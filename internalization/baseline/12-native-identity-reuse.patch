@@ -1,0 +1,1512 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -211,7 +211,7 @@
+ 
+    # Provides the native addons every downstream TS job installs. PRs never
+    # build: they fetch the latest release's Linux x64 pair from the
+-   # @zero2ai/natives-linux-x64 npm leaf instead. The workspace loader
++   # @oh-my-pi/pi-natives-linux-x64 npm leaf instead. The workspace loader
+    # skips its version sentinel for workspace loads, so release addons load
+    # fine under a newer checkout; a PR whose TS tests depend on changed
+    # native behavior fails visibly and the native side lands via main.
+@@ -229,12 +229,12 @@
+            shell: bash
+            run: |
+               set -euo pipefail
+-              tarball="$(npm view @zero2ai/natives-linux-x64@latest dist.tarball)"
++              tarball="$(npm view @oh-my-pi/pi-natives-linux-x64@latest dist.tarball)"
+               echo "Fetching $tarball"
+               curl -fsSL --retry 3 "$tarball" | tar -xz -C "$RUNNER_TEMP"
+               mkdir -p bazel-bin/natives-linux-x64-baseline bazel-bin/natives-linux-x64-modern
+-              cp "$RUNNER_TEMP/package/zero2ai_natives.linux-x64-baseline.node" bazel-bin/natives-linux-x64-baseline/
+-              cp "$RUNNER_TEMP/package/zero2ai_natives.linux-x64-modern.node" bazel-bin/natives-linux-x64-modern/
++              cp "$RUNNER_TEMP/package/pi_natives.linux-x64-baseline.node" bazel-bin/natives-linux-x64-baseline/
++              cp "$RUNNER_TEMP/package/pi_natives.linux-x64-modern.node" bazel-bin/natives-linux-x64-modern/
+          # A corrupt download must fail here, not as a confusing dlopen error
+          # in every downstream test shard.
+          - name: Smoke release addons
+@@ -257,8 +257,8 @@
+               loader=node
+               if command -v bun >/dev/null 2>&1; then loader=bun; fi
+               "$loader" "$RUNNER_TEMP/smoke-addons.js" \
+-                "$PWD/bazel-bin/natives-linux-x64-baseline/zero2ai_natives.linux-x64-baseline.node" \
+-                "$PWD/bazel-bin/natives-linux-x64-modern/zero2ai_natives.linux-x64-modern.node"
++                "$PWD/bazel-bin/natives-linux-x64-baseline/pi_natives.linux-x64-baseline.node" \
++                "$PWD/bazel-bin/natives-linux-x64-modern/pi_natives.linux-x64-modern.node"
+          # Make the policy visible on the rare native-touching PR instead of
+          # leaving a reviewer to wonder which addons the tests exercised.
+          # Best-effort: a diff-API failure must not fail the job over a notice.
+@@ -712,7 +712,7 @@
+            uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+            with:
+               name: native-addons-${{ matrix.target_id }}
+-              path: packages/natives/native/zero2ai_natives.${{ matrix.target_id }}*.node
++              path: packages/natives/native/pi_natives.${{ matrix.target_id }}*.node
+               if-no-files-found: error
+               retention-days: 1
+          - name: Upload release binary artifact
+@@ -721,7 +721,7 @@
+               name: zero2ai-binary-${{ matrix.target_id }}
+               path: ${{ matrix.binary_path }}
+ 
+-   # Publishes the six @zero2ai/natives-<tag> leaf packages once
++   # Publishes the six @oh-my-pi/pi-natives-<tag> leaf packages once
+    # validation passes and every binary built. Runs on one linux runner: leaf
+    # publishing is platform-agnostic file packaging (gen-npm-packages reads
+    # packages/natives/native), so no per-platform runners are needed.
+diff --git a/BUILD.bazel b/BUILD.bazel
+--- a/BUILD.bazel
++++ b/BUILD.bazel
+@@ -1,4 +1,4 @@
+-# Shipping zero2ai_natives addons, one per (platform, arch, ISA-variant).
++# Shipping pi_natives addons, one per (platform, arch, ISA-variant).
+ # `bazel build //:natives-<target>` yields the canonically named .node file;
+ # packages/natives/scripts/build-native.ts copies it into packages/natives/native/.
+ # Note: musl addons intentionally reuse the plain linux-<arch> filenames — the
+@@ -14,20 +14,20 @@
+     "rustfmt.toml",
+ ])
+ _ADDONS = {
+-    "linux-x64-baseline": ("//bazel/platforms:linux-x64-baseline", "zero2ai_natives.linux-x64-baseline.node"),
+-    "linux-x64-modern": ("//bazel/platforms:linux-x64-modern", "zero2ai_natives.linux-x64-modern.node"),
+-    "linux-arm64": ("//bazel/platforms:linux-arm64", "zero2ai_natives.linux-arm64.node"),
+-    "linux-musl-x64-baseline": ("//bazel/platforms:linux-musl-x64-baseline", "zero2ai_natives.linux-x64-baseline.node"),
+-    "linux-musl-arm64": ("//bazel/platforms:linux-musl-arm64", "zero2ai_natives.linux-arm64.node"),
+-    "darwin-x64-baseline": ("//bazel/platforms:darwin-x64-baseline", "zero2ai_natives.darwin-x64-baseline.node"),
+-    "darwin-arm64": ("//bazel/platforms:darwin-arm64", "zero2ai_natives.darwin-arm64.node"),
+-    "win32-x64-baseline": ("//bazel/platforms:win32-x64-baseline", "zero2ai_natives.win32-x64-baseline.node"),
++    "linux-x64-baseline": ("//bazel/platforms:linux-x64-baseline", "pi_natives.linux-x64-baseline.node"),
++    "linux-x64-modern": ("//bazel/platforms:linux-x64-modern", "pi_natives.linux-x64-modern.node"),
++    "linux-arm64": ("//bazel/platforms:linux-arm64", "pi_natives.linux-arm64.node"),
++    "linux-musl-x64-baseline": ("//bazel/platforms:linux-musl-x64-baseline", "pi_natives.linux-x64-baseline.node"),
++    "linux-musl-arm64": ("//bazel/platforms:linux-musl-arm64", "pi_natives.linux-arm64.node"),
++    "darwin-x64-baseline": ("//bazel/platforms:darwin-x64-baseline", "pi_natives.darwin-x64-baseline.node"),
++    "darwin-arm64": ("//bazel/platforms:darwin-arm64", "pi_natives.darwin-arm64.node"),
++    "win32-x64-baseline": ("//bazel/platforms:win32-x64-baseline", "pi_natives.win32-x64-baseline.node"),
+ }
+ 
+ [
+     native_addon(
+         name = "natives-" + target,
+-        lib = "//crates/zero2ai-natives:zero2ai_natives",
++        lib = "//crates/zero2ai-natives:pi_natives",
+         out = out,
+         platform = platform,
+     )
+diff --git a/Dockerfile b/Dockerfile
+--- a/Dockerfile
++++ b/Dockerfile
+@@ -3,7 +3,7 @@
+ # oh-my-pi — pi image
+ #
+ # Stages:
+-#   natives-builder — Rust + Bun → zero2ai_natives.linux-<arch>.node
++#   natives-builder — Rust + Bun → pi_natives.linux-<arch>.node
+ #   wheel-builder   — zero2ai_rpc Python wheel
+ #   zero2ai-base         — python + bun + rustup launcher + natives + zero2ai_rpc
+ #                     + /usr/local/bin/zero2ai shim
+@@ -25,7 +25,7 @@
+ ARG BUN_VERSION=1.4.2
+ 
+ ############################
+-# 1) natives-builder — Rust + Bun → zero2ai_natives.linux-<arch>.node (local cargo)
++# 1) natives-builder — Rust + Bun → pi_natives.linux-<arch>.node (local cargo)
+ ############################
+ FROM rust:1.86-slim-bookworm AS natives-builder
+ 
+@@ -90,7 +90,7 @@
+     set -eux; \
+     bun --cwd=packages/natives run build; \
+     mkdir -p /out; \
+-    cp packages/natives/native/zero2ai_natives.linux-*.node /out/
++    cp packages/natives/native/pi_natives.linux-*.node /out/
+ 
+ ############################
+ # 2) wheel-builder — zero2ai-rpc wheel
+@@ -149,7 +149,7 @@
+     && /usr/local/cargo/bin/rustup --version
+ 
+ # zero2ai-natives addon: pi's loader probes /opt/bun/bin as a fallback path.
+-COPY --from=natives-builder /out/zero2ai_natives.linux-*.node /opt/bun/bin/
++COPY --from=natives-builder /out/pi_natives.linux-*.node /opt/bun/bin/
+ 
+ # zero2ai-rpc Python wheel.
+ COPY --from=wheel-builder /out/*.whl /tmp/wheels/
+diff --git a/Dockerfile.dockerignore b/Dockerfile.dockerignore
+--- a/Dockerfile.dockerignore
++++ b/Dockerfile.dockerignore
+@@ -59,7 +59,7 @@
+ packages/coding-agent/src/internal-urls/docs-index.generated.ts
+ packages/natives/native/.build/
+ # Every host-built addon: natives-builder compiles its own, and a stale host
+-# `zero2ai_natives.linux-*.node` riding in would be copied to /out alongside it.
++# `pi_natives.linux-*.node` riding in would be copied to /out alongside it.
+ # (Also drops the ~760 MB of dev addons a working checkout accumulates.)
+ **/*.node
+ packages/ai/test/.temp-images/
+diff --git a/Dockerfile.robomp.dockerignore b/Dockerfile.robomp.dockerignore
+--- a/Dockerfile.robomp.dockerignore
++++ b/Dockerfile.robomp.dockerignore
+@@ -63,8 +63,8 @@
+ # Generated files (the in-image build regenerates them).
+ packages/coding-agent/src/internal-urls/docs-index.generated.ts
+ packages/natives/native/.build/
+-packages/natives/native/zero2ai_natives.darwin-*.node
+-packages/natives/native/zero2ai_natives.dev.node
++packages/natives/native/pi_natives.darwin-*.node
++packages/natives/native/pi_natives.dev.node
+ packages/ai/test/.temp-images/
+ python/zero2ai-rpc/src/zero2ai_rpc.egg-info/
+ python/robomp/data/
+diff --git a/MODULE.bazel b/MODULE.bazel
+--- a/MODULE.bazel
++++ b/MODULE.bazel
+@@ -1,6 +1,6 @@
+ """oh-my-pi — Bazel build for the native (Rust) side of the workspace.
+ 
+-Builds the zero2ai_natives NAPI cdylib for every shipped target with hermetic
++Builds the pi_natives NAPI cdylib for every shipped target with hermetic
+ toolchains, replacing cargo-zigbuild/cargo-xwin/sccache plus the hand-rolled
+ CI caches with Bazel's content-addressed action cache (see infra/bazel-remote.yaml).
+ 
+diff --git a/bazel/defs.bzl b/bazel/defs.bzl
+--- a/bazel/defs.bzl
++++ b/bazel/defs.bzl
+@@ -1,9 +1,9 @@
+-"""Rules for producing release-grade, canonically named zero2ai_natives addons.
++"""Rules for producing release-grade, canonically named pi_natives addons.
+ 
+-`native_addon` transitions //crates/zero2ai-natives:zero2ai_natives onto a shipping
++`native_addon` transitions //crates/zero2ai-natives:pi_natives onto a shipping
+ platform with the release codegen profile (opt, thin LTO, cgu=16, stripped —
+ mirrors the cargo `ci` profile) and renames the produced shared library to the
+-loader's canonical `zero2ai_natives.<platform>-<arch>[-<variant>].node` filename.
++loader's canonical `pi_natives.<platform>-<arch>[-<variant>].node` filename.
+ 
+ Encoding the profile in the transition means `bazel build //:natives-<t>` is
+ always release-grade regardless of -c, and every addon shares one cache entry
+@@ -68,13 +68,13 @@
+ 
+ native_addon = rule(
+     implementation = _native_addon_impl,
+-    doc = "Release build of the zero2ai_natives cdylib for one shipping platform, " +
++    doc = "Release build of the pi_natives cdylib for one shipping platform, " +
+           "renamed to the loader's canonical .node filename.",
+     attrs = {
+         "lib": attr.label(
+             cfg = _addon_transition,
+             mandatory = True,
+-            doc = "The rust_shared_library target (//crates/zero2ai-natives:zero2ai_natives).",
++            doc = "The rust_shared_library target (//crates/zero2ai-natives:pi_natives).",
+         ),
+         "platform": attr.label(
+             mandatory = True,
+@@ -82,7 +82,7 @@
+         ),
+         "out": attr.string(
+             mandatory = True,
+-            doc = "Canonical addon filename, e.g. zero2ai_natives.linux-x64-baseline.node.",
++            doc = "Canonical addon filename, e.g. pi_natives.linux-x64-baseline.node.",
+         ),
+         "_allowlist_function_transition": attr.label(
+             default = "@bazel_tools//tools/allowlists/function_transition_allowlist",
+diff --git a/bazel/platforms/BUILD.bazel b/bazel/platforms/BUILD.bazel
+--- a/bazel/platforms/BUILD.bazel
++++ b/bazel/platforms/BUILD.bazel
+@@ -1,4 +1,4 @@
+-# One platform per shipped zero2ai_natives addon. linux platforms inherit the zig
++# One platform per shipped pi_natives addon. linux platforms inherit the zig
+ # libc-aware platforms so cc toolchain resolution pins glibc 2.17 (the shipped
+ # portability floor) or musl; the cpu_variant constraint selects -Ctarget-cpu
+ # in //crates/zero2ai-natives. darwin/win32 resolve against the host Xcode toolchain
+diff --git a/bazel/toolchains/msvc/NOTES.md b/bazel/toolchains/msvc/NOTES.md
+--- a/bazel/toolchains/msvc/NOTES.md
++++ b/bazel/toolchains/msvc/NOTES.md
+@@ -101,7 +101,7 @@
+ ## What to verify on can.internal (linux-x64)
+ 
+ 1. `bazel build //:natives-win32-x64-baseline` end-to-end link; check the
+-   produced `zero2ai_natives.win32-x64-baseline.node` imports (dumpbin/llvm-readobj):
++   produced `pi_natives.win32-x64-baseline.node` imports (dumpbin/llvm-readobj):
+    expect **no** `VCRUNTIME140.dll` and **no** `api-ms-win-crt-*` (static CRT);
+    only core Windows system DLLs (kernel32, ntdll, advapi32, …) should remain.
+ 2. LLVM 20.1.7 Linux-X64 binaries are built on a newish Ubuntu: confirm the
+diff --git a/crates/zero2ai-iso/src/projfs.rs b/crates/zero2ai-iso/src/projfs.rs
+--- a/crates/zero2ai-iso/src/projfs.rs
++++ b/crates/zero2ai-iso/src/projfs.rs
+@@ -1,6 +1,6 @@
+ //! Windows Projected File System backend.
+ //!
+-//! Ported from the original `zero2ai_natives::projfs_overlay`; the napi-derived
++//! Ported from the original `pi_natives::projfs_overlay`; the napi-derived
+ //! types and the `Result<()>` alias from `napi::bindgen_prelude` are
+ //! replaced with the platform-neutral [`crate::IsoError`] /
+ //! [`crate::ProbeResult`].
+diff --git a/crates/zero2ai-natives/BUILD.bazel b/crates/zero2ai-natives/BUILD.bazel
+--- a/crates/zero2ai-natives/BUILD.bazel
++++ b/crates/zero2ai-natives/BUILD.bazel
+@@ -48,7 +48,7 @@
+ # a cargo-side dev flow (`bun --cwd packages/natives run build:bindings`);
+ # index.js/index.d.ts are committed, so artifact builds never need the napi CLI.
+ rust_shared_library(
+-    name = "zero2ai_natives",
++    name = "pi_natives",
+     srcs = glob(["src/**/*.rs"]),
+     aliases = aliases(),
+     compile_data = glob([
+@@ -123,8 +123,8 @@
+ )
+ 
+ rust_test(
+-    name = "zero2ai_natives_test",
+-    crate = ":zero2ai_natives",
++    name = "pi_natives_test",
++    crate = ":pi_natives",
+     edition = "2024",
+     proc_macro_deps = all_crate_deps(proc_macro_dev = True),
+     deps = all_crate_deps(normal_dev = True) + [
+diff --git a/crates/zero2ai-natives/src/lib.rs b/crates/zero2ai-natives/src/lib.rs
+--- a/crates/zero2ai-natives/src/lib.rs
++++ b/crates/zero2ai-natives/src/lib.rs
+@@ -7,7 +7,7 @@
+ //!
+ //! # Example
+ //! ```ignore
+-//! use zero2ai_natives::text::visible_width;
++//! use pi_natives::text::visible_width;
+ //!
+ //! let width = visible_width("hello");
+ //! assert_eq!(width, 5);
+@@ -266,7 +266,7 @@
+ /// `packages/natives/native/index.js` (which derives the name from
+ /// `package.json#version`).
+ #[napi(js_name = "__piNativesV18_2_1")]
+-pub const fn zero2ai_natives_version_sentinel() {}
++pub const fn pi_natives_version_sentinel() {}
+ 
+ /// Native module entry point: install crash diagnostics before any tool can
+ /// invoke a panicking or allocating native call. This runs during `.node`
+diff --git a/crates/zero2ai-voice/BUILD.bazel b/crates/zero2ai-voice/BUILD.bazel
+--- a/crates/zero2ai-voice/BUILD.bazel
++++ b/crates/zero2ai-voice/BUILD.bazel
+@@ -6,7 +6,7 @@
+ exports_files(["Cargo.toml"])
+ 
+ # napi-free voice engine (in-house capture/playback backends + WebRTC/Opus live
+-# peer). Keeping the webrtc/opus graph behind this rlib means the zero2ai_natives
++# peer). Keeping the webrtc/opus graph behind this rlib means the pi_natives
+ # leaf — which recompiles on every release (version-sentinel edit in lib.rs) —
+ # no longer pays for the voice stack's monomorphization.
+ rust_library(
+diff --git a/docs/internalization-plan.md b/docs/internalization-plan.md
+--- a/docs/internalization-plan.md
++++ b/docs/internalization-plan.md
+@@ -421,30 +421,23 @@
+ 
+ ## 14. 本地可运行性（实测，2026-09）
+ 
+-**结论：当前检出仓库"能编译、能启动，但不能真正跑会话"**——缺原生插件，且本机无法构建它。
++**结论：本地已可正常运行。** 关键是把**原生插件身份保持在原命名**，直接复用上游预编译产物——改名只作用于用户可见面。
+ 
+ | 验证项 | 结果 | 证据 |
+ |---|---|---|
+-| 依赖安装 | ✅ 通过 | `bun install --frozen-lockfile`（400 包，工作区按新包名重链） |
+-| 类型检查 | ✅ 16/16 包通过 | `bun run --filter './packages/*' check:types` |
+-| CLI 启动 | ✅ 部分可用 | `zero2ai --version` → `zero2ai/18.2.1`；`--help` 正常 |
+-| 其余全部命令 | ❌ 需原生插件 | `completions` / `config list|path` / `stats --summary` / `models` / `gc` / `acp` / `agents` / `--smoke-test` 均报 `Failed to load zero2ai_natives native addon for win32-x64` |
+-| 原生构件 | ❌ 不存在 | `packages/natives/native/*.node` 为空 |
+-| 预编译叶子（npm 路线） | ❌ 不可用 | 加载器按 `require.resolve("@zero2ai/natives-<platformTag>/package.json")` 查找（`packages/natives/native/loader-state.js:70`）；该名字是本仓库深度改名后的产物，**任何 registry 上都不存在**，且 `packages/natives/package.json` 无 `optionalDependencies` |
+-| Rust 工具链 | ❌ 缺失 | `cargo` / `rustc` / `rustup` 均 not found（`bun --cwd=packages/natives run build` 因此失败于 `cargo metadata`） |
+-
+-**要跑起来需要什么**
+-
+-1. 安装 Rust 工具链（按 `rust-toolchain.toml` 固定版本，含 rustfmt/clippy 与目标三元组）；
+-2. Windows 还需 MSVC Build Tools（或走 `bazel` 交叉工具链，代价是要拉 ~2GB 的 LLVM/xwin）；
+-3. `bun --cwd=packages/natives run build` 产出 `packages/natives/native/zero2ai_natives.<tag>*.node`；
+-4. 之后 `zero2ai --smoke-test` 与 `--version` 之外的命令才可用（`--smoke-test` 是 worker 与子进程探针，属最小验证入口）。
+-
+-**内化要点（必须在 P1 处理）**
+-
+-- 深度改名后，**上游预编译原生包不可再解析**：行内要么在内网制品库自建 `@zero2ai/natives-<tag>` 预编译叶子，要么统一"内网构建 + 签名分发"路线（银行场景推荐后者：构建可复现、产物可签、无外部依赖）。
+-- 因此 P1 的"断网可构建"不仅是流水线问题，也是**开发者能否本地起服务的前提**：没有原生插件，除 `--version/--help` 外的能力全部不可用。
+-- 结论：本地可运行性 = 原生插件可构建性，应作为 P1 的首个验收门槛（先 `native build` 通过，再谈 `--smoke-test`）。
++| 依赖安装 | ✅ | `bun install --frozen-lockfile`（工作区按新包名重链） |
++| 类型检查 | ✅ 16/16 包 | `bun run --filter './packages/*' check:types` |
++| CLI 全量命令 | ✅ | `--version`、`completions`、`config list|path`、`stats --summary`、`models`、`gc`、`agents`、`--smoke-test` 全部 exit 0 |
++| 测试（此前被插件缺失阻塞） | ✅ | `credential-store-persistence` 4/4、`managed-policy` 16/16、`agent-session-acp-permission` 32/32、`env` 23/23 |
++| 已知非本次改动导致 | ⚠ | `install-id` 5/5 失败：Windows 上 `path.relative(home, tempOnD:)` 产生 `C:\Users\…\d:\…` 畸形路径（上游既有缺陷，与本内化无关） |
++
++**做法（复用原资源，不本地乱改）**
++
++1. **原生身份不改名**：`pi_natives`（`napi.binaryName`）、`pi_natives.<tag>*.node`、预编译叶子 `@oh-my-pi/pi-natives-<tag>` 全部保持上游命名——它们不是用户可见面。此前深度改名把这三处也改了，导致插件无法解析；已回退（51 文件 / 217 处），并以 `12-native-identity-reuse.patch` 固化。
++2. **直接取用上游预编译插件**：`@oh-my-pi/pi-natives-win32-x64@18.2.2` 含 `pi_natives.win32-x64-baseline.node`，放入 `packages/natives/native/` 即可运行（171 MB，已被 `.gitignore` 的 `*.node` 排除，不进版本库）。
++3. 若需自建：`bun --cwd=packages/natives run build` 需 Rust 工具链（`rust-toolchain.toml` 固定版本）+ Windows 侧 MSVC Build Tools。
++
++**内化要点（P1）**：行内应在内网制品库自建 `@oh-my-pi/pi-natives-<tag>` 同名叶子（或统一走内网构建 + 签名分发），既保留"名字可复用"的便利，又去掉对外部 registry 的依赖。**用户可见面**（CLI、目录、环境变量、品牌、文档）保持 zero2ai，**构建/原生身份**保持上游命名——这条边界已写入本方案。
+ 
+ ---
+ 
+diff --git a/docs/macos-signing-notarization.md b/docs/macos-signing-notarization.md
+--- a/docs/macos-signing-notarization.md
++++ b/docs/macos-signing-notarization.md
+@@ -33,7 +33,7 @@
+ | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+ | `com.apple.security.cs.allow-jit`                        | JavaScriptCore JITs at runtime.                                                                                                                                                                                                                                                                                               |
+ | `com.apple.security.cs.allow-unsigned-executable-memory` | JSC executable memory pages.                                                                                                                                                                                                                                                                                                  |
+-| `com.apple.security.cs.disable-library-validation`       | zero2ai extracts its native addon (`zero2ai_natives.<triple>.node`) and other optional dylibs to a runtime cache and `dlopen()`s them. They do not share the main binary's Team ID, so without this the hardened runtime aborts with _"mapping process and mapped file have different Team IDs"_ — breaking effectively every command. |
++| `com.apple.security.cs.disable-library-validation`       | zero2ai extracts its native addon (`pi_natives.<triple>.node`) and other optional dylibs to a runtime cache and `dlopen()`s them. They do not share the main binary's Team ID, so without this the hardened runtime aborts with _"mapping process and mapped file have different Team IDs"_ — breaking effectively every command. |
+ 
+ Without `disable-library-validation`, a signed+notarized binary signs and
+ notarizes fine but **fails at first real use**. `scripts/ci-macos-sign.sh` runs
+diff --git a/docs/natives-addon-loader-runtime.md b/docs/natives-addon-loader-runtime.md
+--- a/docs/natives-addon-loader-runtime.md
++++ b/docs/natives-addon-loader-runtime.md
+@@ -1,6 +1,6 @@
+ # Natives Addon Loader Runtime
+ 
+-This page documents `packages/natives/native/loader-state.js`, the runtime between an ESM entrypoint and a validated `zero2ai_natives.*.node` addon.
++This page documents `packages/natives/native/loader-state.js`, the runtime between an ESM entrypoint and a validated `pi_natives.*.node` addon.
+ 
+ ## Entrypoints and eager/lazy loading
+ 
+@@ -49,9 +49,9 @@
+ 
+ | Runtime selection    | Ordered filenames                                                                         |
+ | -------------------- | ----------------------------------------------------------------------------------------- |
+-| modern x64           | `zero2ai_natives.<tag>-modern.node`, `zero2ai_natives.<tag>-baseline.node`, `zero2ai_natives.<tag>.node` |
+-| baseline x64         | `zero2ai_natives.<tag>-baseline.node`, `zero2ai_natives.<tag>.node`                                 |
+-| non-x64 / no variant | `zero2ai_natives.<tag>.node`                                                                   |
++| modern x64           | `pi_natives.<tag>-modern.node`, `pi_natives.<tag>-baseline.node`, `pi_natives.<tag>.node` |
++| baseline x64         | `pi_natives.<tag>-baseline.node`, `pi_natives.<tag>.node`                                 |
++| non-x64 / no variant | `pi_natives.<tag>.node`                                                                   |
+ 
+ ## Candidate ordering
+ 
+@@ -59,7 +59,7 @@
+ 
+ ### Installed, non-compiled package
+ 
+-1. Every selected filename in `@zero2ai/natives-<tag>`.
++1. Every selected filename in `@oh-my-pi/pi-natives-<tag>`.
+ 2. For each filename, package-local `nativeDir`, then the executable directory.
+ 
+ The platform leaf wins over a stale core artifact. Workspace loads deliberately skip leaf resolution.
+@@ -121,7 +121,7 @@
+ If no candidate succeeds:
+ 
+ - an unsupported tag throws `Unsupported platform: <tag>`, the supported list, and issue guidance;
+-- a supported tag throws `Failed to load zero2ai_natives native addon for <tag>` (including the x64 variant), followed by every candidate/preparation error and mode-specific help.
++- a supported tag throws `Failed to load pi_natives native addon for <tag>` (including the x64 variant), followed by every candidate/preparation error and mode-specific help.
+ 
+ Compiled help lists expected cache paths, suggests deleting the versioned directory, and prints release-download `curl` commands. Installed-package help suggests reinstalling, the local host build (`bun --cwd=packages/natives run build`), and explicit `scripts/bazel-natives.ts <target> --dest packages/natives/native` builds.
+ 
+diff --git a/docs/natives-architecture.md b/docs/natives-architecture.md
+--- a/docs/natives-architecture.md
++++ b/docs/natives-architecture.md
+@@ -58,7 +58,7 @@
+ - baseline x64: `-baseline.node`, then unsuffixed `.node`;
+ - non-x64: unsuffixed `.node` only.
+ 
+-The published core package contains loader JS, declarations, and metadata but no `.node` files. Release publishing generates `@zero2ai/natives-<platform>-<arch>` optional-dependency leaf packages and injects them at the same version into the core manifest. `LEAF_TARGETS` in `gen-npm-packages.ts` is the authoritative publish target list.
++The published core package contains loader JS, declarations, and metadata but no `.node` files. Release publishing generates `@oh-my-pi/pi-natives-<platform>-<arch>` optional-dependency leaf packages and injects them at the same version into the core manifest. `LEAF_TARGETS` in `gen-npm-packages.ts` is the authoritative publish target list.
+ 
+ ### Candidate ownership and order
+ 
+diff --git a/docs/natives-build-release-debugging.md b/docs/natives-build-release-debugging.md
+--- a/docs/natives-build-release-debugging.md
++++ b/docs/natives-build-release-debugging.md
+@@ -39,31 +39,31 @@
+ 
+ | Target                               | Platform                                    | Canonical output                      |
+ | ------------------------------------ | ------------------------------------------- | ------------------------------------- |
+-| `//:natives-linux-x64-baseline`      | `//bazel/platforms:linux-x64-baseline`      | `zero2ai_natives.linux-x64-baseline.node`  |
+-| `//:natives-linux-x64-modern`        | `//bazel/platforms:linux-x64-modern`        | `zero2ai_natives.linux-x64-modern.node`    |
+-| `//:natives-linux-arm64`             | `//bazel/platforms:linux-arm64`             | `zero2ai_natives.linux-arm64.node`         |
+-| `//:natives-linux-musl-x64-baseline` | `//bazel/platforms:linux-musl-x64-baseline` | `zero2ai_natives.linux-x64-baseline.node`  |
+-| `//:natives-linux-musl-arm64`        | `//bazel/platforms:linux-musl-arm64`        | `zero2ai_natives.linux-arm64.node`         |
+-| `//:natives-darwin-x64-baseline`     | `//bazel/platforms:darwin-x64-baseline`     | `zero2ai_natives.darwin-x64-baseline.node` |
+-| `//:natives-darwin-arm64`            | `//bazel/platforms:darwin-arm64`            | `zero2ai_natives.darwin-arm64.node`        |
+-| `//:natives-win32-x64-baseline`      | `//bazel/platforms:win32-x64-baseline`      | `zero2ai_natives.win32-x64-baseline.node`  |
++| `//:natives-linux-x64-baseline`      | `//bazel/platforms:linux-x64-baseline`      | `pi_natives.linux-x64-baseline.node`  |
++| `//:natives-linux-x64-modern`        | `//bazel/platforms:linux-x64-modern`        | `pi_natives.linux-x64-modern.node`    |
++| `//:natives-linux-arm64`             | `//bazel/platforms:linux-arm64`             | `pi_natives.linux-arm64.node`         |
++| `//:natives-linux-musl-x64-baseline` | `//bazel/platforms:linux-musl-x64-baseline` | `pi_natives.linux-x64-baseline.node`  |
++| `//:natives-linux-musl-arm64`        | `//bazel/platforms:linux-musl-arm64`        | `pi_natives.linux-arm64.node`         |
++| `//:natives-darwin-x64-baseline`     | `//bazel/platforms:darwin-x64-baseline`     | `pi_natives.darwin-x64-baseline.node` |
++| `//:natives-darwin-arm64`            | `//bazel/platforms:darwin-arm64`            | `pi_natives.darwin-arm64.node`        |
++| `//:natives-win32-x64-baseline`      | `//bazel/platforms:win32-x64-baseline`      | `pi_natives.win32-x64-baseline.node`  |
+ 
+ Notes:
+ 
+-- Windows ARM64 has no Bazel target: the release matrix builds `host` through Cargo/N-API on `windows-11-arm`, producing `zero2ai_natives.win32-arm64.node`.
++- Windows ARM64 has no Bazel target: the release matrix builds `host` through Cargo/N-API on `windows-11-arm`, producing `pi_natives.win32-arm64.node`.
+ - musl addons **intentionally reuse** the plain `linux-<arch>` filenames — the loader never sees gnu and musl side by side; release jobs keep them in separate invocations/dest dirs (`scripts/bazel-natives.ts` hard-errors on a basename collision within one run).
+ - Aggregates: `//:natives-linux-all` (all linux targets + the msvc cross build, i.e. everything buildable from a linux-x64 host) and `//:natives-darwin-all` (mac hosts only).
+ 
+ ### 2) `native_addon` rule (`bazel/defs.bzl`)
+ 
+-`native_addon` wraps `//crates/zero2ai-natives:zero2ai_natives` (a `rust_shared_library`) in a configuration transition that pins, per target:
++`native_addon` wraps `//crates/zero2ai-natives:pi_natives` (a `rust_shared_library`) in a configuration transition that pins, per target:
+ 
+ - `--platforms=<the addon's platform>`
+ - `--compilation_mode=opt`
+ - `@rules_rust//rust/settings:lto=thin`
+ - extra rustc flags `-Ccodegen-units=16 -Cstrip=symbols`
+ 
+-This mirrors the old cargo `ci` profile. Because the profile lives **in the transition**, a bare `bazel build //:natives-<t>` is always release-grade regardless of `-c`, and every addon shares one cache entry per (platform, source) pair. The rule then symlinks the produced shared library to the loader's canonical `zero2ai_natives.<platform>-<arch>[-<variant>].node` name, scoped under the rule name (`bazel-bin/natives-<t>/…`) so gnu/musl outputs with identical basenames cannot collide at the package level.
++This mirrors the old cargo `ci` profile. Because the profile lives **in the transition**, a bare `bazel build //:natives-<t>` is always release-grade regardless of `-c`, and every addon shares one cache entry per (platform, source) pair. The rule then symlinks the produced shared library to the loader's canonical `pi_natives.<platform>-<arch>[-<variant>].node` name, scoped under the rule name (`bazel-bin/natives-<t>/…`) so gnu/musl outputs with identical basenames cannot collide at the package level.
+ 
+ Per-target codegen that is not part of the transition lives in `crates/zero2ai-natives/BUILD.bazel` `rustc_flags` selects: `-Ctarget-cpu=x86-64-v2` (baseline) / `x86-64-v3` (modern) via `//bazel/variants`, the napi link args (`-Wl,-undefined,dynamic_lookup` on macOS, `-Wl,-z,nodelete` on linux — `build.rs`/`napi_build::setup()` is deliberately not wired in), `-Ctarget-feature=-crt-static` for musl, and `-Ctarget-feature=+crt-static` for win32-x64 msvc (paired with the `static_link_msvcrt` cc feature enabled in the `native_addon` transition so the C deps compile `/MT` in lock-step — the shipped `.node` then imports no `VCRUNTIME140.dll` from the VC++ Redistributable). The Cargo host path applies the same `+crt-static` policy to Windows ARM64 in `build-bindings.ts`.
+ 
+@@ -142,7 +142,7 @@
+ 
+ `.github/workflows/ci.yml` separates `rust_validate` from `native_addons`; TypeScript jobs depend only on `native_addons`.
+ 
+-**Pull requests never build or validate Rust.** Native-affecting PRs are rare enough that they don't warrant a PR-side bazel build: `rust_validate` is skipped entirely (`if: github.event_name != 'pull_request'`), and `native_addons` fetches the latest release's Linux x64 addon pair from the `@zero2ai/natives-linux-x64` npm leaf, smoke-loads both, and uploads them as the `native-addons` workflow artifact. The loader skips its version sentinel for workspace loads, so release-versioned addons load fine under a newer checkout. A PR whose TypeScript tests depend on changed native behavior fails visibly (and CI emits a notice on any native-touching PR); the Rust side is validated post-merge on main and again at release.
++**Pull requests never build or validate Rust.** Native-affecting PRs are rare enough that they don't warrant a PR-side bazel build: `rust_validate` is skipped entirely (`if: github.event_name != 'pull_request'`), and `native_addons` fetches the latest release's Linux x64 addon pair from the `@oh-my-pi/pi-natives-linux-x64` npm leaf, smoke-loads both, and uploads them as the `native-addons` workflow artifact. The loader skips its version sentinel for workspace loads, so release-versioned addons load fine under a newer checkout. A PR whose TypeScript tests depend on changed native behavior fails visibly (and CI emits a notice on any native-touching PR); the Rust side is validated post-merge on main and again at release.
+ 
+ On non-PR events both jobs run on `zero2ai-kata` pods against the cluster remote cache. `rust_validate` runs:
+ 
+@@ -185,19 +185,19 @@
+ 
+ ### Release binary builds and publishing
+ 
+-Binary builds are build-only and run in parallel with the test fan-out. `release_binary` (Linux plus cross-built win32-x64) needs only `native_addons`, whose workflow artifact supplies its addons. `release_binary_hosted` needs only `release_metadata` and starts when a release is detected: each Darwin leg builds through `bazel-natives` with scope `release-<target_id>` (seeded near HEAD by the warm workflow), while the `windows-11-arm` leg builds its native addon through Cargo/N-API. Every leg then runs `bun run ci:release:build-binaries` and smoke-tests the executable on its target architecture. Publishing is held behind `release_gate`: `release_native_leaves` downloads all built addons and publishes the six `@zero2ai/natives-<tag>` leaves from one Linux runner, and the GitHub release / verify / core npm chain runs beside it.
++Binary builds are build-only and run in parallel with the test fan-out. `release_binary` (Linux plus cross-built win32-x64) needs only `native_addons`, whose workflow artifact supplies its addons. `release_binary_hosted` needs only `release_metadata` and starts when a release is detected: each Darwin leg builds through `bazel-natives` with scope `release-<target_id>` (seeded near HEAD by the warm workflow), while the `windows-11-arm` leg builds its native addon through Cargo/N-API. Every leg then runs `bun run ci:release:build-binaries` and smoke-tests the executable on its target architecture. Publishing is held behind `release_gate`: `release_native_leaves` downloads all built addons and publishes the six `@oh-my-pi/pi-natives-<tag>` leaves from one Linux runner, and the GitHub release / verify / core npm chain runs beside it.
+ 
+ ## Debugging playbook
+ 
+ ### Where things land / how to inspect
+ 
+ ```bash
+-# Outputs (workspace-relative): bazel-bin/natives-<target>/zero2ai_natives.<...>.node
++# Outputs (workspace-relative): bazel-bin/natives-<target>/pi_natives.<...>.node
+ bazelisk cquery --output=files //:natives-linux-x64-baseline
+ 
+ # What actions/flags a target produces (add the same --config flags as the build):
+ bazelisk aquery 'outputs(".*\.node", deps(//:natives-linux-arm64))'
+-bazelisk aquery 'mnemonic("Rustc", deps(//crates/zero2ai-natives:zero2ai_natives))'
++bazelisk aquery 'mnemonic("Rustc", deps(//crates/zero2ai-natives:pi_natives))'
+ 
+ # Which toolchain resolved (e.g. confirm @msvc_cc, not host cc, for win32):
+ bazelisk cquery 'deps(//:natives-win32-x64-baseline)' | grep msvc_cc
+@@ -252,8 +252,8 @@
+ 
+ ### Output filenames
+ 
+-- x64: `zero2ai_natives.<platform>-<arch>-modern.node` or `...-baseline.node`
+-- non-x64: `zero2ai_natives.<platform>-<arch>.node`
++- x64: `pi_natives.<platform>-<arch>-modern.node` or `...-baseline.node`
++- non-x64: `pi_natives.<platform>-<arch>.node`
+ 
+ Runtime x64 candidate order also includes the unsuffixed default filename after the selected variant candidates.
+ 
+@@ -282,7 +282,7 @@
+ Typical local loop:
+ 
+ 1. Build addon: `bun --cwd=packages/natives run build`.
+-2. Loader resolves platform npm leaf-package candidates (`@zero2ai/natives-<platform>-<arch>`, when resolvable), then package-local `native/` and executable-dir fallback candidates.
++2. Loader resolves platform npm leaf-package candidates (`@oh-my-pi/pi-natives-<platform>-<arch>`, when resolvable), then package-local `native/` and executable-dir fallback candidates.
+ 3. Generated declarations in `native/index.d.ts` describe the public TS API (regenerate with `build:bindings` only when the Rust API surface changes).
+ 4. On Windows package installs, the loader first copies a `node_modules` addon into the versioned cache so a running process does not lock the file Bun must replace during a later global update.
+ 5. After a successful load, older semver-shaped version cache directories are removed best-effort; cleanup failures never abort startup.
+@@ -351,7 +351,7 @@
+ # Explicit targets (x64 variants are separate targets, not env switches)
+ bun scripts/bazel-natives.ts linux-x64-modern linux-x64-baseline --dest packages/natives/native
+ 
+-# Raw bazel (output: bazel-bin/natives-<t>/zero2ai_natives.<...>.node)
++# Raw bazel (output: bazel-bin/natives-<t>/pi_natives.<...>.node)
+ bazelisk build //:natives-darwin-arm64
+ 
+ # Regenerate TS typedefs + enum exports (napi CLI, only on Rust API changes)
+@@ -373,7 +373,7 @@
+ 
+ The cache captures the following files from `packages/natives/native/` under the computed key. Correct reuse assumes the worktree contents of keyed paths match committed `HEAD`; because the key ignores uncommitted changes, a build from a dirty keyed path can otherwise be captured under and later reused from the unchanged key:
+ 
+-- `zero2ai_natives.<platform>-<arch>[-variant].node` (glob `zero2ai_natives.*.node`)
++- `pi_natives.<platform>-<arch>[-variant].node` (glob `pi_natives.*.node`)
+ - `index.d.ts`
+ - `index.js`
+ - `embedded-addon.js`
+diff --git a/docs/porting-to-natives.md b/docs/porting-to-natives.md
+--- a/docs/porting-to-natives.md
++++ b/docs/porting-to-natives.md
+@@ -120,7 +120,7 @@
+ Run the narrow scenario against the addon you just built. When diagnosing a candidate mismatch, inspect the candidate path reported by the loader:
+ 
+ ```bash
+-bun -e 'import { createRequire } from "node:module"; const require = createRequire(import.meta.url); const mod = require(process.argv[1]); console.log(Object.keys(mod).sort())' -- /path/to/zero2ai_natives.<tag>[-variant].node
++bun -e 'import { createRequire } from "node:module"; const require = createRequire(import.meta.url); const mod = require(process.argv[1]); console.log(Object.keys(mod).sort())' -- /path/to/pi_natives.<tag>[-variant].node
+ ```
+ 
+ Confirm the export and the package-version sentinel are present. Do not add optional consumer checks for a required export to conceal an artifact mismatch.
+diff --git a/nix/package.nix b/nix/package.nix
+--- a/nix/package.nix
++++ b/nix/package.nix
+@@ -29,20 +29,20 @@
+   platform =
+     {
+       aarch64-darwin = {
+-        addon = "zero2ai_natives.darwin-arm64.node";
++        addon = "pi_natives.darwin-arm64.node";
+         nativeLibrary = "libpi_natives.dylib";
+       };
+       aarch64-linux = {
+-        addon = "zero2ai_natives.linux-arm64.node";
++        addon = "pi_natives.linux-arm64.node";
+         nativeLibrary = "libpi_natives.so";
+       };
+       x86_64-darwin = {
+-        addon = "zero2ai_natives.darwin-x64-baseline.node";
++        addon = "pi_natives.darwin-x64-baseline.node";
+         nativeLibrary = "libpi_natives.dylib";
+         rustFlags = "-C target-cpu=x86-64-v2";
+       };
+       x86_64-linux = {
+-        addon = "zero2ai_natives.linux-x64-baseline.node";
++        addon = "pi_natives.linux-x64-baseline.node";
+         nativeLibrary = "libpi_natives.so";
+         rustFlags = "-C target-cpu=x86-64-v2";
+       };
+diff --git a/packages/coding-agent/src/cli/update-cli.ts b/packages/coding-agent/src/cli/update-cli.ts
+--- a/packages/coding-agent/src/cli/update-cli.ts
++++ b/packages/coding-agent/src/cli/update-cli.ts
+@@ -54,7 +54,7 @@
+ 
+ /**
+  * Platform tags the release pipeline publishes as
+- * `@zero2ai/natives-<tag>` leaves. Mirrors `SUPPORTED_PLATFORMS` in
++ * `@oh-my-pi/pi-natives-<tag>` leaves. Mirrors `SUPPORTED_PLATFORMS` in
+  * `packages/natives/native/loader-state.js` and `LEAF_TARGETS` in
+  * `packages/natives/scripts/gen-npm-packages.ts`; kept here as the local
+  * source of truth so the update path stays free of cross-package imports.
+@@ -1439,7 +1439,7 @@
+  * lookup the version check just performed. See #1686.
+  *
+  * Also pins {@link NATIVES_PACKAGE} and the platform-specific
+- * `@zero2ai/natives-<tag>` leaf to `expectedVersion`. `bun install -g`
++ * `@oh-my-pi/pi-natives-<tag>` leaf to `expectedVersion`. `bun install -g`
+  * does not reliably refresh transitive `optionalDependencies` when the
+  * top-level package is the only one bumped, so the native addon and its
+  * version sentinel can drift out of sync with the freshly installed
+diff --git a/packages/coding-agent/test/update-cli.test.ts b/packages/coding-agent/test/update-cli.test.ts
+--- a/packages/coding-agent/test/update-cli.test.ts
++++ b/packages/coding-agent/test/update-cli.test.ts
+@@ -634,7 +634,7 @@
+ 		expect(args).toContain("--registry=https://registry.npmjs.org/");
+ 		expect(args).toContain("@zero2ai/coding-agent@16.3.15");
+ 		expect(args).toContain("@zero2ai/natives@16.3.15");
+-		expect(args).toContain("@zero2ai/natives-win32-x64@16.3.15");
++		expect(args).toContain("@oh-my-pi/pi-natives-win32-x64@16.3.15");
+ 	});
+ });
+ 
+@@ -677,7 +677,7 @@
+ 		expect(buildRenameCleanupPackages(packages, "darwin-arm64")).toEqual([
+ 			"@zero2ai/coding-agent",
+ 			"@zero2ai/natives",
+-			"@zero2ai/natives-darwin-arm64",
++			"@oh-my-pi/pi-natives-darwin-arm64",
+ 		]);
+ 		expect(buildRenameCleanupPackages(packages, "linux-arm")).toEqual([
+ 			"@zero2ai/coding-agent",
+@@ -809,7 +809,7 @@
+ 
+ 	it("pins the native addon core and the platform-specific leaf to the same version so the loader sentinel cannot drift on supported tags", () => {
+ 		// Regression: bun install -g <pkg>@<v> would update only the top-level
+-		// package, leaving @zero2ai/natives and @zero2ai/natives-<tag>
++		// package, leaving @zero2ai/natives and @oh-my-pi/pi-natives-<tag>
+ 		// at their previous version. The next launch then loaded a stale .node
+ 		// file and aborted at validateLoadedBindings with `The .node file on
+ 		// disk is from a different release than this loader`. See
+@@ -817,7 +817,7 @@
+ 		for (const tag of ["linux-x64", "linux-arm64", "darwin-x64", "darwin-arm64", "win32-x64", "win32-arm64"]) {
+ 			const args = buildBunInstallArgs("15.9.0", tag);
+ 			expect(args).toContain("@zero2ai/natives@15.9.0");
+-			expect(args).toContain(`@zero2ai/natives-${tag}@15.9.0`);
++			expect(args).toContain(`@oh-my-pi/pi-natives-${tag}@15.9.0`);
+ 		}
+ 	});
+ 
+@@ -829,7 +829,7 @@
+ 		// and hides the real diagnostic from `loadNative`'s aggregated error.
+ 		const args = buildBunInstallArgs("15.9.0", "linux-arm");
+ 		expect(args).toContain("@zero2ai/natives@15.9.0");
+-		expect(args.some(arg => arg.startsWith("@zero2ai/natives-"))).toBe(false);
++		expect(args.some(arg => arg.startsWith("@oh-my-pi/pi-natives-"))).toBe(false);
+ 	});
+ 
+ 	it("derives global node_modules from supported Bun locations with the explicit global directory taking precedence", () => {
+diff --git a/packages/coding-agent/test/utils/changelog-static-import.test.ts b/packages/coding-agent/test/utils/changelog-static-import.test.ts
+--- a/packages/coding-agent/test/utils/changelog-static-import.test.ts
++++ b/packages/coding-agent/test/utils/changelog-static-import.test.ts
+@@ -37,7 +37,7 @@
+ /**
+  * Swap `@zero2ai/utils` and the changelog module's `../config` import for a
+  * dependency-free stub. Both pull the native addon loader into the bundle graph, and
+- * that loader resolves `zero2ai_natives.<platform>.node` relative to the emitted artifact,
++ * that loader resolves `pi_natives.<platform>.node` relative to the emitted artifact,
+  * so any probe written outside the repo fails to start. The subject under test is
+  * emitted-asset resolution, not native loading.
+  */
+diff --git a/packages/metaharness/README.md b/packages/metaharness/README.md
+--- a/packages/metaharness/README.md
++++ b/packages/metaharness/README.md
+@@ -174,7 +174,7 @@
+ - **Network policy.** On Harbor's local Docker backend only **public**
+   registries work; task containers reach models via the host gateway.
+ - **`--install source` reflects local TS changes** with no rebuild, but Rust
+-  natives load from the in-tree `packages/natives/native/zero2ai_natives.linux-*.node`
++  natives load from the in-tree `packages/natives/native/pi_natives.linux-*.node`
+   prebuilds — rebuild those when Rust changes (the loader skips the version
+   sentinel for workspace loads, so a stale `.node` runs silently).
+ - **Source mode is single-arch.** The deps tree matches the docker daemon's
+diff --git a/packages/metaharness/agent/zero2ai_local.py b/packages/metaharness/agent/zero2ai_local.py
+--- a/packages/metaharness/agent/zero2ai_local.py
++++ b/packages/metaharness/agent/zero2ai_local.py
+@@ -388,8 +388,8 @@
+                 # Native leaf MUST match the bundle version exactly (loader/API skew
+                 # otherwise). Read it straight from the packed package.json.
+                 'ver=$(bun -e "process.stdout.write(require(\\"./package.json\\").version)"); '
+-                'echo "pinning native @zero2ai/natives-linux-$na@$ver"; '
+-                'bun add --production "@zero2ai/natives-linux-$na@$ver"'
++                'echo "pinning native @oh-my-pi/pi-natives-linux-$na@$ver"; '
++                'bun add --production "@oh-my-pi/pi-natives-linux-$na@$ver"'
+             ),
+             timeout_sec=900,
+         )
+diff --git a/packages/metaharness/src/tb/agent.ts b/packages/metaharness/src/tb/agent.ts
+--- a/packages/metaharness/src/tb/agent.ts
++++ b/packages/metaharness/src/tb/agent.ts
+@@ -17,7 +17,7 @@
+ 	if (exitCode !== 0) throw new Error(`${command.join(" ")} exited with code ${exitCode}`);
+ }
+ /**
+- * Refresh cross-target `zero2ai_natives.linux-<arch>*.node` files in
++ * Refresh cross-target `pi_natives.linux-<arch>*.node` files in
+  * `packages/natives/native/` from the published npm leaf package.
+  *
+  * The binary build embeds whatever `.node` files sit in that directory; on a
+@@ -37,7 +37,7 @@
+ 		let extracted = 0;
+ 		for (const [entry, file] of await archive.files()) {
+ 			const name = path.posix.basename(entry);
+-			if (!name.startsWith(`zero2ai_natives.linux-${arch}`) || !name.endsWith(".node")) continue;
++			if (!name.startsWith(`pi_natives.linux-${arch}`) || !name.endsWith(".node")) continue;
+ 			await Bun.write(path.join(NATIVES_DIR, name), file);
+ 			extracted++;
+ 		}
+diff --git a/packages/natives/README.md b/packages/natives/README.md
+--- a/packages/natives/README.md
++++ b/packages/natives/README.md
+@@ -69,11 +69,11 @@
+   index.js               # Public native export surface
+   loader-state.js        # Platform, ISA variant, and addon resolution
+   embedded-addon.js      # Standalone binary embed stub/generated metadata
+-  zero2ai_natives.<platform>-<arch>-modern.node   # x64 modern ISA (local/CI artifact)
+-  zero2ai_natives.<platform>-<arch>-baseline.node # x64 baseline ISA (local/CI artifact)
+-  zero2ai_natives.<platform>-<arch>.node          # non-x64 build artifact
++  pi_natives.<platform>-<arch>-modern.node   # x64 modern ISA (local/CI artifact)
++  pi_natives.<platform>-<arch>-baseline.node # x64 baseline ISA (local/CI artifact)
++  pi_natives.<platform>-<arch>.node          # non-x64 build artifact
+ npm/<platform>-<arch>/   # Generated at publish time, not committed
+-  package.json           # @zero2ai/natives-<platform>-<arch>
++  package.json           # @oh-my-pi/pi-natives-<platform>-<arch>
+   *.node                 # Only that platform's addon binary or x64 ISA variants
+ ```
+ 
+diff --git a/packages/natives/native/loader-state.js b/packages/natives/native/loader-state.js
+--- a/packages/natives/native/loader-state.js
++++ b/packages/natives/native/loader-state.js
+@@ -12,7 +12,7 @@
+  * Native addon loader for `@zero2ai/natives`.
+  *
+  * Owns every step between "Node imports `native/index.js`" and "the right
+- * `zero2ai_natives.<platform>-<arch>*.node` is required, validated, and returned":
++ * `pi_natives.<platform>-<arch>*.node` is required, validated, and returned":
+  * platform/variant detection, candidate-path resolution, on-disk staging from
+  * `node_modules` (Windows update safety), embedded-addon extraction (Bun
+  * standalone binaries), version-sentinel validation, and the aggregated error
+@@ -67,7 +67,7 @@
+ function resolveLeafPackageDir(platformTag) {
+ 	try {
+ 		const require_ = createRequire(import.meta.url);
+-		return path.dirname(require_.resolve(`@zero2ai/natives-${platformTag}/package.json`));
++		return path.dirname(require_.resolve(`@oh-my-pi/pi-natives-${platformTag}/package.json`));
+ 	} catch {
+ 		return null;
+ 	}
+@@ -100,10 +100,10 @@
+  * @returns {string[]}
+  */
+ export function getAddonFilenames({ tag, arch, variant }) {
+-	const defaultFilename = `zero2ai_natives.${tag}.node`;
++	const defaultFilename = `pi_natives.${tag}.node`;
+ 	if (arch !== "x64" || !variant) return [defaultFilename];
+-	const baselineFilename = `zero2ai_natives.${tag}-baseline.node`;
+-	const modernFilename = `zero2ai_natives.${tag}-modern.node`;
++	const baselineFilename = `pi_natives.${tag}-baseline.node`;
++	const modernFilename = `pi_natives.${tag}-modern.node`;
+ 	if (variant === "modern") {
+ 		return [modernFilename, baselineFilename, defaultFilename];
+ 	}
+@@ -893,6 +893,6 @@
+ 	}
+ 	const details = errors.map(error => `- ${error}`).join("\n");
+ 	throw new Error(
+-		`Failed to load zero2ai_natives native addon for ${ctx.addonLabel}.\n\nTried:\n${details}\n\n${buildHelpMessage(ctx)}`,
++		`Failed to load pi_natives native addon for ${ctx.addonLabel}.\n\nTried:\n${details}\n\n${buildHelpMessage(ctx)}`,
+ 	);
+ }
+diff --git a/packages/natives/package.json b/packages/natives/package.json
+--- a/packages/natives/package.json
++++ b/packages/natives/package.json
+@@ -58,7 +58,7 @@
+     "bun": ">=1.3.14"
+   },
+   "napi": {
+-    "binaryName": "zero2ai_natives",
++    "binaryName": "pi_natives",
+     "triples": {}
+   },
+   "files": [
+diff --git a/packages/natives/scripts/build-bindings.ts b/packages/natives/scripts/build-bindings.ts
+--- a/packages/natives/scripts/build-bindings.ts
++++ b/packages/natives/scripts/build-bindings.ts
+@@ -144,7 +144,7 @@
+ 	}
+ 
+ 	const generatedCandidates = entries.filter(
+-		entry => entry.startsWith(`zero2ai_natives.${process.platform}-${process.arch}`) && entry.endsWith(".node"),
++		entry => entry.startsWith(`pi_natives.${process.platform}-${process.arch}`) && entry.endsWith(".node"),
+ 	);
+ 
+ 	if (generatedCandidates.length === 1) {
+diff --git a/packages/natives/scripts/embed-native.ts b/packages/natives/scripts/embed-native.ts
+--- a/packages/natives/scripts/embed-native.ts
++++ b/packages/natives/scripts/embed-native.ts
+@@ -86,10 +86,10 @@
+ 	const candidates: CandidateAddon[] =
+ 		targetArch === "x64"
+ 			? [
+-					{ variant: "modern", filename: `zero2ai_natives.${platformTag}-modern.node` },
+-					{ variant: "baseline", filename: `zero2ai_natives.${platformTag}-baseline.node` },
++					{ variant: "modern", filename: `pi_natives.${platformTag}-modern.node` },
++					{ variant: "baseline", filename: `pi_natives.${platformTag}-baseline.node` },
+ 				]
+-			: [{ variant: "default", filename: `zero2ai_natives.${platformTag}.node` }];
++			: [{ variant: "default", filename: `pi_natives.${platformTag}.node` }];
+ 
+ 	const available: AvailableAddon[] = [];
+ 	for (const candidate of candidates) {
+@@ -116,7 +116,7 @@
+ 		if (!containsVersionSentinel(bytes, versionSentinel)) {
+ 			throw new Error(
+ 				`Native addon ${addon.path} does not contain the @zero2ai/natives@${version} version sentinel ` +
+-					`\`${versionSentinel}\`. Rebuild it or fetch @zero2ai/natives-${platformTag}@${version} before embedding.`,
++					`\`${versionSentinel}\`. Rebuild it or fetch @oh-my-pi/pi-natives-${platformTag}@${version} before embedding.`,
+ 			);
+ 		}
+ 		archiveEntries[addon.filename] = bytes;
+diff --git a/packages/natives/scripts/gen-npm-packages.ts b/packages/natives/scripts/gen-npm-packages.ts
+--- a/packages/natives/scripts/gen-npm-packages.ts
++++ b/packages/natives/scripts/gen-npm-packages.ts
+@@ -62,8 +62,8 @@
+ 
+ function expectedAddonFilenames(tag: string): string[] {
+ 	return tag.endsWith("-x64")
+-		? [`zero2ai_natives.${tag}-baseline.node`, `zero2ai_natives.${tag}-modern.node`, `zero2ai_natives.${tag}.node`]
+-		: [`zero2ai_natives.${tag}.node`];
++		? [`pi_natives.${tag}-baseline.node`, `pi_natives.${tag}-modern.node`, `pi_natives.${tag}.node`]
++		: [`pi_natives.${tag}.node`];
+ }
+ 
+ function discoverAddonFiles(nativeDir: string, tag: string): Promise<string[]> {
+@@ -75,9 +75,9 @@
+ }
+ 
+ function selectPrimaryAddonFile(tag: string, files: readonly string[]): string {
+-	const baseline = `zero2ai_natives.${tag}-baseline.node`;
++	const baseline = `pi_natives.${tag}-baseline.node`;
+ 	if (files.includes(baseline)) return baseline;
+-	const defaultFile = `zero2ai_natives.${tag}.node`;
++	const defaultFile = `pi_natives.${tag}.node`;
+ 	if (files.includes(defaultFile)) return defaultFile;
+ 	return files[0];
+ }
+@@ -90,7 +90,7 @@
+ 	}
+ 	const main = selectPrimaryAddonFile(tag, addonFiles);
+ 	return {
+-		name: `@zero2ai/natives-${tag}`,
++		name: `@oh-my-pi/pi-natives-${tag}`,
+ 		version,
+ 		author: "Stencil Labs, Inc.",
+ 		os: [os],
+diff --git a/packages/natives/test/embed-native.test.ts b/packages/natives/test/embed-native.test.ts
+--- a/packages/natives/test/embed-native.test.ts
++++ b/packages/natives/test/embed-native.test.ts
+@@ -11,7 +11,7 @@
+ 		const outputPath = path.join(nativeDir, "embedded-addon.js");
+ 		try {
+ 			await fs.mkdir(nativeDir);
+-			await Bun.write(path.join(nativeDir, "zero2ai_natives.win32-arm64.node"), "binary__piNativesV18_1_10");
++			await Bun.write(path.join(nativeDir, "pi_natives.win32-arm64.node"), "binary__piNativesV18_1_10");
+ 
+ 			await expect(
+ 				embedNativeAddon({
+diff --git a/packages/natives/test/issue-3238-repro.test.ts b/packages/natives/test/issue-3238-repro.test.ts
+--- a/packages/natives/test/issue-3238-repro.test.ts
++++ b/packages/natives/test/issue-3238-repro.test.ts
+@@ -2,7 +2,7 @@
+  * Regression for https://github.com/can1357/oh-my-pi/issues/3238.
+  *
+  * On macOS x64 (Intel), `zero2ai stats` builds only the `modern`
+- * (`zero2ai_natives.darwin-x64-modern.node`) variant when the host has AVX2,
++ * (`pi_natives.darwin-x64-modern.node`) variant when the host has AVX2,
+  * because `scripts/host-detect.ts` uses `Bun.spawnSync("sysctl", …)` from a
+  * normal shell context and correctly resolves AVX2 → modern.
+  *
+@@ -15,7 +15,7 @@
+  *
+  * `detectAvx2Support` returned `false`, `resolveCpuVariant` selected
+  * `baseline`, and `getAddonFilenames("baseline")` searched only
+- * `zero2ai_natives.darwin-x64-baseline.node` + `zero2ai_natives.darwin-x64.node` —
++ * `pi_natives.darwin-x64-baseline.node` + `pi_natives.darwin-x64.node` —
+  * neither of which exists on a modern-only on-disk build. The main thread,
+  * which ran the same detector before spawning the worker, picked `modern`
+  * fine; only the worker failed.
+@@ -147,7 +147,7 @@
+ 		}).variant;
+ 		expect(variant).toBe("modern");
+ 		const filenames = getAddonFilenames({ tag: "darwin-x64", arch: "x64", variant });
+-		expect(filenames[0]).toBe("zero2ai_natives.darwin-x64-modern.node");
+-		expect(filenames).toContain("zero2ai_natives.darwin-x64-baseline.node");
++		expect(filenames[0]).toBe("pi_natives.darwin-x64-modern.node");
++		expect(filenames).toContain("pi_natives.darwin-x64-baseline.node");
+ 	});
+ });
+diff --git a/packages/natives/test/issue-4812-repro.test.ts b/packages/natives/test/issue-4812-repro.test.ts
+--- a/packages/natives/test/issue-4812-repro.test.ts
++++ b/packages/natives/test/issue-4812-repro.test.ts
+@@ -19,11 +19,11 @@
+ import { validateLoadedBindings } from "../native/loader-state.js";
+ 
+ const unusedCandidate =
+-	"/home/u/.bun/install/global/node_modules/@zero2ai/natives-linux-x64/zero2ai_natives.linux-x64.node";
++	"/home/u/.bun/install/global/node_modules/@oh-my-pi/pi-natives-linux-x64/pi_natives.linux-x64.node";
+ 
+ async function withCandidate(contents: string, test: (candidate: string) => void) {
+ 	const dir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-natives-sentinel-"));
+-	const candidate = path.join(dir, "zero2ai_natives.node");
++	const candidate = path.join(dir, "pi_natives.node");
+ 	try {
+ 		await fs.writeFile(candidate, contents);
+ 		test(candidate);
+diff --git a/packages/natives/test/issue-823-repro.test.ts b/packages/natives/test/issue-823-repro.test.ts
+--- a/packages/natives/test/issue-823-repro.test.ts
++++ b/packages/natives/test/issue-823-repro.test.ts
+@@ -3,7 +3,7 @@
+  *
+  * On WSL (and any host where the user moves the standalone binary away from the
+  * build-time native artifacts), the compiled `zero2ai` binary fails to load
+- * `zero2ai_natives.linux-x64-*.node`. Root cause: the old loader's
++ * `pi_natives.linux-x64-*.node`. Root cause: the old loader's
+  * `isCompiledBinary` detection relied on signals that are unreliable in a Bun
+  * standalone binary:
+  *   - `process.env.ZERO2AI_COMPILED` — never set, because `bun build --compile
+@@ -54,8 +54,8 @@
+ 					files: [
+ 						{
+ 							variant: "modern",
+-							filename: "zero2ai_natives.linux-x64-modern.node",
+-							filePath: "/$bunfs/root/packages/natives/native/zero2ai_natives.linux-x64-modern.node",
++							filename: "pi_natives.linux-x64-modern.node",
++							filePath: "/$bunfs/root/packages/natives/native/pi_natives.linux-x64-modern.node",
+ 						},
+ 					],
+ 				},
+@@ -106,10 +106,10 @@
+ 			userDataDir,
+ 		});
+ 
+-		const versionedModern = path.join(versionedDir, "zero2ai_natives.linux-x64-modern.node");
+-		const versionedBaseline = path.join(versionedDir, "zero2ai_natives.linux-x64-baseline.node");
+-		const userDataModern = path.join(userDataDir, "zero2ai_natives.linux-x64-modern.node");
+-		const buildHostModern = path.join(nativeDir, "zero2ai_natives.linux-x64-modern.node");
++		const versionedModern = path.join(versionedDir, "pi_natives.linux-x64-modern.node");
++		const versionedBaseline = path.join(versionedDir, "pi_natives.linux-x64-baseline.node");
++		const userDataModern = path.join(userDataDir, "pi_natives.linux-x64-modern.node");
++		const buildHostModern = path.join(nativeDir, "pi_natives.linux-x64-modern.node");
+ 
+ 		// Versioned cache and user-data dir candidates must exist for compiled binaries —
+ 		// these are where the embedded-addon extraction lands (~/.zero2ai/natives/<v>) and where
+@@ -134,12 +134,12 @@
+ 			versionedDir,
+ 			userDataDir,
+ 		});
+-		expect(candidates).not.toContain(path.join(versionedDir, "zero2ai_natives.linux-x64-baseline.node"));
+-		expect(candidates).not.toContain(path.join(userDataDir, "zero2ai_natives.linux-x64-baseline.node"));
++		expect(candidates).not.toContain(path.join(versionedDir, "pi_natives.linux-x64-baseline.node"));
++		expect(candidates).not.toContain(path.join(userDataDir, "pi_natives.linux-x64-baseline.node"));
+ 	});
+ 
+ 	it("prefers platform leaf package candidates ahead of core nativeDir candidates on npm installs", () => {
+-		const leafPackageDir = "/app/node_modules/@zero2ai/natives-linux-x64";
++		const leafPackageDir = "/app/node_modules/@oh-my-pi/pi-natives-linux-x64";
+ 		const nativeDir = "/app/node_modules/@zero2ai/natives/native";
+ 		const candidates = resolveLoaderCandidates({
+ 			addonFilenames: getAddonFilenames({ tag: "linux-x64", arch: "x64", variant: "baseline" }),
+@@ -151,15 +151,15 @@
+ 			userDataDir: "/home/u/.local/bin",
+ 		});
+ 
+-		const leafBaseline = path.join(leafPackageDir, "zero2ai_natives.linux-x64-baseline.node");
+-		const coreBaseline = path.join(nativeDir, "zero2ai_natives.linux-x64-baseline.node");
++		const leafBaseline = path.join(leafPackageDir, "pi_natives.linux-x64-baseline.node");
++		const coreBaseline = path.join(nativeDir, "pi_natives.linux-x64-baseline.node");
+ 		expect(candidates).toContain(leafBaseline);
+ 		expect(candidates.indexOf(leafBaseline)).toBeLessThan(candidates.indexOf(coreBaseline));
+ 	});
+ 
+ 	it("keeps Windows staging ahead of leaf package and core nativeDir candidates", () => {
+ 		const versionedDir = "/home/u/.zero2ai/natives/15.5.15";
+-		const leafPackageDir = "/app/node_modules/@zero2ai/natives-win32-x64";
++		const leafPackageDir = "/app/node_modules/@oh-my-pi/pi-natives-win32-x64";
+ 		const nativeDir = "/app/node_modules/@zero2ai/natives/native";
+ 		const candidates = resolveLoaderCandidates({
+ 			addonFilenames: getAddonFilenames({ tag: "win32-x64", arch: "x64", variant: "baseline" }),
+@@ -172,9 +172,9 @@
+ 			userDataDir: "/home/u/AppData/Local/zero2ai",
+ 		});
+ 
+-		const stagedBaseline = path.join(versionedDir, "zero2ai_natives.win32-x64-baseline.node");
+-		const leafBaseline = path.join(leafPackageDir, "zero2ai_natives.win32-x64-baseline.node");
+-		const coreBaseline = path.join(nativeDir, "zero2ai_natives.win32-x64-baseline.node");
++		const stagedBaseline = path.join(versionedDir, "pi_natives.win32-x64-baseline.node");
++		const leafBaseline = path.join(leafPackageDir, "pi_natives.win32-x64-baseline.node");
++		const coreBaseline = path.join(nativeDir, "pi_natives.win32-x64-baseline.node");
+ 		expect(candidates.indexOf(stagedBaseline)).toBeLessThan(candidates.indexOf(leafBaseline));
+ 		expect(candidates.indexOf(leafBaseline)).toBeLessThan(candidates.indexOf(coreBaseline));
+ 	});
+@@ -206,8 +206,8 @@
+ 
+ 			const modern = Buffer.from("modern native addon");
+ 			const baseline = Buffer.from("baseline native addon");
+-			const modernFilename = "zero2ai_natives.linux-x64-modern.node";
+-			const baselineFilename = "zero2ai_natives.linux-x64-baseline.node";
++			const modernFilename = "pi_natives.linux-x64-modern.node";
++			const baselineFilename = "pi_natives.linux-x64-baseline.node";
+ 			await Bun.write(
+ 				archivePath,
+ 				await new Bun.Archive(
+diff --git a/packages/natives/test/legacy-desktop-sentinel.test.ts b/packages/natives/test/legacy-desktop-sentinel.test.ts
+--- a/packages/natives/test/legacy-desktop-sentinel.test.ts
++++ b/packages/natives/test/legacy-desktop-sentinel.test.ts
+@@ -6,7 +6,7 @@
+ 
+ async function withCandidate(contents: string, test: (candidate: string) => void) {
+ 	const dir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-natives-legacy-desktop-"));
+-	const candidate = path.join(dir, "zero2ai_natives.node");
++	const candidate = path.join(dir, "pi_natives.node");
+ 	try {
+ 		await fs.writeFile(candidate, contents);
+ 		test(candidate);
+diff --git a/packages/natives/test/npm-packages.test.ts b/packages/natives/test/npm-packages.test.ts
+--- a/packages/natives/test/npm-packages.test.ts
++++ b/packages/natives/test/npm-packages.test.ts
+@@ -6,7 +6,7 @@
+ 
+ describe("generated native npm leaf packages", () => {
+ 	it("builds an x64 leaf manifest that exposes all addon files without package exports", () => {
+-		const addonFiles = ["zero2ai_natives.linux-x64-baseline.node", "zero2ai_natives.linux-x64-modern.node"];
++		const addonFiles = ["pi_natives.linux-x64-baseline.node", "pi_natives.linux-x64-modern.node"];
+ 		const manifest = buildLeafManifest({
+ 			tag: "linux-x64",
+ 			os: "linux",
+@@ -15,7 +15,7 @@
+ 			version: "15.5.15",
+ 		});
+ 
+-		expect(manifest.name).toBe("@zero2ai/natives-linux-x64");
++		expect(manifest.name).toBe("@oh-my-pi/pi-natives-linux-x64");
+ 		expect(manifest.version).toBe("15.5.15");
+ 		expect(manifest.os).toEqual(["linux"]);
+ 		expect(manifest.cpu).toEqual(["x64"]);
+@@ -32,7 +32,7 @@
+ 	});
+ 
+ 	it("uses the default addon as the main entry for non-x64 leaves", () => {
+-		const addonFiles = ["zero2ai_natives.darwin-arm64.node"];
++		const addonFiles = ["pi_natives.darwin-arm64.node"];
+ 		const manifest = buildLeafManifest({
+ 			tag: "darwin-arm64",
+ 			os: "darwin",
+@@ -41,10 +41,10 @@
+ 			version: "15.5.15",
+ 		});
+ 
+-		expect(manifest.name).toBe("@zero2ai/natives-darwin-arm64");
++		expect(manifest.name).toBe("@oh-my-pi/pi-natives-darwin-arm64");
+ 		expect(manifest.os).toEqual(["darwin"]);
+ 		expect(manifest.cpu).toEqual(["arm64"]);
+-		expect(manifest.main).toBe("./zero2ai_natives.darwin-arm64.node");
++		expect(manifest.main).toBe("./pi_natives.darwin-arm64.node");
+ 		expect(addonFiles).toContain(manifest.main.slice("./".length));
+ 		expect("exports" in manifest).toBe(false);
+ 	});
+@@ -59,13 +59,13 @@
+ 				Bun.write(path.join(packageDir, "THIRD-PARTY-NOTICES.txt"), "Notice payload\n"),
+ 			]);
+ 			const addonFiles = [
+-				"zero2ai_natives.linux-x64-baseline.node",
+-				"zero2ai_natives.linux-x64-modern.node",
+-				"zero2ai_natives.linux-arm64.node",
+-				"zero2ai_natives.darwin-x64-baseline.node",
+-				"zero2ai_natives.darwin-arm64.node",
+-				"zero2ai_natives.win32-x64-baseline.node",
+-				"zero2ai_natives.win32-arm64.node",
++				"pi_natives.linux-x64-baseline.node",
++				"pi_natives.linux-x64-modern.node",
++				"pi_natives.linux-arm64.node",
++				"pi_natives.darwin-x64-baseline.node",
++				"pi_natives.darwin-arm64.node",
++				"pi_natives.win32-x64-baseline.node",
++				"pi_natives.win32-arm64.node",
+ 			];
+ 			for (const file of addonFiles) {
+ 				await Bun.write(path.join(packageDir, "native", file), file);
+@@ -81,12 +81,12 @@
+ 				"win32-arm64",
+ 			]);
+ 			const linuxX64 = leaves.find(leaf => leaf.tag === "linux-x64");
+-			expect(linuxX64?.files).toEqual(["zero2ai_natives.linux-x64-baseline.node", "zero2ai_natives.linux-x64-modern.node"]);
+-			expect(await Bun.file(path.join(packageDir, "npm/linux-x64/zero2ai_natives.linux-x64-modern.node")).text()).toBe(
+-				"zero2ai_natives.linux-x64-modern.node",
++			expect(linuxX64?.files).toEqual(["pi_natives.linux-x64-baseline.node", "pi_natives.linux-x64-modern.node"]);
++			expect(await Bun.file(path.join(packageDir, "npm/linux-x64/pi_natives.linux-x64-modern.node")).text()).toBe(
++				"pi_natives.linux-x64-modern.node",
+ 			);
+ 			const manifest = await Bun.file(path.join(packageDir, "npm/linux-x64/package.json")).json();
+-			expect(manifest.main).toBe("./zero2ai_natives.linux-x64-baseline.node");
++			expect(manifest.main).toBe("./pi_natives.linux-x64-baseline.node");
+ 			expect(manifest.files).toEqual(["*.node", "README.md", "LICENSE", "THIRD-PARTY-NOTICES.txt"]);
+ 			expect(await Bun.file(path.join(packageDir, "npm/linux-x64/LICENSE")).text()).toBe("MIT payload\n");
+ 			expect(await Bun.file(path.join(packageDir, "npm/linux-x64/THIRD-PARTY-NOTICES.txt")).text()).toBe(
+@@ -105,7 +105,7 @@
+ 			await fs.mkdir(path.join(packageDir, "native"), { recursive: true });
+ 			await Promise.all([
+ 				Bun.write(path.join(packageDir, "package.json"), JSON.stringify({ version: "15.5.15" })),
+-				Bun.write(path.join(packageDir, "native/zero2ai_natives.darwin-arm64.node"), "darwin"),
++				Bun.write(path.join(packageDir, "native/pi_natives.darwin-arm64.node"), "darwin"),
+ 				Bun.write(path.join(packageDir, "LICENSE"), "MIT payload\n"),
+ 				Bun.write(path.join(root, "THIRD-PARTY-NOTICES.txt"), "Repository notice\n"),
+ 			]);
+@@ -125,7 +125,7 @@
+ 		try {
+ 			await fs.mkdir(path.join(packageDir, "native"));
+ 			await Bun.write(path.join(packageDir, "package.json"), JSON.stringify({ version: "15.5.15" }));
+-			await Bun.write(path.join(packageDir, "native/zero2ai_natives.darwin-arm64.node"), "darwin");
++			await Bun.write(path.join(packageDir, "native/pi_natives.darwin-arm64.node"), "darwin");
+ 
+ 			const leaves = await generateNpmPackages({ packageDir, dryRun: true });
+ 			expect(leaves.filter(leaf => leaf.missing).map(leaf => leaf.tag)).toEqual([
+diff --git a/packages/natives/test/windows-staging.test.ts b/packages/natives/test/windows-staging.test.ts
+--- a/packages/natives/test/windows-staging.test.ts
++++ b/packages/natives/test/windows-staging.test.ts
+@@ -1,7 +1,7 @@
+ /**
+  * Regression for the Windows `bun install -g` update path: when an `zero2ai`
+  * process is running, bun cannot overwrite a locked
+- * `node_modules/@zero2ai/natives/native/zero2ai_natives.win32-x64.node` during
++ * `node_modules/@zero2ai/natives/native/pi_natives.win32-x64.node` during
+  * package update and silently keeps the old binary next to the new ESM
+  * wrapper. The next launch then throws `<sym> is not a function` deep inside
+  * tool execution (see Discord report, 2026-05-14).
+@@ -99,9 +99,9 @@
+ 			userDataDir,
+ 		});
+ 
+-		const versionedBaseline = path.join(versionedDir, "zero2ai_natives.win32-x64-baseline.node");
+-		const versionedDefault = path.join(versionedDir, "zero2ai_natives.win32-x64.node");
+-		const nodeModulesBaseline = path.join(winNodeModulesNativeDir, "zero2ai_natives.win32-x64-baseline.node");
++		const versionedBaseline = path.join(versionedDir, "pi_natives.win32-x64-baseline.node");
++		const versionedDefault = path.join(versionedDir, "pi_natives.win32-x64.node");
++		const nodeModulesBaseline = path.join(winNodeModulesNativeDir, "pi_natives.win32-x64-baseline.node");
+ 
+ 		// Staged paths must be probed first so the running process locks the cache
+ 		// copy and bun is free to replace the node_modules copy on next update.
+@@ -112,12 +112,12 @@
+ 		// User-data dir is reserved for compiled-binary mode — staging must not
+ 		// quietly start probing it on npm installs (where it never contains the
+ 		// addon anyway).
+-		const userDataBaseline = path.join(userDataDir, "zero2ai_natives.win32-x64-baseline.node");
++		const userDataBaseline = path.join(userDataDir, "pi_natives.win32-x64-baseline.node");
+ 		expect(candidates).not.toContain(userDataBaseline);
+ 	});
+ 
+ 	it("classifies only Windows node_modules paths case-insensitively", () => {
+-		const leafPackageDir = "/tmp/node_modules/@zero2ai/natives-darwin-arm64";
++		const leafPackageDir = "/tmp/node_modules/@oh-my-pi/pi-natives-darwin-arm64";
+ 		const uppercaseNodeModulesNativeDir = "/tmp/NODE_MODULES/@zero2ai/natives/native";
+ 		const variantCacheKey = "__PI_NATIVE_VARIANT_CACHE";
+ 		const previousVariantCache = process.env[variantCacheKey];
+@@ -186,8 +186,8 @@
+ 			userDataDir: "/home/u/.local/bin",
+ 		});
+ 
+-		const versionedBaseline = path.join(versionedDir, "zero2ai_natives.linux-x64-baseline.node");
+-		const nodeModulesBaseline = path.join(posixNodeModulesNativeDir, "zero2ai_natives.linux-x64-baseline.node");
++		const versionedBaseline = path.join(versionedDir, "pi_natives.linux-x64-baseline.node");
++		const nodeModulesBaseline = path.join(posixNodeModulesNativeDir, "pi_natives.linux-x64-baseline.node");
+ 		expect(candidates).not.toContain(versionedBaseline);
+ 		expect(candidates).toContain(nodeModulesBaseline);
+ 	});
+diff --git a/python/robomp/README.md b/python/robomp/README.md
+--- a/python/robomp/README.md
++++ b/python/robomp/README.md
+@@ -229,7 +229,7 @@
+ | `refusing to push: working tree is dirty` | Uncommitted agent edits. Or just call `gh_open_pr`, which auto-commits `bun run fix` output. |
+ | `bun check failed before PR creation` | Fix the reported failure and retry `gh_open_pr`. |
+ | `refusing to open PR: \`bun run test\` failed before open PR` | The repo suite is red at HEAD. Fix and commit, or `skip_checks=true` if the failure pre-exists on the default branch. |
+-| `Failed to load zero2ai_natives` | Wrong arch / missing native. `bun run pi:image` then `bun run robomp:build`. |
++| `Failed to load pi_natives` | Wrong arch / missing native. `bun run pi:image` then `bun run robomp:build`. |
+ | `No API key found for <provider>` | `~/.zero2ai/agent/models.container.yml` mount missing or provider id mismatch with `ROBOMP_MODEL`. |
+ 
+ ## Layout
+diff --git a/python/robomp/src/natives_cache.py b/python/robomp/src/natives_cache.py
+--- a/python/robomp/src/natives_cache.py
++++ b/python/robomp/src/natives_cache.py
+@@ -1,6 +1,6 @@
+ """Content-addressed cache of pre-built ``packages/natives/native/`` artifacts.
+ 
+-The napi-rs build of ``zero2ai_natives.<platform>-<arch>[-variant].node`` takes
++The napi-rs build of ``pi_natives.<platform>-<arch>[-variant].node`` takes
+ minutes. Most issues never touch ``crates/``, so the same artifact is
+ buildable in every workspace whose source state matches one we've already
+ built. This module:
+@@ -63,7 +63,7 @@
+ # Files in ``packages/natives/native/`` that ARE pure functions of the
+ # cache-key inputs and travel as a unit. ``.node`` is matched by glob since
+ # the basename embeds the target triple + variant.
+-_CACHED_NODE_GLOB = "zero2ai_natives.*.node"
++_CACHED_NODE_GLOB = "pi_natives.*.node"
+ _CACHED_COMPANION_FILES: tuple[str, ...] = (
+     "index.d.ts",
+     "index.js",
+diff --git a/python/robomp/tests/test_natives_cache.py b/python/robomp/tests/test_natives_cache.py
+--- a/python/robomp/tests/test_natives_cache.py
++++ b/python/robomp/tests/test_natives_cache.py
+@@ -80,7 +80,7 @@
+     """Fill `packages/natives/native/` with a complete built-artifact set."""
+     native_dir = repo_dir / "packages" / "natives" / "native"
+     native_dir.mkdir(parents=True, exist_ok=True)
+-    (native_dir / "zero2ai_natives.linux-arm64.node").write_bytes(body)
++    (native_dir / "pi_natives.linux-arm64.node").write_bytes(body)
+     (native_dir / "index.d.ts").write_text("export const X: number;\n")
+     (native_dir / "index.js").write_text("export const X = 1;\n")
+     (native_dir / "embedded-addon.js").write_text("export const embeddedAddon = null;\n")
+@@ -193,7 +193,7 @@
+     assert stored is not None
+     manifest = json.loads((stored / "manifest.json").read_text())
+     assert manifest["key"] == key
+-    assert "zero2ai_natives.linux-arm64.node" in manifest["node_files"]
++    assert "pi_natives.linux-arm64.node" in manifest["node_files"]
+ 
+     # Populate a fresh workspace from the same source state.
+     dst_repo = src_repo.parent.parent / "dst" / "repo"
+@@ -204,14 +204,14 @@
+     hit = cache.populate_workspace(REPO, key, dst_native)
+     assert hit is not None
+     assert {p.name for p in hit.files} >= {
+-        "zero2ai_natives.linux-arm64.node",
++        "pi_natives.linux-arm64.node",
+         "index.d.ts",
+         "index.js",
+         "embedded-addon.js",
+     }
+     # The `.node` is hardlinked: same inode, nlink ≥ 2.
+-    cached_node = stored / "zero2ai_natives.linux-arm64.node"
+-    workspace_node = dst_native / "zero2ai_natives.linux-arm64.node"
++    cached_node = stored / "pi_natives.linux-arm64.node"
++    workspace_node = dst_native / "pi_natives.linux-arm64.node"
+     assert cached_node.stat().st_ino == workspace_node.stat().st_ino
+     assert cached_node.stat().st_nlink >= 2
+     # Companions are COPIED (independent inodes): in-place rewrite in the
+@@ -231,7 +231,7 @@
+     repo = _seed_repo(tmp_path / "ws" / "repo")
+     native_dir = repo / "packages" / "natives" / "native"
+     # Only the .node — missing companions → capture refuses.
+-    (native_dir / "zero2ai_natives.linux-arm64.node").write_bytes(b"x")
++    (native_dir / "pi_natives.linux-arm64.node").write_bytes(b"x")
+     assert cache.capture(REPO, "k", native_dir) is None
+     # And no entry was created.
+     assert not cache.entry_dir(REPO, "k").exists()
+@@ -289,8 +289,8 @@
+         monkeypatch.setattr(os, "link", real_link)
+     assert hit is not None
+     # Files exist (via copy) but are distinct inodes from the cache.
+-    cached_node = cache.entry_dir(REPO, key) / "zero2ai_natives.linux-arm64.node"
+-    copied_node = dst_native / "zero2ai_natives.linux-arm64.node"
++    cached_node = cache.entry_dir(REPO, key) / "pi_natives.linux-arm64.node"
++    copied_node = dst_native / "pi_natives.linux-arm64.node"
+     assert copied_node.exists()
+     assert cached_node.stat().st_ino != copied_node.stat().st_ino
+ 
+@@ -305,7 +305,7 @@
+     dst_native = tmp_path / "dst" / "packages" / "natives" / "native"
+     dst_native.mkdir(parents=True)
+     # Pre-existing stub bytes — populate must replace, not append/error.
+-    target = dst_native / "zero2ai_natives.linux-arm64.node"
++    target = dst_native / "pi_natives.linux-arm64.node"
+     target.write_bytes(b"old-stub")
+     hit = cache.populate_workspace(REPO, key, dst_native)
+     assert hit is not None
+@@ -318,12 +318,12 @@
+ def _stamp_entry(cache: NativesCache, repo: str, key: str, captured_at: float) -> Path:
+     entry = cache.entry_dir(repo, key)
+     entry.mkdir(parents=True, exist_ok=True)
+-    (entry / "zero2ai_natives.linux-arm64.node").write_bytes(b"x" * 1024)
++    (entry / "pi_natives.linux-arm64.node").write_bytes(b"x" * 1024)
+     (entry / "index.d.ts").write_text("")
+     (entry / "index.js").write_text("")
+     (entry / "embedded-addon.js").write_text("")
+     (entry / "manifest.json").write_text(
+-        json.dumps({"key": key, "captured_at": captured_at, "node_files": ["zero2ai_natives.linux-arm64.node"]})
++        json.dumps({"key": key, "captured_at": captured_at, "node_files": ["pi_natives.linux-arm64.node"]})
+     )
+     return entry
+ 
+@@ -363,9 +363,9 @@
+     entry = _stamp_entry(cache, REPO, "k1", now - 500)
+     _stamp_entry(cache, REPO, "k2", now - 100)
+     # Workspace hardlinks the older entry's .node before GC runs.
+-    ws_node = tmp_path / "ws" / "zero2ai_natives.linux-arm64.node"
++    ws_node = tmp_path / "ws" / "pi_natives.linux-arm64.node"
+     ws_node.parent.mkdir(parents=True)
+-    os.link(entry / "zero2ai_natives.linux-arm64.node", ws_node)
++    os.link(entry / "pi_natives.linux-arm64.node", ws_node)
+     cache.gc(REPO)
+     assert not entry.exists()  # cache directory swept
+     assert ws_node.exists()  # workspace file survives via inode refcount
+@@ -387,7 +387,7 @@
+     cache = _cache(tmp_path)
+     incomplete = cache.entry_dir(REPO, "bogus")
+     incomplete.mkdir(parents=True)
+-    (incomplete / "zero2ai_natives.linux-arm64.node").write_bytes(b"x")
++    (incomplete / "pi_natives.linux-arm64.node").write_bytes(b"x")
+     cache.gc(REPO)
+     assert not incomplete.exists()
+ 
+diff --git a/python/robomp/tests/test_permissions_e2e.py b/python/robomp/tests/test_permissions_e2e.py
+--- a/python/robomp/tests/test_permissions_e2e.py
++++ b/python/robomp/tests/test_permissions_e2e.py
+@@ -352,7 +352,7 @@
+     Writes the four cached files AS THE SLOT so ownership matches a real
+     post-build workspace; capture pulls these into the cache.
+     """
+-    _write_as_slot(bindings, "packages/natives/native/zero2ai_natives.linux-arm64.node", body)
++    _write_as_slot(bindings, "packages/natives/native/pi_natives.linux-arm64.node", body)
+     _write_as_slot(bindings, "packages/natives/native/index.d.ts", "export const X: number;\n")
+     _write_as_slot(bindings, "packages/natives/native/index.js", "export const X = 1;\n")
+     _write_as_slot(
+@@ -407,7 +407,7 @@
+     native_dir1 = ws1.repo_dir / "packages" / "natives" / "native"
+     stored = natives_cache.capture(_REPO, key, native_dir1, source_workspace=ws1.workspace_key)
+     assert stored is not None
+-    cached_node = stored / "zero2ai_natives.linux-arm64.node"
++    cached_node = stored / "pi_natives.linux-arm64.node"
+     cached_companion = stored / "index.d.ts"
+     # Cache root is setgid `zero2ai`; new files inherit gid `zero2ai` so any slot
+     # with `extra_groups=[zero2ai]` can read them.
+@@ -427,7 +427,7 @@
+     )
+     bindings2 = _bindings(db=db, tool_loop=tool_loop, workspace=ws2, upstream=upstream_repo, slot_uid=_SLOT_TWO)
+     native_dir2 = ws2.repo_dir / "packages" / "natives" / "native"
+-    ws2_node = native_dir2 / "zero2ai_natives.linux-arm64.node"
++    ws2_node = native_dir2 / "pi_natives.linux-arm64.node"
+     ws2_companion = native_dir2 / "index.d.ts"
+     assert ws2_node.exists(), "auto-populate must hardlink the .node into ws2"
+     assert ws2_companion.exists(), "auto-populate must copy companions into ws2"
+@@ -440,7 +440,7 @@
+ 
+     # Slot 2 must be able to read the populated artifacts (group zero2ai + 0660
+     # via setgid inheritance from the cache root).
+-    _run_ok(bindings2, ["test", "-r", "packages/natives/native/zero2ai_natives.linux-arm64.node"])
++    _run_ok(bindings2, ["test", "-r", "packages/natives/native/pi_natives.linux-arm64.node"])
+     _run_ok(bindings2, ["test", "-r", "packages/natives/native/index.d.ts"])
+ 
+     # --- Rebuild simulation: napi's installBinary does temp + rename. ---
+@@ -457,7 +457,7 @@
+                 "open(tmp, 'wb').write(b'REBUILT'); "
+                 "os.rename(tmp, dest)"
+             ),
+-            "packages/natives/native/zero2ai_natives.linux-arm64.node",
++            "packages/natives/native/pi_natives.linux-arm64.node",
+         ],
+     )
+     # Workspace sees the rebuilt bytes; cache is untouched (new inode in ws).
+diff --git a/python/robomp/tests/test_sandbox.py b/python/robomp/tests/test_sandbox.py
+--- a/python/robomp/tests/test_sandbox.py
++++ b/python/robomp/tests/test_sandbox.py
+@@ -1763,7 +1763,7 @@
+     # Mirror the napi build output set. The filename must match the live
+     # `target_triple()` value or the populate path won't recognize it.
+     triple = target_triple()
+-    (native_dir1 / f"zero2ai_natives.{triple}.node").write_bytes(b"ELFx")
++    (native_dir1 / f"pi_natives.{triple}.node").write_bytes(b"ELFx")
+     (native_dir1 / "index.d.ts").write_text("export const X: number;\n")
+     (native_dir1 / "index.js").write_text("export const X = 1;\n")
+     (native_dir1 / "embedded-addon.js").write_text("export const embeddedAddon = null;\n")
+@@ -1788,7 +1788,7 @@
+     # The auto-populate path used the real target_triple() — which matches
+     # the host that just captured. So the same key applies and files appear.
+     assert native_dir2.is_dir(), "populate should have created native/ on hit"
+-    node_name = f"zero2ai_natives.{triple}.node"
++    node_name = f"pi_natives.{triple}.node"
+     assert (native_dir2 / node_name).read_bytes() == b"ELFx"
+     # The .node is hardlinked, sharing the cache's inode.
+     cached_node = cache.entry_dir("octo/widget", key) / node_name
+diff --git a/python/robomp/tests/test_worker.py b/python/robomp/tests/test_worker.py
+--- a/python/robomp/tests/test_worker.py
++++ b/python/robomp/tests/test_worker.py
+@@ -965,7 +965,7 @@
+     if with_native_artifacts:
+         native_dir = ws.repo_dir / "packages" / "natives" / "native"
+         native_dir.mkdir(parents=True)
+-        (native_dir / "zero2ai_natives.linux-arm64.node").write_bytes(b"ELFx")
++        (native_dir / "pi_natives.linux-arm64.node").write_bytes(b"ELFx")
+         (native_dir / "index.d.ts").write_text("")
+         (native_dir / "index.js").write_text("")
+         (native_dir / "embedded-addon.js").write_text("")
+diff --git a/scripts/bazel-natives.ts b/scripts/bazel-natives.ts
+--- a/scripts/bazel-natives.ts
++++ b/scripts/bazel-natives.ts
+@@ -1,6 +1,6 @@
+ #!/usr/bin/env bun
+ /**
+- * Canonical Bazel driver for the shipping zero2ai_natives addons.
++ * Canonical Bazel driver for the shipping pi_natives addons.
+  *
+  * Usage: bun scripts/bazel-natives.ts <target>... [--dest <dir>] [--source <dir>] [-- <extra bazel args>]
+  *
+@@ -44,14 +44,14 @@
+ 
+ /** //:natives-<name> → canonical addon filename (mirrors _ADDONS in BUILD.bazel). */
+ export const ADDON_OUTPUTS: Record<string, string> = {
+-	"linux-x64-baseline": "zero2ai_natives.linux-x64-baseline.node",
+-	"linux-x64-modern": "zero2ai_natives.linux-x64-modern.node",
+-	"linux-arm64": "zero2ai_natives.linux-arm64.node",
+-	"linux-musl-x64-baseline": "zero2ai_natives.linux-x64-baseline.node",
+-	"linux-musl-arm64": "zero2ai_natives.linux-arm64.node",
+-	"darwin-x64-baseline": "zero2ai_natives.darwin-x64-baseline.node",
+-	"darwin-arm64": "zero2ai_natives.darwin-arm64.node",
+-	"win32-x64-baseline": "zero2ai_natives.win32-x64-baseline.node",
++	"linux-x64-baseline": "pi_natives.linux-x64-baseline.node",
++	"linux-x64-modern": "pi_natives.linux-x64-modern.node",
++	"linux-arm64": "pi_natives.linux-arm64.node",
++	"linux-musl-x64-baseline": "pi_natives.linux-x64-baseline.node",
++	"linux-musl-arm64": "pi_natives.linux-arm64.node",
++	"darwin-x64-baseline": "pi_natives.darwin-x64-baseline.node",
++	"darwin-arm64": "pi_natives.darwin-arm64.node",
++	"win32-x64-baseline": "pi_natives.win32-x64-baseline.node",
+ };
+ 
+ /** Aggregate filegroups → their member addon targets (mirrors BUILD.bazel). */
+@@ -84,7 +84,7 @@
+ 		if (host.arch === "x64") return host.avx2 ? "linux-x64-modern" : "linux-x64-baseline";
+ 	}
+ 	if (host.platform === "win32" && host.arch === "x64") return "win32-x64-baseline";
+-	throw new Error(`No zero2ai_natives addon target for host ${host.platform}-${host.arch}`);
++	throw new Error(`No pi_natives addon target for host ${host.platform}-${host.arch}`);
+ }
+ 
+ /** Expand pseudo-targets and map names to //:natives-* labels (deduplicated). */
+diff --git a/scripts/ci-release-publish.ts b/scripts/ci-release-publish.ts
+--- a/scripts/ci-release-publish.ts
++++ b/scripts/ci-release-publish.ts
+@@ -283,7 +283,7 @@
+ function buildNativeOptionalDependencies(version: string): JsonObject {
+ 	const optionalDependencies: JsonObject = {};
+ 	for (const target of LEAF_TARGETS) {
+-		optionalDependencies[`@zero2ai/natives-${target.tag}`] = version;
++		optionalDependencies[`@oh-my-pi/pi-natives-${target.tag}`] = version;
+ 	}
+ 	return optionalDependencies;
+ }
+diff --git a/scripts/host-detect.ts b/scripts/host-detect.ts
+--- a/scripts/host-detect.ts
++++ b/scripts/host-detect.ts
+@@ -25,7 +25,7 @@
+ 	const x64Variant = host.arch === "x64" ? (host.avx2 ? "modern" : "baseline") : null;
+ 	const variantSuffix = x64Variant ? `-${x64Variant}` : "";
+ 	return {
+-		filename: `zero2ai_natives.${host.platform}-${host.arch}${variantSuffix}.node`,
++		filename: `pi_natives.${host.platform}-${host.arch}${variantSuffix}.node`,
+ 		x64Variant,
+ 	};
+ }
+diff --git a/scripts/install-tests/run-ci.sh b/scripts/install-tests/run-ci.sh
+--- a/scripts/install-tests/run-ci.sh
++++ b/scripts/install-tests/run-ci.sh
+@@ -57,7 +57,7 @@
+    local candidate_version
+    local candidates=()
+    shopt -s nullglob
+-   candidates=("$ROOT_DIR"/packages/natives/native/zero2ai_natives.*.node)
++   candidates=("$ROOT_DIR"/packages/natives/native/pi_natives.*.node)
+    shopt -u nullglob
+ 
+    if [ "${#candidates[@]}" -eq 0 ]; then
+@@ -189,7 +189,7 @@
+ 			'@zero2ai/wire': '$wire_tgz',
+ 			'@zero2ai/schema': '$omptype_tgz',
+ 			'@zero2ai/natives': '$natives_tgz',
+-			'@zero2ai/natives-$host_tag': '$natives_leaf_tgz',
++			'@oh-my-pi/pi-natives-$host_tag': '$natives_leaf_tgz',
+ 			'@zero2ai/ai': '$ai_tgz',
+ 			'@zero2ai/catalog': '$catalog_tgz',
+ 			'@zero2ai/mnemopi': '$mnemopi_tgz',
+@@ -207,7 +207,7 @@
+    # The platform leaf must arrive through the core's optionalDependencies +
+    # override, not as a direct dependency — assert it landed before smoking so a
+    # resolution regression is distinguishable from a runtime loader bug.
+-   leaf_dir="node_modules/@zero2ai/natives-$host_tag"
++   leaf_dir="node_modules/@oh-my-pi/pi-natives-$host_tag"
+    [ -d "$leaf_dir" ] || {
+       echo "Platform leaf package not installed: $leaf_dir"
+       exit 1
+diff --git a/scripts/macos-entitlements.plist b/scripts/macos-entitlements.plist
+--- a/scripts/macos-entitlements.plist
++++ b/scripts/macos-entitlements.plist
+@@ -10,7 +10,7 @@
+ 	    * allow-jit / allow-unsigned-executable-memory — JavaScriptCore JITs at
+ 	      runtime; the hardened runtime kills JIT (MAP_JIT) pages without these.
+ 	    * disable-library-validation — zero2ai extracts its native addon
+-	      (zero2ai_natives.<triple>.node) and other optional dylibs to a runtime cache
++	      (pi_natives.<triple>.node) and other optional dylibs to a runtime cache
+ 	      and dlopen()s them. Those dylibs do not share the main binary's Team ID,
+ 	      so without this entitlement the hardened runtime refuses to map them
+ 	      ("mapping process and mapped file have different Team IDs") and every
+diff --git a/scripts/setup-npm-trust.ts b/scripts/setup-npm-trust.ts
+--- a/scripts/setup-npm-trust.ts
++++ b/scripts/setup-npm-trust.ts
+@@ -169,7 +169,7 @@
+ 		// own published package and needs its own trusted-publisher link.
+ 		if (pkg.kind === "native") {
+ 			for (const target of LEAF_TARGETS) {
+-				const leaf = `@zero2ai/natives-${target.tag}`;
++				const leaf = `@oh-my-pi/pi-natives-${target.tag}`;
+ 				if (!seen.has(leaf)) {
+ 					seen.add(leaf);
+ 					names.push(leaf);
+@@ -236,7 +236,7 @@
+ }
+ 
+ function nativeLeafName(tag: string): string {
+-	return `@zero2ai/natives-${tag}`;
++	return `@oh-my-pi/pi-natives-${tag}`;
+ }
+ 
+ function nativeLeafTargetForPackage(name: string): NativeLeafTarget | null {

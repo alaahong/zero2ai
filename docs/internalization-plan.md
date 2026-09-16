@@ -441,6 +441,27 @@ zero2ai --config /etc/corp/zero2ai/baseline.yml \
 
 ---
 
+## 15. ESDLC 工作区（行内研发流程）
+
+**定位**：在 agent 之上提供"从需求到发布"的可追溯工作区：每次阶段运行都留痕（状态 + 产物），供评审与审计复核。
+
+| 阶段 | 做什么 | 产物（项目内 `<project>/.zero2ai/esdlc/<phase>/`） |
+|---|---|---|
+| requirements | 收讨论材料：录音经 ASR 转写，或直接给文本记录/笔记 | `transcript.md` / `notes.md` |
+| analysis | 大模型生成业务需求书与功能规格书 | `BRD.md`、`FSD.md` |
+| build | 以提示词驱动 agent 在仓库内实现，并抓取改动快照 | `agent-output.md`、`BUILD-NOTES.md`、`changed-files.txt`、`changes.patch` |
+| test | 跑项目测试命令，自动判定并归纳质量 | `report.md`（结论 + 原始输出） |
+| deploy | 依据仓库事实生成部署文档 | `DEPLOY.md` |
+| release | 生成项目级发布文档 | `RELEASE-NOTES.md` |
+
+**已实现（本轮）**：阶段引擎与状态机（`.zero2ai/esdlc/state.json`，失败阶段不破坏其他阶段记录）、六阶段实现、`zero2ai esdlc [status|run <phase>]` 命令、提示词全部落在 `src/esdlc/prompts/*.md`（Handlebars 模板，仓库规则）、ASR 复用内置 STT 管线（PCM WAV 直接解码，其他容器经 ffmpeg 转 16k 单声道）、7 项契约测试通过。
+
+**复用而非新造**：模型解析走 `resolvePrimaryModel`，一次性生成走 `completeSimple`，改动快照走 `@zero2ai/natives/vcs`（`diffText`/`changedFiles`），音频走既有 `sttClient`。
+
+**待做**：① 交互式 TUI 屏幕（banner + 阶段列表 + 快捷键触发/查看，复用 `packages/tui` 组件与被测过的状态渲染）；② 把本轮改动纳入基线补丁序列；③ `build` 阶段目前以 `-p` 子进程驱动 agent，后续可改为进程内 SDK 调用以省一次冷启动。
+
+---
+
 ## 附录 A：本方案依据的关键证据索引
 
 | 结论 | 位置 |

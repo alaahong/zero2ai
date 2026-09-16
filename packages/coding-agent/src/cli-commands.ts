@@ -115,6 +115,11 @@ export const commands: CommandEntry[] = [
 		help: commandHelp.grepHelp,
 	},
 	{
+		name: "esdlc",
+		load: () => import("./commands/esdlc").then(m => m.default),
+		help: commandHelp.esdlcHelp,
+	},
+	{
 		name: "gallery",
 		load: () => import("./commands/gallery").then(m => m.default),
 		help: commandHelp.galleryHelp,

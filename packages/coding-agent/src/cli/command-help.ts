@@ -50,6 +50,10 @@ export const dryBalanceHelp = {
 	description: "Dry-run OAuth account balancing across random session ids",
 } satisfies CommandMetadata;
 
+export const esdlcHelp = {
+	description: "Engineering lifecycle workspace: requirements (ASR) -> BRD/FSD -> build -> test -> deploy -> release",
+} satisfies CommandMetadata;
+
 export const galleryHelp = {
 	description: "Preview tool, composer, and status-line renderers in a deterministic visual gallery",
 } satisfies CommandMetadata;
