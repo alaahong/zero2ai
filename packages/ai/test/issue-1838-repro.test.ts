@@ -19,7 +19,7 @@
  *   > the entire reasoning content from the context.
  *
  * Without `keep: "all"` the Moonshot backend silently drops every prior turn's
- * `reasoning_content` even though omp already sends it on the wire (the Kimi
+ * `reasoning_content` even though zero2ai already sends it on the wire (the Kimi
  * compat path sets `requiresReasoningContentForToolCalls`). K2.6 then has to
  * re-derive its full chain-of-thought from the user prompt on every iteration
  * of an agent loop, which the reporter sees as the agent "stops in between
@@ -33,10 +33,10 @@
  * own native format and would reject the extra key.
  */
 import { describe, expect, it } from "bun:test";
-import { streamOpenAICompletions } from "@oh-my-pi/pi-ai/providers/openai-completions";
-import type { AssistantMessage, Context, FetchImpl, Model, ModelSpec } from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
+import { streamOpenAICompletions } from "@zero2ai/ai/providers/openai-completions";
+import type { AssistantMessage, Context, FetchImpl, Model, ModelSpec } from "@zero2ai/ai/types";
+import { buildModel } from "@zero2ai/catalog/build";
+import { getBundledModel } from "@zero2ai/catalog/models";
 
 function abortedSignal(): AbortSignal {
 	const controller = new AbortController();

@@ -4,10 +4,10 @@ import {
 	processInteractionUpdate,
 	type ToolCallState,
 	type UsageState,
-} from "@oh-my-pi/pi-ai/providers/cursor";
-import type { AssistantMessage, CursorTodoSnapshot, ToolResultMessage } from "@oh-my-pi/pi-ai/types";
-import { kCursorExecResolved } from "@oh-my-pi/pi-ai/utils/block-symbols";
-import { AssistantMessageEventStream } from "@oh-my-pi/pi-ai/utils/event-stream";
+} from "@zero2ai/ai/providers/cursor";
+import type { AssistantMessage, CursorTodoSnapshot, ToolResultMessage } from "@zero2ai/ai/types";
+import { kCursorExecResolved } from "@zero2ai/ai/utils/block-symbols";
+import { AssistantMessageEventStream } from "@zero2ai/ai/utils/event-stream";
 import {
 	AgentServerMessageSchema,
 	InteractionUpdateSchema,
@@ -28,8 +28,8 @@ import {
 	UpdateTodosResultSchema,
 	UpdateTodosSuccessSchema,
 	UpdateTodosToolCallSchema,
-} from "@oh-my-pi/pi-catalog/discovery/cursor-proto";
-import { create, fromBinary, toBinary } from "@oh-my-pi/pi-catalog/discovery/protobuf";
+} from "@zero2ai/catalog/discovery/cursor-proto";
+import { create, fromBinary, toBinary } from "@zero2ai/catalog/discovery/protobuf";
 
 /** One `todoSync` invocation, recorded verbatim. */
 interface SyncCall {
@@ -922,7 +922,7 @@ describe("cursor native todo bridge (wire-encoded protobuf)", () => {
 							name: "fixture_report",
 							toolName: "mcp__fixture_report",
 							toolCallId: "call-mcp-wire",
-							providerIdentifier: "pi-agent",
+							providerIdentifier: "zero2ai-agent",
 							args,
 						}),
 					}),

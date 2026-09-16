@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "oh-my-pi extension example: block rm -rf / via tool_call hook",
   "homepage": "https://omp.sh",
-  "omp": {
+  "zero2ai": {
     "extensions": ["./index.ts"]
   }
 }

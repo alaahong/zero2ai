@@ -3,19 +3,19 @@ import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
 import * as url from "node:url";
-import { removeWithRetries } from "@oh-my-pi/pi-utils";
+import { removeWithRetries } from "@zero2ai/utils";
 
 const CLI_ENTRY = path.join(import.meta.dir, "..", "src", "cli.ts");
 const FIXTURE_PATH = path.join(import.meta.dir, "fixtures", "resources-no-templates-mcp.ts");
 
-describe("omp read MCP resources", () => {
+describe("zero2ai read MCP resources", () => {
 	let root: string;
 	let projectDir: string;
 	let agentDir: string;
 	let probePath: string;
 
 	beforeEach(async () => {
-		root = await fs.mkdtemp(path.join(os.tmpdir(), "omp-read-mcp-"));
+		root = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-read-mcp-"));
 		projectDir = path.join(root, "project");
 		agentDir = path.join(root, "agent");
 		await Promise.all([fs.mkdir(projectDir), fs.mkdir(agentDir)]);
@@ -57,7 +57,7 @@ describe("omp read MCP resources", () => {
 				...process.env,
 				HOME: root,
 				NO_COLOR: "1",
-				PI_CODING_AGENT_DIR: agentDir,
+				ZERO2AI_CODING_AGENT_DIR: agentDir,
 			},
 		});
 		const stdout = new Response(proc.stdout).text();

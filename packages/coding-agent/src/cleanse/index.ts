@@ -1,4 +1,4 @@
-import { getProjectDir } from "@oh-my-pi/pi-utils";
+import { getProjectDir } from "@zero2ai/utils";
 import { pickCleanseTarget, promptCleanseRequest } from "../cli/cleanse-picker";
 import { shortenPath } from "../tools/render-utils";
 import { type CleanseAgentHooks, type CleanseAgentRuntime, createCleanseAgentRuntime } from "./agent";
@@ -17,7 +17,7 @@ import type { CleanseCommandResult, CleanseDiagnosticReport, CleanseLoopResult, 
 const DEFAULT_MODEL = "@smol";
 const DISPLAY_FILE_LIMIT = 50;
 
-/** User-facing options for `omp cleanse`. */
+/** User-facing options for `zero2ai cleanse`. */
 export interface CleanseCommandOptions {
 	maxAgents?: number;
 	model?: string;

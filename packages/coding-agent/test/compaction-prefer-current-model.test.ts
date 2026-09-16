@@ -1,16 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as path from "node:path";
-import { Agent } from "@oh-my-pi/pi-agent-core";
-import * as compactionModule from "@oh-my-pi/pi-agent-core/compaction";
-import * as AIError from "@oh-my-pi/pi-ai/error";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { Agent } from "@zero2ai/agent-core";
+import * as compactionModule from "@zero2ai/agent-core/compaction";
+import * as AIError from "@zero2ai/ai/error";
+import { buildModel } from "@zero2ai/catalog/build";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { TempDir } from "@zero2ai/utils";
 import { assistantMsg, userMsg } from "./utilities";
 
 /**
@@ -27,7 +27,7 @@ describe("compaction prefers the current session model over modelRoles.default",
 	let modelRegistry: ModelRegistry;
 
 	beforeEach(() => {
-		tempDir = TempDir.createSync("@pi-compact-current-");
+		tempDir = TempDir.createSync("@zero2ai-compact-current-");
 	});
 
 	afterEach(async () => {

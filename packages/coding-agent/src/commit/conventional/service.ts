@@ -1,8 +1,8 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import type { VcsNumstatEntry } from "@oh-my-pi/pi-natives";
-import * as vcs from "@oh-my-pi/pi-natives/vcs";
-import { getCommitCacheDbPath } from "@oh-my-pi/pi-utils";
+import type { VcsNumstatEntry } from "@zero2ai/natives";
+import * as vcs from "@zero2ai/natives/vcs";
+import { getCommitCacheDbPath } from "@zero2ai/utils";
 import { ModelRegistry } from "../../config/model-registry";
 import { Settings } from "../../config/settings";
 import { discoverAuthStorage, loadCliExtensionProviders } from "../../sdk";
@@ -16,7 +16,7 @@ import {
 	type CommitInferenceRequest,
 	type CommitInferenceResponse,
 	type CommitProgress,
-	OmpCommitInference,
+	Zero2AiCommitInference,
 } from "./inference";
 import { detectRepositoryContext, formatRepositoryContext } from "./repo-context";
 
@@ -100,7 +100,7 @@ async function createOmpInference(
 	options: GenerateGitCommitOptions,
 	settings: Settings,
 	config: ConventionalGenerationConfig,
-): Promise<OmpCommitInference> {
+): Promise<Zero2AiCommitInference> {
 	options.signal?.throwIfAborted();
 	const authStorage = await discoverAuthStorage();
 	try {
@@ -114,7 +114,7 @@ async function createOmpInference(
 		const cache = config.cacheEnabled
 			? await CommitInferenceCache.open(getCommitCacheDbPath(), config.cacheTtlDays)
 			: null;
-		return new OmpCommitInference({
+		return new Zero2AiCommitInference({
 			primary,
 			smol,
 			forcePrimaryForEveryRole: options.modelOverride !== undefined,
@@ -177,10 +177,10 @@ async function projectNames(cwd: string): Promise<string[]> {
 }
 
 class LazyCommitInference implements CommitInference {
-	readonly #create: () => Promise<OmpCommitInference>;
-	#instance: Promise<OmpCommitInference> | undefined;
+	readonly #create: () => Promise<Zero2AiCommitInference>;
+	#instance: Promise<Zero2AiCommitInference> | undefined;
 
-	constructor(create: () => Promise<OmpCommitInference>) {
+	constructor(create: () => Promise<Zero2AiCommitInference>) {
 		this.#create = create;
 	}
 

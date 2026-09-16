@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import * as path from "node:path";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { TempDir } from "@zero2ai/utils";
 
 interface ProbeResult {
 	retainedHeapNodes: number;

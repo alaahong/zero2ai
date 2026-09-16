@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import * as path from "node:path";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { TempDir } from "@zero2ai/utils";
 
 const UUID_V7_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 
@@ -44,7 +44,7 @@ describe("SessionManager session ids", () => {
 	});
 
 	it("generates a UUIDv7 when forking a persisted session", async () => {
-		using tempDir = TempDir.createSync("@pi-session-id-fork-");
+		using tempDir = TempDir.createSync("@zero2ai-session-id-fork-");
 		const session = SessionManager.create(tempDir.path(), tempDir.path());
 		session.appendMessage({ role: "user", content: "hello", timestamp: 1 });
 		await session.flush();
@@ -59,7 +59,7 @@ describe("SessionManager session ids", () => {
 	});
 
 	it("preserves existing session ids when reopening a saved session", async () => {
-		using tempDir = TempDir.createSync("@pi-session-id-open-");
+		using tempDir = TempDir.createSync("@zero2ai-session-id-open-");
 		const sessionFile = path.join(tempDir.path(), "existing.jsonl");
 		const existingId = "existing-session-id";
 		await Bun.write(

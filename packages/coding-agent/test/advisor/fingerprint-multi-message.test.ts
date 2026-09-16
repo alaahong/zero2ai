@@ -1,6 +1,6 @@
 // PoC: evaluate which candidate fix prevents advisor full-transcript replays.
 // Scenarios reproduce the production triggers observed in the live session
-// (omp 17.2.2, omp-cop-sticky / gpt-5.6-terra):
+// (zero2ai 17.2.2, zero2ai-cop-sticky / gpt-5.6-terra):
 //   A. delivered message replaced by a clone differing only in unrendered
 //      fields (timestamp/usage)  -> full-JSON fingerprint mismatch
 //   B. delivered message content rewritten to a `[shaken ...]` placeholder
@@ -14,7 +14,7 @@
 // mutated by scenarios A/B/F, so its presence proves the whole history was
 // re-rendered (full replay); absence means only the new tail shipped.
 import { describe, expect, it } from "bun:test";
-import type { AgentMessage } from "@oh-my-pi/pi-agent-core";
+import type { AgentMessage } from "@zero2ai/agent-core";
 
 import { type AdvisorAgent, AdvisorRuntime, type AdvisorRuntimeHost } from "../../src/advisor/runtime";
 

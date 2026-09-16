@@ -50,7 +50,7 @@ describe("generated native npm leaf packages", () => {
 	});
 
 	it("generates every leaf package by copying present addon files", async () => {
-		const packageDir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-natives-npm-"));
+		const packageDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-natives-npm-"));
 		try {
 			await fs.mkdir(path.join(packageDir, "native"));
 			await Bun.write(path.join(packageDir, "package.json"), JSON.stringify({ version: "15.5.15" }));
@@ -99,7 +99,7 @@ describe("generated native npm leaf packages", () => {
 	});
 
 	it("uses the repository notice when direct generation has only package-local licenses", async () => {
-		const root = await fs.mkdtemp(path.join(os.tmpdir(), "pi-natives-npm-notice-"));
+		const root = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-natives-npm-notice-"));
 		const packageDir = path.join(root, "packages/natives");
 		try {
 			await fs.mkdir(path.join(packageDir, "native"), { recursive: true });
@@ -120,7 +120,7 @@ describe("generated native npm leaf packages", () => {
 	});
 
 	it("reports missing leaves during dry runs without writing generated packages", async () => {
-		const packageDir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-natives-npm-dry-"));
+		const packageDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-natives-npm-dry-"));
 		const logSpy = spyOn(console, "log").mockImplementation(() => {});
 		try {
 			await fs.mkdir(path.join(packageDir, "native"));

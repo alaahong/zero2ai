@@ -31,16 +31,16 @@
  * that also import the module-level `settings` need the global initialized.
  */
 import { vi } from "bun:test";
-import { isSettingsInitialized, Settings, settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { MCPManager } from "@oh-my-pi/pi-coding-agent/mcp/manager";
-import type { MCPServerConnection } from "@oh-my-pi/pi-coding-agent/mcp/types";
-import { ServedModelTracker } from "@oh-my-pi/pi-coding-agent/modes/components/served-model-marker";
-import { TranscriptContainer } from "@oh-my-pi/pi-coding-agent/modes/components/transcript-container";
-import { OAuthManualInputManager } from "@oh-my-pi/pi-coding-agent/modes/oauth-manual-input";
-import type { InteractiveModeContext } from "@oh-my-pi/pi-coding-agent/modes/types";
-import type { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { type Component, Container } from "@oh-my-pi/pi-tui";
+import { isSettingsInitialized, Settings, settings } from "@zero2ai/coding-agent/config/settings";
+import type { MCPManager } from "@zero2ai/coding-agent/mcp/manager";
+import type { MCPServerConnection } from "@zero2ai/coding-agent/mcp/types";
+import { ServedModelTracker } from "@zero2ai/coding-agent/modes/components/served-model-marker";
+import { TranscriptContainer } from "@zero2ai/coding-agent/modes/components/transcript-container";
+import { OAuthManualInputManager } from "@zero2ai/coding-agent/modes/oauth-manual-input";
+import type { InteractiveModeContext } from "@zero2ai/coding-agent/modes/types";
+import type { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { type Component, Container } from "@zero2ai/tui";
 
 type AnyFn = (...args: never[]) => unknown;
 

@@ -5,8 +5,8 @@
  * (issue #6177). Non-error stops must not emit it.
  */
 import { afterAll, afterEach, describe, expect, it } from "bun:test";
-import type { AssistantMessage } from "@oh-my-pi/pi-ai";
-import { logger } from "@oh-my-pi/pi-utils";
+import type { AssistantMessage } from "@zero2ai/ai";
+import { logger } from "@zero2ai/utils";
 import { logProviderTurnError } from "../../src/session/messages";
 
 function makeMessage(overrides: Partial<AssistantMessage>): AssistantMessage {

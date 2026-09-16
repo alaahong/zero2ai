@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
-import { ProcessTerminal } from "@oh-my-pi/pi-tui/terminal";
-import { setTerminalHeadless } from "@oh-my-pi/pi-utils";
+import { ProcessTerminal } from "@zero2ai/tui/terminal";
+import { setTerminalHeadless } from "@zero2ai/utils";
 
 // Regression for https://github.com/can1357/oh-my-pi/issues/10430
 //

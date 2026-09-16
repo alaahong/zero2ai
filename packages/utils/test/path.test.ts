@@ -3,16 +3,16 @@ import { isFullyQualifiedPath, stripWindowsExtendedLengthPathPrefix, windowsPath
 
 describe("stripWindowsExtendedLengthPathPrefix", () => {
 	it("removes drive and UNC extended-length prefixes on Windows", () => {
-		expect(stripWindowsExtendedLengthPathPrefix("\\\\?\\C:\\Users\\Shi Xin\\omp.exe", "win32")).toBe(
-			"C:\\Users\\Shi Xin\\omp.exe",
+		expect(stripWindowsExtendedLengthPathPrefix("\\\\?\\C:\\Users\\Shi Xin\\zero2ai.exe", "win32")).toBe(
+			"C:\\Users\\Shi Xin\\zero2ai.exe",
 		);
-		expect(stripWindowsExtendedLengthPathPrefix("\\\\?\\UNC\\server\\share\\omp.exe", "win32")).toBe(
-			"\\\\server\\share\\omp.exe",
+		expect(stripWindowsExtendedLengthPathPrefix("\\\\?\\UNC\\server\\share\\zero2ai.exe", "win32")).toBe(
+			"\\\\server\\share\\zero2ai.exe",
 		);
 	});
 
 	it("leaves non-Windows paths unchanged", () => {
-		const path = "\\\\?\\C:\\Users\\Shi Xin\\omp.exe";
+		const path = "\\\\?\\C:\\Users\\Shi Xin\\zero2ai.exe";
 		expect(stripWindowsExtendedLengthPathPrefix(path, "linux")).toBe(path);
 	});
 });
@@ -29,22 +29,22 @@ describe("windowsPathToWslMount", () => {
 
 describe("isFullyQualifiedPath", () => {
 	it("identifies fully qualified Windows paths across platforms", () => {
-		expect(isFullyQualifiedPath("C:\\omp\\bin\\omp.exe", "win32")).toBe(true);
-		expect(isFullyQualifiedPath("c:/omp/bin/omp.exe", "win32")).toBe(true);
-		expect(isFullyQualifiedPath("\\\\server\\share\\omp.exe", "win32")).toBe(true);
-		expect(isFullyQualifiedPath("//server/share/omp.exe", "win32")).toBe(true);
-		expect(isFullyQualifiedPath("C:omp", "win32")).toBe(false);
-		expect(isFullyQualifiedPath(".\\omp", "win32")).toBe(false);
-		expect(isFullyQualifiedPath("\\bin\\omp", "win32")).toBe(false);
-		expect(isFullyQualifiedPath("/bin/omp", "win32")).toBe(false);
+		expect(isFullyQualifiedPath("C:\\zero2ai\\bin\\zero2ai.exe", "win32")).toBe(true);
+		expect(isFullyQualifiedPath("c:/zero2ai/bin/zero2ai.exe", "win32")).toBe(true);
+		expect(isFullyQualifiedPath("\\\\server\\share\\zero2ai.exe", "win32")).toBe(true);
+		expect(isFullyQualifiedPath("//server/share/zero2ai.exe", "win32")).toBe(true);
+		expect(isFullyQualifiedPath("C:zero2ai", "win32")).toBe(false);
+		expect(isFullyQualifiedPath(".\\zero2ai", "win32")).toBe(false);
+		expect(isFullyQualifiedPath("\\bin\\zero2ai", "win32")).toBe(false);
+		expect(isFullyQualifiedPath("/bin/zero2ai", "win32")).toBe(false);
 		expect(isFullyQualifiedPath("//", "win32")).toBe(false);
 		expect(isFullyQualifiedPath("\\\\", "win32")).toBe(false);
 	});
 
 	it("identifies absolute POSIX paths", () => {
-		expect(isFullyQualifiedPath("/usr/local/bin/omp", "darwin")).toBe(true);
-		expect(isFullyQualifiedPath("/usr/local/bin/omp", "linux")).toBe(true);
-		expect(isFullyQualifiedPath("./omp", "darwin")).toBe(false);
-		expect(isFullyQualifiedPath("omp", "linux")).toBe(false);
+		expect(isFullyQualifiedPath("/usr/local/bin/zero2ai", "darwin")).toBe(true);
+		expect(isFullyQualifiedPath("/usr/local/bin/zero2ai", "linux")).toBe(true);
+		expect(isFullyQualifiedPath("./zero2ai", "darwin")).toBe(false);
+		expect(isFullyQualifiedPath("zero2ai", "linux")).toBe(false);
 	});
 });

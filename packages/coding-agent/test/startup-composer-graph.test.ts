@@ -30,7 +30,7 @@ describe("startup composer prepaint graph", () => {
 		expect(modules.some(module => module.includes("modes/components/welcome"))).toBe(true);
 		expectGraphExcludes(modules, [
 			/config\/settings/,
-			/pi-catalog/,
+			/zero2ai-catalog/,
 			/provider-models/,
 			/session\/agent-session/,
 			/session\/session-listing/,
@@ -47,7 +47,7 @@ describe("startup composer prepaint graph", () => {
 			/modes\/interactive-mode/,
 			/node:inspector/,
 			/node:worker_threads/,
-			/omptype/,
+			/schema/,
 		]);
 	});
 
@@ -70,7 +70,7 @@ describe("startup composer prepaint graph", () => {
 			/node:inspector/,
 			/node:readline/,
 			/node:worker_threads/,
-			/omptype/,
+			/schema/,
 		]);
 	});
 });

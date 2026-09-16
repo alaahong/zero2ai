@@ -6,14 +6,14 @@
  * one.
  */
 import { afterEach, describe, expect, it, vi } from "bun:test";
-import { streamAnthropic } from "@oh-my-pi/pi-ai/providers/anthropic";
-import { AnthropicMessages } from "@oh-my-pi/pi-ai/providers/anthropic-client";
+import { streamAnthropic } from "@zero2ai/ai/providers/anthropic";
+import { AnthropicMessages } from "@zero2ai/ai/providers/anthropic-client";
 import {
 	servedModelFromAnthropicSignature,
 	servedModelFromOpenRouterReasoning,
-} from "@oh-my-pi/pi-ai/providers/anthropic-signature";
-import type { Context, Model } from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
+} from "@zero2ai/ai/providers/anthropic-signature";
+import type { Context, Model } from "@zero2ai/ai/types";
+import { buildModel } from "@zero2ai/catalog/build";
 
 // Captured from OpenRouter → "Claude Platform on AWS" for anthropic/claude-opus-5 (2026-09-15).
 const OPUS_5_SIGNATURE =

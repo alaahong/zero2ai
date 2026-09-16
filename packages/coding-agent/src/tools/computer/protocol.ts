@@ -1,5 +1,5 @@
-import type { ImageContent, TextContent } from "@oh-my-pi/pi-ai";
-import type { DesktopCapabilities } from "@oh-my-pi/pi-natives";
+import type { ImageContent, TextContent } from "@zero2ai/ai";
+import type { DesktopCapabilities } from "@zero2ai/natives";
 
 export { COMPUTER_WORKER_ARG } from "../../cli/worker-selectors";
 

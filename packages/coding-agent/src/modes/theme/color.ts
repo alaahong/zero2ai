@@ -1,4 +1,4 @@
-import { detectTerminalId, getTerminalInfo } from "@oh-my-pi/pi-tui/terminal-capabilities";
+import { detectTerminalId, getTerminalInfo } from "@zero2ai/tui/terminal-capabilities";
 import type { ColorMode, ColorValue } from "./schema";
 
 // ============================================================================

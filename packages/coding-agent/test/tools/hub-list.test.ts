@@ -1,26 +1,26 @@
 import { afterEach, beforeEach, describe, expect, it, spyOn } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AgentProtocolHandler } from "@oh-my-pi/pi-coding-agent/internal-urls/agent-protocol";
-import { HistoryProtocolHandler } from "@oh-my-pi/pi-coding-agent/internal-urls/history-protocol";
-import { parseInternalUrl } from "@oh-my-pi/pi-coding-agent/internal-urls/parse";
-import { IrcBus } from "@oh-my-pi/pi-coding-agent/irc/bus";
-import { AgentLifecycleManager } from "@oh-my-pi/pi-coding-agent/registry/agent-lifecycle";
-import { AgentRegistry, getAgentTombstonePath, MAIN_AGENT_ID } from "@oh-my-pi/pi-coding-agent/registry/agent-registry";
-import { ensurePersistedRoster, registerPersistedSubagents } from "@oh-my-pi/pi-coding-agent/registry/persisted-agents";
-import type { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { CURRENT_SESSION_VERSION } from "@oh-my-pi/pi-coding-agent/session/session-entries";
-import { collectIrcPeerRoster } from "@oh-my-pi/pi-coding-agent/task/executor";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { HubTool } from "@oh-my-pi/pi-coding-agent/tools/hub";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { AgentProtocolHandler } from "@zero2ai/coding-agent/internal-urls/agent-protocol";
+import { HistoryProtocolHandler } from "@zero2ai/coding-agent/internal-urls/history-protocol";
+import { parseInternalUrl } from "@zero2ai/coding-agent/internal-urls/parse";
+import { IrcBus } from "@zero2ai/coding-agent/irc/bus";
+import { AgentLifecycleManager } from "@zero2ai/coding-agent/registry/agent-lifecycle";
+import { AgentRegistry, getAgentTombstonePath, MAIN_AGENT_ID } from "@zero2ai/coding-agent/registry/agent-registry";
+import { ensurePersistedRoster, registerPersistedSubagents } from "@zero2ai/coding-agent/registry/persisted-agents";
+import type { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { CURRENT_SESSION_VERSION } from "@zero2ai/coding-agent/session/session-entries";
+import { collectIrcPeerRoster } from "@zero2ai/coding-agent/task/executor";
+import type { ToolSession } from "@zero2ai/coding-agent/tools";
+import { HubTool } from "@zero2ai/coding-agent/tools/hub";
 import {
 	DEFAULT_HUB_LIST_LIMIT,
 	executeList,
 	executeSend,
 	MAX_HUB_LIST_LIMIT,
-} from "@oh-my-pi/pi-coding-agent/tools/hub/messaging";
-import { prompt, TempDir } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/tools/hub/messaging";
+import { prompt, TempDir } from "@zero2ai/utils";
 
 function sessionHeader(id: string): string {
 	return JSON.stringify({
@@ -329,7 +329,7 @@ describe("hub list", () => {
 	});
 
 	it("retries persisted roster scan after a transient readdir failure", async () => {
-		using tempDir = TempDir.createSync("@omp-hub-list-readdir-retry-");
+		using tempDir = TempDir.createSync("@zero2ai-hub-list-readdir-retry-");
 		const dir = tempDir.path();
 		const sessionFile = path.join(dir, "main.jsonl");
 		await Bun.write(sessionFile, `${sessionHeader("main")}\n`);
@@ -390,7 +390,7 @@ describe("hub list", () => {
 	});
 
 	it("retries persisted roster scan after a root transcript read failure", async () => {
-		using tempDir = TempDir.createSync("@omp-hub-list-vibe-read-retry-");
+		using tempDir = TempDir.createSync("@zero2ai-hub-list-vibe-read-retry-");
 		const dir = tempDir.path();
 		const sessionFile = path.join(dir, "main.jsonl");
 		const transcriptFile = path.join(dir, "main", "ParkedScout.jsonl");
@@ -437,7 +437,7 @@ describe("hub list", () => {
 	});
 
 	it("retries persisted roster scan after a tombstone access failure", async () => {
-		using tempDir = TempDir.createSync("@omp-hub-list-tombstone-retry-");
+		using tempDir = TempDir.createSync("@zero2ai-hub-list-tombstone-retry-");
 		const dir = tempDir.path();
 		const sessionFile = path.join(dir, "main.jsonl");
 		const transcriptFile = path.join(dir, "main", "ParkedScout.jsonl");
@@ -490,7 +490,7 @@ describe("hub list", () => {
 
 	it("drops the latch and re-reads after a transient metadata read failure", async () => {
 		for (const code of ["EMFILE", "EACCES"] as const) {
-			using tempDir = TempDir.createSync(`@omp-hub-list-metadata-${code}-`);
+			using tempDir = TempDir.createSync(`@zero2ai-hub-list-metadata-${code}-`);
 			const dir = tempDir.path();
 			const sessionFile = path.join(dir, "main.jsonl");
 			await Bun.write(sessionFile, `${sessionHeader("main")}\n`);
@@ -555,7 +555,7 @@ describe("hub list", () => {
 	});
 
 	it("tolerates a transcript vanishing between readdir and its metadata read", async () => {
-		using tempDir = TempDir.createSync("@omp-hub-list-metadata-enoent-race-");
+		using tempDir = TempDir.createSync("@zero2ai-hub-list-metadata-enoent-race-");
 		const dir = tempDir.path();
 		const sessionFile = path.join(dir, "main.jsonl");
 		const transcriptFile = path.join(dir, "main", "ParkedScout.jsonl");
@@ -613,7 +613,7 @@ describe("hub list", () => {
 	});
 
 	it("tolerates a malformed transcript prefix and registers what it can parse", async () => {
-		using tempDir = TempDir.createSync("@omp-hub-list-malformed-");
+		using tempDir = TempDir.createSync("@zero2ai-hub-list-malformed-");
 		const dir = tempDir.path();
 		const sessionFile = path.join(dir, "main.jsonl");
 		const transcriptFile = path.join(dir, "main", "ParkedScout.jsonl");
@@ -654,7 +654,7 @@ describe("hub list", () => {
 	});
 
 	it("latches an empty persisted roster when the optional subagent directory is missing", async () => {
-		using tempDir = TempDir.createSync("@omp-hub-list-enoent-latch-");
+		using tempDir = TempDir.createSync("@zero2ai-hub-list-enoent-latch-");
 		const dir = tempDir.path();
 		const sessionFile = path.join(dir, "main.jsonl");
 		await Bun.write(sessionFile, `${sessionHeader("main")}\n`);
@@ -704,7 +704,7 @@ describe("hub list", () => {
 	});
 
 	it("restores persisted peers after the process registry is lost without leaking them into the default view", async () => {
-		using tempDir = TempDir.createSync("@omp-hub-list-persisted-");
+		using tempDir = TempDir.createSync("@zero2ai-hub-list-persisted-");
 		const sessionFile = path.join(tempDir.path(), "main.jsonl");
 		const workerSessionFile = path.join(tempDir.path(), "main", "Worker.jsonl");
 		await Bun.write(sessionFile, `${sessionHeader("main")}\n`);
@@ -764,7 +764,7 @@ describe("hub list", () => {
 	});
 
 	it("counts a disk-only parked sibling when a live sibling is already in memory", async () => {
-		using tempDir = TempDir.createSync("@omp-hub-list-live-disk-");
+		using tempDir = TempDir.createSync("@zero2ai-hub-list-live-disk-");
 		const dir = tempDir.path();
 		const sessionFile = path.join(dir, "main.jsonl");
 		const liveSessionFile = path.join(dir, "main", "LiveWorker.jsonl");
@@ -810,7 +810,7 @@ describe("hub list", () => {
 		expect(fromChild.details.peers?.map(peer => peer.id)).not.toContain("ParkedScout");
 	});
 	it("rescans and scopes parked peers when one registry switches root sessions", async () => {
-		using tempDir = TempDir.createSync("@omp-hub-list-session-switch-");
+		using tempDir = TempDir.createSync("@zero2ai-hub-list-session-switch-");
 		const firstSession = path.join(tempDir.path(), "first.jsonl");
 		const secondSession = path.join(tempDir.path(), "second.jsonl");
 		await Bun.write(firstSession, `${sessionHeader("first")}\n`);
@@ -858,7 +858,7 @@ describe("hub list", () => {
 	});
 
 	it("climbs more than nine nested session levels to count a parked top-level sibling", async () => {
-		using tempDir = TempDir.createSync("@omp-hub-list-deep-nest-");
+		using tempDir = TempDir.createSync("@zero2ai-hub-list-deep-nest-");
 		const dir = tempDir.path();
 		const sessionFile = path.join(dir, "main.jsonl");
 		await Bun.write(sessionFile, `${sessionHeader("main")}\n`);
@@ -971,7 +971,7 @@ describe("hub list", () => {
 
 describe("hub list session authority", () => {
 	it("uses HubTool getSessionFile when Main's registry ref still points at the old root", async () => {
-		using tempDir = TempDir.createSync("@omp-hub-stale-main-");
+		using tempDir = TempDir.createSync("@zero2ai-hub-stale-main-");
 		const firstSession = path.join(tempDir.path(), "first.jsonl");
 		const secondSession = path.join(tempDir.path(), "second.jsonl");
 		await Bun.write(firstSession, `${sessionHeader("first")}\n`);
@@ -1001,7 +1001,7 @@ describe("hub list session authority", () => {
 		AgentLifecycleManager.resetGlobalForTests();
 		IrcBus.resetGlobalForTests();
 		try {
-			using tempDir = TempDir.createSync("@omp-hub-replace-current-");
+			using tempDir = TempDir.createSync("@zero2ai-hub-replace-current-");
 			const firstSession = path.join(tempDir.path(), "first.jsonl");
 			const secondSession = path.join(tempDir.path(), "second.jsonl");
 			const oldWorker = path.join(tempDir.path(), "first", "Worker.jsonl");
@@ -1110,7 +1110,7 @@ describe("hub list session authority", () => {
 	});
 
 	it("preserves live, aborted, advisor, vibe-owned, and nested same-root collisions", async () => {
-		using tempDir = TempDir.createSync("@omp-hub-preserve-collisions-");
+		using tempDir = TempDir.createSync("@zero2ai-hub-preserve-collisions-");
 		const dir = tempDir.path();
 		const currentSession = path.join(dir, "current.jsonl");
 		const oldLive = path.join(dir, "old", "LiveTwin.jsonl");
@@ -1215,7 +1215,7 @@ describe("hub list session authority", () => {
 	});
 
 	it("does not replace through an incomplete stub or a spawn that claims the id mid-scan", async () => {
-		using tempDir = TempDir.createSync("@omp-hub-no-replace-race-");
+		using tempDir = TempDir.createSync("@zero2ai-hub-no-replace-race-");
 		const dir = tempDir.path();
 		const currentSession = path.join(dir, "current.jsonl");
 		const oldIncomplete = path.join(dir, "old", "IncompleteTwin.jsonl");
@@ -1282,7 +1282,7 @@ describe("hub list session authority", () => {
 	});
 
 	it("keeps ensurePersistedRoster metadata-only and hydrates on a later explicit register", async () => {
-		using tempDir = TempDir.createSync("@omp-hub-hydrate-later-");
+		using tempDir = TempDir.createSync("@zero2ai-hub-hydrate-later-");
 		const dir = tempDir.path();
 		const sessionFile = path.join(dir, "main.jsonl");
 		const workerFile = path.join(dir, "main", "Worker.jsonl");
@@ -1400,7 +1400,7 @@ describe("child system prompt roster", () => {
 	});
 
 	it("counts a disk-only parked sibling from the root tree without naming it", async () => {
-		using tempDir = TempDir.createSync("@omp-hub-roster-live-disk-");
+		using tempDir = TempDir.createSync("@zero2ai-hub-roster-live-disk-");
 		const dir = tempDir.path();
 		const sessionFile = path.join(dir, "main.jsonl");
 		const liveSessionFile = path.join(dir, "main", "LiveWorker.jsonl");
@@ -1541,7 +1541,7 @@ describe("hub direct addressing refreshes the caller root without a prior list",
 	}
 
 	it("direct send, history://, and agent:// target the caller root's parked Worker without a prior list (A→B→A)", async () => {
-		using tempDir = TempDir.createSync("@omp-hub-direct-root-");
+		using tempDir = TempDir.createSync("@zero2ai-hub-direct-root-");
 		const dir = tempDir.path();
 		const rootA = path.join(dir, "a", "main.jsonl");
 		const rootB = path.join(dir, "b", "main.jsonl");
@@ -1671,7 +1671,7 @@ describe("hub direct addressing refreshes the caller root without a prior list",
 	}, 15_000);
 
 	it("keeps a live same-id Worker in place when the caller root refreshes", async () => {
-		using tempDir = TempDir.createSync("@omp-hub-direct-live-");
+		using tempDir = TempDir.createSync("@zero2ai-hub-direct-live-");
 		const dir = tempDir.path();
 		const rootA = path.join(dir, "a", "main.jsonl");
 		const childA = path.join(dir, "a", "main", "Worker.jsonl");
@@ -1728,7 +1728,7 @@ describe("hub direct addressing refreshes the caller root without a prior list",
 	});
 
 	it("stays graceful when the caller root or target id is unavailable", async () => {
-		using tempDir = TempDir.createSync("@omp-hub-direct-missing-");
+		using tempDir = TempDir.createSync("@zero2ai-hub-direct-missing-");
 		const dir = tempDir.path();
 		const rootB = path.join(dir, "b", "main.jsonl");
 		const childB = path.join(dir, "b", "main", "Worker.jsonl");

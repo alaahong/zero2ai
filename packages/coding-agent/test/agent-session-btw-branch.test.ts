@@ -2,18 +2,18 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { Agent } from "@oh-my-pi/pi-agent-core";
-import type { AssistantMessage } from "@oh-my-pi/pi-ai";
-import { createMockModel, type MockHandler } from "@oh-my-pi/pi-ai/providers/mock";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { loadAdvisorTranscriptCosts } from "@oh-my-pi/pi-coding-agent/advisor/transcript-recorder";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { ExtensionRunner } from "@oh-my-pi/pi-coding-agent/extensibility/extensions";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { Snowflake } from "@oh-my-pi/pi-utils";
+import { Agent } from "@zero2ai/agent-core";
+import type { AssistantMessage } from "@zero2ai/ai";
+import { createMockModel, type MockHandler } from "@zero2ai/ai/providers/mock";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { loadAdvisorTranscriptCosts } from "@zero2ai/coding-agent/advisor/transcript-recorder";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import type { ExtensionRunner } from "@zero2ai/coding-agent/extensibility/extensions";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { Snowflake } from "@zero2ai/utils";
 
 function createBtwAssistant(): AssistantMessage {
 	return {
@@ -60,7 +60,7 @@ describe("AgentSession.branchFromBtw", () => {
 	let authStorage: AuthStorage | undefined;
 
 	beforeEach(() => {
-		tempDir = path.join(os.tmpdir(), `pi-btw-branch-test-${Snowflake.next()}`);
+		tempDir = path.join(os.tmpdir(), `zero2ai-btw-branch-test-${Snowflake.next()}`);
 		fs.mkdirSync(tempDir, { recursive: true });
 	});
 

@@ -13,11 +13,11 @@
  * a 400 so the request short-circuits.
  */
 import { describe, expect, it } from "bun:test";
-import type { MessageCreateParams } from "@oh-my-pi/pi-ai/providers/anthropic-wire";
-import { streamAnthropic } from "@oh-my-pi/pi-ai/providers/anthropic";
-import type { AssistantMessage, CacheRetention, Context, Message, Model, ModelSpec } from "@oh-my-pi/pi-ai/types";
-import { markPerCallContextMessage } from "@oh-my-pi/pi-ai/utils/block-symbols";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
+import type { MessageCreateParams } from "@zero2ai/ai/providers/anthropic-wire";
+import { streamAnthropic } from "@zero2ai/ai/providers/anthropic";
+import type { AssistantMessage, CacheRetention, Context, Message, Model, ModelSpec } from "@zero2ai/ai/types";
+import { markPerCallContextMessage } from "@zero2ai/ai/utils/block-symbols";
+import { buildModel } from "@zero2ai/catalog/build";
 
 const MODEL_SPEC: ModelSpec<"anthropic-messages"> = {
 	id: "claude-sonnet-4-5",

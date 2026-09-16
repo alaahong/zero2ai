@@ -1,17 +1,17 @@
 /**
  * Contract for the `pi` brand segment's working transition (port of rust
- * omp's status-band brand fade): idle renders the omp icon in the dim color;
+ * zero2ai's status-band brand fade): idle renders the zero2ai icon in the dim color;
  * a turn start swaps the glyph to a spinner + turn timer whose foreground
  * fades dim → accent over 450ms (never an instant color swap), and a turn end
  * fades back from the color currently on screen. Regression: the first cut of
  * the working brand swapped colors instantly with no tween.
  */
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { StatusLineComponent } from "@oh-my-pi/pi-coding-agent/modes/components/status-line";
-import { initTheme, theme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import type { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { getSessionAccentAnsi } from "@oh-my-pi/pi-coding-agent/utils/session-color";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
+import { StatusLineComponent } from "@zero2ai/coding-agent/modes/components/status-line";
+import { initTheme, theme } from "@zero2ai/coding-agent/modes/theme/theme";
+import type { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { getSessionAccentAnsi } from "@zero2ai/coding-agent/utils/session-color";
 
 beforeAll(async () => {
 	resetSettingsForTest();
@@ -84,8 +84,8 @@ describe("status line brand fade", () => {
 		if (!dimAnsi || !accentAnsi) throw new Error("expected resolvable dim/accent theme colors");
 		const component = makeComponent();
 		try {
-			// Idle: omp icon settled in the dim color.
-			expect(component.renderBottomBar(80, "full")).toContain(`${dimAnsi}${theme.icon.omp}`);
+			// Idle: zero2ai icon settled in the dim color.
+			expect(component.renderBottomBar(80, "full")).toContain(`${dimAnsi}${theme.icon.zero2ai}`);
 
 			// Turn start: the glyph becomes a spinner + whole-second timer at
 			// once, but the color starts from the on-screen dim — no instant swap.
@@ -93,7 +93,7 @@ describe("status line brand fade", () => {
 			now += 10;
 			const early = component.renderBottomBar(80, "full");
 			expect(early).toContain(" 0s");
-			expect(early).not.toContain(theme.icon.omp);
+			expect(early).not.toContain(theme.icon.zero2ai);
 			expect(early).toContain(dimAnsi);
 			expect(early).not.toContain(accentAnsi);
 
@@ -130,7 +130,7 @@ describe("status line brand fade", () => {
 			component.markActivityEnd();
 			now += 10;
 			const ending = component.renderBottomBar(80, "full");
-			expect(ending).toContain(theme.icon.omp);
+			expect(ending).toContain(theme.icon.zero2ai);
 			expect(ending).toContain(accentAnsi);
 
 			now += 215;
@@ -139,7 +139,7 @@ describe("status line brand fade", () => {
 			expect(mid).not.toContain(accentAnsi);
 
 			now += 300;
-			expect(component.renderBottomBar(80, "full")).toContain(`${dimAnsi}${theme.icon.omp}`);
+			expect(component.renderBottomBar(80, "full")).toContain(`${dimAnsi}${theme.icon.zero2ai}`);
 		} finally {
 			component.dispose();
 		}

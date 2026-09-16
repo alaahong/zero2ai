@@ -7,7 +7,7 @@
  * stay in their respective files.
  */
 
-import { type Component, Container, Loader, Text, type TUI } from "@oh-my-pi/pi-tui";
+import { type Component, Container, Loader, Text, type TUI } from "@zero2ai/tui";
 import { getSymbolTheme, theme } from "../../modes/theme/theme";
 import type { OutputArtifactError } from "../../session/streaming-output";
 import { formatArtifactErrorNotice, formatTruncationMetaNotice, type TruncationMeta } from "../../tools/output-meta";

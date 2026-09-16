@@ -2,16 +2,16 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it } from "bun:test
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { AgentToolResult } from "@oh-my-pi/pi-agent-core";
-import { InternalUrlRouter } from "@oh-my-pi/pi-coding-agent/internal-urls/router";
-import type { ProtocolHandler } from "@oh-my-pi/pi-coding-agent/internal-urls/types";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { ClientBridge } from "@oh-my-pi/pi-coding-agent/session/client-bridge";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { wrapToolWithMetaNotice } from "@oh-my-pi/pi-coding-agent/tools/output-meta";
-import { ReadTool } from "@oh-my-pi/pi-coding-agent/tools/read";
-import { WriteTool } from "@oh-my-pi/pi-coding-agent/tools/write";
-import { readArchiveEntries, writeArchive } from "@oh-my-pi/pi-utils/ar";
+import type { AgentToolResult } from "@zero2ai/agent-core";
+import { InternalUrlRouter } from "@zero2ai/coding-agent/internal-urls/router";
+import type { ProtocolHandler } from "@zero2ai/coding-agent/internal-urls/types";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import type { ClientBridge } from "@zero2ai/coding-agent/session/client-bridge";
+import type { ToolSession } from "@zero2ai/coding-agent/tools";
+import { wrapToolWithMetaNotice } from "@zero2ai/coding-agent/tools/output-meta";
+import { ReadTool } from "@zero2ai/coding-agent/tools/read";
+import { WriteTool } from "@zero2ai/coding-agent/tools/write";
+import { readArchiveEntries, writeArchive } from "@zero2ai/utils/ar";
 
 function createSession(cwd: string, bridge?: ClientBridge, editMode: "replace" | "hashline" = "replace"): ToolSession {
 	return {
@@ -234,7 +234,7 @@ describe("write tool read projection guard", () => {
 
 	it("writes a literal read notice when the replacement does not shrink the current source", async () => {
 		const filePath = path.join(tmpDir, "documentation.txt");
-		const content = "Example omp output:\n[Showing lines 1-20 of 60. Use :21 to continue]\n";
+		const content = "Example zero2ai output:\n[Showing lines 1-20 of 60. Use :21 to continue]\n";
 		await Bun.write(filePath, "old\n");
 
 		await new WriteTool(createSession(tmpDir)).execute("call-2", { path: filePath, content });

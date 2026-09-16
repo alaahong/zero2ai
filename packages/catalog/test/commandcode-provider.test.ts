@@ -1,12 +1,12 @@
 import { afterEach, describe, expect, test, vi } from "bun:test";
-import { getOAuthProviders } from "@oh-my-pi/pi-ai/registry/oauth";
-import { getProviderDefinition } from "@oh-my-pi/pi-ai/registry";
-import { getEnvApiKey, streamSimple } from "@oh-my-pi/pi-ai/stream";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { getBundledModels } from "@oh-my-pi/pi-catalog/models";
-import { DEFAULT_MODEL_PER_PROVIDER, PROVIDER_DESCRIPTORS } from "@oh-my-pi/pi-catalog/provider-models/descriptors";
-import { commandCodeModelManagerOptions } from "@oh-my-pi/pi-catalog/provider-models/openai-compat";
-import type { FetchImpl } from "@oh-my-pi/pi-catalog/types";
+import { getOAuthProviders } from "@zero2ai/ai/registry/oauth";
+import { getProviderDefinition } from "@zero2ai/ai/registry";
+import { getEnvApiKey, streamSimple } from "@zero2ai/ai/stream";
+import { buildModel } from "@zero2ai/catalog/build";
+import { getBundledModels } from "@zero2ai/catalog/models";
+import { DEFAULT_MODEL_PER_PROVIDER, PROVIDER_DESCRIPTORS } from "@zero2ai/catalog/provider-models/descriptors";
+import { commandCodeModelManagerOptions } from "@zero2ai/catalog/provider-models/openai-compat";
+import type { FetchImpl } from "@zero2ai/catalog/types";
 
 const originalPrimaryKey = Bun.env.COMMAND_CODE_API_KEY;
 const originalLegacyKey = Bun.env.COMMANDCODE_API_KEY;

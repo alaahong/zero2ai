@@ -1,9 +1,9 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from "bun:test";
 import * as os from "node:os";
 import * as path from "node:path";
-import { ThinkingLevel } from "@oh-my-pi/pi-agent-core";
-import { KeybindingsManager, setKeyHintPlatform } from "@oh-my-pi/pi-coding-agent/config/keybindings";
-import { getThemeByName, initTheme, type Theme, theme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
+import { ThinkingLevel } from "@zero2ai/agent-core";
+import { KeybindingsManager, setKeyHintPlatform } from "@zero2ai/coding-agent/config/keybindings";
+import { getThemeByName, initTheme, type Theme, theme } from "@zero2ai/coding-agent/modes/theme/theme";
 import {
 	dedupeParseErrors,
 	expandKeyHint,
@@ -22,13 +22,13 @@ import {
 	shortenPath,
 	TRUNCATE_LENGTHS,
 	truncateDiffByHunk,
-} from "@oh-my-pi/pi-coding-agent/tools/render-utils";
+} from "@zero2ai/coding-agent/tools/render-utils";
 import {
 	DEFAULT_TAB_WIDTH,
 	getKeybindings,
 	setKeybindings,
 	type KeybindingsManager as TuiKeybindingsManager,
-} from "@oh-my-pi/pi-tui";
+} from "@zero2ai/tui";
 
 describe("feed model badges", () => {
 	let uiTheme: Theme;
@@ -208,7 +208,7 @@ describe("formatScreenshot", () => {
 	});
 
 	it("formats non-home path without tilde", () => {
-		const filePath = path.join(path.parse(os.homedir()).root, "omp-render-utils", "capture.png");
+		const filePath = path.join(path.parse(os.homedir()).root, "zero2ai-render-utils", "capture.png");
 		const resized = fakeResized({ mimeType: "image/webp", buffer: new Uint8Array(1024) });
 
 		expect(
@@ -234,7 +234,7 @@ describe("formatScreenshot", () => {
 				saveFullRes: false,
 				savedMimeType: "image/webp",
 				savedByteLength: 3072,
-				dest: path.join(os.tmpdir(), "omp-sshots-123.png"),
+				dest: path.join(os.tmpdir(), "zero2ai-sshots-123.png"),
 				resized,
 			}),
 		).toEqual(["Screenshot captured", "Format: image/webp (3.00 KB)", "Dimensions: 800x600"]);
@@ -248,7 +248,7 @@ describe("formatScreenshot", () => {
 				saveFullRes: false,
 				savedMimeType: "image/png",
 				savedByteLength: 4096,
-				dest: path.join(os.tmpdir(), "omp-sshots-123.png"),
+				dest: path.join(os.tmpdir(), "zero2ai-sshots-123.png"),
 				resized,
 			}),
 		).toContain("Resize: image decoder failed; using original image bytes");
@@ -534,10 +534,10 @@ describe("sanitizeDisplayLines", () => {
 
 describe("sanitizeDisplayWarning", () => {
 	it("strips terminal controls, expands tabs, flattens lines, and shortens home paths", () => {
-		const filePath = path.join(os.homedir(), ".omp", "WATCHDOG.yml");
+		const filePath = path.join(os.homedir(), ".zero2ai", "WATCHDOG.yml");
 		const warning = sanitizeDisplayWarning(`${filePath}: advisor "\x1b[31mBad\tName\x1b[0m\nfollow-up" dropped`);
 
-		expect(warning).toContain("~/.omp/WATCHDOG.yml");
+		expect(warning).toContain("~/.zero2ai/WATCHDOG.yml");
 		expect(warning).toContain('advisor "Bad   Name follow-up" dropped');
 		expect(warning).not.toContain(filePath);
 		expect(warning).not.toContain("\x1b");
@@ -548,14 +548,14 @@ describe("sanitizeDisplayWarning", () => {
 
 describe("shortenEmbeddedPaths", () => {
 	it("shortens home paths containing spaces before tokenizing", () => {
-		expect(shortenEmbeddedPaths("/Users/Jane Smith/.omp/WATCHDOG.yml: failed", "/Users/Jane Smith")).toBe(
-			"~/.omp/WATCHDOG.yml: failed",
+		expect(shortenEmbeddedPaths("/Users/Jane Smith/.zero2ai/WATCHDOG.yml: failed", "/Users/Jane Smith")).toBe(
+			"~/.zero2ai/WATCHDOG.yml: failed",
 		);
 	});
 
 	it("preserves sibling paths outside the home boundary", () => {
 		const home = "/Users/Jane";
-		const sibling = "/Users/Jane2/.omp/WATCHDOG.yml: failed";
+		const sibling = "/Users/Jane2/.zero2ai/WATCHDOG.yml: failed";
 		expect(shortenEmbeddedPaths(sibling, home)).toBe(sibling);
 	});
 

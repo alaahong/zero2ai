@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { applyCatalogMetrics, CatalogMetricsIndex } from "@oh-my-pi/pi-catalog/identity/metrics";
-import type { Api, Model, ModelSpec } from "@oh-my-pi/pi-catalog/types";
+import { buildModel } from "@zero2ai/catalog/build";
+import { applyCatalogMetrics, CatalogMetricsIndex } from "@zero2ai/catalog/identity/metrics";
+import type { Api, Model, ModelSpec } from "@zero2ai/catalog/types";
 
 function model(provider: string, id: string, metrics?: { int?: number; tps?: number }): Model<Api> {
 	return buildModel({

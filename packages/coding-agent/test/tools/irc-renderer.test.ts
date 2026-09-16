@@ -1,8 +1,8 @@
 import { describe, expect, it } from "bun:test";
-import type { IrcMessage } from "@oh-my-pi/pi-coding-agent/irc/bus";
-import { getThemeByName } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { type CoordinationDetails, hubToolRenderer } from "@oh-my-pi/pi-coding-agent/tools/hub";
-import { sanitizeText } from "@oh-my-pi/pi-utils";
+import type { IrcMessage } from "@zero2ai/coding-agent/irc/bus";
+import { getThemeByName } from "@zero2ai/coding-agent/modes/theme/theme";
+import { type CoordinationDetails, hubToolRenderer } from "@zero2ai/coding-agent/tools/hub";
+import { sanitizeText } from "@zero2ai/utils";
 
 async function theme() {
 	const t = await getThemeByName("dark");

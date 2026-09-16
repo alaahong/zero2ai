@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import type { MCPServer } from "@oh-my-pi/pi-coding-agent/capability/mcp";
-import type { SourceMeta } from "@oh-my-pi/pi-coding-agent/capability/types";
-import type { CustomTool } from "@oh-my-pi/pi-coding-agent/extensibility/custom-tools/types";
-import type { MCPServerConnection, MCPTransport } from "@oh-my-pi/pi-coding-agent/mcp/types";
+import type { MCPServer } from "@zero2ai/coding-agent/capability/mcp";
+import type { SourceMeta } from "@zero2ai/coding-agent/capability/types";
+import type { CustomTool } from "@zero2ai/coding-agent/extensibility/custom-tools/types";
+import type { MCPServerConnection, MCPTransport } from "@zero2ai/coding-agent/mcp/types";
 import {
 	applyMcpToggleRuntime,
 	formatMcpHealthLabel,
@@ -12,7 +12,7 @@ import {
 	type MCPRuntimeSource,
 	snapshotMcpRuntime,
 	visibleMcpTools,
-} from "@oh-my-pi/pi-coding-agent/modes/components/extensions/mcp-runtime";
+} from "@zero2ai/coding-agent/modes/components/extensions/mcp-runtime";
 
 function stubCustomTool(name: string): CustomTool {
 	return {
@@ -28,8 +28,8 @@ function stubCustomTool(name: string): CustomTool {
 
 const source: SourceMeta = {
 	provider: "native",
-	providerName: "OMP (User)",
-	path: "/home/sf/.omp/agent/mcp.json",
+	providerName: "ZERO2AI (User)",
+	path: "/home/sf/.zero2ai/agent/mcp.json",
 	level: "user",
 };
 

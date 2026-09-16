@@ -1,4 +1,4 @@
-import type { UsageLimit, UsageReport } from "@oh-my-pi/pi-ai";
+import type { UsageLimit, UsageReport } from "@zero2ai/ai";
 
 function collapseSharedLimits(limits: UsageLimit[]): UsageLimit[] {
 	const seenGroups = new Set<string>();

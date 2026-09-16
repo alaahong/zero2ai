@@ -1,6 +1,6 @@
 # roboomp
 
-Self-hosted GitHub triage bot. Drives [`omp --mode rpc`](https://github.com/can1357/oh-my-pi)
+Self-hosted GitHub triage bot. Drives [`zero2ai --mode rpc`](https://github.com/can1357/oh-my-pi)
 as a subprocess against a per-issue git worktree, then writes back to GitHub
 through a sidecar that holds the PAT.
 
@@ -17,7 +17,7 @@ and branches:
 - `enhancement` / `proposal` → one comment, no PR.
 - `invalid` / `duplicate` → one brief comment.
 
-Follow-up issue comments and PR review comments resume the same omp session
+Follow-up issue comments and PR review comments resume the same zero2ai session
 (`--continue` against the persisted JSONL transcript). On orchestrator
 restart, in-flight events are re-queued and resume the same way.
 
@@ -30,7 +30,7 @@ the next verdict until every run and the GitHub Release are green.
 
 Two containers, one trust boundary:
 
-- **robomp** — FastAPI + sqlite event queue + `WorkerPool` running `omp` in
+- **robomp** — FastAPI + sqlite event queue + `WorkerPool` running `zero2ai` in
   per-issue worktrees under `/data/workspaces/`. Holds the HMAC key, never
   the PAT.
 - **gh-proxy** — sibling on an `internal: true` network. Holds `GITHUB_TOKEN`,
@@ -41,13 +41,13 @@ Flow: webhook → HMAC verify → `github_events.route` → sqlite `events`
 (dedup on `X-GitHub-Delivery`) → `WorkerPool` claims under
 `BEGIN IMMEDIATE` with an in-process `_inflight` set per `(owner, repo, n)`
 → `sandbox.ensure_workspace` produces a worktree on `farm/<8hex>/<slug>`
-→ `worker.run_task` spawns `omp --mode rpc` with `cwd=worktree`,
+→ `worker.run_task` spawns `zero2ai --mode rpc` with `cwd=worktree`,
 persistent `session_dir`, model randomly drawn from `ROBOMP_MODEL` (CSV).
 
 Release events serialize under `<owner>/<repo>#release`; each tag persists its
-own `releases` row and `.omp-session-<tag>` transcript.
+own `releases` row and `.zero2ai-session-<tag>` transcript.
 
-The agent uses omp's built-in tools (`read`/`edit`/`bash`/`lsp`, scoped to
+The agent uses zero2ai's built-in tools (`read`/`edit`/`bash`/`lsp`, scoped to
 the worktree) plus the host tools in `src/host_tools.py` — the
 exclusive surface for GitHub writes. Every host-tool invocation is audited
 into the `tool_calls` table with credential-redacted args and results.
@@ -55,10 +55,10 @@ into the `tool_calls` table with credential-redacted args and results.
 ## Setup
 
 Requires Docker Compose v2 and a LiteLLM-style proxy on the host that your
-`~/.omp/agent/models.container.yml` points at (mounted into the container as `models.yml`; kept under a separate filename on the host so the host omp doesn't route through the gateway). roboomp lives inside the oh-my-pi
+`~/.zero2ai/agent/models.container.yml` points at (mounted into the container as `models.yml`; kept under a separate filename on the host so the host zero2ai doesn't route through the gateway). roboomp lives inside the oh-my-pi
 monorepo at `python/robomp/`; both the docker build context and the
 `/work/pi` bind mount default to the parent monorepo (`../..`). Override
-`PI_ROOT` only if you want a different oh-my-pi checkout backing the build
+`ZERO2AI_ROOT` only if you want a different oh-my-pi checkout backing the build
 and runtime.
 
 Bot account needs **Write** on every repo in `ROBOMP_REPO_ALLOWLIST`. Use a
@@ -85,7 +85,7 @@ rejects a `.env` setting both).
 
 Build invalidation is bounded: editing roboomp Python touches only the
 runtime layer; editing pi source rebuilds `oh-my-pi/pi:dev`, which
-roboomp's `Dockerfile.robomp` extends via `FROM ${PI_BASE}`.
+roboomp's `Dockerfile.robomp` extends via `FROM ${ZERO2AI_BASE}`.
 
 ### Public URL
 
@@ -157,8 +157,8 @@ pytest -x tests/                              # unit suite, no network
 ROBOMP_INTEGRATION=1 pytest -x tests/test_worker_smoke.py
 ```
 
-The integration test spawns a real `omp --mode rpc` against an
-`httpx.MockTransport` GitHub and a local bare repo, so it needs `omp` on
+The integration test spawns a real `zero2ai --mode rpc` against an
+`httpx.MockTransport` GitHub and a local bare repo, so it needs `zero2ai` on
 `PATH`. `bun run test:py` runs the unit suite.
 
 ## Security posture
@@ -223,14 +223,14 @@ The integration test spawns a real `omp --mode rpc` against an
 | Symptom | Check |
 |---|---|
 | `401 invalid signature` | `GITHUB_WEBHOOK_SECRET` mismatch with the repo webhook config. |
-| Container exits with `PI_ROOT … missing` | `/work/pi` mount empty inside the container; on the host either run `docker compose` from `python/robomp/` so `PI_ROOT` defaults to `../..`, or export `PI_ROOT` to a valid oh-my-pi checkout. |
+| Container exits with `ZERO2AI_ROOT … missing` | `/work/pi` mount empty inside the container; on the host either run `docker compose` from `python/robomp/` so `ZERO2AI_ROOT` defaults to `../..`, or export `ZERO2AI_ROOT` to a valid oh-my-pi checkout. |
 | `git push: Authentication required` | Bot PAT lacks push, or `ROBOMP_BOT_LOGIN` does not identify the PAT account's mention handle (production: `roboomp`, no `@`/`[bot]`). |
 | `refusing to push: commit author identity mismatch` | Some commit not authored as `ROBOMP_GIT_AUTHOR_*`. The error lists the offending shas; `git commit --amend --reset-author --no-edit`. |
 | `refusing to push: working tree is dirty` | Uncommitted agent edits. Or just call `gh_open_pr`, which auto-commits `bun run fix` output. |
 | `bun check failed before PR creation` | Fix the reported failure and retry `gh_open_pr`. |
 | `refusing to open PR: \`bun run test\` failed before open PR` | The repo suite is red at HEAD. Fix and commit, or `skip_checks=true` if the failure pre-exists on the default branch. |
 | `Failed to load pi_natives` | Wrong arch / missing native. `bun run pi:image` then `bun run robomp:build`. |
-| `No API key found for <provider>` | `~/.omp/agent/models.container.yml` mount missing or provider id mismatch with `ROBOMP_MODEL`. |
+| `No API key found for <provider>` | `~/.zero2ai/agent/models.container.yml` mount missing or provider id mismatch with `ROBOMP_MODEL`. |
 
 ## Layout
 
@@ -240,7 +240,7 @@ src/
   github_events.py   verify_signature + route()
   queue.py           WorkerPool, dispatch loop, per-issue _inflight serialization
   tasks.py           issue/PR handlers plus handle_release_ci and cleanup_workspace
-  worker.py          synchronous omp RPC driver, prompt assembly, env scrubbing
+  worker.py          synchronous zero2ai RPC driver, prompt assembly, env scrubbing
   host_tools.py      issue/PR tools plus release_ci_status, release_job_log,
                      release_retag, and abort_task
   sandbox.py         clone pool + worktree lifecycle

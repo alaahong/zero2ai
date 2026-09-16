@@ -1,5 +1,5 @@
 {
-	"name": "@oh-my-pi/pi-ai",
+	"name": "@zero2ai/ai",
 	"version": "18.2.1",
 	"description": "Unified LLM API with automatic model discovery and provider configuration",
 	"keywords": [
@@ -121,11 +121,11 @@
 		"fmt": "oxfmt --no-error-on-unmatched-pattern 'src/**/*.{ts,tsx}' '{test,bench,examples,scripts}/**/*.ts' '*.ts'"
 	},
 	"dependencies": {
-		"@oh-my-pi/omptype": "catalog:",
-		"@oh-my-pi/pi-catalog": "catalog:",
-		"@oh-my-pi/pi-natives": "catalog:",
-		"@oh-my-pi/pi-utils": "catalog:",
-		"@oh-my-pi/pi-wire": "catalog:"
+		"@zero2ai/schema": "catalog:",
+		"@zero2ai/catalog": "catalog:",
+		"@zero2ai/natives": "catalog:",
+		"@zero2ai/utils": "catalog:",
+		"@zero2ai/wire": "catalog:"
 	},
 	"devDependencies": {
 		"@types/bun": "catalog:"

@@ -2,20 +2,20 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { resolveAuthBrokerConfig } from "@oh-my-pi/pi-ai/auth-broker";
+import { resolveAuthBrokerConfig } from "@zero2ai/ai/auth-broker";
 import { removeWithRetries } from "../../utils/src/temp";
 import { withEnv } from "./helpers";
 
 const CLEAR_BROKER_ENV = {
-	OMP_AUTH_BROKER_URL: undefined,
-	OMP_AUTH_BROKER_TOKEN: undefined,
+	ZERO2AI_AUTH_BROKER_URL: undefined,
+	ZERO2AI_AUTH_BROKER_TOKEN: undefined,
 } as const;
 
 describe("auth-broker config.yml key resolution", () => {
 	let agentDir = "";
 
 	beforeEach(async () => {
-		agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-ai-auth-broker-config-"));
+		agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-ai-auth-broker-config-"));
 	});
 
 	afterEach(async () => {

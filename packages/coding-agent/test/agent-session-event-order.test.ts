@@ -15,18 +15,18 @@
 
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
 import * as path from "node:path";
-import { Agent } from "@oh-my-pi/pi-agent-core";
-import type { ToolCall } from "@oh-my-pi/pi-ai";
-import { createMockModel } from "@oh-my-pi/pi-ai/providers/mock";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { ExtensionRunner } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/runner";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TodoTool } from "@oh-my-pi/pi-coding-agent/tools";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { Agent } from "@zero2ai/agent-core";
+import type { ToolCall } from "@zero2ai/ai";
+import { createMockModel } from "@zero2ai/ai/providers/mock";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import type { ExtensionRunner } from "@zero2ai/coding-agent/extensibility/extensions/runner";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { TodoTool } from "@zero2ai/coding-agent/tools";
+import { TempDir } from "@zero2ai/utils";
 
 describe("AgentSession subscriber event order", () => {
 	let tempDir: TempDir;
@@ -35,7 +35,7 @@ describe("AgentSession subscriber event order", () => {
 	let session: AgentSession | undefined;
 
 	beforeAll(async () => {
-		tempDir = TempDir.createSync("@pi-event-order-");
+		tempDir = TempDir.createSync("@zero2ai-event-order-");
 		authStorage = await AuthStorage.create(path.join(tempDir.path(), "testauth.db"));
 		authStorage.setRuntimeApiKey("anthropic", "anthropic-test-key");
 		modelRegistry = new ModelRegistry(authStorage, path.join(tempDir.path(), "models.yml"));

@@ -1,11 +1,11 @@
 /**
  * Anchored overlay panel for `/cleanse`, mounted above the editor like the
  * `/omfg` panel. Implements {@link CleanseStatusBoard}, so the shared cleanse
- * core renders the exact live view `omp cleanse` shows on stdout: transient
+ * core renders the exact live view `zero2ai cleanse` shows on stdout: transient
  * checker/repair/agent rows from {@link CleanseBoardModel} animate in place while
  * permanent log lines accumulate above them.
  */
-import { Spacer, Text, type TUI } from "@oh-my-pi/pi-tui";
+import { Spacer, Text, type TUI } from "@zero2ai/tui";
 import { CleanseBoardModel, type CleanseStatusBoard } from "../../cleanse/board";
 import type { CleanseCheckerDescriptor } from "../../cleanse/checkers";
 import type { CleanseAgentOutcome, CleanseAssignment, CleanseCheckResult, CleanseRunStatus } from "../../cleanse/types";

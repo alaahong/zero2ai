@@ -1,6 +1,6 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
 import * as path from "node:path";
-import { Agent } from "@oh-my-pi/pi-agent-core";
+import { Agent } from "@zero2ai/agent-core";
 import type {
 	Api,
 	AssistantMessage,
@@ -9,17 +9,17 @@ import type {
 	Model,
 	SimpleStreamOptions,
 	ThinkingContent,
-} from "@oh-my-pi/pi-ai";
-import { createMockModel } from "@oh-my-pi/pi-ai/providers/mock";
-import { AssistantMessageEventStream } from "@oh-my-pi/pi-ai/utils/event-stream";
-import { GEMINI_HEADER_RUNAWAY_THRESHOLD } from "@oh-my-pi/pi-ai/utils/thinking-loop";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AgentSession, type AgentSessionEvent } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { convertToLlm } from "@oh-my-pi/pi-coding-agent/session/messages";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TempDir } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/ai";
+import { createMockModel } from "@zero2ai/ai/providers/mock";
+import { AssistantMessageEventStream } from "@zero2ai/ai/utils/event-stream";
+import { GEMINI_HEADER_RUNAWAY_THRESHOLD } from "@zero2ai/ai/utils/thinking-loop";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { AgentSession, type AgentSessionEvent } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { convertToLlm } from "@zero2ai/coding-agent/session/messages";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { TempDir } from "@zero2ai/utils";
 
 function emptyUsage(): AssistantMessage["usage"] {
 	return {
@@ -144,7 +144,7 @@ describe("AgentSession Gemini header-runaway interrupt", () => {
 	let session: AgentSession | undefined;
 
 	beforeAll(async () => {
-		sharedDir = TempDir.createSync("@pi-gemini-header-interrupt-shared-");
+		sharedDir = TempDir.createSync("@zero2ai-gemini-header-interrupt-shared-");
 		authStorage = await AuthStorage.create(path.join(sharedDir.path(), "auth.db"));
 		authStorage.setRuntimeApiKey("openrouter", "openrouter-test-key");
 		modelRegistry = new ModelRegistry(authStorage);

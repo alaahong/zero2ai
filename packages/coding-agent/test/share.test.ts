@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import * as path from "node:path";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { TempDir } from "@zero2ai/utils";
 import type { SessionData } from "../src/export/html";
 import {
 	buildShareSnapshot,
@@ -597,7 +597,7 @@ describe("shareSession", () => {
 
 describe("share command", () => {
 	test("rejects a missing path without creating or uploading a session", async () => {
-		using tempDir = TempDir.createSync("@omp-share-missing-");
+		using tempDir = TempDir.createSync("@zero2ai-share-missing-");
 		const sessionArg = "./ghost.jsonl";
 		const missingSession = path.join(tempDir.path(), "ghost.jsonl");
 		const proc = Bun.spawn([process.execPath, CLI_ENTRY, "share", sessionArg], {
@@ -605,7 +605,7 @@ describe("share command", () => {
 			env: {
 				...process.env,
 				NO_COLOR: "1",
-				PI_CODING_AGENT_DIR: path.join(tempDir.path(), "agent"),
+				ZERO2AI_CODING_AGENT_DIR: path.join(tempDir.path(), "agent"),
 			},
 			stdout: "pipe",
 			stderr: "pipe",

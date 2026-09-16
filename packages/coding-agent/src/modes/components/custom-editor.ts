@@ -1,10 +1,10 @@
 import { fileURLToPath } from "node:url";
-import type { ImageContent } from "@oh-my-pi/pi-ai";
-import { BracketedPasteHandler } from "@oh-my-pi/pi-tui/bracketed-paste";
-import { Editor, type EditorTextDecorationContext, type EditorTheme } from "@oh-my-pi/pi-tui/components/editor";
-import { addKeyAliases, canonicalKeyId, getKeybindings } from "@oh-my-pi/pi-tui/keybindings";
-import { type KeyId, parseKey, parseKittySequence } from "@oh-my-pi/pi-tui/keys";
-import { TUI } from "@oh-my-pi/pi-tui/tui";
+import type { ImageContent } from "@zero2ai/ai";
+import { BracketedPasteHandler } from "@zero2ai/tui/bracketed-paste";
+import { Editor, type EditorTextDecorationContext, type EditorTheme } from "@zero2ai/tui/components/editor";
+import { addKeyAliases, canonicalKeyId, getKeybindings } from "@zero2ai/tui/keybindings";
+import { type KeyId, parseKey, parseKittySequence } from "@zero2ai/tui/keys";
+import { TUI } from "@zero2ai/tui/tui";
 import type { AppKeybinding } from "../../config/keybindings";
 import { allowsSkillTokens, SKILL_TOKEN_RE } from "../../extensibility/skill-tokens";
 import { isVideoPath, videoPreviewSource } from "../../utils/video";
@@ -353,7 +353,7 @@ export function extractImagePathFromText(text: string): string | undefined {
 
 /**
  * Resolve the {@link EditorTheme} from a `CustomEditor`/`Editor` constructor
- * argument list, tolerating both the omp `(theme)` and upstream-pi
+ * argument list, tolerating both the zero2ai `(theme)` and upstream-pi
  * `(tui, theme, keybindings)` conventions (see {@link CustomEditor}'s
  * constructor). A real `EditorTheme` is identified structurally — it exposes a
  * `borderColor` function and a `symbols` object — so a `TUI` passed in the first
@@ -428,7 +428,7 @@ export class CustomEditor extends Editor {
 
 	/**
 	 * The host {@link TUI}, captured when a plugin constructs this editor through
-	 * the upstream-pi `(tui, theme, keybindings)` convention. Undefined for omp's
+	 * the upstream-pi `(tui, theme, keybindings)` convention. Undefined for zero2ai's
 	 * own `new CustomEditor(theme)` callers (they drive repaints through the
 	 * interactive-mode wiring instead). Plugins that call `this.tui.requestRender()`
 	 * in their overrides read it here (issue #4766).
@@ -436,7 +436,7 @@ export class CustomEditor extends Editor {
 	tui?: TUI;
 
 	/**
-	 * Accept both the omp constructor convention — `new CustomEditor(theme)` —
+	 * Accept both the zero2ai constructor convention — `new CustomEditor(theme)` —
 	 * and the upstream-pi `Editor` convention — `new Editor(tui, theme, keybindings)`
 	 * — that {@link ExtensionUIContext.setEditorComponent}'s factory contract
 	 * advertises `(tui, theme, keybindings)`. Plugins written against upstream pi

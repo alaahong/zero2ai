@@ -6,7 +6,7 @@ import * as crypto from "node:crypto";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { getAgentDir } from "@oh-my-pi/pi-utils";
+import { getAgentDir } from "@zero2ai/utils";
 import packageJson from "../../../package.json" with { type: "json" };
 
 const DEVICE_ID_FILENAME = "kimi-device-id";

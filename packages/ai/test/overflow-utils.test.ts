@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
-import type { AssistantMessage } from "@oh-my-pi/pi-ai";
-import * as AIError from "@oh-my-pi/pi-ai/error";
-import { isContextOverflow, isPayloadRejection } from "@oh-my-pi/pi-ai/error";
+import type { AssistantMessage } from "@zero2ai/ai";
+import * as AIError from "@zero2ai/ai/error";
+import { isContextOverflow, isPayloadRejection } from "@zero2ai/ai/error";
 
 function createErrorMessage(errorMessage: string): AssistantMessage {
 	return {

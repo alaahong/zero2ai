@@ -14,7 +14,7 @@ import { Buffer } from "node:buffer";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { removeWithRetries, VERSION } from "@oh-my-pi/pi-utils";
+import { removeWithRetries, VERSION } from "@zero2ai/utils";
 import { SETTINGS_SCHEMA, Settings } from "../../src/config/settings";
 import {
 	type ChangelogEntry,
@@ -81,7 +81,7 @@ describe("startup changelog mode settings", () => {
 });
 
 async function withTempAgentDir<T>(callback: (agentDir: string) => Promise<T>): Promise<T> {
-	const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "omp-changelog-marker-"));
+	const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-changelog-marker-"));
 	try {
 		const result = await callback(agentDir);
 		return result;
@@ -308,7 +308,7 @@ describe("last changelog marker", () => {
 describe.skipIf(!hasPtyHarness)("interactive startup changelog PTY smoke", () => {
 	test("does not dump packaged changelog history on first install with uncollapsed notes", async () => {
 		await withTempAgentDir(async agentDir => {
-			const root = await fs.mkdtemp(path.join(os.tmpdir(), "omp-changelog-pty-"));
+			const root = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-changelog-pty-"));
 			try {
 				await fs.mkdir(path.join(root, "xdg-config"), { recursive: true });
 				await fs.mkdir(path.join(root, "xdg-state"), { recursive: true });
@@ -327,9 +327,9 @@ describe.skipIf(!hasPtyHarness)("interactive startup changelog PTY smoke", () =>
 							XDG_CONFIG_HOME: path.join(root, "xdg-config"),
 							XDG_STATE_HOME: path.join(root, "xdg-state"),
 							XDG_DATA_HOME: path.join(root, "xdg-data"),
-							PI_CODING_AGENT_DIR: agentDir,
-							PI_PACKAGE_DIR: packageDir,
-							PI_NO_TITLE: "1",
+							ZERO2AI_CODING_AGENT_DIR: agentDir,
+							ZERO2AI_PACKAGE_DIR: packageDir,
+							ZERO2AI_NO_TITLE: "1",
 							NO_COLOR: "1",
 							TERM: "xterm-256color",
 						},

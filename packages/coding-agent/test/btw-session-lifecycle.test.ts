@@ -1,23 +1,23 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as path from "node:path";
-import { Agent } from "@oh-my-pi/pi-agent-core";
-import type { AssistantMessage } from "@oh-my-pi/pi-ai";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { ExtensionRuntime } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/loader";
-import { ExtensionRunner } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/runner";
-import { SessionSelectorComponent } from "@oh-my-pi/pi-coding-agent/modes/components/session-selector";
-import { BtwController } from "@oh-my-pi/pi-coding-agent/modes/controllers/btw-controller";
-import { ExtensionUiController } from "@oh-my-pi/pi-coding-agent/modes/controllers/extension-ui-controller";
-import { SelectorController } from "@oh-my-pi/pi-coding-agent/modes/controllers/selector-controller";
-import { InteractiveMode } from "@oh-my-pi/pi-coding-agent/modes/interactive-mode";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { BtwHistoryStore } from "@oh-my-pi/pi-coding-agent/session/btw-history";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { FileSessionStorage } from "@oh-my-pi/pi-coding-agent/session/session-storage";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { Agent } from "@zero2ai/agent-core";
+import type { AssistantMessage } from "@zero2ai/ai";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
+import { ExtensionRuntime } from "@zero2ai/coding-agent/extensibility/extensions/loader";
+import { ExtensionRunner } from "@zero2ai/coding-agent/extensibility/extensions/runner";
+import { SessionSelectorComponent } from "@zero2ai/coding-agent/modes/components/session-selector";
+import { BtwController } from "@zero2ai/coding-agent/modes/controllers/btw-controller";
+import { ExtensionUiController } from "@zero2ai/coding-agent/modes/controllers/extension-ui-controller";
+import { SelectorController } from "@zero2ai/coding-agent/modes/controllers/selector-controller";
+import { InteractiveMode } from "@zero2ai/coding-agent/modes/interactive-mode";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { BtwHistoryStore } from "@zero2ai/coding-agent/session/btw-history";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { FileSessionStorage } from "@zero2ai/coding-agent/session/session-storage";
+import { TempDir } from "@zero2ai/utils";
 
 function answer(text: string) {
 	const assistantMessage: AssistantMessage = {
@@ -62,7 +62,7 @@ describe("BTW session boundaries", () => {
 	beforeAll(() => initTheme());
 	beforeEach(async () => {
 		resetSettingsForTest();
-		directory = TempDir.createSync("@omp-btw-session-lifecycle-");
+		directory = TempDir.createSync("@zero2ai-btw-session-lifecycle-");
 		await Settings.init({ inMemory: true, cwd: directory.path() });
 		auth = await AuthStorage.create(path.join(directory.path(), "auth.db"));
 		const registry = new ModelRegistry(auth);

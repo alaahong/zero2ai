@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "bun:test";
-import { getProviderDefinition } from "@oh-my-pi/pi-ai/registry";
-import type { OAuthController } from "@oh-my-pi/pi-ai/registry/oauth/types";
-import type { FetchImpl } from "@oh-my-pi/pi-ai/types";
+import { getProviderDefinition } from "@zero2ai/ai/registry";
+import type { OAuthController } from "@zero2ai/ai/registry/oauth/types";
+import type { FetchImpl } from "@zero2ai/ai/types";
 
 const CLIENT_ID = "36f2a70cddeb5a0889d4fd8295c241b7e9848e89cf9e599d0eed2d8e5350fbf5";
 const REDIRECT_URI = "vscode://gitlab.gitlab-workflow/authentication";

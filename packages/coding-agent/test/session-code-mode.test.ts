@@ -2,11 +2,11 @@ import { afterEach, describe, expect, test, vi } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { type } from "@oh-my-pi/omptype";
-import { Agent, type AgentTool } from "@oh-my-pi/pi-agent-core";
-import { AuthStorage, type Model } from "@oh-my-pi/pi-ai";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { removeSyncWithRetries, Snowflake } from "@oh-my-pi/pi-utils";
+import { type } from "@zero2ai/schema";
+import { Agent, type AgentTool } from "@zero2ai/agent-core";
+import { AuthStorage, type Model } from "@zero2ai/ai";
+import { buildModel } from "@zero2ai/catalog/build";
+import { removeSyncWithRetries, Snowflake } from "@zero2ai/utils";
 import { ModelRegistry } from "../src/config/model-registry";
 import { Settings } from "../src/config/settings";
 import { EVAL_AGENT_BRIDGE_NAME } from "../src/eval/agent-bridge";
@@ -581,7 +581,7 @@ describe("Code Mode session startup", () => {
 	const sessions: AgentSession[] = [];
 
 	test("fresh session on a code_mode_only model starts restricted with namespaces info", async () => {
-		registryDir = path.join(os.tmpdir(), `pi-code-mode-startup-${Snowflake.next()}`);
+		registryDir = path.join(os.tmpdir(), `zero2ai-code-mode-startup-${Snowflake.next()}`);
 		fs.mkdirSync(registryDir, { recursive: true });
 		authStorage = await AuthStorage.create(path.join(registryDir, "auth.db"));
 		modelRegistry = new ModelRegistry(authStorage, path.join(registryDir, "models.yml"));

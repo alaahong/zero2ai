@@ -3,17 +3,17 @@
  * llama.cpp, lm-studio, openai-models-list, and new-api/one-api-style proxies.
  * `ModelRegistry` owns the orchestration (status, state, caching) and calls
  * `discoverModelsByProviderType` with a `DiscoveryContext`; built-in provider
- * discovery lives in pi-catalog's provider-models.
+ * discovery lives in zero2ai-catalog's provider-models.
  */
-import { type ApiKey, withAuth } from "@oh-my-pi/pi-ai/auth-retry";
-import type { Api, FetchImpl, Model, RemoteCompactionConfig } from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
+import { type ApiKey, withAuth } from "@zero2ai/ai/auth-retry";
+import type { Api, FetchImpl, Model, RemoteCompactionConfig } from "@zero2ai/ai/types";
+import { buildModel } from "@zero2ai/catalog/build";
 import {
 	getBundledModelReferenceIndex,
 	inheritReferenceThinking,
 	resolveModelReference,
 	stripBracketedModelIdAffixes,
-} from "@oh-my-pi/pi-catalog/identity";
+} from "@zero2ai/catalog/identity";
 import {
 	fetchLiteLLMRichModels,
 	fetchLmStudioNativeModelMetadata,
@@ -21,9 +21,9 @@ import {
 	OPENAI_COMPAT_DISCOVERY_DEFAULT_CONTEXT_WINDOW,
 	OPENAI_COMPAT_DISCOVERY_DEFAULT_MAX_TOKENS,
 	resolveLiteLLMApi,
-} from "@oh-my-pi/pi-catalog/provider-models/openai-compat";
-import type { ModelSpec, OpenAICompat } from "@oh-my-pi/pi-catalog/types";
-import { isRecord } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/catalog/provider-models/openai-compat";
+import type { ModelSpec, OpenAICompat } from "@zero2ai/catalog/types";
+import { isRecord } from "@zero2ai/utils";
 import type { ProviderDiscovery } from "./models-config-schema";
 
 // Default cap on `max_tokens` for auto-discovered models that do not advertise
@@ -567,12 +567,12 @@ function isBonsaiQwenGguf(id: string): boolean {
  * turned off. Qwen ids and the Qwen3.6-based PrismLM Ternary Bonsai GGUFs are
  * routed through chat-completions (the implicit llama.cpp provider defaults to
  * `openai-responses`, whose disable path has no Qwen encoding) with the
- * `qwen-template-false` dialect; omp emits `preserve_thinking` inside
+ * `qwen-template-false` dialect; zero2ai emits `preserve_thinking` inside
  * `chat_template_kwargs` for Qwen, so the toggle rides there too and history
  * `<think>` blocks survive (`qwenPreserveThinking`). The runtime base URL gets a
  * `/v1` suffix because the chat-completions request would otherwise POST to the
  * native root, which does not serve it. A model with a custom transport (e.g.
- * `pi-native`, whose client appends `/v1/pi/stream`) keeps its base URL so the
+ * `zero2ai-native`, whose client appends `/v1/pi/stream`) keeps its base URL so the
  * suffix is not doubled. Non-Qwen models pass through unchanged. Applied on both
  * fresh discovery and cache load, so an upgraded cache is corrected without
  * waiting for re-discovery.

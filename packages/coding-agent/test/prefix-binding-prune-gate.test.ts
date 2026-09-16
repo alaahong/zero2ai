@@ -1,11 +1,11 @@
 import { afterEach, describe, expect, it } from "bun:test";
-import { Agent } from "@oh-my-pi/pi-agent-core";
-import { SUPERSEDED_NOTICE } from "@oh-my-pi/pi-agent-core/compaction/pruning";
-import type { AssistantMessage, Model, ToolResultMessage } from "@oh-my-pi/pi-ai";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
+import { Agent } from "@zero2ai/agent-core";
+import { SUPERSEDED_NOTICE } from "@zero2ai/agent-core/compaction/pruning";
+import type { AssistantMessage, Model, ToolResultMessage } from "@zero2ai/ai";
+import { buildModel } from "@zero2ai/catalog/build";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
 
 const OLD_RESULT = "old file contents\n".repeat(100);
 const NEW_RESULT = "new file contents\n".repeat(100);

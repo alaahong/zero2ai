@@ -1,7 +1,7 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import { type } from "@oh-my-pi/omptype";
-import { acquireFileLock, type FileLockHandle, isEnoent, toError } from "@oh-my-pi/pi-utils";
+import { type } from "@zero2ai/schema";
+import { acquireFileLock, type FileLockHandle, isEnoent, toError } from "@zero2ai/utils";
 import { replaceFileAtomically } from "../utils/atomic-file";
 
 export interface BtwHistoryTurn {

@@ -7,19 +7,19 @@
  */
 
 import { describe, expect, it } from "bun:test";
-import { type } from "@oh-my-pi/omptype";
-import { agentLoop, agentLoopDetailed } from "@oh-my-pi/pi-agent-core/agent-loop";
+import { type } from "@zero2ai/schema";
+import { agentLoop, agentLoopDetailed } from "@zero2ai/agent-core/agent-loop";
 import {
 	type AgentRunSummary,
 	aggregateAgentRunCoverage,
 	aggregateAgentRunSummaries,
 	emptyAgentRunCoverage,
 	emptyAgentRunSummary,
-} from "@oh-my-pi/pi-agent-core/run-collector";
-import { EXECUTE_TOOL_STATUS_ATTR, GenAIAttr, PiGenAIAggregateAttr } from "@oh-my-pi/pi-agent-core/telemetry";
-import type { AgentEvent, AgentLoopConfig, AgentMessage, AgentTool } from "@oh-my-pi/pi-agent-core/types";
-import type { AssistantMessage, Message } from "@oh-my-pi/pi-ai";
-import { createMockModel } from "@oh-my-pi/pi-ai/providers/mock";
+} from "@zero2ai/agent-core/run-collector";
+import { EXECUTE_TOOL_STATUS_ATTR, GenAIAttr, Zero2AiGenAIAggregateAttr } from "@zero2ai/agent-core/telemetry";
+import type { AgentEvent, AgentLoopConfig, AgentMessage, AgentTool } from "@zero2ai/agent-core/types";
+import type { AssistantMessage, Message } from "@zero2ai/ai";
+import { createMockModel } from "@zero2ai/ai/providers/mock";
 import type {
 	AttributeValue,
 	Context as OtelContext,
@@ -321,7 +321,7 @@ describe("AgentRunSummary aggregation", () => {
 		expect(blockedSpan?.attributes[GenAIAttr.ErrorType]).toBe("tool_blocked");
 	});
 
-	it("populates aggregate pi.gen_ai.agent.* attributes on the invoke_agent span", async () => {
+	it("populates aggregate zero2ai.gen_ai.agent.* attributes on the invoke_agent span", async () => {
 		const tracer = new RecordingTracer();
 		const tool = buildTool({ name: "alpha", behavior: "ok" });
 		const mock = createMockModel({
@@ -346,12 +346,12 @@ describe("AgentRunSummary aggregation", () => {
 		await detailed.detailed();
 		const invokeSpan = tracer.findSpan("invoke_agent");
 		expect(invokeSpan).toBeDefined();
-		expect(invokeSpan?.attributes[PiGenAIAggregateAttr.ChatsCount]).toBe(2);
-		expect(invokeSpan?.attributes[PiGenAIAggregateAttr.ToolsCount]).toBe(1);
-		expect(invokeSpan?.attributes[PiGenAIAggregateAttr.ToolsOkCount]).toBe(1);
-		expect(invokeSpan?.attributes[PiGenAIAggregateAttr.UsageInputTokensTotal]).toBe(6);
-		expect(invokeSpan?.attributes[PiGenAIAggregateAttr.UsageTotalTokensTotal]).toBe(13);
-		expect(invokeSpan?.attributes[PiGenAIAggregateAttr.ToolsInvoked]).toEqual(["alpha"]);
+		expect(invokeSpan?.attributes[Zero2AiGenAIAggregateAttr.ChatsCount]).toBe(2);
+		expect(invokeSpan?.attributes[Zero2AiGenAIAggregateAttr.ToolsCount]).toBe(1);
+		expect(invokeSpan?.attributes[Zero2AiGenAIAggregateAttr.ToolsOkCount]).toBe(1);
+		expect(invokeSpan?.attributes[Zero2AiGenAIAggregateAttr.UsageInputTokensTotal]).toBe(6);
+		expect(invokeSpan?.attributes[Zero2AiGenAIAggregateAttr.UsageTotalTokensTotal]).toBe(13);
+		expect(invokeSpan?.attributes[Zero2AiGenAIAggregateAttr.ToolsInvoked]).toEqual(["alpha"]);
 	});
 });
 

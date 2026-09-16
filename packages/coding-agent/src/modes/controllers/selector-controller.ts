@@ -1,12 +1,12 @@
-import { type AgentMessage, type AgentToolResult, ThinkingLevel } from "@oh-my-pi/pi-agent-core";
-import type { CompactionOutcome } from "@oh-my-pi/pi-agent-core/compaction";
-import type { Model, PASTE_CODE_LOGIN_PROVIDERS as PasteCodeLoginProviders, UsageReport } from "@oh-my-pi/pi-ai";
-import type { getOAuthProviders as GetOAuthProviders } from "@oh-my-pi/pi-ai/oauth";
-import type { OAuthProvider } from "@oh-my-pi/pi-ai/oauth/types";
-import * as vcs from "@oh-my-pi/pi-natives/vcs";
-import type { Component, OverlayHandle, ResizeScrollbackMode } from "@oh-my-pi/pi-tui";
-import { Loader, Spacer, setTuiTight, Text } from "@oh-my-pi/pi-tui";
-import { getAgentDbPath, getAgentDir, getProjectDir, normalizePathForComparison } from "@oh-my-pi/pi-utils";
+import { type AgentMessage, type AgentToolResult, ThinkingLevel } from "@zero2ai/agent-core";
+import type { CompactionOutcome } from "@zero2ai/agent-core/compaction";
+import type { Model, PASTE_CODE_LOGIN_PROVIDERS as PasteCodeLoginProviders, UsageReport } from "@zero2ai/ai";
+import type { getOAuthProviders as GetOAuthProviders } from "@zero2ai/ai/oauth";
+import type { OAuthProvider } from "@zero2ai/ai/oauth/types";
+import * as vcs from "@zero2ai/natives/vcs";
+import type { Component, OverlayHandle, ResizeScrollbackMode } from "@zero2ai/tui";
+import { Loader, Spacer, setTuiTight, Text } from "@zero2ai/tui";
+import { getAgentDbPath, getAgentDir, getProjectDir, normalizePathForComparison } from "@zero2ai/utils";
 import {
 	type AdvisorConfigScope,
 	discoverAdvisorConfigs,
@@ -146,8 +146,8 @@ interface ProviderAuthUiModules {
 /** Synchronous first-use boundary for provider auth catalog and dialog components. */
 function loadProviderAuthUi(): ProviderAuthUiModules {
 	return {
-		PASTE_CODE_LOGIN_PROVIDERS: require("@oh-my-pi/pi-ai/index.js").PASTE_CODE_LOGIN_PROVIDERS,
-		getOAuthProviders: require("@oh-my-pi/pi-ai/registry/oauth/index.js").getOAuthProviders,
+		PASTE_CODE_LOGIN_PROVIDERS: require("@zero2ai/ai/index.js").PASTE_CODE_LOGIN_PROVIDERS,
+		getOAuthProviders: require("@zero2ai/ai/registry/oauth/index.js").getOAuthProviders,
 		LoginDialogComponent: require("../components/login-dialog").LoginDialogComponent,
 		LogoutAccountSelectorComponent: require("../components/logout-account-selector").LogoutAccountSelectorComponent,
 		OAuthSelectorComponent: require("../components/oauth-selector").OAuthSelectorComponent,

@@ -1,6 +1,6 @@
 # SDK Examples
 
-Programmatic usage of omp-coding-agent via `createAgentSession()`.
+Programmatic usage of zero2ai-coding-agent via `createAgentSession()`.
 
 ## Examples
 
@@ -29,7 +29,7 @@ npx tsx examples/sdk/01-minimal.ts
 ## Quick Reference
 
 ```typescript
-import { getModel } from "@oh-my-pi/pi-ai";
+import { getModel } from "@zero2ai/ai";
 import {
 	AuthStorage,
 	createAgentSession,
@@ -47,7 +47,7 @@ import {
 	BUILTIN_TOOLS,
 	HIDDEN_TOOLS,
 	createTools,
-} from "@oh-my-pi/pi-coding-agent";
+} from "@zero2ai/coding-agent";
 
 // Auth and models setup
 const authStorage = discoverAuthStorage();
@@ -130,7 +130,7 @@ await writeTool.execute("call-1", {
 | `authStorage`               | `discoverAuthStorage()`       | Credential storage                |
 | `modelRegistry`             | `discoverModels(authStorage)` | Model registry                    |
 | `cwd`                       | `process.cwd()`               | Working directory                 |
-| `agentDir`                  | `~/.omp/agent`                | Config directory                  |
+| `agentDir`                  | `~/.zero2ai/agent`                | Config directory                  |
 | `model`                     | From settings/first available | Model to use                      |
 | `thinkingLevel`             | From settings/"off"           | off, low, medium, high            |
 | `systemPrompt`              | Discovered                    | String or `(default) => modified` |

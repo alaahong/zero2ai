@@ -1,6 +1,6 @@
-import type { AssistantMessage, Message } from "@oh-my-pi/pi-ai";
-import { type OverlayHandle, replaceTabs } from "@oh-my-pi/pi-tui";
-import { logger, prompt, Snowflake, toError, withTimeout } from "@oh-my-pi/pi-utils";
+import type { AssistantMessage, Message } from "@zero2ai/ai";
+import { type OverlayHandle, replaceTabs } from "@zero2ai/tui";
+import { logger, prompt, Snowflake, toError, withTimeout } from "@zero2ai/utils";
 import btwUserPrompt from "../../prompts/system/btw-user.md" with { type: "text" };
 import {
 	type BtwHistoryRecord,

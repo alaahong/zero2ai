@@ -16,8 +16,8 @@ import {
 	SettingsList,
 	Spacer,
 	Text,
-} from "@oh-my-pi/pi-tui";
-import { logger } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/tui";
+import { logger } from "@zero2ai/utils";
 import { clearPluginRootsAndCaches, resolveOrDefaultProjectRegistryPath } from "../../discovery/helpers";
 import { PluginManager } from "../../extensibility/plugins/manager";
 import {
@@ -179,9 +179,9 @@ export class PluginListComponent extends OverlayPanel {
 		if (entries.length === 0) {
 			this.addChild(new Text(theme.fg("muted", "No plugins installed"), 0, 0));
 			this.addChild(new Spacer(1));
-			this.addChild(new Text(theme.fg("dim", "Install npm plugins:        omp plugin install <package>"), 0, 0));
+			this.addChild(new Text(theme.fg("dim", "Install npm plugins:        zero2ai plugin install <package>"), 0, 0));
 			this.addChild(
-				new Text(theme.fg("dim", "Install marketplace plugins: omp plugin install <name>@<marketplace>"), 0, 0),
+				new Text(theme.fg("dim", "Install marketplace plugins: zero2ai plugin install <name>@<marketplace>"), 0, 0),
 			);
 			this.addChild(new Spacer(1));
 

@@ -1,6 +1,6 @@
 # Custom Tools Examples
 
-Example custom tools for omp-coding-agent.
+Example custom tools for zero2ai-coding-agent.
 
 ## Examples
 
@@ -23,13 +23,13 @@ Full-featured example demonstrating:
 
 ```bash
 # Test directly (can point to any .ts file)
-omp --tool examples/custom-tools/todo/index.ts
+zero2ai --tool examples/custom-tools/todo/index.ts
 
 # Or copy entire folder to tools directory for persistent use
-cp -r todo ~/.omp/agent/tools/
+cp -r todo ~/.zero2ai/agent/tools/
 ```
 
-Then in omp:
+Then in zero2ai:
 
 ```
 > add a todo "test custom tools"
@@ -47,8 +47,8 @@ See [docs/custom-tools.md](../../docs/custom-tools.md) for full documentation.
 **Factory pattern:**
 
 ```typescript
-import { Text } from "@oh-my-pi/pi-tui";
-import type { CustomToolFactory } from "@oh-my-pi/pi-coding-agent";
+import { Text } from "@zero2ai/tui";
+import type { CustomToolFactory } from "@zero2ai/coding-agent";
 
 const factory: CustomToolFactory = (pi) => ({
 	name: "my_tool",

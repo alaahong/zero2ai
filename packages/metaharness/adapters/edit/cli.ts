@@ -12,10 +12,10 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import { parseArgs } from "node:util";
-import { type ResolvedThinkingLevel, ThinkingLevel } from "@oh-my-pi/pi-agent-core";
-import { THINKING_EFFORTS } from "@oh-my-pi/pi-ai";
-import { postmortem, TempDir } from "@oh-my-pi/pi-utils";
-import { loadTasksFromDir, validateFixturesFromDir } from "@oh-my-pi/typescript-edit-benchmark/tasks";
+import { type ResolvedThinkingLevel, ThinkingLevel } from "@zero2ai/agent-core";
+import { THINKING_EFFORTS } from "@zero2ai/ai";
+import { postmortem, TempDir } from "@zero2ai/utils";
+import { loadTasksFromDir, validateFixturesFromDir } from "@zero2ai/typescript-edit-benchmark/tasks";
 import { LiveProgress } from "./live-progress";
 import { generateJsonReport, generateReport } from "./report";
 import { type BenchmarkConfig, type BenchmarkResult, buildBenchmarkResult, runBenchmark } from "./runner";

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
-import { Effort } from "@oh-my-pi/pi-ai";
-import { parseAgentFields } from "@oh-my-pi/pi-coding-agent/discovery/helpers";
-import { AUTO_THINKING } from "@oh-my-pi/pi-coding-agent/thinking";
+import { Effort } from "@zero2ai/ai";
+import { parseAgentFields } from "@zero2ai/coding-agent/discovery/helpers";
+import { AUTO_THINKING } from "@zero2ai/coding-agent/thinking";
 
 describe("parseAgentFields", () => {
 	test("rejects the reserved `main` and `sub` agent definition names", () => {

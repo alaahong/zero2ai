@@ -8,7 +8,7 @@ import {
 	getProjectDir,
 	relativePathWithinRoot,
 	setProjectDir,
-} from "@oh-my-pi/pi-utils/dirs";
+} from "@zero2ai/utils/dirs";
 
 const originalProjectDir = fs.realpathSync(process.cwd()).replace(/^\/private(?=\/)/, "");
 
@@ -47,7 +47,7 @@ describe("project directory state", () => {
 	});
 
 	it("normalizes each containment operand only once", () => {
-		const root = fs.mkdtempSync(path.join(os.tmpdir(), "omp-dirs-containment-"));
+		const root = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-dirs-containment-"));
 		const candidate = path.join(root, "child");
 		fs.mkdirSync(candidate);
 		const realpath = spyOn(fs, "realpathSync");

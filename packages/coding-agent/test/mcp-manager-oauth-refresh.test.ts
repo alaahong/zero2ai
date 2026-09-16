@@ -14,11 +14,11 @@ import { afterEach, beforeEach, describe, expect, setSystemTime, test, vi } from
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { AuthStorage, SqliteAuthCredentialStore } from "@oh-my-pi/pi-ai";
-import { MCPManager } from "@oh-my-pi/pi-coding-agent/mcp/manager";
-import * as oauthFlow from "@oh-my-pi/pi-coding-agent/mcp/oauth-flow";
-import type { MCPServerConfig } from "@oh-my-pi/pi-coding-agent/mcp/types";
-import { removeWithRetries } from "@oh-my-pi/pi-utils";
+import { AuthStorage, SqliteAuthCredentialStore } from "@zero2ai/ai";
+import { MCPManager } from "@zero2ai/coding-agent/mcp/manager";
+import * as oauthFlow from "@zero2ai/coding-agent/mcp/oauth-flow";
+import type { MCPServerConfig } from "@zero2ai/coding-agent/mcp/types";
+import { removeWithRetries } from "@zero2ai/utils";
 
 const CREDENTIAL_ID = "mcp_oauth_test_1908";
 const TOKEN_URL = "https://example.com/oauth/token";
@@ -92,7 +92,7 @@ async function withSharedSQLiteAuth<T>(
 		storeB: SqliteAuthCredentialStore;
 	}) => Promise<T>,
 ): Promise<T> {
-	const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "omp-mcp-oauth-shared-refresh-"));
+	const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-mcp-oauth-shared-refresh-"));
 	let authA: AuthStorage | undefined;
 	let authB: AuthStorage | undefined;
 	try {

@@ -3,24 +3,24 @@ import {
 	type InputItem,
 	type RequestBody,
 	transformRequestBody,
-} from "@oh-my-pi/pi-ai/providers/openai-codex/request-transformer";
+} from "@zero2ai/ai/providers/openai-codex/request-transformer";
 import {
 	buildTransformedCodexRequestBody,
 	convertCodexResponsesMessages,
 	resetOpenAICodexHistoryAfterCompaction,
 	streamOpenAICodexResponses,
-} from "@oh-my-pi/pi-ai/providers/openai-codex-responses";
-import { isOpenAIResponsesProgressEvent } from "@oh-my-pi/pi-ai/providers/openai-shared";
-import { configureCredentialRedaction } from "@oh-my-pi/pi-ai/providers/transform-messages";
+} from "@zero2ai/ai/providers/openai-codex-responses";
+import { isOpenAIResponsesProgressEvent } from "@zero2ai/ai/providers/openai-shared";
+import { configureCredentialRedaction } from "@zero2ai/ai/providers/transform-messages";
 import type {
 	CodexCompactionRequestContext,
 	Context,
 	FetchImpl,
 	ModelSpec,
 	ProviderSessionState,
-} from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import * as piUtils from "@oh-my-pi/pi-utils";
+} from "@zero2ai/ai/types";
+import { buildModel } from "@zero2ai/catalog/build";
+import * as piUtils from "@zero2ai/utils";
 import { createCodexModel } from "./helpers";
 
 beforeAll(() => configureCredentialRedaction(true));
@@ -401,15 +401,15 @@ describe("openai-codex Responses Lite input shaping", () => {
 	});
 
 	it("defaults normal inference to full Responses and keeps explicit options above the environment", async () => {
-		const previous = Bun.env.PI_CODEX_RESPONSES_LITE;
+		const previous = Bun.env.ZERO2AI_CODEX_RESPONSES_LITE;
 		const model = createCodexModel("gpt-5.6-terra", { useResponsesLite: true });
 		try {
-			delete Bun.env.PI_CODEX_RESPONSES_LITE;
+			delete Bun.env.ZERO2AI_CODEX_RESPONSES_LITE;
 			const defaultRequest = await transformRequestBody({ model: model.id, instructions: "sys" }, model, {});
 			expect(defaultRequest.instructions).toBe("sys");
 			expect(defaultRequest.input?.some(item => item.type === "additional_tools")).toBe(false);
 
-			Bun.env.PI_CODEX_RESPONSES_LITE = "true";
+			Bun.env.ZERO2AI_CODEX_RESPONSES_LITE = "true";
 			const envOptIn = await transformRequestBody({ model: model.id, instructions: "sys" }, model, {});
 			expect(envOptIn.instructions).toBeUndefined();
 			expect(envOptIn.input?.[0]?.type).toBe("additional_tools");
@@ -420,8 +420,8 @@ describe("openai-codex Responses Lite input shaping", () => {
 			expect(explicitOptOut.instructions).toBe("sys");
 			expect(explicitOptOut.input?.some(item => item.type === "additional_tools")).toBe(false);
 		} finally {
-			if (previous === undefined) delete Bun.env.PI_CODEX_RESPONSES_LITE;
-			else Bun.env.PI_CODEX_RESPONSES_LITE = previous;
+			if (previous === undefined) delete Bun.env.ZERO2AI_CODEX_RESPONSES_LITE;
+			else Bun.env.ZERO2AI_CODEX_RESPONSES_LITE = previous;
 		}
 	});
 });
@@ -795,12 +795,12 @@ describe("openai-codex concurrent reasoning summaries", () => {
 	// sections), so the response-side contract is exercised with it enabled.
 	let previousConcurrent: string | undefined;
 	beforeEach(() => {
-		previousConcurrent = Bun.env.PI_CODEX_CONCURRENT_SUMMARIES;
-		Bun.env.PI_CODEX_CONCURRENT_SUMMARIES = "1";
+		previousConcurrent = Bun.env.ZERO2AI_CODEX_CONCURRENT_SUMMARIES;
+		Bun.env.ZERO2AI_CODEX_CONCURRENT_SUMMARIES = "1";
 	});
 	afterEach(() => {
-		if (previousConcurrent === undefined) delete Bun.env.PI_CODEX_CONCURRENT_SUMMARIES;
-		else Bun.env.PI_CODEX_CONCURRENT_SUMMARIES = previousConcurrent;
+		if (previousConcurrent === undefined) delete Bun.env.ZERO2AI_CODEX_CONCURRENT_SUMMARIES;
+		else Bun.env.ZERO2AI_CODEX_CONCURRENT_SUMMARIES = previousConcurrent;
 	});
 
 	it("counts atomic summary dones as websocket watchdog progress", () => {
@@ -816,11 +816,11 @@ describe("openai-codex concurrent reasoning summaries", () => {
 		expect(withSummary.reasoning?.summary).toBe("detailed");
 
 		// Opted out: the summary is still requested, only the delivery mode drops.
-		delete Bun.env.PI_CODEX_CONCURRENT_SUMMARIES;
+		delete Bun.env.ZERO2AI_CODEX_CONCURRENT_SUMMARIES;
 		const optedOut = await transformRequestBody({ model: terra.id }, terra, summaryRequest);
 		expect(optedOut.stream_options).toBeUndefined();
 		expect(optedOut.reasoning?.summary).toBe("detailed");
-		Bun.env.PI_CODEX_CONCURRENT_SUMMARIES = "1";
+		Bun.env.ZERO2AI_CODEX_CONCURRENT_SUMMARIES = "1";
 
 		const suppressed = await transformRequestBody({ model: terra.id }, terra, {
 			reasoningEffort: "medium",

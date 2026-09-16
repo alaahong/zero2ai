@@ -2,13 +2,13 @@ import { describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { resolveProviderModels } from "@oh-my-pi/pi-catalog/model-manager";
-import { calculateCost, getBundledModels } from "@oh-my-pi/pi-catalog/models";
-import { providerEntry } from "@oh-my-pi/pi-catalog/compat/providers";
-import { DEFAULT_MODEL_PER_PROVIDER } from "@oh-my-pi/pi-catalog/provider-models/descriptors";
-import { applyXaiCatalogPricing, xaiModelManagerOptions } from "@oh-my-pi/pi-catalog/provider-models/openai-compat";
-import type { ModelSpec, Usage } from "@oh-my-pi/pi-catalog/types";
+import { buildModel } from "@zero2ai/catalog/build";
+import { resolveProviderModels } from "@zero2ai/catalog/model-manager";
+import { calculateCost, getBundledModels } from "@zero2ai/catalog/models";
+import { providerEntry } from "@zero2ai/catalog/compat/providers";
+import { DEFAULT_MODEL_PER_PROVIDER } from "@zero2ai/catalog/provider-models/descriptors";
+import { applyXaiCatalogPricing, xaiModelManagerOptions } from "@zero2ai/catalog/provider-models/openai-compat";
+import type { ModelSpec, Usage } from "@zero2ai/catalog/types";
 
 const XAI_RESPONSES_SPEC: ModelSpec<"openai-responses"> = {
 	id: "grok-4.5",
@@ -142,7 +142,7 @@ describe("paid xai (XAI_API_KEY) Responses contract", () => {
 	});
 
 	it("drops stale Chat Completions cache rows so Responses takes effect immediately", async () => {
-		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-catalog-xai-completions-cache-"));
+		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-catalog-xai-completions-cache-"));
 		const dbPath = path.join(tempDir, "models.db");
 		try {
 			await resolveProviderModels(

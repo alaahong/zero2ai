@@ -2,12 +2,12 @@ import { describe, expect, test } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { Effort } from "@oh-my-pi/pi-catalog/effort";
-import { readModelCache } from "@oh-my-pi/pi-catalog/model-cache";
-import { resolveProviderModels } from "@oh-my-pi/pi-catalog/model-manager";
-import { basetenModelManagerOptions } from "@oh-my-pi/pi-catalog/provider-models/openai-compat";
-import type { FetchImpl, ModelSpec } from "@oh-my-pi/pi-catalog/types";
+import { buildModel } from "@zero2ai/catalog/build";
+import { Effort } from "@zero2ai/catalog/effort";
+import { readModelCache } from "@zero2ai/catalog/model-cache";
+import { resolveProviderModels } from "@zero2ai/catalog/model-manager";
+import { basetenModelManagerOptions } from "@zero2ai/catalog/provider-models/openai-compat";
+import type { FetchImpl, ModelSpec } from "@zero2ai/catalog/types";
 
 describe("Baseten provider discovery", () => {
 	test("discovers Baseten models with custom metadata", async () => {
@@ -246,7 +246,7 @@ describe("Baseten provider discovery", () => {
 	});
 
 	test("invalidates cached GLM-5.3 reasoning metadata on upgrade", async () => {
-		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-catalog-baseten-glm53-cache-"));
+		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-catalog-baseten-glm53-cache-"));
 		const cacheDbPath = path.join(tempDir, "models.db");
 		const discoveredModels: ModelSpec<"openai-completions">[] = [
 			{

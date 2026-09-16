@@ -1,6 +1,6 @@
-# Developing `@oh-my-pi/pi-coding-agent`
+# Developing `@zero2ai/coding-agent`
 
-This package is the `omp` CLI. This file is a **developer's map**: where things live
+This package is the `zero2ai` CLI. This file is a **developer's map**: where things live
 in `src/`, how to run the local loops, and — for each subsystem — which document in
 the repo [`docs/`](../../docs/) tree is the authoritative reference.
 
@@ -20,7 +20,7 @@ Run from `packages/coding-agent/` (or add `--cwd=packages/coding-agent`):
 | Lint only | `bun run lint` |
 | Tests | `bun run test` |
 | Autofix: lint + format prompts | `bun run fix` |
-| Build the `dist/omp` binary | `bun run build` |
+| Build the `dist/zero2ai` binary | `bun run build` |
 
 Never invoke `tsc`/`npx tsc` directly — `bun run check` is the typecheck gate. After
 changing the React tool renderers under `collab-web/src/tool-render/`, rebuild them
@@ -49,7 +49,7 @@ createAgentSession(...)        ── src/sdk.ts → AgentSession
 ```
 
 `cli.ts` doubles as the worker host: it declares itself via `declareWorkerHostEntry()`
-and dispatches the hidden `__omp_worker_*` argv selectors before loading the command
+and dispatches the hidden `__zero2ai_worker_*` argv selectors before loading the command
 registry (see `AGENTS.md` → *Worker scripts*).
 
 ## Source layout (`src/`)
@@ -98,7 +98,7 @@ Top-level entry modules: `cli.ts`, `main.ts`, `sdk.ts`, `index.ts` (SDK barrel),
 - [models.md](../../docs/models.md), [providers.md](../../docs/providers.md), [adding-a-provider.md](../../docs/adding-a-provider.md)
 - [local-models.md](../../docs/local-models.md)
 - [provider-streaming-internals.md](../../docs/provider-streaming-internals.md), [ai-schema-normalize.md](../../docs/ai-schema-normalize.md)
-- [toolconv/](../../docs/toolconv/) — per-family tool-call conversion (anthropic, deepseek, gemini, gemma, glm-4.5, harmony, hermes, kimi-k2, minimax, pi-native, qwen3, xml); see also [ERRATA-GPT5-HARMONY.md](../../docs/ERRATA-GPT5-HARMONY.md)
+- [toolconv/](../../docs/toolconv/) — per-family tool-call conversion (anthropic, deepseek, gemini, gemma, glm-4.5, harmony, hermes, kimi-k2, minimax, zero2ai-native, qwen3, xml); see also [ERRATA-GPT5-HARMONY.md](../../docs/ERRATA-GPT5-HARMONY.md)
 - [keybindings.md](../../docs/keybindings.md)
 - [secrets.md](../../docs/secrets.md), [auth-broker-gateway.md](../../docs/auth-broker-gateway.md), [install-id.md](../../docs/install-id.md)
 - [system-prompt-customization.md](../../docs/system-prompt-customization.md)
@@ -137,7 +137,7 @@ Top-level entry modules: `cli.ts`, `main.ts`, `sdk.ts`, `index.ts` (SDK barrel),
 - [tui.md](../../docs/tui.md), [tui-core-renderer.md](../../docs/tui-core-renderer.md), [tui-runtime-internals.md](../../docs/tui-runtime-internals.md)
 - [theme.md](../../docs/theme.md)
 
-### Natives (`crates/pi-natives`, `packages/natives`)
+### Natives (`crates/zero2ai-natives`, `packages/natives`)
 - [natives-architecture.md](../../docs/natives-architecture.md), [natives-addon-loader-runtime.md](../../docs/natives-addon-loader-runtime.md), [natives-binding-contract.md](../../docs/natives-binding-contract.md)
 - [natives-text-search-pipeline.md](../../docs/natives-text-search-pipeline.md), [natives-shell-pty-process.md](../../docs/natives-shell-pty-process.md), [natives-media-system-utils.md](../../docs/natives-media-system-utils.md)
 - [natives-build-release-debugging.md](../../docs/natives-build-release-debugging.md), [natives-rust-task-cancellation.md](../../docs/natives-rust-task-cancellation.md), [porting-to-natives.md](../../docs/porting-to-natives.md)
@@ -146,7 +146,7 @@ Top-level entry modules: `cli.ts`, `main.ts`, `sdk.ts`, `index.ts` (SDK barrel),
 - [macos-signing-notarization.md](../../docs/macos-signing-notarization.md)
 - [porting-from-pi-mono.md](../../docs/porting-from-pi-mono.md)
 
-## Extending omp
+## Extending zero2ai
 
 | To add… | Start here |
 |---|---|

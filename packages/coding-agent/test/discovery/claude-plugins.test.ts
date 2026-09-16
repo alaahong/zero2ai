@@ -2,17 +2,17 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { clearCache as clearFsCache } from "@oh-my-pi/pi-coding-agent/capability/fs";
-import { disableUserSource, enableProvider, loadCapability } from "@oh-my-pi/pi-coding-agent/capability";
+import { clearCache as clearFsCache } from "@zero2ai/coding-agent/capability/fs";
+import { disableUserSource, enableProvider, loadCapability } from "@zero2ai/coding-agent/capability";
 import {
 	clearClaudePluginRootsCache,
 	listClaudePluginRoots,
 	parseClaudePluginsRegistry,
-} from "@oh-my-pi/pi-coding-agent/discovery/helpers";
-import type { Skill } from "@oh-my-pi/pi-coding-agent/capability/skill";
-import { loadSkills } from "@oh-my-pi/pi-coding-agent/extensibility/skills";
-import { __resetDirsFromEnvForTests, removeWithRetries, setAgentDir } from "@oh-my-pi/pi-utils";
-import "@oh-my-pi/pi-coding-agent/discovery/claude-plugins";
+} from "@zero2ai/coding-agent/discovery/helpers";
+import type { Skill } from "@zero2ai/coding-agent/capability/skill";
+import { loadSkills } from "@zero2ai/coding-agent/extensibility/skills";
+import { __resetDirsFromEnvForTests, removeWithRetries, setAgentDir } from "@zero2ai/utils";
+import "@zero2ai/coding-agent/discovery/claude-plugins";
 
 describe("parseClaudePluginsRegistry", () => {
 	test("parses valid registry", () => {
@@ -79,9 +79,9 @@ describe("listClaudePluginRoots", () => {
 		clearClaudePluginRootsCache();
 		clearFsCache();
 		originalHome = process.env.HOME;
-		originalAgentDirEnv = process.env.PI_CODING_AGENT_DIR;
-		originalOmpProfileEnv = process.env.OMP_PROFILE;
-		originalPiProfileEnv = process.env.PI_PROFILE;
+		originalAgentDirEnv = process.env.ZERO2AI_CODING_AGENT_DIR;
+		originalOmpProfileEnv = process.env.ZERO2AI_PROFILE;
+		originalPiProfileEnv = process.env.ZERO2AI_PROFILE;
 		originalClaudeConfigDir = process.env.CLAUDE_CONFIG_DIR;
 		delete process.env.CLAUDE_CONFIG_DIR;
 		tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "claude-plugins-test-"));
@@ -89,7 +89,7 @@ describe("listClaudePluginRoots", () => {
 		process.env.HOME = tempDir;
 		vi.spyOn(os, "homedir").mockReturnValue(tempDir);
 		// Point the agent dir at a temp dir so user-scope discovery (native MCP
-		// config, skills, etc.) cannot read the real ~/.omp/agent profile.
+		// config, skills, etc.) cannot read the real ~/.zero2ai/agent profile.
 		setAgentDir(testAgentDir);
 		enableProvider("claude-plugins");
 		disableUserSource("claude-plugins");
@@ -103,9 +103,9 @@ describe("listClaudePluginRoots", () => {
 		// setAgentDir() clears the profile env vars and snapshots the agent dir,
 		// so restore every env var it can touch before rebuilding the resolver.
 		restoreEnvValue("HOME", originalHome);
-		restoreEnvValue("OMP_PROFILE", originalOmpProfileEnv);
-		restoreEnvValue("PI_PROFILE", originalPiProfileEnv);
-		restoreEnvValue("PI_CODING_AGENT_DIR", originalAgentDirEnv);
+		restoreEnvValue("ZERO2AI_PROFILE", originalOmpProfileEnv);
+		restoreEnvValue("ZERO2AI_PROFILE", originalPiProfileEnv);
+		restoreEnvValue("ZERO2AI_CODING_AGENT_DIR", originalAgentDirEnv);
 		restoreEnvValue("CLAUDE_CONFIG_DIR", originalClaudeConfigDir);
 		enableProvider("claude-plugins");
 		disableUserSource("claude-plugins");
@@ -480,7 +480,7 @@ describe("listClaudePluginRoots", () => {
 		expect(result3.roots).toHaveLength(2);
 	});
 
-	test("isolates cached OMP plugin roots by home when Claude config is shared", async () => {
+	test("isolates cached ZERO2AI plugin roots by home when Claude config is shared", async () => {
 		const sharedClaudeConfig = path.join(tempDir, "shared-claude");
 		const firstHome = path.join(tempDir, "first-home");
 		const secondHome = path.join(tempDir, "second-home");
@@ -489,7 +489,7 @@ describe("listClaudePluginRoots", () => {
 			[firstHome, "first@market"],
 			[secondHome, "second@market"],
 		] as const) {
-			const pluginsDir = path.join(home, ".omp", "plugins");
+			const pluginsDir = path.join(home, ".zero2ai", "plugins");
 			await fs.mkdir(pluginsDir, { recursive: true });
 			await fs.writeFile(
 				path.join(pluginsDir, "installed_plugins.json"),
@@ -515,32 +515,32 @@ describe("listClaudePluginRoots", () => {
 		expect(second.roots.map(root => root.id)).toEqual(["second@market"]);
 	});
 
-	test("loads OMP user skills without opting into foreign Claude skills", async () => {
-		const ompPluginPath = path.join(tempDir, "plugins", "omp-owned");
+	test("loads ZERO2AI user skills without opting into foreign Claude skills", async () => {
+		const zero2aiPluginPath = path.join(tempDir, "plugins", "zero2ai-owned");
 		const claudePluginPath = path.join(tempDir, "plugins", "claude-owned");
-		const ompRegistryPath = path.join(tempDir, ".omp", "plugins", "installed_plugins.json");
+		const zero2aiRegistryPath = path.join(tempDir, ".zero2ai", "plugins", "installed_plugins.json");
 		const claudeRegistryPath = path.join(tempDir, ".claude", "plugins", "installed_plugins.json");
 		await Promise.all([
-			fs.mkdir(path.join(ompPluginPath, "skills", "omp-demo"), { recursive: true }),
+			fs.mkdir(path.join(zero2aiPluginPath, "skills", "zero2ai-demo"), { recursive: true }),
 			fs.mkdir(path.join(claudePluginPath, "skills", "claude-demo"), { recursive: true }),
-			fs.mkdir(path.dirname(ompRegistryPath), { recursive: true }),
+			fs.mkdir(path.dirname(zero2aiRegistryPath), { recursive: true }),
 			fs.mkdir(path.dirname(claudeRegistryPath), { recursive: true }),
 		]);
 		await Promise.all([
 			fs.writeFile(
-				path.join(ompPluginPath, "skills", "omp-demo", "SKILL.md"),
-				"---\nname: omp-demo\ndescription: OMP skill\n---\nBody\n",
+				path.join(zero2aiPluginPath, "skills", "zero2ai-demo", "SKILL.md"),
+				"---\nname: zero2ai-demo\ndescription: ZERO2AI skill\n---\nBody\n",
 			),
 			fs.writeFile(
 				path.join(claudePluginPath, "skills", "claude-demo", "SKILL.md"),
 				"---\nname: claude-demo\ndescription: Claude skill\n---\nBody\n",
 			),
 			fs.writeFile(
-				ompRegistryPath,
+				zero2aiRegistryPath,
 				JSON.stringify({
 					version: 2,
 					plugins: {
-						"omp-owned@market": [{ scope: "user", installPath: ompPluginPath, version: "1.0.0" }],
+						"zero2ai-owned@market": [{ scope: "user", installPath: zero2aiPluginPath, version: "1.0.0" }],
 					},
 				}),
 			),
@@ -557,40 +557,40 @@ describe("listClaudePluginRoots", () => {
 
 		const result = await loadCapability<Skill>("skills", { cwd: tempDir });
 
-		expect(result.all.find(skill => skill.name === "omp-demo")?._source.provider).toBe("claude-plugins");
+		expect(result.all.find(skill => skill.name === "zero2ai-demo")?._source.provider).toBe("claude-plugins");
 		expect(result.all.find(skill => skill.name === "claude-demo")).toBeUndefined();
 	});
 
-	test("loadSkills surfaces omp-installed plugin skills without enabling the Claude source", async () => {
+	test("loadSkills surfaces zero2ai-installed plugin skills without enabling the Claude source", async () => {
 		// Regression (#10743): #10666 fixed allowedRoots() to keep user-scope roots
 		// with origin !== "claude", but isSourceEnabled() in extensibility/skills.ts
 		// re-dropped them via isUserSourceEnabled("claude-plugins"). The origin now
 		// rides SourceMeta, so the foreign gate applies only to claude-origin roots.
-		const ompPluginPath = path.join(tempDir, "plugins", "omp-owned");
+		const zero2aiPluginPath = path.join(tempDir, "plugins", "zero2ai-owned");
 		const claudePluginPath = path.join(tempDir, "plugins", "claude-owned");
-		const ompRegistryPath = path.join(tempDir, ".omp", "plugins", "installed_plugins.json");
+		const zero2aiRegistryPath = path.join(tempDir, ".zero2ai", "plugins", "installed_plugins.json");
 		const claudeRegistryPath = path.join(tempDir, ".claude", "plugins", "installed_plugins.json");
 		await Promise.all([
-			fs.mkdir(path.join(ompPluginPath, "skills", "omp-demo"), { recursive: true }),
+			fs.mkdir(path.join(zero2aiPluginPath, "skills", "zero2ai-demo"), { recursive: true }),
 			fs.mkdir(path.join(claudePluginPath, "skills", "claude-demo"), { recursive: true }),
-			fs.mkdir(path.dirname(ompRegistryPath), { recursive: true }),
+			fs.mkdir(path.dirname(zero2aiRegistryPath), { recursive: true }),
 			fs.mkdir(path.dirname(claudeRegistryPath), { recursive: true }),
 		]);
 		await Promise.all([
 			fs.writeFile(
-				path.join(ompPluginPath, "skills", "omp-demo", "SKILL.md"),
-				"---\nname: omp-demo\ndescription: OMP skill\n---\nBody\n",
+				path.join(zero2aiPluginPath, "skills", "zero2ai-demo", "SKILL.md"),
+				"---\nname: zero2ai-demo\ndescription: ZERO2AI skill\n---\nBody\n",
 			),
 			fs.writeFile(
 				path.join(claudePluginPath, "skills", "claude-demo", "SKILL.md"),
 				"---\nname: claude-demo\ndescription: Claude skill\n---\nBody\n",
 			),
 			fs.writeFile(
-				ompRegistryPath,
+				zero2aiRegistryPath,
 				JSON.stringify({
 					version: 2,
 					plugins: {
-						"omp-owned@market": [{ scope: "user", installPath: ompPluginPath, version: "1.0.0" }],
+						"zero2ai-owned@market": [{ scope: "user", installPath: zero2aiPluginPath, version: "1.0.0" }],
 					},
 				}),
 			),
@@ -606,18 +606,18 @@ describe("listClaudePluginRoots", () => {
 		]);
 
 		// enabledProviders unset (beforeEach disables the claude-plugins/claude
-		// user sources): the omp-origin skill must still load; the claude-origin
+		// user sources): the zero2ai-origin skill must still load; the claude-origin
 		// one must stay opt-in.
 		const { skills } = await loadSkills({ cwd: tempDir });
 
-		expect(skills.map(s => s.name)).toContain("omp-demo");
+		expect(skills.map(s => s.name)).toContain("zero2ai-demo");
 		expect(skills.map(s => s.name)).not.toContain("claude-demo");
 	});
 
-	for (const catalogDir of [".claude-plugin", ".omp-plugin"]) {
+	for (const catalogDir of [".claude-plugin", ".zero2ai-plugin"]) {
 		test(`marketplace-root ${catalogDir} entry limits shared skills to declared paths`, async () => {
 			const pluginPath = path.join(tempDir, "plugins", "anthropic-skills");
-			const registryPath = path.join(tempDir, ".omp", "plugins", "installed_plugins.json");
+			const registryPath = path.join(tempDir, ".zero2ai", "plugins", "installed_plugins.json");
 			await Promise.all([
 				fs.mkdir(path.join(pluginPath, "skills", "xlsx"), { recursive: true }),
 				fs.mkdir(path.join(pluginPath, "skills", "skill-creator"), { recursive: true }),

@@ -3,18 +3,18 @@ import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { removeWithRetries } from "@oh-my-pi/pi-utils";
-import "@oh-my-pi/pi-coding-agent/tools/renderers";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { ReadTool } from "@oh-my-pi/pi-coding-agent/tools/read";
+import { removeWithRetries } from "@zero2ai/utils";
+import "@zero2ai/coding-agent/tools/renderers";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { ReadTool } from "@zero2ai/coding-agent/tools/read";
 import {
 	listTables,
 	parseSqlitePathCandidates,
 	parseSqliteSelector,
 	renderTable,
 	renderTableList,
-} from "@oh-my-pi/pi-coding-agent/tools/sqlite-reader";
-import { WriteTool } from "@oh-my-pi/pi-coding-agent/tools/write";
+} from "@zero2ai/coding-agent/tools/sqlite-reader";
+import { WriteTool } from "@zero2ai/coding-agent/tools/write";
 
 type ToolTextResult = {
 	content: Array<{ type: string; text?: string }>;
@@ -174,8 +174,8 @@ describe("SQLite tool support", () => {
 		sqlitePath = path.join(tmpDir, "app.sqlite");
 		sqliteDbPath = path.join(tmpDir, "app.db");
 		invalidDbPath = path.join(tmpDir, "thumbs.db");
-		originalEditVariant = Bun.env.PI_EDIT_VARIANT;
-		Bun.env.PI_EDIT_VARIANT = "replace";
+		originalEditVariant = Bun.env.ZERO2AI_EDIT_VARIANT;
+		Bun.env.ZERO2AI_EDIT_VARIANT = "replace";
 
 		fixtureBytes = buildFixtureBytes();
 		await fs.writeFile(sqlitePath, fixtureBytes);
@@ -189,9 +189,9 @@ describe("SQLite tool support", () => {
 
 	afterAll(async () => {
 		if (originalEditVariant === undefined) {
-			delete Bun.env.PI_EDIT_VARIANT;
+			delete Bun.env.ZERO2AI_EDIT_VARIANT;
 		} else {
-			Bun.env.PI_EDIT_VARIANT = originalEditVariant;
+			Bun.env.ZERO2AI_EDIT_VARIANT = originalEditVariant;
 		}
 		await removeWithRetries(tmpDir);
 	});

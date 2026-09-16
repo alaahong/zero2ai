@@ -1,4 +1,4 @@
-import { type } from "@oh-my-pi/omptype";
+import { type } from "@zero2ai/schema";
 import type {
 	AgentIdentity,
 	AgentTelemetryConfig,
@@ -6,8 +6,8 @@ import type {
 	AgentToolContext,
 	AgentToolResult,
 	AgentToolUpdateCallback,
-} from "@oh-my-pi/pi-agent-core";
-import { escapeXmlAttribute, escapeXmlText, logger } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/agent-core";
+import { escapeXmlAttribute, escapeXmlText, logger } from "@zero2ai/utils";
 import adviseDescription from "../prompts/advisor/advise-tool.md" with { type: "text" };
 import { AdvisorEmissionGuard, type AdvisorSuppressionReason, normalizeAdvisorNote } from "./emission-guard";
 

@@ -1,4 +1,4 @@
-import { popLoopPhase, pushLoopPhase } from "@oh-my-pi/pi-utils";
+import { popLoopPhase, pushLoopPhase } from "@zero2ai/utils";
 import { fuzzyFilter } from "../fuzzy";
 import { getKeybindings } from "../keybindings";
 import { extractPrintableText } from "../keys";

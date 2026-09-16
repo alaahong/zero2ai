@@ -25,13 +25,13 @@ import {
 	shouldUseAnthropicNativeCompaction,
 	shouldUseProviderNativeCompaction,
 	withAnthropicCompactionPreserveData,
-} from "@oh-my-pi/pi-agent-core/compaction";
-import * as ai from "@oh-my-pi/pi-ai";
-import * as AIError from "@oh-my-pi/pi-ai/error";
-import type { AssistantMessage, Context, Message, Model, SimpleStreamOptions, Usage } from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import type { ModelSpec } from "@oh-my-pi/pi-catalog/types";
-import * as snapcompact from "@oh-my-pi/snapcompact";
+} from "@zero2ai/agent-core/compaction";
+import * as ai from "@zero2ai/ai";
+import * as AIError from "@zero2ai/ai/error";
+import type { AssistantMessage, Context, Message, Model, SimpleStreamOptions, Usage } from "@zero2ai/ai/types";
+import { buildModel } from "@zero2ai/catalog/build";
+import type { ModelSpec } from "@zero2ai/catalog/types";
+import * as snapcompact from "@zero2ai/snapcompact";
 
 const ZERO_USAGE: Usage = {
 	input: 0,

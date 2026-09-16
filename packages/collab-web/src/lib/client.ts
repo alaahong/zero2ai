@@ -19,7 +19,7 @@ import type {
 	SessionState,
 	SubagentLifecyclePayload,
 	SubagentProgressPayload,
-} from "@oh-my-pi/pi-wire";
+} from "@zero2ai/wire";
 import { importRoomKey } from "./codec";
 import { COLLAB_PROTO, encodeBase64Url, parseCollabLink } from "./link";
 import { CollabSocket } from "./socket";

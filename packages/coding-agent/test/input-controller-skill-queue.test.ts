@@ -7,23 +7,23 @@
  */
 import { afterEach, beforeEach, describe, expect, it, type Mock, vi } from "bun:test";
 import * as path from "node:path";
-import { Agent } from "@oh-my-pi/pi-agent-core";
-import type { ImageContent, TextContent } from "@oh-my-pi/pi-ai";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { Skill } from "@oh-my-pi/pi-coding-agent/extensibility/skills";
-import { EventController } from "@oh-my-pi/pi-coding-agent/modes/controllers/event-controller";
-import { InputController } from "@oh-my-pi/pi-coding-agent/modes/controllers/input-controller";
-import { getThemeByName, setThemeInstance } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import type { CompactionQueuedMessage, InteractiveModeContext } from "@oh-my-pi/pi-coding-agent/modes/types";
-import { UiHelpers } from "@oh-my-pi/pi-coding-agent/modes/utils/ui-helpers";
-import { AgentSession, type AgentSessionEvent } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SKILL_PROMPT_MESSAGE_TYPE, type SkillPromptDetails } from "@oh-my-pi/pi-coding-agent/session/messages";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { Container } from "@oh-my-pi/pi-tui";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { Agent } from "@zero2ai/agent-core";
+import type { ImageContent, TextContent } from "@zero2ai/ai";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import type { Skill } from "@zero2ai/coding-agent/extensibility/skills";
+import { EventController } from "@zero2ai/coding-agent/modes/controllers/event-controller";
+import { InputController } from "@zero2ai/coding-agent/modes/controllers/input-controller";
+import { getThemeByName, setThemeInstance } from "@zero2ai/coding-agent/modes/theme/theme";
+import type { CompactionQueuedMessage, InteractiveModeContext } from "@zero2ai/coding-agent/modes/types";
+import { UiHelpers } from "@zero2ai/coding-agent/modes/utils/ui-helpers";
+import { AgentSession, type AgentSessionEvent } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SKILL_PROMPT_MESSAGE_TYPE, type SkillPromptDetails } from "@zero2ai/coding-agent/session/messages";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { Container } from "@zero2ai/tui";
+import { TempDir } from "@zero2ai/utils";
 import { createInteractiveModeContext } from "./helpers/interactive-mode-context";
 
 type StubEditor = {
@@ -160,7 +160,7 @@ describe("InputController skill queue chip metadata", () => {
 	let skillCommands: Map<string, Skill>;
 
 	beforeEach(async () => {
-		tempDir = TempDir.createSync("@pi-skill-queue-stub-");
+		tempDir = TempDir.createSync("@zero2ai-skill-queue-stub-");
 		const skill = await writeSkillFile(tempDir.path(), "test-skill", "Do the thing.");
 		skillCommands = new Map<string, Skill>([["skill:test-skill", skill]]);
 	});
@@ -322,7 +322,7 @@ describe("InputController optimistic skill row (#8895)", () => {
 	let skillCommands: Map<string, Skill>;
 
 	beforeEach(async () => {
-		tempDir = TempDir.createSync("@pi-skill-optimistic-stub-");
+		tempDir = TempDir.createSync("@zero2ai-skill-optimistic-stub-");
 		const skill = await writeSkillFile(tempDir.path(), "test-skill", "Do the thing.");
 		skillCommands = new Map<string, Skill>([["skill:test-skill", skill]]);
 	});
@@ -437,7 +437,7 @@ describe("compaction skill re-invocation", () => {
 	}
 
 	beforeEach(async () => {
-		tempDir = TempDir.createSync("@pi-skill-compaction-stub-");
+		tempDir = TempDir.createSync("@zero2ai-skill-compaction-stub-");
 		const skill = await writeSkillFile(tempDir.path(), "test-skill", "Do the thing.");
 		skillCommands = new Map<string, Skill>([["skill:test-skill", skill]]);
 	});
@@ -530,7 +530,7 @@ interface SessionFixture {
 }
 
 async function createRealSession(): Promise<SessionFixture> {
-	const tempDir = TempDir.createSync("@pi-skill-queue-real-");
+	const tempDir = TempDir.createSync("@zero2ai-skill-queue-real-");
 	const authStorage = await AuthStorage.create(path.join(tempDir.path(), "testauth.db"));
 	authStorage.setRuntimeApiKey("anthropic", "test-key");
 	const modelRegistry = new ModelRegistry(authStorage);

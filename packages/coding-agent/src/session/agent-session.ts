@@ -43,7 +43,7 @@ import {
 	TERMINAL_TOOL_RESULT_ABORT_REASON,
 	type ThinkingLevel,
 	type ToolChoiceDirective,
-} from "@oh-my-pi/pi-agent-core";
+} from "@zero2ai/agent-core";
 import {
 	type CompactionPreparation,
 	type CompactionResult,
@@ -51,7 +51,7 @@ import {
 	collectEntriesForBranchSummary,
 	generateBranchSummary,
 	type ShakeConfig,
-} from "@oh-my-pi/pi-agent-core/compaction";
+} from "@zero2ai/agent-core/compaction";
 import type {
 	AssistantMessage,
 	CodexCompactionContext,
@@ -75,14 +75,14 @@ import type {
 	ToolResultMessage,
 	UsageReport,
 	UserMessage,
-} from "@oh-my-pi/pi-ai";
-import { type Effort, streamSimple } from "@oh-my-pi/pi-ai";
-import * as AIError from "@oh-my-pi/pi-ai/error";
-import { resetOpenAICodexHistoryAfterCompaction } from "@oh-my-pi/pi-ai/providers/openai-codex-responses";
-import { toolWireSchema } from "@oh-my-pi/pi-ai/utils/schema";
-import { preferredDialect } from "@oh-my-pi/pi-catalog/identity";
-import { modelsAreEqual } from "@oh-my-pi/pi-catalog/models";
-import { type EditStore, PowerAssertion, type PowerAssertionOptions } from "@oh-my-pi/pi-natives";
+} from "@zero2ai/ai";
+import { type Effort, streamSimple } from "@zero2ai/ai";
+import * as AIError from "@zero2ai/ai/error";
+import { resetOpenAICodexHistoryAfterCompaction } from "@zero2ai/ai/providers/openai-codex-responses";
+import { toolWireSchema } from "@zero2ai/ai/utils/schema";
+import { preferredDialect } from "@zero2ai/catalog/identity";
+import { modelsAreEqual } from "@zero2ai/catalog/models";
+import { type EditStore, PowerAssertion, type PowerAssertionOptions } from "@zero2ai/natives";
 import {
 	$env,
 	escapeXmlText,
@@ -97,7 +97,7 @@ import {
 	Snowflake,
 	stringProperty,
 	withTimeout,
-} from "@oh-my-pi/pi-utils";
+} from "@zero2ai/utils";
 import { type AdvisorConfig, loadAdvisorTranscriptCosts } from "../advisor";
 import { ASYNC_JOB_MANAGER_SHUTDOWN_REASON, type AsyncJob, AsyncJobManager } from "../async";
 import { reset as resetCapabilities } from "../capability";
@@ -4564,7 +4564,7 @@ export class AgentSession {
 	 * `metadata.user_id` shaped like real Claude Code's `getAPIMetadata` output:
 	 * `{ session_id, account_uuid, device_id }`. `account_uuid` is included only
 	 * when an Anthropic OAuth credential with a known account UUID is loaded;
-	 * `device_id` is derived from both the persistent omp install id and that
+	 * `device_id` is derived from both the persistent zero2ai install id and that
 	 * account UUID. Resolving live keeps the value in sync with auth-state changes
 	 * (login/logout, token refresh that surfaces a new account UUID) without
 	 * needing to re-call `#syncAgentSessionId()` on every such event.
@@ -4752,7 +4752,7 @@ export class AgentSession {
 	 * Turn-settle checkpoint for owned headless browser tabs (issue #8246).
 	 * Close tabs idle past `browser.idleCloseSec` as the memory backstop,
 	 * then freeze the survivors so idle animated pages stop burning CPU/GPU
-	 * while keeping their state for millisecond resume. Scoped to OMP-owned
+	 * while keeping their state for millisecond resume. Scoped to ZERO2AI-owned
 	 * headless tabs of this session only — relay/CDP/spawned tabs, other
 	 * sessions' tabs, and `persist` tabs are never touched. Best-effort:
 	 * never throws, so teardown cannot break the event flow.
@@ -7046,7 +7046,7 @@ export class AgentSession {
 				// Await the idempotent dispose() before exiting so the browser
 				// reaper and other bounded teardown complete — a fire-and-forget
 				// `void this.dispose()` raced process.exit() and could leave an
-				// OMP-owned Chromium alive (#5643).
+				// ZERO2AI-owned Chromium alive (#5643).
 				void this.dispose().finally(() => process.exit(0));
 			},
 			getContextUsage: () => this.getContextUsage(),
@@ -7989,7 +7989,7 @@ export class AgentSession {
 	}
 
 	#scheduleReplanTitleRefresh(): void {
-		if ($env.PI_NO_TITLE) return;
+		if ($env.ZERO2AI_NO_TITLE) return;
 		// Headless subagent sessions have no operator-visible title, so a todo-init
 		// replan refresh only burns a tiny-model call whose result lands in JSONL
 		// and is never shown (issue #5910). In an interactive host the operator can
@@ -8036,7 +8036,7 @@ export class AgentSession {
 			isLocalExtensionCommand ||
 			this.sessionName ||
 			this.#titleGenerationInFlightFor === sessionId ||
-			$env.PI_NO_TITLE ||
+			$env.ZERO2AI_NO_TITLE ||
 			isLowSignalTitleInput(firstMessage)
 		) {
 			return;
@@ -11093,7 +11093,7 @@ export class AgentSession {
 			})),
 			messages: llmMessages,
 		};
-		const filePath = path.join(os.tmpdir(), `omp-llm-request-${Snowflake.next()}.json`);
+		const filePath = path.join(os.tmpdir(), `zero2ai-llm-request-${Snowflake.next()}.json`);
 		await Bun.write(filePath, `${JSON.stringify(payload, null, 2)}\n`);
 		return filePath;
 	}

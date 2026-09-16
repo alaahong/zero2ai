@@ -1,14 +1,14 @@
 import { afterEach, expect, it, vi } from "bun:test";
-import { AuthStorage } from "@oh-my-pi/pi-ai";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { ExtensionRuntime } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/loader";
-import type { CreateAgentSessionResult } from "@oh-my-pi/pi-coding-agent/sdk";
-import * as sdkModule from "@oh-my-pi/pi-coding-agent/sdk";
-import type { AgentSession, AgentSessionEvent } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { runSubprocess } from "@oh-my-pi/pi-coding-agent/task/executor";
-import { EventBus } from "@oh-my-pi/pi-coding-agent/utils/event-bus";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { AuthStorage } from "@zero2ai/ai";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { ExtensionRuntime } from "@zero2ai/coding-agent/extensibility/extensions/loader";
+import type { CreateAgentSessionResult } from "@zero2ai/coding-agent/sdk";
+import * as sdkModule from "@zero2ai/coding-agent/sdk";
+import type { AgentSession, AgentSessionEvent } from "@zero2ai/coding-agent/session/agent-session";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { runSubprocess } from "@zero2ai/coding-agent/task/executor";
+import { EventBus } from "@zero2ai/coding-agent/utils/event-bus";
+import { TempDir } from "@zero2ai/utils";
 import { createSessionDefaults } from "../helpers/session-defaults";
 
 const authStorages: AuthStorage[] = [];
@@ -21,7 +21,7 @@ afterEach(async () => {
 });
 
 it("overlaps registry refresh with session-file opening and session setup", async () => {
-	const tempDir = TempDir.createSync("@pi-task-launch-");
+	const tempDir = TempDir.createSync("@zero2ai-task-launch-");
 	tempDirs.push(tempDir);
 	const authStorage = await AuthStorage.create(tempDir.join("auth.db"));
 	authStorages.push(authStorage);

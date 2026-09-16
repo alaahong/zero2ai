@@ -12,18 +12,18 @@
  */
 import { afterAll, afterEach, beforeAll, describe, expect, it, type Mock, spyOn } from "bun:test";
 import * as os from "node:os";
-import { Agent } from "@oh-my-pi/pi-agent-core";
-import type { Model } from "@oh-my-pi/pi-ai";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { CollabGuestLink } from "@oh-my-pi/pi-coding-agent/collab/guest";
-import { CollabHost } from "@oh-my-pi/pi-coding-agent/collab/host";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { InteractiveModeContext } from "@oh-my-pi/pi-coding-agent/modes/types";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import type { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { refreshDirsFromEnv, TempDir } from "@oh-my-pi/pi-utils";
+import { Agent } from "@zero2ai/agent-core";
+import type { Model } from "@zero2ai/ai";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { CollabGuestLink } from "@zero2ai/coding-agent/collab/guest";
+import { CollabHost } from "@zero2ai/coding-agent/collab/host";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import type { InteractiveModeContext } from "@zero2ai/coding-agent/modes/types";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import type { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { refreshDirsFromEnv, TempDir } from "@zero2ai/utils";
 import { createAssistantMessage, createInMemoryAuthStorage } from "../helpers/agent-session-setup";
 import { installInMemoryRelay, uninstallInMemoryRelay } from "./helpers/in-memory-relay";
 
@@ -69,7 +69,7 @@ interface GuestHarness {
  * (and rebuilt-on-compaction) model context.
  */
 function makeGuestHarness(model: Model, modelRegistry: ModelRegistry): GuestHarness {
-	const tempDir = TempDir.createSync("@pi-collab-guest-sync-");
+	const tempDir = TempDir.createSync("@zero2ai-collab-guest-sync-");
 	const manager = SessionManager.create(tempDir.path(), tempDir.path());
 	const agent = new Agent({
 		initialState: { model, systemPrompt: ["Test"], tools: [], messages: [] },
@@ -140,7 +140,7 @@ async function settleFrames(predicate: () => boolean, timeoutMs = 10_000): Promi
 }
 
 // The guest writes its replica under getConfigRootDir(); redirect the config
-// root to a temp HOME so the test never touches the real ~/.omp.
+// root to a temp HOME so the test never touches the real ~/.zero2ai.
 let homedirSpy: Mock<typeof os.homedir> | undefined;
 let homeDir: TempDir | undefined;
 let authStorage: AuthStorage;
@@ -148,7 +148,7 @@ let modelRegistry: ModelRegistry;
 let model: Model;
 
 beforeAll(() => {
-	homeDir = TempDir.createSync("@pi-collab-guest-home-");
+	homeDir = TempDir.createSync("@zero2ai-collab-guest-home-");
 	homedirSpy = spyOn(os, "homedir").mockReturnValue(homeDir.path());
 	refreshDirsFromEnv();
 	installInMemoryRelay();

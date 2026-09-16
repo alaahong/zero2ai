@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "robomp"
 version = "0.1.0"
-description = "Self-hosted GitHub triage/fix bot driving omp --mode rpc"
+description = "Self-hosted GitHub triage/fix bot driving zero2ai --mode rpc"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
@@ -19,7 +19,7 @@ dependencies = [
   "pydantic-settings>=2.2",
   "python-dotenv>=1.0",
   "click>=8.1",
-  "omp-rpc>=0.1.0",
+  "zero2ai-rpc>=0.1.0",
 ]
 
 [project.optional-dependencies]
@@ -51,7 +51,7 @@ filterwarnings = [
 line-length = 120
 target-version = "py311"
 src = ["src", "tests"]
-extend-exclude = [".pi-context", "data"]
+extend-exclude = [".zero2ai-context", "data"]
 
 [tool.ruff.lint]
 select = [

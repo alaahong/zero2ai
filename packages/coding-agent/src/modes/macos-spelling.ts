@@ -1,11 +1,11 @@
-import * as native from "@oh-my-pi/pi-natives";
-import { TERMINAL } from "@oh-my-pi/pi-tui";
+import * as native from "@zero2ai/natives";
+import { TERMINAL } from "@zero2ai/tui";
 import type {
 	EditorInlineReplacement,
 	EditorTextAssistProvider,
 	EditorWordReplacements,
-} from "@oh-my-pi/pi-tui/components/editor";
-import { logger } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/tui/components/editor";
+import { logger } from "@zero2ai/utils";
 import { maskNonProse } from "./markdown-prose";
 
 /** Styled underline: red curly undercurl via colon-subparameter SGR (4:3 + SGR 58 color). */

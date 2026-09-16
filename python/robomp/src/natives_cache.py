@@ -18,8 +18,8 @@ allocates a new inode and leaves the cached file untouched. Cache GC is by
 LRU on ``manifest.json.captured_at``; hardlinked workspaces keep the inode
 alive after the cache directory is rmtree'd.
 
-Ownership: cache root is provisioned ``root:omp 02770`` by ``entrypoint.sh``
-so slot subprocesses (group ``omp``) can capture under setgid inheritance.
+Ownership: cache root is provisioned ``root:zero2ai 02770`` by ``entrypoint.sh``
+so slot subprocesses (group ``zero2ai``) can capture under setgid inheritance.
 Same shape as ``/data/cache/cargo``.
 """
 
@@ -48,8 +48,8 @@ log = logging.getLogger(__name__)
 # Paths whose git tree-hash feeds the cache key. Order is significant — the
 # hash incorporates the (path, tree_hash) pairs in this exact order so a
 # different ordering would produce a different key. Cover every input the
-# napi build reads: all workspace crates (pi-natives transitively depends on
-# pi-ast/pi-iso/pi-shell), the workspace Cargo manifest + lock, the rust
+# napi build reads: all workspace crates (zero2ai-natives transitively depends on
+# zero2ai-ast/zero2ai-iso/zero2ai-shell), the workspace Cargo manifest + lock, the rust
 # toolchain pin, and the natives package itself (build script + scripts/* +
 # package.json with napi config).
 CACHE_KEY_PATHS: tuple[str, ...] = (
@@ -250,7 +250,7 @@ class CacheHit:
 
 
 class NativesCache:
-    """Per-repo content-addressed cache of pi-natives build outputs."""
+    """Per-repo content-addressed cache of zero2ai-natives build outputs."""
 
     def __init__(
         self,
@@ -365,9 +365,9 @@ class NativesCache:
                 # NOTE: capture uses COPY, not hardlink. Hardlinking a
                 # slot-owned workspace file into the cache would preserve
                 # the slot's ownership on the cached inode — defeating
-                # the setgid `omp` model that lets other slots read it.
+                # the setgid `zero2ai` model that lets other slots read it.
                 # A copy creates a fresh inode owned by the orchestrator
-                # (root) and inherits gid `omp` from the setgid 2770
+                # (root) and inherits gid `zero2ai` from the setgid 2770
                 # cache root.
                 for src in node_files:
                     _atomic_copy(src, staging / src.name)

@@ -15,19 +15,19 @@
  *   CLI flags, scope globs — onto that pipeline.
  */
 
-import { ThinkingLevel } from "@oh-my-pi/pi-agent-core";
-import type { Api, Effort, KnownProvider, Model, ModelSpec } from "@oh-my-pi/pi-ai";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { resolveBareVariantSelector, resolveVariantSelector } from "@oh-my-pi/pi-catalog/compat/collapse";
-import { collapseVariantId, stripThinkingVariantSuffix } from "@oh-my-pi/pi-catalog/compat/taxonomy";
-import { modelMatchesHost } from "@oh-my-pi/pi-catalog/hosts";
-import { buildModelProviderPriorityRank } from "@oh-my-pi/pi-catalog/identity";
-import { clampThinkingLevelForModel } from "@oh-my-pi/pi-catalog/model-thinking";
-import { type GeneratedProvider, getBundledModels, modelsAreEqual } from "@oh-my-pi/pi-catalog/models";
-import { DEFAULT_MODEL_PER_PROVIDER } from "@oh-my-pi/pi-catalog/provider-models";
-import { fuzzyMatch } from "@oh-my-pi/pi-tui";
-import { logger } from "@oh-my-pi/pi-utils";
-import chalk from "@oh-my-pi/pi-utils/chalk";
+import { ThinkingLevel } from "@zero2ai/agent-core";
+import type { Api, Effort, KnownProvider, Model, ModelSpec } from "@zero2ai/ai";
+import { buildModel } from "@zero2ai/catalog/build";
+import { resolveBareVariantSelector, resolveVariantSelector } from "@zero2ai/catalog/compat/collapse";
+import { collapseVariantId, stripThinkingVariantSuffix } from "@zero2ai/catalog/compat/taxonomy";
+import { modelMatchesHost } from "@zero2ai/catalog/hosts";
+import { buildModelProviderPriorityRank } from "@zero2ai/catalog/identity";
+import { clampThinkingLevelForModel } from "@zero2ai/catalog/model-thinking";
+import { type GeneratedProvider, getBundledModels, modelsAreEqual } from "@zero2ai/catalog/models";
+import { DEFAULT_MODEL_PER_PROVIDER } from "@zero2ai/catalog/provider-models";
+import { fuzzyMatch } from "@zero2ai/tui";
+import { logger } from "@zero2ai/utils";
+import chalk from "@zero2ai/utils/chalk";
 import MODEL_PRIO from "../priority.json" with { type: "json" };
 import {
 	AUTO_THINKING,
@@ -2000,7 +2000,7 @@ export function resolveCliModel(options: {
 			model: undefined,
 			selector: undefined,
 			warning: undefined,
-			error: `Unknown provider "${cliProvider}". Run "omp models" to see available providers/models.`,
+			error: `Unknown provider "${cliProvider}". Run "zero2ai models" to see available providers/models.`,
 		};
 	}
 
@@ -2085,7 +2085,7 @@ export function resolveCliModel(options: {
 					selector: undefined,
 					thinkingLevel: undefined,
 					warning: resolved.warning,
-					error: `Model "${trimmedModel}" not found. Run "omp models" to see available models.`,
+					error: `Model "${trimmedModel}" not found. Run "zero2ai models" to see available models.`,
 				};
 			}
 		}
@@ -2145,7 +2145,7 @@ export function resolveCliModel(options: {
 			selector: undefined,
 			thinkingLevel: undefined,
 			warning,
-			error: `Model "${display}" not found. Run "omp models" to see available models.`,
+			error: `Model "${display}" not found. Run "zero2ai models" to see available models.`,
 		};
 	}
 

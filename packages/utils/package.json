@@ -1,5 +1,5 @@
 {
-	"name": "@oh-my-pi/pi-utils",
+	"name": "@zero2ai/utils",
 	"version": "18.2.1",
 	"description": "Shared utilities for pi packages",
 	"keywords": [
@@ -51,7 +51,7 @@
 		"fmt": "oxfmt --no-error-on-unmatched-pattern 'src/**/*.{ts,tsx}' '{test,bench,examples,scripts}/**/*.ts' '*.ts'"
 	},
 	"dependencies": {
-		"@oh-my-pi/pi-natives": "catalog:"
+		"@zero2ai/natives": "catalog:"
 	},
 	"devDependencies": {
 		"@types/bun": "catalog:"

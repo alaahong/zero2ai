@@ -2,16 +2,16 @@ import { afterEach, describe, expect, it, vi } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { AuthStorage, type CredentialDisabledEvent } from "@oh-my-pi/pi-ai";
-import * as oauthUtils from "@oh-my-pi/pi-ai/oauth";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { Extension, ExtensionError, ExtensionFactory } from "@oh-my-pi/pi-coding-agent/extensibility/extensions";
-import { ExtensionRunner } from "@oh-my-pi/pi-coding-agent/extensibility/extensions";
-import { ExtensionRuntime } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/loader";
-import { createAgentSession } from "@oh-my-pi/pi-coding-agent/sdk";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { removeSyncWithRetries, Snowflake } from "@oh-my-pi/pi-utils";
+import { AuthStorage, type CredentialDisabledEvent } from "@zero2ai/ai";
+import * as oauthUtils from "@zero2ai/ai/oauth";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import type { Extension, ExtensionError, ExtensionFactory } from "@zero2ai/coding-agent/extensibility/extensions";
+import { ExtensionRunner } from "@zero2ai/coding-agent/extensibility/extensions";
+import { ExtensionRuntime } from "@zero2ai/coding-agent/extensibility/extensions/loader";
+import { createAgentSession } from "@zero2ai/coding-agent/sdk";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { removeSyncWithRetries, Snowflake } from "@zero2ai/utils";
 
 interface SessionDirs {
 	cwd: string;
@@ -80,7 +80,7 @@ describe("createAgentSession credential_disabled subscription", () => {
 	const tempDirs: string[] = [];
 
 	const makeDirs = (label: string): SessionDirs => {
-		const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), `pi-credential-disabled-${label}-${Snowflake.next()}-`));
+		const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), `zero2ai-credential-disabled-${label}-${Snowflake.next()}-`));
 		tempDirs.push(tempDir);
 		const cwd = path.join(tempDir, "project");
 		const agentDir = path.join(tempDir, "agent");
@@ -94,7 +94,7 @@ describe("createAgentSession credential_disabled subscription", () => {
 		agentDir: dirs.agentDir,
 		authStorage,
 		// Pin the model registry at a temp models.json. Without an explicit path, ModelRegistry
-		// loads the developer's real ~/.omp models config on every construction (~100ms each,
+		// loads the developer's real ~/.zero2ai models config on every construction (~100ms each,
 		// and non-isolated). Pointing it at the (absent) temp file keeps construction at ~2ms and
 		// avoids leaking host config into the test. Providing the registry also skips the
 		// fire-and-forget background model discovery, which is irrelevant to credential_disabled.

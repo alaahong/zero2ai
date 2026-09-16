@@ -1,8 +1,8 @@
 import * as fs from "node:fs";
 import * as fsp from "node:fs/promises";
 import * as path from "node:path";
-import { isEnoent, logger } from "@oh-my-pi/pi-utils";
-import type { LazyFrameData } from "@oh-my-pi/snapcompact";
+import { isEnoent, logger } from "@zero2ai/utils";
+import type { LazyFrameData } from "@zero2ai/snapcompact";
 
 const BLOB_PREFIX = "blob:sha256:";
 

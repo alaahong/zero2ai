@@ -1,16 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as path from "node:path";
 import { scheduler } from "node:timers/promises";
-import { Agent, type AgentMessage, RESCUE_SHAKE_CONFIG, Tokenizer } from "@oh-my-pi/pi-agent-core";
-import * as compactionModule from "@oh-my-pi/pi-agent-core/compaction";
-import type { AssistantMessage, ImageContent, ToolResultMessage } from "@oh-my-pi/pi-ai";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AgentSession, type AgentSessionEvent } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { Agent, type AgentMessage, RESCUE_SHAKE_CONFIG, Tokenizer } from "@zero2ai/agent-core";
+import * as compactionModule from "@zero2ai/agent-core/compaction";
+import type { AssistantMessage, ImageContent, ToolResultMessage } from "@zero2ai/ai";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { AgentSession, type AgentSessionEvent } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { TempDir } from "@zero2ai/utils";
 
 const usage = {
 	input: 16,
@@ -31,7 +31,7 @@ describe("AgentSession shake", () => {
 	let apiInfo: { api: AssistantMessage["api"]; provider: AssistantMessage["provider"]; model: string };
 
 	beforeEach(async () => {
-		tempDir = TempDir.createSync("@pi-shake-");
+		tempDir = TempDir.createSync("@zero2ai-shake-");
 		authStorage = await AuthStorage.create(path.join(tempDir.path(), "testauth.db"));
 		authStorage.setRuntimeApiKey("anthropic", "test-key");
 		modelRegistry = new ModelRegistry(authStorage);

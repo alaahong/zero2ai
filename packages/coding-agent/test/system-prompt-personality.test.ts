@@ -2,9 +2,9 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { Personality } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { buildSystemPrompt } from "@oh-my-pi/pi-coding-agent/system-prompt";
-import { getAgentDir, removeSyncWithRetries, setAgentDir } from "@oh-my-pi/pi-utils";
+import type { Personality } from "@zero2ai/coding-agent/config/settings";
+import { buildSystemPrompt } from "@zero2ai/coding-agent/system-prompt";
+import { getAgentDir, removeSyncWithRetries, setAgentDir } from "@zero2ai/utils";
 
 const EMPTY_TREE = {
 	rootPath: "",
@@ -29,8 +29,8 @@ describe("PERSONALITY.md override", () => {
 	let tempAgentDir = "";
 
 	beforeEach(() => {
-		tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "pi-personality-"));
-		tempAgentDir = fs.mkdtempSync(path.join(os.tmpdir(), "pi-personality-agent-"));
+		tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-personality-"));
+		tempAgentDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-personality-agent-"));
 		setAgentDir(tempAgentDir);
 	});
 

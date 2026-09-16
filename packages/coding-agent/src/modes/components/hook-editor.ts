@@ -7,8 +7,8 @@
  *   (Ctrl+Q / Ctrl+Enter) submits, bordered popup
  * - Prompt-style (ask): Enter submits, Shift+Enter inserts newline, legacy ask chrome
  */
-import { Editor, type Focusable, matchesKey, Spacer, Text, type TUI } from "@oh-my-pi/pi-tui";
-import { BracketedPasteHandler } from "@oh-my-pi/pi-tui/bracketed-paste";
+import { Editor, type Focusable, matchesKey, Spacer, Text, type TUI } from "@zero2ai/tui";
+import { BracketedPasteHandler } from "@zero2ai/tui/bracketed-paste";
 import { getEditorTheme, theme } from "../../modes/theme/theme";
 import {
 	matchesAppExternalEditor,

@@ -3,13 +3,13 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { stripVTControlCharacters } from "node:util";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { StatusLineComponent, type StatusLineSettings } from "@oh-my-pi/pi-coding-agent/modes/components/status-line";
-import { STATUS_LINE_PRESETS } from "@oh-my-pi/pi-coding-agent/modes/components/status-line/presets";
-import { initTheme, theme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { visibleWidth } from "@oh-my-pi/pi-tui";
-import * as vcs from "@oh-my-pi/pi-natives/vcs";
-import { removeSyncWithRetries, setProjectDir } from "@oh-my-pi/pi-utils";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { StatusLineComponent, type StatusLineSettings } from "@zero2ai/coding-agent/modes/components/status-line";
+import { STATUS_LINE_PRESETS } from "@zero2ai/coding-agent/modes/components/status-line/presets";
+import { initTheme, theme } from "@zero2ai/coding-agent/modes/theme/theme";
+import { visibleWidth } from "@zero2ai/tui";
+import * as vcs from "@zero2ai/natives/vcs";
+import { removeSyncWithRetries, setProjectDir } from "@zero2ai/utils";
 import { beginSettingsTest, restoreSettingsTestState, type SettingsTestState } from "./helpers/settings-test-state";
 import { StatusLineTestComponents } from "./helpers/status-line";
 
@@ -19,7 +19,7 @@ const statusLines = new StatusLineTestComponents();
 
 beforeEach(async () => {
 	settingsState = beginSettingsTest();
-	projectDir = fs.mkdtempSync(path.join(os.tmpdir(), "omp-status-line-settings-cache-"));
+	projectDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-status-line-settings-cache-"));
 	setProjectDir(projectDir);
 	await Settings.init({ inMemory: true, cwd: projectDir });
 	await initTheme();

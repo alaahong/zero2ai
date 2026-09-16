@@ -1,12 +1,12 @@
-import type { Agent, AgentMessage } from "@oh-my-pi/pi-agent-core";
+import type { Agent, AgentMessage } from "@zero2ai/agent-core";
 import {
 	calculatePromptTokens,
 	findTranscriptUsageAnchor,
 	isTranscriptUsageAnchor,
 	type SessionMessageEntry,
-} from "@oh-my-pi/pi-agent-core/compaction";
-import type { AssistantMessage, Model, ProviderResponseMetadata, Usage } from "@oh-my-pi/pi-ai";
-import { isRecord } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/agent-core/compaction";
+import type { AssistantMessage, Model, ProviderResponseMetadata, Usage } from "@zero2ai/ai";
+import { isRecord } from "@zero2ai/utils";
 import type { ModelRegistry } from "../config/model-registry";
 import type { ContextUsage } from "../extensibility/extensions/types";
 import {

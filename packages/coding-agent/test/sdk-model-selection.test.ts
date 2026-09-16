@@ -2,20 +2,20 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test, vi 
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { Effort, type FetchImpl } from "@oh-my-pi/pi-ai";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { writeModelCache } from "@oh-my-pi/pi-catalog/model-cache";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { resolveModelCacheProviderId } from "@oh-my-pi/pi-catalog/provider-models";
-import { parseArgs } from "@oh-my-pi/pi-coding-agent/cli/args";
-import { ModelRegistry, type ProviderConfigInput } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { getModelMatchPreferences, resolveModelScope } from "@oh-my-pi/pi-coding-agent/config/model-resolver";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { buildSessionOptions as buildCliSessionOptions } from "@oh-my-pi/pi-coding-agent/main";
-import { createAgentSession, type ExtensionFactory } from "@oh-my-pi/pi-coding-agent/sdk";
-import type { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { removeSyncWithRetries, Snowflake } from "@oh-my-pi/pi-utils";
+import { Effort, type FetchImpl } from "@zero2ai/ai";
+import { buildModel } from "@zero2ai/catalog/build";
+import { writeModelCache } from "@zero2ai/catalog/model-cache";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { resolveModelCacheProviderId } from "@zero2ai/catalog/provider-models";
+import { parseArgs } from "@zero2ai/coding-agent/cli/args";
+import { ModelRegistry, type ProviderConfigInput } from "@zero2ai/coding-agent/config/model-registry";
+import { getModelMatchPreferences, resolveModelScope } from "@zero2ai/coding-agent/config/model-resolver";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { buildSessionOptions as buildCliSessionOptions } from "@zero2ai/coding-agent/main";
+import { createAgentSession, type ExtensionFactory } from "@zero2ai/coding-agent/sdk";
+import type { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { removeSyncWithRetries, Snowflake } from "@zero2ai/utils";
 import { createInMemoryAuthStorage } from "./helpers/agent-session-setup";
 
 describe("createAgentSession deferred model pattern resolution", () => {
@@ -26,14 +26,14 @@ describe("createAgentSession deferred model pattern resolution", () => {
 	const authStoragesToClose: AuthStorage[] = [];
 
 	beforeAll(() => {
-		fixtureDir = path.join(os.tmpdir(), `pi-sdk-model-selection-fixture-${Snowflake.next()}`);
+		fixtureDir = path.join(os.tmpdir(), `zero2ai-sdk-model-selection-fixture-${Snowflake.next()}`);
 		fs.mkdirSync(fixtureDir, { recursive: true });
 		fixtureAuthStorage = createInMemoryAuthStorage();
 		fixtureModelRegistry = new ModelRegistry(fixtureAuthStorage, path.join(fixtureDir, "models.yml"));
 	});
 
 	beforeEach(() => {
-		tempDir = path.join(os.tmpdir(), `pi-sdk-model-selection-${Snowflake.next()}`);
+		tempDir = path.join(os.tmpdir(), `zero2ai-sdk-model-selection-${Snowflake.next()}`);
 		fs.mkdirSync(tempDir, { recursive: true });
 	});
 
@@ -1263,7 +1263,7 @@ describe("createAgentSession deferred model pattern resolution", () => {
 	});
 
 	test("restores a discovery-backed session model instead of falling back to the default role", async () => {
-		// Regression: on `omp --resume`, the session-model restore probed
+		// Regression: on `zero2ai --resume`, the session-model restore probed
 		// candidates only against the static+cached catalog. A discovery-backed
 		// provider (models.yml `discovery:`) hasn't been fetched at that point, so
 		// the saved model failed to resolve and resume silently downgraded to

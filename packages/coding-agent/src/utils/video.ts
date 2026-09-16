@@ -8,10 +8,10 @@
  * anything timestamp-shaped is a seek position.
  */
 import * as path from "node:path";
-import type { ImageContent } from "@oh-my-pi/pi-ai";
-import { untilAborted } from "@oh-my-pi/pi-utils/abortable";
-import { TempDir } from "@oh-my-pi/pi-utils/temp";
-import { $which } from "@oh-my-pi/pi-utils/which";
+import type { ImageContent } from "@zero2ai/ai";
+import { untilAborted } from "@zero2ai/utils/abortable";
+import { TempDir } from "@zero2ai/utils/temp";
+import { $which } from "@zero2ai/utils/which";
 
 /** Container extensions treated as video. Mirrors the video subset of the local-protocol binary list. */
 const VIDEO_EXTENSION_LOOKUP: Record<string, true> = {
@@ -382,7 +382,7 @@ export async function extractVideoFramePng(
 	selector: VideoSelector,
 	signal?: AbortSignal,
 ): Promise<VideoPng> {
-	const tmp = await TempDir.create("omp-video-frame-");
+	const tmp = await TempDir.create("zero2ai-video-frame-");
 	try {
 		const out = tmp.join("frame.png");
 		if (selector.kind === "time") {
@@ -440,7 +440,7 @@ export async function buildVideoContactSheetPng(
 	const thumbs = CONTACT_SHEET_THUMBS;
 	const cols = CONTACT_SHEET_COLS;
 	const rows = Math.ceil(thumbs / cols);
-	const tmp = await TempDir.create("omp-video-sheet-");
+	const tmp = await TempDir.create("zero2ai-video-sheet-");
 	try {
 		const duration = meta.durationSec;
 		const times: number[] =

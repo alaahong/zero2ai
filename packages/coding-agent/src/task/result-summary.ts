@@ -5,7 +5,7 @@
  * when a woken subagent re-yields, so a parent reads the same shape (status,
  * preview, `agent://` pointer) regardless of which path delivered it.
  */
-import { prompt } from "@oh-my-pi/pi-utils";
+import { prompt } from "@zero2ai/utils";
 import taskSummaryTemplate from "../prompts/tools/task-summary.md" with { type: "text" };
 import { AgentRegistry } from "../registry/agent-registry";
 import { formatBytes, formatDuration } from "../tools/render-utils";

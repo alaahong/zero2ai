@@ -1,14 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import * as path from "node:path";
-import { Agent } from "@oh-my-pi/pi-agent-core";
-import { Effort, type Model } from "@oh-my-pi/pi-ai";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { Agent } from "@zero2ai/agent-core";
+import { Effort, type Model } from "@zero2ai/ai";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { TempDir } from "@zero2ai/utils";
 
 describe("issue #775: per-model defaultLevel", () => {
 	let tempDir: TempDir;
@@ -16,7 +16,7 @@ describe("issue #775: per-model defaultLevel", () => {
 	const authStorages: AuthStorage[] = [];
 
 	beforeEach(() => {
-		tempDir = TempDir.createSync("@pi-issue-775-");
+		tempDir = TempDir.createSync("@zero2ai-issue-775-");
 	});
 
 	afterEach(async () => {

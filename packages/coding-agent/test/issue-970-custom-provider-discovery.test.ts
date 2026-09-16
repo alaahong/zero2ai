@@ -3,16 +3,16 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { stripVTControlCharacters } from "node:util";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { writeModelCache } from "@oh-my-pi/pi-catalog/model-cache";
-import type { ModelRegistry, ProviderDiscoveryState } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { ModelRegistry as ModelRegistryImpl } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { ModelHubComponent } from "@oh-my-pi/pi-coding-agent/modes/components/model-hub";
-import { getThemeByName, setThemeInstance } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import type { TUI } from "@oh-my-pi/pi-tui";
-import { removeSyncWithRetries, Snowflake } from "@oh-my-pi/pi-utils";
+import { buildModel } from "@zero2ai/catalog/build";
+import { writeModelCache } from "@zero2ai/catalog/model-cache";
+import type { ModelRegistry, ProviderDiscoveryState } from "@zero2ai/coding-agent/config/model-registry";
+import { ModelRegistry as ModelRegistryImpl } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { ModelHubComponent } from "@zero2ai/coding-agent/modes/components/model-hub";
+import { getThemeByName, setThemeInstance } from "@zero2ai/coding-agent/modes/theme/theme";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import type { TUI } from "@zero2ai/tui";
+import { removeSyncWithRetries, Snowflake } from "@zero2ai/utils";
 
 function normalizeRenderedText(text: string): string {
 	return stripVTControlCharacters(text).replace(/\s+/g, " ").trim();
@@ -66,7 +66,7 @@ describe("issue #970 custom provider discovery", () => {
 	});
 
 	beforeEach(async () => {
-		tempDir = path.join(os.tmpdir(), `pi-test-issue-970-${Snowflake.next()}`);
+		tempDir = path.join(os.tmpdir(), `zero2ai-test-issue-970-${Snowflake.next()}`);
 		fs.mkdirSync(tempDir, { recursive: true });
 		modelsPath = path.join(tempDir, "models.yml");
 		authStorage = await AuthStorage.create(path.join(tempDir, "auth.db"));

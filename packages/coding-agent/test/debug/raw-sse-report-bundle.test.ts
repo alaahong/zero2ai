@@ -2,11 +2,11 @@ import { afterEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { Model } from "@oh-my-pi/pi-ai";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { RawSseDebugBuffer } from "@oh-my-pi/pi-coding-agent/debug/raw-sse-buffer";
-import { createReportBundle } from "@oh-my-pi/pi-coding-agent/debug/report-bundle";
-import { getConfigRootDir, removeWithRetries, setAgentDir } from "@oh-my-pi/pi-utils";
+import type { Model } from "@zero2ai/ai";
+import { buildModel } from "@zero2ai/catalog/build";
+import { RawSseDebugBuffer } from "@zero2ai/coding-agent/debug/raw-sse-buffer";
+import { createReportBundle } from "@zero2ai/coding-agent/debug/report-bundle";
+import { getConfigRootDir, removeWithRetries, setAgentDir } from "@zero2ai/utils";
 
 const model: Model<"anthropic-messages"> = buildModel({
 	id: "claude-test",
@@ -21,7 +21,7 @@ const model: Model<"anthropic-messages"> = buildModel({
 	maxTokens: 8_192,
 });
 
-const originalAgentDir = process.env.PI_CODING_AGENT_DIR;
+const originalAgentDir = process.env.ZERO2AI_CODING_AGENT_DIR;
 const originalXdgStateHome = process.env.XDG_STATE_HOME;
 const fallbackAgentDir = path.join(getConfigRootDir(), "agent");
 let cleanupRoot: string | undefined;
@@ -36,7 +36,7 @@ afterEach(async () => {
 		setAgentDir(originalAgentDir);
 	} else {
 		setAgentDir(fallbackAgentDir);
-		delete process.env.PI_CODING_AGENT_DIR;
+		delete process.env.ZERO2AI_CODING_AGENT_DIR;
 	}
 	if (cleanupRoot) {
 		await removeWithRetries(cleanupRoot);
@@ -46,9 +46,9 @@ afterEach(async () => {
 
 describe("raw SSE report bundle", () => {
 	it("includes captured raw SSE text and dropped-record disclosure", async () => {
-		cleanupRoot = await fs.mkdtemp(path.join(os.tmpdir(), "omp-raw-sse-report-"));
+		cleanupRoot = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-raw-sse-report-"));
 		const xdgStateHome = path.join(cleanupRoot, "state");
-		await fs.mkdir(path.join(xdgStateHome, "omp"), { recursive: true });
+		await fs.mkdir(path.join(xdgStateHome, "zero2ai"), { recursive: true });
 		process.env.XDG_STATE_HOME = xdgStateHome;
 		setAgentDir(fallbackAgentDir);
 
@@ -64,7 +64,7 @@ describe("raw SSE report bundle", () => {
 			);
 		}
 		const rawSseText = buffer.toRawText();
-		expect(rawSseText).toContain(": omp-debug-dropped records=");
+		expect(rawSseText).toContain(": zero2ai-debug-dropped records=");
 		expect(rawSseText).toContain("event: message_delta");
 
 		const result = await createReportBundle({ sessionFile: undefined, rawSseText });

@@ -15,7 +15,7 @@
  * work, which is the failure mode this whole feature exists to avoid.
  */
 
-import { logger } from "@oh-my-pi/pi-utils";
+import { logger } from "@zero2ai/utils";
 import type { BashResult } from "../exec/bash-executor";
 import { executeBash } from "../exec/bash-executor";
 import { TRUNCATE_LENGTHS, truncateToWidth } from "../tools/render-utils";

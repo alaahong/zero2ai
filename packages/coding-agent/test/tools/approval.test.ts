@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
-import { customToolToDefinition } from "@oh-my-pi/pi-coding-agent/sdk";
-import type { AgentTool, ToolApproval } from "@oh-my-pi/pi-agent-core";
-import { LSP_READONLY_ACTIONS } from "@oh-my-pi/pi-coding-agent/lsp";
+import { customToolToDefinition } from "@zero2ai/coding-agent/sdk";
+import type { AgentTool, ToolApproval } from "@zero2ai/agent-core";
+import { LSP_READONLY_ACTIONS } from "@zero2ai/coding-agent/lsp";
 import {
 	type ApprovalMode,
 	denyError,
@@ -10,9 +10,9 @@ import {
 	resolveApproval,
 	resolveApprovalFromContext,
 	truncateForPrompt,
-} from "@oh-my-pi/pi-coding-agent/tools/approval";
-import { BashTool } from "@oh-my-pi/pi-coding-agent/tools/bash";
-import { DEBUG_READONLY_ACTIONS } from "@oh-my-pi/pi-coding-agent/tools/debug";
+} from "@zero2ai/coding-agent/tools/approval";
+import { BashTool } from "@zero2ai/coding-agent/tools/bash";
+import { DEBUG_READONLY_ACTIONS } from "@zero2ai/coding-agent/tools/debug";
 import { Settings } from "../../src/config/settings";
 import { EditTool } from "../../src/edit";
 import type { ToolSession } from "../../src/tools";

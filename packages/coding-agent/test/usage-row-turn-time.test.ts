@@ -7,28 +7,28 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { AgentMessage } from "@oh-my-pi/pi-agent-core";
-import { Agent } from "@oh-my-pi/pi-agent-core";
-import type { Usage } from "@oh-my-pi/pi-ai";
-import { createMockModel } from "@oh-my-pi/pi-ai/providers/mock";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { resetSettingsForTest, Settings, settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { ExtensionRunner } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/runner";
-import { ChatTranscriptBuilder } from "@oh-my-pi/pi-coding-agent/modes/components/chat-transcript-builder";
-import { formatUsageRow } from "@oh-my-pi/pi-coding-agent/modes/components/usage-row";
-import { EventController } from "@oh-my-pi/pi-coding-agent/modes/controllers/event-controller";
-import { initTheme, theme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import type { InteractiveModeContext } from "@oh-my-pi/pi-coding-agent/modes/types";
-import { UiHelpers } from "@oh-my-pi/pi-coding-agent/modes/utils/ui-helpers";
-import type { AgentSessionEvent } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { convertToLlm } from "@oh-my-pi/pi-coding-agent/session/messages";
-import type { SessionContext } from "@oh-my-pi/pi-coding-agent/session/session-context";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { Container, type TUI } from "@oh-my-pi/pi-tui";
-import { removeSyncWithRetries, Snowflake } from "@oh-my-pi/pi-utils";
+import type { AgentMessage } from "@zero2ai/agent-core";
+import { Agent } from "@zero2ai/agent-core";
+import type { Usage } from "@zero2ai/ai";
+import { createMockModel } from "@zero2ai/ai/providers/mock";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { resetSettingsForTest, Settings, settings } from "@zero2ai/coding-agent/config/settings";
+import type { ExtensionRunner } from "@zero2ai/coding-agent/extensibility/extensions/runner";
+import { ChatTranscriptBuilder } from "@zero2ai/coding-agent/modes/components/chat-transcript-builder";
+import { formatUsageRow } from "@zero2ai/coding-agent/modes/components/usage-row";
+import { EventController } from "@zero2ai/coding-agent/modes/controllers/event-controller";
+import { initTheme, theme } from "@zero2ai/coding-agent/modes/theme/theme";
+import type { InteractiveModeContext } from "@zero2ai/coding-agent/modes/types";
+import { UiHelpers } from "@zero2ai/coding-agent/modes/utils/ui-helpers";
+import type { AgentSessionEvent } from "@zero2ai/coding-agent/session/agent-session";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { convertToLlm } from "@zero2ai/coding-agent/session/messages";
+import type { SessionContext } from "@zero2ai/coding-agent/session/session-context";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { Container, type TUI } from "@zero2ai/tui";
+import { removeSyncWithRetries, Snowflake } from "@zero2ai/utils";
 import { createInteractiveModeContext } from "./helpers/interactive-mode-context";
 
 // 60s of elapsed: 30s between the prompt and the final response's creation,
@@ -457,7 +457,7 @@ describe("AgentSession synthetic follow-up marking", () => {
 	let modelRegistry: ModelRegistry;
 
 	beforeAll(async () => {
-		sharedDir = path.join(os.tmpdir(), `pi-turn-time-shared-${Snowflake.next()}`);
+		sharedDir = path.join(os.tmpdir(), `zero2ai-turn-time-shared-${Snowflake.next()}`);
 		fs.mkdirSync(sharedDir, { recursive: true });
 		authStorage = await AuthStorage.create(path.join(sharedDir, "auth.db"));
 		authStorage.setRuntimeApiKey("anthropic", "test-key");

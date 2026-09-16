@@ -21,13 +21,13 @@ import {
 	convertAnthropicMessages,
 	streamAnthropic,
 	supportsAnthropicCompaction,
-} from "@oh-my-pi/pi-ai/providers/anthropic";
-import type { AnthropicMessageParam } from "@oh-my-pi/pi-ai/providers/anthropic";
-import { AnthropicMessages } from "@oh-my-pi/pi-ai/providers/anthropic-client";
-import { configureCredentialRedaction } from "@oh-my-pi/pi-ai/providers/transform-messages";
-import type { AssistantMessage, Context, Model, ModelSpec, UserMessage } from "@oh-my-pi/pi-ai/types";
-import { type ConversationalUserCarrier, kConversationalUser } from "@oh-my-pi/pi-ai/utils/block-symbols";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
+} from "@zero2ai/ai/providers/anthropic";
+import type { AnthropicMessageParam } from "@zero2ai/ai/providers/anthropic";
+import { AnthropicMessages } from "@zero2ai/ai/providers/anthropic-client";
+import { configureCredentialRedaction } from "@zero2ai/ai/providers/transform-messages";
+import type { AssistantMessage, Context, Model, ModelSpec, UserMessage } from "@zero2ai/ai/types";
+import { type ConversationalUserCarrier, kConversationalUser } from "@zero2ai/ai/utils/block-symbols";
+import { buildModel } from "@zero2ai/catalog/build";
 import { withEnv, withOfficialAnthropicEndpoint } from "./helpers";
 
 const fableSpec: ModelSpec<"anthropic-messages"> = {
@@ -287,13 +287,13 @@ describe("anthropic server-side compaction request", () => {
 		expect(beta).not.toContain("compact-2026-01-12");
 	});
 
-	it("treats pi-native gateways as transports, not upstream endpoints", () => {
-		// A pi-native baseUrl names the auth gateway; the gateway resolves
+	it("treats zero2ai-native gateways as transports, not upstream endpoints", () => {
+		// A zero2ai-native baseUrl names the auth gateway; the gateway resolves
 		// official Anthropic server-side, so no opt-in is needed. An
 		// explicitly supplied foreign endpoint is still judged on its merits.
 		const gateway = buildModel({
 			...fableSpec,
-			transport: "pi-native",
+			transport: "zero2ai-native",
 			baseUrl: "https://gateway.example.test",
 		});
 		expect(supportsAnthropicCompaction(gateway)).toBe(true);
@@ -308,7 +308,7 @@ describe("anthropic server-side compaction request", () => {
 		const customGateway = buildModel({
 			...fableSpec,
 			provider: "custom-anthropic-proxy",
-			transport: "pi-native",
+			transport: "zero2ai-native",
 			baseUrl: "https://gateway.example.test",
 		});
 		expect(customGateway.compat.firstPartyProvider).toBe(false);
@@ -316,7 +316,7 @@ describe("anthropic server-side compaction request", () => {
 		const optedInCustomGateway = buildModel({
 			...fableSpec,
 			provider: "custom-anthropic-proxy",
-			transport: "pi-native",
+			transport: "zero2ai-native",
 			baseUrl: "https://gateway.example.test",
 			remoteCompaction: { enabled: true },
 		});

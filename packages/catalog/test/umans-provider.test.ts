@@ -2,14 +2,14 @@ import { describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { Effort } from "@oh-my-pi/pi-catalog/effort";
-import { resolveProviderModels } from "@oh-my-pi/pi-catalog/model-manager";
+import { Effort } from "@zero2ai/catalog/effort";
+import { resolveProviderModels } from "@zero2ai/catalog/model-manager";
 import {
 	MODELS_DEV_PROVIDER_DESCRIPTORS,
 	mapModelsDevToModels,
 	umansModelManagerOptions,
-} from "@oh-my-pi/pi-catalog/provider-models/openai-compat";
-import type { FetchImpl, ModelSpec } from "@oh-my-pi/pi-catalog/types";
+} from "@zero2ai/catalog/provider-models/openai-compat";
+import type { FetchImpl, ModelSpec } from "@zero2ai/catalog/types";
 
 describe("umans provider catalog", () => {
 	it("discovers Anthropic-route models from the public models info endpoint", async () => {
@@ -160,7 +160,7 @@ describe("umans provider catalog", () => {
 	});
 
 	it("drops stale cached GLM rows that predate the via-handoff static correction", async () => {
-		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-catalog-umans-stale-cache-"));
+		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-catalog-umans-stale-cache-"));
 		const dbPath = path.join(tempDir, "models.db");
 		const staleGlm: ModelSpec<"anthropic-messages"> = {
 			id: "umans-glm-5.2",

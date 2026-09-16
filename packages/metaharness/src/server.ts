@@ -420,7 +420,7 @@ export class ManagerServer {
 			benchmark,
 			jobName,
 			dataset,
-			agent: request.agent ?? "omp",
+			agent: request.agent ?? "zero2ai",
 			models: [request.model],
 			prewalk: request.prewalk,
 			config: { ...request },

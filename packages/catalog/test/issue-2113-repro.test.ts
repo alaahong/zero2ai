@@ -1,5 +1,5 @@
 /**
- * Issue #2113 — `kimik2 does not work on the latest omp`
+ * Issue #2113 — `kimik2 does not work on the latest zero2ai`
  *
  * Reporter: with only `MOONSHOT_API_KEY` set, selecting `kimi-k2.6` and
  * sending any text leaves the agent stuck on "Working..." with no output.
@@ -17,13 +17,13 @@
  * moonshot discovery mapper and stamps default thinking metadata.
  */
 import { describe, expect, it } from "bun:test";
-import { type OpenAICompletionsOptions, streamOpenAICompletions } from "@oh-my-pi/pi-ai/providers/openai-completions";
-import type { AssistantMessage, Context } from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { Effort } from "@oh-my-pi/pi-catalog/effort";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { moonshotModelManagerOptions } from "@oh-my-pi/pi-catalog/provider-models/openai-compat";
-import type { Model, ModelSpec } from "@oh-my-pi/pi-catalog/types";
+import { type OpenAICompletionsOptions, streamOpenAICompletions } from "@zero2ai/ai/providers/openai-completions";
+import type { AssistantMessage, Context } from "@zero2ai/ai/types";
+import { buildModel } from "@zero2ai/catalog/build";
+import { Effort } from "@zero2ai/catalog/effort";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { moonshotModelManagerOptions } from "@zero2ai/catalog/provider-models/openai-compat";
+import type { Model, ModelSpec } from "@zero2ai/catalog/types";
 
 function moonshotKimiModel(id: string, reasoning: boolean): Model<"openai-completions"> {
 	const reference = getBundledModel("openai", "gpt-4o-mini");

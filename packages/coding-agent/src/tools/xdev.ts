@@ -15,7 +15,7 @@
  * mounted-only because top-level tools already ship their schemas.
  *
  * Args go through the same machinery as native tool calls: validated with
- * pi-ai's `validateToolArguments` (the schema is returned on mismatch, so a
+ * zero2ai-ai's `validateToolArguments` (the schema is returned on mismatch, so a
  * malformed call self-corrects without a round trip) and streamed through
  * the write tool's existing incremental `content` decoding for live render
  * previews. Compared to a dispatcher def this still costs zero *schema
@@ -29,10 +29,10 @@
  * queued/planning until `tool_execution_start`, and only then delegate to the
  * wrapped tool's own renderer with the decoded inner args.
  */
-import type { AgentToolContext, AgentToolResult, AgentToolUpdateCallback, ToolLoadMode } from "@oh-my-pi/pi-agent-core";
-import { type Tool as AiTool, jsonSchemaToTypeScript, toolWireSchema, validateToolArguments } from "@oh-my-pi/pi-ai";
-import { type Component, Container, Text } from "@oh-my-pi/pi-tui";
-import { parseStreamingJson } from "@oh-my-pi/pi-utils";
+import type { AgentToolContext, AgentToolResult, AgentToolUpdateCallback, ToolLoadMode } from "@zero2ai/agent-core";
+import { type Tool as AiTool, jsonSchemaToTypeScript, toolWireSchema, validateToolArguments } from "@zero2ai/ai";
+import { type Component, Container, Text } from "@zero2ai/tui";
+import { parseStreamingJson } from "@zero2ai/utils";
 import { schemaDeclaresIntentField } from "../utils/tool-schema";
 import type { RenderResultOptions } from "../extensibility/custom-tools/types";
 import { stripXdUrlPrefix, XD_URL_PREFIX } from "../internal-urls/xd-protocol";
@@ -279,7 +279,7 @@ export function resolveMountedXdevTool(state: XdevState, name: string): Tool | u
  * Resolve a mounted tool with its execution-only permission decorator.
  *
  * Mounted-only, matching {@link resolveMountedXdevTool}, and a published export
- * under `@oh-my-pi/pi-coding-agent/tools/xdev`, so its semantics must not
+ * under `@zero2ai/coding-agent/tools/xdev`, so its semantics must not
  * drift. `sdk.ts` composes this with the calling agent's advertised tools to
  * recover a Claude Code-spelled MCP name: the union has to be resolved in one
  * pass for the ambiguity rule to hold, so that composition lives with the

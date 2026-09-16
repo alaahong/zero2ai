@@ -1,19 +1,19 @@
 import { afterEach, describe, expect, it, vi } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { type } from "@oh-my-pi/omptype";
-import { Agent, type AgentTool } from "@oh-my-pi/pi-agent-core";
-import * as compactionModule from "@oh-my-pi/pi-agent-core/compaction";
-import { createMockModel, type MockHandler, type MockResponse } from "@oh-my-pi/pi-ai/providers/mock";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { loadExtensions } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/loader";
-import { ExtensionRunner } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/runner";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { convertToLlm } from "@oh-my-pi/pi-coding-agent/session/messages";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { getProjectAgentDir, TempDir } from "@oh-my-pi/pi-utils";
+import { type } from "@zero2ai/schema";
+import { Agent, type AgentTool } from "@zero2ai/agent-core";
+import * as compactionModule from "@zero2ai/agent-core/compaction";
+import { createMockModel, type MockHandler, type MockResponse } from "@zero2ai/ai/providers/mock";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { loadExtensions } from "@zero2ai/coding-agent/extensibility/extensions/loader";
+import { ExtensionRunner } from "@zero2ai/coding-agent/extensibility/extensions/runner";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { convertToLlm } from "@zero2ai/coding-agent/session/messages";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { getProjectAgentDir, TempDir } from "@zero2ai/utils";
 
 const noopSchema = type({});
 const noopTool: AgentTool<typeof noopSchema, undefined> = {
@@ -55,7 +55,7 @@ describe("AgentSession mid-turn compaction dead-end", () => {
 		/** Delay message-end hooks so the turn is absent until the persistence barrier resolves. */
 		delayMessageEndPersistence?: boolean;
 	}): Promise<{ notices: string[]; compactionStarts: number[]; compactionResults: number }> {
-		tempDir = TempDir.createSync("@pi-mid-turn-compaction-dead-end-");
+		tempDir = TempDir.createSync("@zero2ai-mid-turn-compaction-dead-end-");
 		authStorage = await AuthStorage.create(path.join(tempDir.path(), "auth.db"));
 		authStorage.setRuntimeApiKey("mock", "test-key");
 		const modelRegistry = new ModelRegistry(authStorage, path.join(tempDir.path(), "models.yml"));

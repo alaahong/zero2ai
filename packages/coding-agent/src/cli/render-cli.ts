@@ -1,5 +1,5 @@
 /**
- * `omp render` — draw a session's entire thread through the production
+ * `zero2ai render` — draw a session's entire thread through the production
  * transcript pipeline, headlessly.
  *
  * Replays the session into a real `InteractiveMode` + `TUI` wired to an
@@ -14,11 +14,11 @@
 import { Database } from "bun:sqlite";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import { Agent } from "@oh-my-pi/pi-agent-core";
-import type { Terminal, TerminalAppearance, TerminalAppearanceRequestToken } from "@oh-my-pi/pi-tui/terminal";
-import type { RenderScheduler } from "@oh-my-pi/pi-tui/tui";
-import { getProjectDir, isEnoent, logger, TempDir } from "@oh-my-pi/pi-utils";
-import { VERSION } from "@oh-my-pi/pi-utils/dirs";
+import { Agent } from "@zero2ai/agent-core";
+import type { Terminal, TerminalAppearance, TerminalAppearanceRequestToken } from "@zero2ai/tui/terminal";
+import type { RenderScheduler } from "@zero2ai/tui/tui";
+import { getProjectDir, isEnoent, logger, TempDir } from "@zero2ai/utils";
+import { VERSION } from "@zero2ai/utils/dirs";
 import { ModelRegistry } from "../config/model-registry";
 import { Settings } from "../config/settings";
 import { Composer } from "../modes/composer";
@@ -175,8 +175,8 @@ export async function runRenderCommand(args: RenderCommandArgs): Promise<number>
 
 	// Copy before opening: SessionManager.open takes the single-writer lock and
 	// session teardown appends a session_exit entry — neither may touch a live
-	// session file the user has open in another omp.
-	const tempDir = TempDir.createSync("@omp-render-");
+	// session file the user has open in another zero2ai.
+	const tempDir = TempDir.createSync("@zero2ai-render-");
 	const workingCopy = path.join(tempDir.path(), path.basename(sourcePath));
 
 	const width = args.width ?? (process.stdout.isTTY ? process.stdout.columns : undefined) ?? 120;
@@ -275,7 +275,7 @@ export async function runRenderCommand(args: RenderCommandArgs): Promise<number>
 			mode?.stop();
 			await session?.dispose();
 		} catch (err) {
-			logger.debug("omp render teardown failed", { error: String(err) });
+			logger.debug("zero2ai render teardown failed", { error: String(err) });
 		}
 		tempDir.removeSync();
 	}

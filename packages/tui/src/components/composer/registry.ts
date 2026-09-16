@@ -20,7 +20,7 @@ const BUILTIN_COMPOSER_STYLES: Readonly<Record<string, ComposerStyle>> = {
 };
 const extensionComposerStyles = new Map<string, ComposerStyle>();
 
-/** Whether an id names a composer style shipped by pi-tui. */
+/** Whether an id names a composer style shipped by zero2ai-tui. */
 export function isBuiltinComposerStyle(id: string): boolean {
 	return Object.hasOwn(BUILTIN_COMPOSER_STYLES, id);
 }

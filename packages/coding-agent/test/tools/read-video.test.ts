@@ -7,11 +7,11 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { createMockModel } from "@oh-my-pi/pi-ai/providers/mock";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { ReadTool } from "@oh-my-pi/pi-coding-agent/tools/read";
-import { $which, removeWithRetries } from "@oh-my-pi/pi-utils";
+import { createMockModel } from "@zero2ai/ai/providers/mock";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import type { ToolSession } from "@zero2ai/coding-agent/tools";
+import { ReadTool } from "@zero2ai/coding-agent/tools/read";
+import { $which, removeWithRetries } from "@zero2ai/utils";
 
 const hasFfmpeg = Boolean($which("ffmpeg") && $which("ffprobe"));
 

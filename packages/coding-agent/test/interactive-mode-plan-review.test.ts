@@ -1,31 +1,31 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import { Agent, AgentBusyError, ThinkingLevel } from "@oh-my-pi/pi-agent-core";
-import type { AssistantMessage, Usage } from "@oh-my-pi/pi-ai";
-import * as AIError from "@oh-my-pi/pi-ai/error";
-import { KeybindingsManager } from "@oh-my-pi/pi-coding-agent/config/keybindings";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { resolveLocalUrlToPath } from "@oh-my-pi/pi-coding-agent/internal-urls";
-import { AssistantMessageComponent } from "@oh-my-pi/pi-coding-agent/modes/components/assistant-message";
-import type { HookSelectorSlider } from "@oh-my-pi/pi-coding-agent/modes/components/hook-selector";
+import { Agent, AgentBusyError, ThinkingLevel } from "@zero2ai/agent-core";
+import type { AssistantMessage, Usage } from "@zero2ai/ai";
+import * as AIError from "@zero2ai/ai/error";
+import { KeybindingsManager } from "@zero2ai/coding-agent/config/keybindings";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
+import { resolveLocalUrlToPath } from "@zero2ai/coding-agent/internal-urls";
+import { AssistantMessageComponent } from "@zero2ai/coding-agent/modes/components/assistant-message";
+import type { HookSelectorSlider } from "@zero2ai/coding-agent/modes/components/hook-selector";
 import {
 	type PlanReviewAnnotationState,
 	PlanReviewOverlay,
-} from "@oh-my-pi/pi-coding-agent/modes/components/plan-review-overlay";
-import { InteractiveMode } from "@oh-my-pi/pi-coding-agent/modes/interactive-mode";
-import { planSaveFileName } from "@oh-my-pi/pi-coding-agent/plan-mode/plan-autosave";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import type { SubmittedUserInput } from "@oh-my-pi/pi-coding-agent/modes/types";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SILENT_ABORT_MARKER, USER_INTERRUPT_LABEL } from "@oh-my-pi/pi-coding-agent/session/messages";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { AUTO_THINKING } from "@oh-my-pi/pi-coding-agent/thinking";
-import * as clipboard from "@oh-my-pi/pi-coding-agent/utils/clipboard";
-import { setKeybindings } from "@oh-my-pi/pi-tui";
-import { formatNumber, TempDir } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/modes/components/plan-review-overlay";
+import { InteractiveMode } from "@zero2ai/coding-agent/modes/interactive-mode";
+import { planSaveFileName } from "@zero2ai/coding-agent/plan-mode/plan-autosave";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import type { SubmittedUserInput } from "@zero2ai/coding-agent/modes/types";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SILENT_ABORT_MARKER, USER_INTERRUPT_LABEL } from "@zero2ai/coding-agent/session/messages";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { AUTO_THINKING } from "@zero2ai/coding-agent/thinking";
+import * as clipboard from "@zero2ai/coding-agent/utils/clipboard";
+import { setKeybindings } from "@zero2ai/tui";
+import { formatNumber, TempDir } from "@zero2ai/utils";
 
 /**
  * Matches the plan-approved synthetic-prompt dispatch. `#approvePlan` calls
@@ -84,7 +84,7 @@ describe("InteractiveMode plan review rendering", () => {
 	beforeAll(async () => {
 		initTheme();
 		resetSettingsForTest();
-		sharedTempDir = TempDir.createSync("@pi-plan-review-shared-");
+		sharedTempDir = TempDir.createSync("@zero2ai-plan-review-shared-");
 		await Settings.init({ inMemory: true, cwd: sharedTempDir.path() });
 		authStorage = await AuthStorage.create(path.join(sharedTempDir.path(), "testauth.db"));
 		authStorage.setRuntimeApiKey("anthropic", "test-key");
@@ -97,7 +97,7 @@ describe("InteractiveMode plan review rendering", () => {
 	});
 
 	beforeEach(() => {
-		tempDir = TempDir.createSync("@pi-plan-review-");
+		tempDir = TempDir.createSync("@zero2ai-plan-review-");
 		const model = modelRegistry.find("anthropic", "claude-sonnet-4-5");
 		if (!model) {
 			throw new Error("Expected claude-sonnet-4-5 to exist in registry");
@@ -1667,7 +1667,7 @@ describe("InteractiveMode plan review rendering", () => {
 			title: "AUTOSAVE",
 		});
 
-		const saved = path.join(tempDir.path(), ".omp", "plans", "AUTOSAVE_PLAN.md");
+		const saved = path.join(tempDir.path(), ".zero2ai", "plans", "AUTOSAVE_PLAN.md");
 		expect(await Bun.file(saved).text()).toBe("# Plan\n\nAutosave me.");
 		expect(status).toHaveBeenCalledWith(expect.stringContaining("Saved plan to"));
 	});

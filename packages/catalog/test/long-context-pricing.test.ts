@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import { calculateCost, getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import type { Usage } from "@oh-my-pi/pi-catalog/types";
+import { calculateCost, getBundledModel } from "@zero2ai/catalog/models";
+import type { Usage } from "@zero2ai/catalog/types";
 
 function usage(fields: Pick<Usage, "input" | "output" | "cacheRead" | "cacheWrite">): Usage {
 	return {

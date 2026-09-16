@@ -2,10 +2,10 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import {
 	KeybindingsManager as AppKeybindingsManager,
 	setKeyHintPlatform,
-} from "@oh-my-pi/pi-coding-agent/config/keybindings";
-import { createPromptActionAutocompleteProvider } from "@oh-my-pi/pi-coding-agent/modes/prompt-action-autocomplete";
-import { getSelectListTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { KeybindingsManager, SelectList, setKeybindings, TUI_KEYBINDINGS } from "@oh-my-pi/pi-tui";
+} from "@zero2ai/coding-agent/config/keybindings";
+import { createPromptActionAutocompleteProvider } from "@zero2ai/coding-agent/modes/prompt-action-autocomplete";
+import { getSelectListTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import { KeybindingsManager, SelectList, setKeybindings, TUI_KEYBINDINGS } from "@zero2ai/tui";
 
 describe("prompt action autocomplete", () => {
 	beforeEach(() => {
@@ -207,11 +207,11 @@ describe("prompt action autocomplete", () => {
 			moveCursorToLineEnd: () => {},
 		});
 
-		const line = "/btw omp://";
+		const line = "/btw zero2ai://";
 		const suggestions = await provider.getSuggestions([line], 0, line.length);
 
 		expect(suggestions).not.toBeNull();
-		expect(suggestions?.prefix).toBe("omp://");
+		expect(suggestions?.prefix).toBe("zero2ai://");
 		expect(suggestions?.items.length).toBeGreaterThan(0);
 	});
 
@@ -236,11 +236,11 @@ describe("prompt action autocomplete", () => {
 			moveCursorToLineEnd: () => {},
 		});
 
-		const line = "/mcp omp://";
+		const line = "/mcp zero2ai://";
 		const suggestions = await provider.getSuggestions([line], 0, line.length);
 
 		expect(suggestions).not.toBeNull();
-		expect(suggestions?.prefix).toBe("omp://");
+		expect(suggestions?.prefix).toBe("zero2ai://");
 		expect(suggestions?.items.length).toBeGreaterThan(0);
 	});
 

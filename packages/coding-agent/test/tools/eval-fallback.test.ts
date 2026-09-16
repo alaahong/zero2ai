@@ -1,16 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import * as evalIndex from "@oh-my-pi/pi-coding-agent/eval";
-import * as pyKernel from "@oh-my-pi/pi-coding-agent/eval/py/kernel";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { EvalTool } from "@oh-my-pi/pi-coding-agent/tools/eval";
-import { resolveEvalBackends } from "@oh-my-pi/pi-coding-agent/tools/eval-backends";
-import { ToolAbortError } from "@oh-my-pi/pi-coding-agent/tools/tool-errors";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import * as evalIndex from "@zero2ai/coding-agent/eval";
+import * as pyKernel from "@zero2ai/coding-agent/eval/py/kernel";
+import type { ToolSession } from "@zero2ai/coding-agent/tools";
+import { EvalTool } from "@zero2ai/coding-agent/tools/eval";
+import { resolveEvalBackends } from "@zero2ai/coding-agent/tools/eval-backends";
+import { ToolAbortError } from "@zero2ai/coding-agent/tools/tool-errors";
 
 let originalPiPy: string | undefined;
 let originalPiJs: string | undefined;
 
-function restoreEnv(name: "PI_PY" | "PI_JS", value: string | undefined): void {
+function restoreEnv(name: "ZERO2AI_PY" | "ZERO2AI_JS", value: string | undefined): void {
 	if (value === undefined) {
 		delete Bun.env[name];
 		return;
@@ -42,16 +42,16 @@ const mockResult = {
 
 describe("EvalTool language dispatch", () => {
 	beforeEach(() => {
-		originalPiPy = Bun.env.PI_PY;
-		originalPiJs = Bun.env.PI_JS;
-		delete Bun.env.PI_PY;
-		delete Bun.env.PI_JS;
+		originalPiPy = Bun.env.ZERO2AI_PY;
+		originalPiJs = Bun.env.ZERO2AI_JS;
+		delete Bun.env.ZERO2AI_PY;
+		delete Bun.env.ZERO2AI_JS;
 	});
 
 	afterEach(() => {
 		vi.restoreAllMocks();
-		restoreEnv("PI_PY", originalPiPy);
-		restoreEnv("PI_JS", originalPiJs);
+		restoreEnv("ZERO2AI_PY", originalPiPy);
+		restoreEnv("ZERO2AI_JS", originalPiJs);
 	});
 
 	it('dispatches to the JS backend when cell.language === "js"', async () => {
@@ -150,7 +150,7 @@ describe("EvalTool language dispatch", () => {
 	});
 
 	it("uses settings for eval backends whose env flag is unset", () => {
-		Bun.env.PI_PY = "1";
+		Bun.env.ZERO2AI_PY = "1";
 		const settings = Settings.isolated();
 		settings.set("eval.py", false);
 		settings.set("eval.js", false);
@@ -161,8 +161,8 @@ describe("EvalTool language dispatch", () => {
 		});
 	});
 
-	it("lets PI_JS disable js execution even when eval.js is enabled", async () => {
-		Bun.env.PI_JS = "0";
+	it("lets ZERO2AI_JS disable js execution even when eval.js is enabled", async () => {
+		Bun.env.ZERO2AI_JS = "0";
 		const settings = Settings.isolated();
 		settings.set("eval.js", true);
 		const tool = new EvalTool(makeSession(settings));
@@ -172,6 +172,6 @@ describe("EvalTool language dispatch", () => {
 				language: "js",
 				code: "const x = 1;",
 			}),
-		).rejects.toThrow(/PI_JS=0/);
+		).rejects.toThrow(/ZERO2AI_JS=0/);
 	});
 });

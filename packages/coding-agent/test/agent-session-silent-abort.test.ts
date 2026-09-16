@@ -14,18 +14,18 @@
  */
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
 import * as path from "node:path";
-import { Agent } from "@oh-my-pi/pi-agent-core";
-import type { AssistantMessage, TextContent } from "@oh-my-pi/pi-ai";
-import * as AIError from "@oh-my-pi/pi-ai/error";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { SecretObfuscator } from "@oh-my-pi/pi-coding-agent/secrets/obfuscator";
-import { AgentSession, type AgentSessionEvent } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SILENT_ABORT_MARKER } from "@oh-my-pi/pi-coding-agent/session/messages";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { Agent } from "@zero2ai/agent-core";
+import type { AssistantMessage, TextContent } from "@zero2ai/ai";
+import * as AIError from "@zero2ai/ai/error";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { SecretObfuscator } from "@zero2ai/coding-agent/secrets/obfuscator";
+import { AgentSession, type AgentSessionEvent } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SILENT_ABORT_MARKER } from "@zero2ai/coding-agent/session/messages";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { TempDir } from "@zero2ai/utils";
 
 function makeAbortedAssistantMessage(text = "partial draft"): AssistantMessage {
 	return {
@@ -92,7 +92,7 @@ describe("AgentSession silent-abort marker stamping", () => {
 	let modelRegistry: ModelRegistry;
 
 	beforeAll(async () => {
-		fixtureDir = TempDir.createSync("@pi-silent-abort-fixture-");
+		fixtureDir = TempDir.createSync("@zero2ai-silent-abort-fixture-");
 		authStorage = await AuthStorage.create(path.join(fixtureDir.path(), "testauth.db"));
 		authStorage.setRuntimeApiKey("anthropic", "test-key");
 		modelRegistry = new ModelRegistry(authStorage);

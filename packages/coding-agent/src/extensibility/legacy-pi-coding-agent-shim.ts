@@ -1,6 +1,6 @@
 /**
  * Compatibility shim for legacy extensions importing the package root of
- * `@oh-my-pi/pi-coding-agent` (or one of its aliased scopes like
+ * `@zero2ai/coding-agent` (or one of its aliased scopes like
  * `@earendil-works/pi-coding-agent` or `@mariozechner/pi-coding-agent`).
  *
  * The coding-agent package's own barrel (`./src/index.ts`) cannot be listed
@@ -9,10 +9,11 @@
  * Routing legacy plugin imports through this sibling shim sidesteps that
  * conflict: bun bundles a distinct entry whose path differs from the CLI
  * entry, while still re-exporting the canonical surface so plugins observe
- * the same module identity as a direct `@oh-my-pi/pi-coding-agent` import.
+ * the same module identity as a direct `@zero2ai/coding-agent` import.
  */
 
 import { Database } from "bun:sqlite";
+import { managedExtensionPaths } from "../config/managed-policy";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import {
@@ -21,24 +22,24 @@ import {
 	type AgentToolUpdateCallback,
 	type MessageCountOptions,
 	Tokenizer,
-} from "@oh-my-pi/pi-agent-core";
-import { findCutPoint as computeCutPoint, type CutPointResult } from "@oh-my-pi/pi-agent-core/compaction";
-import type { SessionEntry as CompactionSessionEntry } from "@oh-my-pi/pi-agent-core/compaction/entries";
+} from "@zero2ai/agent-core";
+import { findCutPoint as computeCutPoint, type CutPointResult } from "@zero2ai/agent-core/compaction";
+import type { SessionEntry as CompactionSessionEntry } from "@zero2ai/agent-core/compaction/entries";
 import {
 	createBranchSummaryMessage,
 	createCompactionSummaryMessage,
 	createCustomMessage,
-} from "@oh-my-pi/pi-agent-core/compaction/messages";
-import { type AuthCredential, SqliteAuthCredentialStore, type TSchema } from "@oh-my-pi/pi-ai";
-import { piEscapeRegexLiteral, piJoinPath } from "@oh-my-pi/pi-ai/providers/cursor-pi-args";
-import { getKeybindings, type Keybinding, Text } from "@oh-my-pi/pi-tui";
+} from "@zero2ai/agent-core/compaction/messages";
+import { type AuthCredential, SqliteAuthCredentialStore, type TSchema } from "@zero2ai/ai";
+import { piEscapeRegexLiteral, piJoinPath } from "@zero2ai/ai/providers/cursor-pi-args";
+import { getKeybindings, type Keybinding, Text } from "@zero2ai/tui";
 import {
 	getAgentDbPath,
 	getAgentDir,
 	getProjectDir,
 	isCompiledBinary,
 	parseFrontmatter as parseOmpFrontmatter,
-} from "@oh-my-pi/pi-utils";
+} from "@zero2ai/utils";
 import { getPackageDir as getOmpPackageDir } from "../config";
 import { formatKeyHints } from "../config/keybindings";
 import type { PromptTemplate } from "../config/prompt-templates";
@@ -50,7 +51,7 @@ import {
 	discoverPromptTemplates,
 	discoverSessionExtensionPaths,
 	discoverSkills,
-	createAgentSession as ompCreateAgentSession,
+	createAgentSession as zero2aiCreateAgentSession,
 } from "../sdk";
 import {
 	DEFAULT_MAX_BYTES,
@@ -720,7 +721,7 @@ export function createLsTool(cwd: string, options?: LsToolOptions): ToolDefiniti
 export function createEditToolDefinition(cwd: string, options?: EditToolOptions): ToolDefinition {
 	if (options?.operations) {
 		throw new Error(
-			"Legacy EditToolOptions.operations is not supported: OMP's built-in edit tool writes the local " +
+			"Legacy EditToolOptions.operations is not supported: ZERO2AI's built-in edit tool writes the local " +
 				"filesystem natively and exposes no pluggable operations seam. Register a custom edit tool via " +
 				"defineTool() instead of passing operations to createEditTool()/createEditToolDefinition().",
 		);
@@ -737,7 +738,7 @@ export function createEditTool(cwd: string, options?: EditToolOptions): ToolDefi
 export function createWriteToolDefinition(cwd: string, options?: WriteToolOptions): ToolDefinition {
 	if (options?.operations) {
 		throw new Error(
-			"Legacy WriteToolOptions.operations is not supported: OMP's built-in write tool writes the local " +
+			"Legacy WriteToolOptions.operations is not supported: ZERO2AI's built-in write tool writes the local " +
 				"filesystem natively and exposes no pluggable operations seam. Register a custom write tool via " +
 				"defineTool() instead of passing operations to createWriteTool()/createWriteToolDefinition().",
 		);
@@ -770,7 +771,7 @@ export function createReadOnlyTools(cwd: string): ToolDefinition[] {
  *
  * Upstream Pi's `SettingsManager.create(cwd)` is **synchronous** and returns a
  * manager exposing `getGlobalSettings()`/`getProjectSettings()` (plus the typed
- * `get(path)`). OMP's `Settings` is that manager, so the shim resolves the
+ * `get(path)`). ZERO2AI's `Settings` is that manager, so the shim resolves the
  * active extension session's instance first, then falls back to a live instance
  * matching the requested `cwd`/`agentDir`, or an isolated instance when nothing
  * matches. Returning the promise from `Settings.init()` here broke every pi
@@ -825,7 +826,7 @@ export interface DefaultPackageManagerOptions {
 }
 
 /**
- * Enumerates the extensions OMP would load through the historical package
+ * Enumerates the extensions ZERO2AI would load through the historical package
  * manager surface used by legacy extensions.
  */
 export class DefaultPackageManager {
@@ -839,7 +840,7 @@ export class DefaultPackageManager {
 		this.#settingsManager = options.settingsManager;
 	}
 
-	/** Resolve enabled extension paths with their OMP plugin provenance. */
+	/** Resolve enabled extension paths with their ZERO2AI plugin provenance. */
 	async resolve(_onMissing?: (source: string) => Promise<MissingSourceAction>): Promise<ResolvedPaths> {
 		const settings = await this.#settingsManager;
 		const configuredPaths = settings.get("extensions") ?? [];
@@ -893,18 +894,18 @@ export class DefaultPackageManager {
  * import the class at module scope; a missing export takes the whole
  * extension down at parse time (issue #4567).
  *
- * OMP does the same discovery inline inside `createAgentSession()`, so this
+ * ZERO2AI does the same discovery inline inside `createAgentSession()`, so this
  * shim intentionally does NOT re-implement pi's ResourceLoader plumbing.
  * Instead the loader captures the caller's intent (`no*` flags, `*Override`
  * callbacks, `additional*Paths`, `extensionFactories`, `settingsManager`,
  * `eventBus`) plus the discovery results, and the sibling `createAgentSession`
- * override below translates them into OMP's native session options
+ * override below translates them into ZERO2AI's native session options
  * (`disableExtensionDiscovery`, prepared/path extension preloads, `extensions`,
  * `skills`, `promptTemplates`, `contextFiles`, `settings`, `eventBus`,
  * `systemPrompt`) before delegating to `../sdk`.
  *
  * The pi surface it emulates is the intersection actually used by real
- * extensions in the wild — themes are silently dropped (OMP has no
+ * extensions in the wild — themes are silently dropped (ZERO2AI has no
  * session-level themes surface); `extendResources`, `loadProjectTrustExtensions`,
  * and provider-trust hooks are omitted.
  */
@@ -1165,14 +1166,23 @@ export class DefaultResourceLoader implements ResourceLoader {
 	async #loadExtensions(settings: Settings): Promise<LoadExtensionsResult> {
 		const { cwd, noExtensions, additionalExtensionPaths, extensionFactories, eventBus } = this.#state;
 
-		if (noExtensions && additionalExtensionPaths.length === 0 && extensionFactories.length === 0) {
+		// Administrator-mandated extensions survive every user opt-out: they are
+		// folded into the explicit path list below, so `--no-extensions` cannot
+		// switch off the operator's audit/redaction hooks.
+		const managedPaths = managedExtensionPaths();
+		const effectiveAdditionalPaths =
+			managedPaths.length === 0
+				? additionalExtensionPaths
+				: [...additionalExtensionPaths, ...managedPaths.filter(p => !additionalExtensionPaths.includes(p))];
+
+		if (noExtensions && effectiveAdditionalPaths.length === 0 && extensionFactories.length === 0) {
 			return { extensions: [], errors: [], runtime: createExtensionRuntime() };
 		}
 
 		const paths = await discoverSessionExtensionPaths(
 			{
 				disableExtensionDiscovery: noExtensions,
-				additionalExtensionPaths,
+				additionalExtensionPaths: effectiveAdditionalPaths,
 			},
 			cwd,
 			settings,
@@ -1334,15 +1344,15 @@ export class DefaultResourceLoader implements ResourceLoader {
 }
 
 /**
- * Legacy pi extensions call `createAgentSession({ resourceLoader })`. OMP's
+ * Legacy pi extensions call `createAgentSession({ resourceLoader })`. ZERO2AI's
  * native option surface has no such field — extension / skill / prompt /
  * context-file discovery are configured directly on the session options — so
  * an untranslated call would silently ignore the loader (including its
- * `noExtensions`/`noSkills` opt-outs), re-run OMP's own discovery, and
+ * `noExtensions`/`noSkills` opt-outs), re-run ZERO2AI's own discovery, and
  * happily re-load the calling extension into the subagent. That's exactly
  * the recursion the caller passed the loader to prevent.
  *
- * Translate the loader's captured state into OMP's option fields, then
+ * Translate the loader's captured state into ZERO2AI's option fields, then
  * delegate to the underlying SDK. Explicit fields on `options` override the
  * loader (matches upstream pi semantics — a caller can partially override a
  * shared loader).
@@ -1359,7 +1369,7 @@ export async function createAgentSession(
 ): Promise<CreateAgentSessionResult> {
 	const loader = options.resourceLoader;
 	if (!loader) {
-		return ompCreateAgentSession(options);
+		return zero2aiCreateAgentSession(options);
 	}
 
 	if (loader instanceof DefaultResourceLoader && !loader.loaded) {
@@ -1426,13 +1436,13 @@ export async function createAgentSession(
 		forwarded.appendSystemPrompt = state.appendSystemPrompt.join("\n\n");
 	}
 
-	return ompCreateAgentSession(forwarded);
+	return zero2aiCreateAgentSession(forwarded);
 }
 
 /**
  * Synchronous auth storage surface retained for legacy extensions.
  *
- * Modern OMP auth storage is asynchronous, while older provider extensions
+ * Modern ZERO2AI auth storage is asynchronous, while older provider extensions
  * call `AuthStorage.create().get()` during module initialization.
  */
 export class AuthStorage {
@@ -1470,23 +1480,23 @@ export function readStoredCredential(provider: string): AuthCredential | undefin
 }
 
 // Pi SDK path helpers. `export * from "../index"` above only forwards
-// `getAgentDir`; `getProjectDir` (a `@oh-my-pi/pi-utils` helper) and
+// `getAgentDir`; `getProjectDir` (a `@zero2ai/utils` helper) and
 // `getPackageDir` are absent from that barrel, so legacy extensions importing
 // either fail Bun's static export check during validation (issue #5968).
-export { getProjectDir } from "@oh-my-pi/pi-utils";
+export { getProjectDir } from "@zero2ai/utils";
 
 /**
  * Coding-agent package install directory, matching pi's string-valued
  * `getPackageDir()` contract (extensions do `path.join(getPackageDir(), ...)`
  * to auto-allow bundled docs/resources).
  *
- * omp's canonical `getPackageDir()` (`../config`) returns `undefined` inside a
+ * zero2ai's canonical `getPackageDir()` (`../config`) returns `undefined` inside a
  * `bun --compile` binary — `import.meta.dir` is `/$bunfs/root` and no owning
  * `package.json` exists (issue #1423). Returning `undefined` there would crash
  * every legacy `path.join(getPackageDir(), ...)` at runtime in the shipped
  * binary, the primary distribution. So fall back to the executable's own
  * directory in compiled mode, where the binary *is* the install root. The
- * `PI_PACKAGE_DIR` override and dev/source/npm-dist walk-up still win via the
+ * `ZERO2AI_PACKAGE_DIR` override and dev/source/npm-dist walk-up still win via the
  * canonical helper.
  */
 export function getPackageDir(): string {
@@ -1495,11 +1505,11 @@ export function getPackageDir(): string {
 
 // Legacy pi's `@earendil-works/pi-coding-agent` re-exported `estimateTokens`,
 // `compact`, `serializeConversation`, and `calculateContextTokens` from its
-// package root (via `./core/compaction/index.ts`). In omp these live in
-// `@oh-my-pi/pi-agent-core/compaction`, and the coding-agent barrel below does
+// package root (via `./core/compaction/index.ts`). In zero2ai these live in
+// `@zero2ai/agent-core/compaction`, and the coding-agent barrel below does
 // not forward them, so legacy extensions importing them fail Bun's static
 // export check during validation (issues #6583, #7174, #7403, #10278).
-export { calculateContextTokens, compact, serializeConversation } from "@oh-my-pi/pi-agent-core/compaction";
+export { calculateContextTokens, compact, serializeConversation } from "@zero2ai/agent-core/compaction";
 
 const legacyTokenizer = new Tokenizer();
 
@@ -1516,7 +1526,7 @@ export function estimateTokens(message: AgentMessage, tokenizer?: Tokenizer, opt
 
 // Legacy pi's `@earendil-works/pi-coding-agent` also exported `findCutPoint` and
 // `sessionEntryToContextMessages` from its package root (upstream Pi 0.84.2
-// public API). In omp `findCutPoint` moved to `@oh-my-pi/pi-agent-core/compaction`
+// public API). In zero2ai `findCutPoint` moved to `@zero2ai/agent-core/compaction`
 // AND grew a required `Tokenizer` parameter, and `sessionEntryToContextMessages`
 // has no canonical equivalent, so neither reaches the barrel below and legacy
 // extensions importing them (e.g. NVlabs/SoL-Pi's online-context-compact) fail
@@ -1544,7 +1554,7 @@ export function findCutPoint(
 /**
  * Legacy `sessionEntryToContextMessages(entry)` export: project one session entry
  * into its LLM/runtime messages. Plain custom/state entries do not participate in
- * context and yield `[]`. omp's `buildSessionContext` only projects whole branches,
+ * context and yield `[]`. zero2ai's `buildSessionContext` only projects whole branches,
  * so this ports upstream Pi's per-entry mapper.
  */
 export function sessionEntryToContextMessages(entry: SessionEntry): AgentMessage[] {
@@ -1583,11 +1593,11 @@ export function sessionEntryToContextMessages(entry: SessionEntry): AgentMessage
 }
 
 // Same barrel gap for two more legacy package-root exports: pi re-exported the
-// `CONFIG_DIR_NAME` constant and the CLI parser `parseArgs`. In omp
-// `CONFIG_DIR_NAME` lives in `@oh-my-pi/pi-utils` and `parseArgs` in
+// `CONFIG_DIR_NAME` constant and the CLI parser `parseArgs`. In zero2ai
+// `CONFIG_DIR_NAME` lives in `@zero2ai/utils` and `parseArgs` in
 // `../cli/args`, neither of which the barrel below forwards, so legacy
 // extensions importing either fail Bun's static export check during validation.
-export { CONFIG_DIR_NAME } from "@oh-my-pi/pi-utils";
+export { CONFIG_DIR_NAME } from "@zero2ai/utils";
 export { parseArgs } from "../cli/args";
 
 export * from "../index";
@@ -1597,12 +1607,12 @@ export { Type } from "./legacy-typebox";
 
 // Legacy pi's `@earendil-works/pi-coding-agent` root exported an `is<Tool>ToolResult`
 // family of type guards that narrow a `tool_result` event (`ToolResultEvent`) by
-// tool name. omp removed them from the public API in 10.2.3, and the barrel above
+// tool name. zero2ai removed them from the public API in 10.2.3, and the barrel above
 // does not forward them, so legacy extensions importing them (e.g.
 // `pi-lean-ctx@3.9.18`, which uses `isEditToolResult`/`isWriteToolResult` to
 // invalidate its read cache after a native edit/write) fail Bun's static export
 // check during validation (issue #8161). Restore the full guard family; legacy
-// `find`/`ls` tool results arrive through omp's custom-event branch, so those
+// `find`/`ls` tool results arrive through zero2ai's custom-event branch, so those
 // guards narrow the tool name while leaving their details unknown.
 
 /** Narrow a `tool_result` event to the `bash` tool. */
@@ -1630,7 +1640,7 @@ export function isGrepToolResult(e: ToolResultEvent): e is GrepToolResultEvent {
 	return e.toolName === "grep";
 }
 
-/** Legacy `find` result event represented by omp's custom-event branch. */
+/** Legacy `find` result event represented by zero2ai's custom-event branch. */
 export type FindToolResultEvent = ToolResultEvent & { toolName: "find" };
 
 /** Narrow a `tool_result` event to the legacy `find` tool. */
@@ -1638,7 +1648,7 @@ export function isFindToolResult(e: ToolResultEvent): e is FindToolResultEvent {
 	return e.toolName === "find";
 }
 
-/** Legacy `ls` result event represented by omp's custom-event branch. */
+/** Legacy `ls` result event represented by zero2ai's custom-event branch. */
 export type LsToolResultEvent = ToolResultEvent & { toolName: "ls" };
 
 /** Narrow a `tool_result` event to the legacy `ls` tool. */

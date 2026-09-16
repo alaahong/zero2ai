@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "bun:test";
-import { type Component, TUI } from "@oh-my-pi/pi-tui";
+import { type Component, TUI } from "@zero2ai/tui";
 import { withoutTerminalMultiplexer } from "./helpers/terminal-multiplexer";
 import { VirtualTerminal } from "./virtual-terminal";
 

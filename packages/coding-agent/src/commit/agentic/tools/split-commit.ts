@@ -1,5 +1,5 @@
-import { type } from "@oh-my-pi/omptype";
-import * as vcs from "@oh-my-pi/pi-natives/vcs";
+import { type } from "@zero2ai/schema";
+import * as vcs from "@zero2ai/natives/vcs";
 import type { CommitAgentState, SplitCommitGroup, SplitCommitPlan } from "../../../commit/agentic/state";
 import { computeDependencyOrder } from "../../../commit/agentic/topo-sort";
 import {

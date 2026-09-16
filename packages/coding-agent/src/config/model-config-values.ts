@@ -1,5 +1,5 @@
 import { execSync } from "node:child_process";
-import { $envExact, directoryIsEnterableSync, getProjectDir, logger } from "@oh-my-pi/pi-utils";
+import { $envExact, directoryIsEnterableSync, getProjectDir, logger } from "@zero2ai/utils";
 
 const commandValueCache = new Map<string, string>();
 // Failed `!command` resolutions (non-zero exit, empty stdout) are negative-cached
@@ -106,7 +106,7 @@ interface HeaderResolutionOptions {
  * re-wrapped across turns/subagent batches — the multi-minute main-thread stall
  * in #10605.
  */
-const LIVE_HEADER_RESOLVER = Symbol("ompLiveConfigHeaderResolver");
+const LIVE_HEADER_RESOLVER = Symbol("zero2aiLiveConfigHeaderResolver");
 
 interface LiveHeaderCarrier {
 	[LIVE_HEADER_RESOLVER]?: () => Record<string, string> | undefined;

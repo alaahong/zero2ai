@@ -1,6 +1,6 @@
-import { Effort } from "@oh-my-pi/pi-catalog/effort";
-import { requireSupportedEffort } from "@oh-my-pi/pi-catalog/model-thinking";
-import { $env } from "@oh-my-pi/pi-utils";
+import { Effort } from "@zero2ai/catalog/effort";
+import { requireSupportedEffort } from "@zero2ai/catalog/model-thinking";
+import { $env } from "@zero2ai/utils";
 import type { Model } from "../../types";
 import { mapOpenAIReasoningEffort } from "../openai-shared";
 
@@ -98,7 +98,7 @@ export interface RequestBody {
  */
 export function resolveCodexResponsesLite(requested: boolean | undefined): boolean {
 	if (requested !== undefined) return requested;
-	const env = $env.PI_CODEX_RESPONSES_LITE?.trim().toLowerCase();
+	const env = $env.ZERO2AI_CODEX_RESPONSES_LITE?.trim().toLowerCase();
 	if (env === "1" || env === "true") return true;
 	if (env === "0" || env === "false") return false;
 	return false;
@@ -107,7 +107,7 @@ export function resolveCodexResponsesLite(requested: boolean | undefined): boole
 /**
  * Whether to request `stream_options.reasoning_summary_delivery =
  * "sequential_cutoff"` (codex-rs `concurrent_reasoning_summaries`), enabled by
- * `PI_CODEX_CONCURRENT_SUMMARIES=1`.
+ * `ZERO2AI_CODEX_CONCURRENT_SUMMARIES=1`.
  *
  * Off by default because the mode cancels summary sections still in flight when
  * the reasoning item closes: measured over 12 interleaved turns it halved
@@ -116,7 +116,7 @@ export function resolveCodexResponsesLite(requested: boolean | undefined): boole
  * (`Stage::UnderDevelopment`, `default_enabled: false`).
  */
 function concurrentSummariesEnabled(): boolean {
-	const env = $env.PI_CODEX_CONCURRENT_SUMMARIES?.trim().toLowerCase();
+	const env = $env.ZERO2AI_CODEX_CONCURRENT_SUMMARIES?.trim().toLowerCase();
 	return env === "1" || env === "true";
 }
 

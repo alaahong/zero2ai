@@ -1,4 +1,4 @@
-import { truncateToWidth } from "@oh-my-pi/pi-tui";
+import { truncateToWidth } from "@zero2ai/tui";
 import type { StatusLineSegmentId } from "../../config/settings-schema";
 import { ALL_SEGMENT_IDS, renderSegment } from "../../modes/components/status-line/segments";
 import type { SegmentContext } from "../../modes/components/status-line/types";

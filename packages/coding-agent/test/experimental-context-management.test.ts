@@ -1,32 +1,32 @@
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
-import { Agent, CompactionCancelledError, type AgentTool } from "@oh-my-pi/pi-agent-core";
-import type { AssistantMessage, UserMessage } from "@oh-my-pi/pi-ai";
-import { createMockModel } from "@oh-my-pi/pi-ai/providers/mock";
-import { AssistantMessageEventStream } from "@oh-my-pi/pi-ai/utils/event-stream";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AgentSession, type AgentSessionEvent } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { CONTEXT_NOTES_ENTRY_TYPE, getContextNotes } from "@oh-my-pi/pi-coding-agent/session/context-notes";
+import { Agent, CompactionCancelledError, type AgentTool } from "@zero2ai/agent-core";
+import type { AssistantMessage, UserMessage } from "@zero2ai/ai";
+import { createMockModel } from "@zero2ai/ai/providers/mock";
+import { AssistantMessageEventStream } from "@zero2ai/ai/utils/event-stream";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { AgentSession, type AgentSessionEvent } from "@zero2ai/coding-agent/session/agent-session";
+import { CONTEXT_NOTES_ENTRY_TYPE, getContextNotes } from "@zero2ai/coding-agent/session/context-notes";
 import {
 	createCustomMessage,
 	convertToLlm,
 	SKILL_PROMPT_MESSAGE_TYPE,
-} from "@oh-my-pi/pi-coding-agent/session/messages";
-import type { CompactionEntry } from "@oh-my-pi/pi-coding-agent/session/session-entries";
-import { ExtensionRuntime, loadExtensionFromFactory } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/loader";
-import { ExtensionRunner } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/runner";
-import { EventBus } from "@oh-my-pi/pi-coding-agent/utils/event-bus";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TempDir } from "@oh-my-pi/pi-utils";
-import { computeNonMessageTokens } from "@oh-my-pi/pi-coding-agent/modes/utils/context-usage";
-import { mnemopiBackend } from "@oh-my-pi/pi-coding-agent/mnemopi/backend";
-import type { Tool, ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { ContextNotesTool, NewContextTool } from "@oh-my-pi/pi-coding-agent/tools/context-notes";
-import { BUILTIN_TOOL_NAMES } from "@oh-my-pi/pi-coding-agent/tools/builtin-names";
-import { GrepTool } from "@oh-my-pi/pi-coding-agent/tools/grep";
-import { EvalTool } from "@oh-my-pi/pi-coding-agent/tools/eval";
-import { ReadTool } from "@oh-my-pi/pi-coding-agent/tools/read";
+} from "@zero2ai/coding-agent/session/messages";
+import type { CompactionEntry } from "@zero2ai/coding-agent/session/session-entries";
+import { ExtensionRuntime, loadExtensionFromFactory } from "@zero2ai/coding-agent/extensibility/extensions/loader";
+import { ExtensionRunner } from "@zero2ai/coding-agent/extensibility/extensions/runner";
+import { EventBus } from "@zero2ai/coding-agent/utils/event-bus";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { TempDir } from "@zero2ai/utils";
+import { computeNonMessageTokens } from "@zero2ai/coding-agent/modes/utils/context-usage";
+import { mnemopiBackend } from "@zero2ai/coding-agent/mnemopi/backend";
+import type { Tool, ToolSession } from "@zero2ai/coding-agent/tools";
+import { ContextNotesTool, NewContextTool } from "@zero2ai/coding-agent/tools/context-notes";
+import { BUILTIN_TOOL_NAMES } from "@zero2ai/coding-agent/tools/builtin-names";
+import { GrepTool } from "@zero2ai/coding-agent/tools/grep";
+import { EvalTool } from "@zero2ai/coding-agent/tools/eval";
+import { ReadTool } from "@zero2ai/coding-agent/tools/read";
 import { createInMemoryAuthStorage } from "./helpers/agent-session-setup";
 
 const authStorage = createInMemoryAuthStorage();
@@ -612,7 +612,7 @@ describe("experimental context management", () => {
 	});
 
 	it("commits no boundary when the run aborts mid-rollover while the compaction hook is parked", async () => {
-		const tempDir = TempDir.createSync("@pi-experimental-abort-");
+		const tempDir = TempDir.createSync("@zero2ai-experimental-abort-");
 		try {
 			const model = getBundledModel("anthropic", "claude-sonnet-4-5");
 			if (!model) throw new Error("Expected bundled model");

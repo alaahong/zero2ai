@@ -11,7 +11,7 @@
  *      user), and either decision tool resets the counter.
  */
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "bun:test";
-import { type } from "@oh-my-pi/omptype";
+import { type } from "@zero2ai/schema";
 import {
 	Agent,
 	type AgentMessage,
@@ -19,20 +19,20 @@ import {
 	type StreamFn,
 	type ToolApproval,
 	type ToolLoadMode,
-} from "@oh-my-pi/pi-agent-core";
-import { createMockModel, type MockModel, type MockResponse } from "@oh-my-pi/pi-ai/providers/mock";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { CustomTool } from "@oh-my-pi/pi-coding-agent/extensibility/custom-tools/types";
-import { resolveLocalUrlToPath } from "@oh-my-pi/pi-coding-agent/internal-urls";
-import { IrcBus, type IrcMessage } from "@oh-my-pi/pi-coding-agent/irc/bus";
-import { AgentRegistry } from "@oh-my-pi/pi-coding-agent/registry/agent-registry";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import type { XdevState } from "@oh-my-pi/pi-coding-agent/tools/xdev";
-import { TempDir } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/agent-core";
+import { createMockModel, type MockModel, type MockResponse } from "@zero2ai/ai/providers/mock";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import type { CustomTool } from "@zero2ai/coding-agent/extensibility/custom-tools/types";
+import { resolveLocalUrlToPath } from "@zero2ai/coding-agent/internal-urls";
+import { IrcBus, type IrcMessage } from "@zero2ai/coding-agent/irc/bus";
+import { AgentRegistry } from "@zero2ai/coding-agent/registry/agent-registry";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import type { XdevState } from "@zero2ai/coding-agent/tools/xdev";
+import { TempDir } from "@zero2ai/utils";
 import planModeReminderPrompt from "../src/prompts/system/plan-mode-tool-decision-reminder.md" with { type: "text" };
 
 /** A stable, literal (non-templated) line of the reminder prompt, so the test
@@ -109,7 +109,7 @@ describe("AgentSession plan-mode convergence", () => {
 	let modelRegistry: ModelRegistry;
 
 	beforeAll(async () => {
-		authDir = TempDir.createSync("@pi-plan-converge-auth-");
+		authDir = TempDir.createSync("@zero2ai-plan-converge-auth-");
 		authStorage = await AuthStorage.create(authDir.join("auth.db"));
 		authStorage.setRuntimeApiKey("anthropic", "test-key");
 		modelRegistry = new ModelRegistry(authStorage, authDir.join("models.yml"));
@@ -121,7 +121,7 @@ describe("AgentSession plan-mode convergence", () => {
 	});
 
 	beforeEach(() => {
-		tempDir = TempDir.createSync("@pi-plan-converge-");
+		tempDir = TempDir.createSync("@zero2ai-plan-converge-");
 	});
 
 	afterEach(async () => {

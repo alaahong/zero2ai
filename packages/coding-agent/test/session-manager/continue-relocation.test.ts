@@ -3,12 +3,12 @@ import * as fs from "node:fs";
 import * as fsp from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { SessionHeader } from "@oh-my-pi/pi-coding-agent/session/session-entries";
-import { loadEntriesFromFile } from "@oh-my-pi/pi-coding-agent/session/session-loader";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { writeTerminalBreadcrumb } from "@oh-my-pi/pi-coding-agent/session/session-paths";
-import { getTerminalId } from "@oh-my-pi/pi-tui";
-import { getConfigRootDir, getTerminalSessionsDir, setAgentDir } from "@oh-my-pi/pi-utils";
+import type { SessionHeader } from "@zero2ai/coding-agent/session/session-entries";
+import { loadEntriesFromFile } from "@zero2ai/coding-agent/session/session-loader";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { writeTerminalBreadcrumb } from "@zero2ai/coding-agent/session/session-paths";
+import { getTerminalId } from "@zero2ai/tui";
+import { getConfigRootDir, getTerminalSessionsDir, setAgentDir } from "@zero2ai/utils";
 
 import { makeAssistantMessage } from "./helpers";
 
@@ -47,14 +47,14 @@ describe("SessionManager.continueRecent relocation", () => {
 	let testAgentDir: string;
 	let cwdA: string;
 	let cwdB: string;
-	const originalAgentDir = process.env.PI_CODING_AGENT_DIR;
+	const originalAgentDir = process.env.ZERO2AI_CODING_AGENT_DIR;
 	const originalTmuxPane = process.env.TMUX_PANE;
 	const fallbackAgentDir = path.join(getConfigRootDir(), "agent");
 
 	beforeEach(async () => {
 		// Force a deterministic, non-TTY terminal id so breadcrumb read/write is stable.
 		process.env.TMUX_PANE = "%relocation-test";
-		testAgentDir = await fsp.mkdtemp(path.join(os.tmpdir(), "omp-reloc-test-"));
+		testAgentDir = await fsp.mkdtemp(path.join(os.tmpdir(), "zero2ai-reloc-test-"));
 		setAgentDir(testAgentDir);
 		cwdA = path.join(testAgentDir, "worktree-old");
 		cwdB = path.join(testAgentDir, "worktree-new");
@@ -69,7 +69,7 @@ describe("SessionManager.continueRecent relocation", () => {
 			setAgentDir(originalAgentDir);
 		} else {
 			setAgentDir(fallbackAgentDir);
-			delete process.env.PI_CODING_AGENT_DIR;
+			delete process.env.ZERO2AI_CODING_AGENT_DIR;
 		}
 		await fsp.rm(testAgentDir, { recursive: true, force: true });
 	});

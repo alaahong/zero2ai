@@ -1,4 +1,4 @@
-import { USER_AGENT, getInstallId } from "@oh-my-pi/pi-utils";
+import { USER_AGENT, getInstallId } from "@zero2ai/utils";
 import { ProviderHttpError } from "../error";
 import type {
 	CredentialRankingStrategy,

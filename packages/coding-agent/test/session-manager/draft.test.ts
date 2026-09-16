@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import * as path from "node:path";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { isEnoent, TempDir } from "@oh-my-pi/pi-utils";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { isEnoent, TempDir } from "@zero2ai/utils";
 
 async function fileExists(p: string): Promise<boolean> {
 	try {
@@ -15,7 +15,7 @@ async function fileExists(p: string): Promise<boolean> {
 
 describe("SessionManager draft", () => {
 	it("round-trips text through saveDraft + consumeDraft", async () => {
-		using tempDir = TempDir.createSync("@pi-session-draft-roundtrip-");
+		using tempDir = TempDir.createSync("@zero2ai-session-draft-roundtrip-");
 		const session = SessionManager.create(tempDir.path(), tempDir.path());
 		session.appendMessage({ role: "user", content: "hello", timestamp: 1 });
 		await session.flush();
@@ -28,7 +28,7 @@ describe("SessionManager draft", () => {
 	});
 
 	it("places the draft inside the artifacts directory so dropSession cleans it", async () => {
-		using tempDir = TempDir.createSync("@pi-session-draft-location-");
+		using tempDir = TempDir.createSync("@zero2ai-session-draft-location-");
 		const session = SessionManager.create(tempDir.path(), tempDir.path());
 		session.appendMessage({ role: "user", content: "hello", timestamp: 1 });
 		await session.flush();
@@ -48,7 +48,7 @@ describe("SessionManager draft", () => {
 	});
 
 	it("removes any stale draft when saving an empty string", async () => {
-		using tempDir = TempDir.createSync("@pi-session-draft-empty-");
+		using tempDir = TempDir.createSync("@zero2ai-session-draft-empty-");
 		const session = SessionManager.create(tempDir.path(), tempDir.path());
 		session.appendMessage({ role: "user", content: "hello", timestamp: 1 });
 		await session.flush();
@@ -60,7 +60,7 @@ describe("SessionManager draft", () => {
 	});
 
 	it("forces the session header onto disk so resume can find the draft owner", async () => {
-		using tempDir = TempDir.createSync("@pi-session-draft-ensure-on-disk-");
+		using tempDir = TempDir.createSync("@zero2ai-session-draft-ensure-on-disk-");
 		const session = SessionManager.create(tempDir.path(), tempDir.path());
 		// No assistant reply yet: without ensureOnDisk the session file would not
 		// exist, leaving an orphan draft sidecar that --resume can never reach.

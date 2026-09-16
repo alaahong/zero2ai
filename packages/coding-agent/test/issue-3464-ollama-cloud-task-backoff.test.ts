@@ -1,18 +1,18 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
 import * as path from "node:path";
-import { Agent, type StreamFn } from "@oh-my-pi/pi-agent-core";
-import type { AssistantMessage, Model } from "@oh-my-pi/pi-ai";
-import { createMockModel } from "@oh-my-pi/pi-ai/providers/mock";
-import { AssistantMessageEventStream } from "@oh-my-pi/pi-ai/utils/event-stream";
-import { type GeneratedProvider, getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { Semaphore } from "@oh-my-pi/pi-coding-agent/task/parallel";
-import { wrapStreamFnWithProviderConcurrency } from "@oh-my-pi/pi-coding-agent/task/provider-concurrency";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { Agent, type StreamFn } from "@zero2ai/agent-core";
+import type { AssistantMessage, Model } from "@zero2ai/ai";
+import { createMockModel } from "@zero2ai/ai/providers/mock";
+import { AssistantMessageEventStream } from "@zero2ai/ai/utils/event-stream";
+import { type GeneratedProvider, getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { Semaphore } from "@zero2ai/coding-agent/task/parallel";
+import { wrapStreamFnWithProviderConcurrency } from "@zero2ai/coding-agent/task/provider-concurrency";
+import { TempDir } from "@zero2ai/utils";
 
 interface Deferred {
 	promise: Promise<void>;
@@ -37,7 +37,7 @@ describe("issue #3464: ollama-cloud task backoff", () => {
 	let session: AgentSession | undefined;
 
 	beforeAll(async () => {
-		tempDir = TempDir.createSync("@omp-issue-3464-");
+		tempDir = TempDir.createSync("@zero2ai-issue-3464-");
 		authStorage = await AuthStorage.create(path.join(tempDir.path(), "auth.db"));
 		authStorage.setRuntimeApiKey("anthropic", "anthropic-test-key");
 		authStorage.setRuntimeApiKey("openai", "openai-test-key");

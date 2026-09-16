@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
-import { createAutoresearchExtension } from "@oh-my-pi/pi-coding-agent/autoresearch";
+import { createAutoresearchExtension } from "@zero2ai/coding-agent/autoresearch";
 import {
 	buildExperimentState,
 	computeConfidence,
@@ -7,24 +7,24 @@ import {
 	findBaselineRunNumber,
 	findBestKeptMetric,
 	reconstructControlState,
-} from "@oh-my-pi/pi-coding-agent/autoresearch/state";
-import { AutoresearchStorage, closeAllAutoresearchStorages } from "@oh-my-pi/pi-coding-agent/autoresearch/storage";
-import type { ExperimentResult } from "@oh-my-pi/pi-coding-agent/autoresearch/types";
+} from "@zero2ai/coding-agent/autoresearch/state";
+import { AutoresearchStorage, closeAllAutoresearchStorages } from "@zero2ai/coding-agent/autoresearch/storage";
+import type { ExperimentResult } from "@zero2ai/coding-agent/autoresearch/types";
 import type {
 	ExtensionAPI,
 	ExtensionCommandContext,
 	RegisteredCommand,
-} from "@oh-my-pi/pi-coding-agent/extensibility/extensions";
-import type { VcsGitRepo, VcsGitRepoInfo } from "@oh-my-pi/pi-natives";
-import * as vcs from "@oh-my-pi/pi-natives/vcs";
-import { TempDir } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/extensibility/extensions";
+import type { VcsGitRepo, VcsGitRepoInfo } from "@zero2ai/natives";
+import * as vcs from "@zero2ai/natives/vcs";
+import { TempDir } from "@zero2ai/utils";
 
 afterEach(() => {
 	vi.restoreAllMocks();
 });
 
 function makeTempDir(): TempDir {
-	return TempDir.createSync("@pi-autoresearch-test-");
+	return TempDir.createSync("@zero2ai-autoresearch-test-");
 }
 
 function makeResult(partial: Partial<ExperimentResult>): ExperimentResult {
@@ -522,13 +522,13 @@ describe("autoresearch slash command", () => {
 	let dbOverride: TempDir | undefined;
 
 	beforeEach(() => {
-		dbOverride = TempDir.createSync("@pi-autoresearch-cmd-");
-		process.env.OMP_AUTORESEARCH_DB_DIR = dbOverride.path();
+		dbOverride = TempDir.createSync("@zero2ai-autoresearch-cmd-");
+		process.env.ZERO2AI_AUTORESEARCH_DB_DIR = dbOverride.path();
 		cleanups.push(dbOverride);
 	});
 
 	afterEach(() => {
-		delete process.env.OMP_AUTORESEARCH_DB_DIR;
+		delete process.env.ZERO2AI_AUTORESEARCH_DB_DIR;
 		closeAllAutoresearchStorages();
 		for (const dir of cleanups.splice(0)) {
 			dir.removeSync();
@@ -589,13 +589,13 @@ describe("autoresearch tool-call hook", () => {
 	let dbOverride: TempDir;
 
 	beforeEach(() => {
-		dbOverride = TempDir.createSync("@pi-autoresearch-hook-");
-		process.env.OMP_AUTORESEARCH_DB_DIR = dbOverride.path();
+		dbOverride = TempDir.createSync("@zero2ai-autoresearch-hook-");
+		process.env.ZERO2AI_AUTORESEARCH_DB_DIR = dbOverride.path();
 		cleanups.push(dbOverride);
 	});
 
 	afterEach(() => {
-		delete process.env.OMP_AUTORESEARCH_DB_DIR;
+		delete process.env.ZERO2AI_AUTORESEARCH_DB_DIR;
 		closeAllAutoresearchStorages();
 		for (const dir of cleanups.splice(0)) {
 			dir.removeSync();

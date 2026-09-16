@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from "bun:test";
 import { stripVTControlCharacters } from "node:util";
-import { Markdown } from "@oh-my-pi/pi-tui";
+import { Markdown } from "@zero2ai/tui";
 import { Settings } from "../../../src/config/settings";
 import { getMarkdownTheme, getThemeByName, setThemeInstance } from "../../../src/modes/theme/theme";
 

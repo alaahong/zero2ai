@@ -2,8 +2,8 @@ import { describe, expect, it, spyOn } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { applyCatalogCorrections, buildModel } from "@oh-my-pi/pi-catalog/build";
-import { resolveProviderModels } from "@oh-my-pi/pi-catalog/model-manager";
+import { applyCatalogCorrections, buildModel } from "@zero2ai/catalog/build";
+import { resolveProviderModels } from "@zero2ai/catalog/model-manager";
 import {
 	calculateCost,
 	calculateUncachedInputCost,
@@ -12,9 +12,9 @@ import {
 	getBundledModels,
 	getNextTimeBasedPricingTransition,
 	getTimeBasedPricingPeriod,
-} from "@oh-my-pi/pi-catalog/models";
-import type { ModelCost, ModelSpec, Usage } from "@oh-my-pi/pi-catalog/types";
-import { Effort } from "@oh-my-pi/pi-catalog/effort";
+} from "@zero2ai/catalog/models";
+import type { ModelCost, ModelSpec, Usage } from "@zero2ai/catalog/types";
+import { Effort } from "@zero2ai/catalog/effort";
 import { isTimeBasedCost, materializeTimeBasedCost } from "../src/pricing";
 
 function spec(id = "deepseek-v4-flash", provider = "deepseek"): ModelSpec<"openai-completions"> {
@@ -354,7 +354,7 @@ describe("financial schedule validation", () => {
 
 describe("pricing discovery and cache", () => {
 	it("retains custom static schedules when merging discovery ratecards and restoring cache", async () => {
-		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-catalog-scheduled-merge-"));
+		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-catalog-scheduled-merge-"));
 		const base = spec("scheduled-model", "custom-scheduled");
 		base.cost.timeBased = { offPeakMultiplier: 0.5, peakWindows: [] };
 		const dynamic = { ...base, cost: { input: 4, output: 3, cacheRead: 2, cacheWrite: 1 } };
@@ -380,7 +380,7 @@ describe("deepseek provider metadata corrections", () => {
 	// takes spec-shaped rows and re-builds them, so the bundled row is cast here
 	// exactly as the other catalog tests do.
 	it("gives the bare Flash alias its documented limits through provider resolution", async () => {
-		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-catalog-bare-alias-limits-"));
+		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-catalog-bare-alias-limits-"));
 		const bundled = getBundledModels("deepseek").find(model => model.id === "deepseek-flash");
 		if (!bundled) throw new Error("Expected a bundled deepseek-flash row");
 		const staticSpec = bundled as ModelSpec<"openai-completions">;

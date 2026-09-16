@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { convertAnthropicMessages } from "@oh-my-pi/pi-ai/providers/anthropic";
+import { convertAnthropicMessages } from "@zero2ai/ai/providers/anthropic";
 import type {
 	AssistantMessage,
 	Message,
@@ -7,8 +7,8 @@ import type {
 	ModelSpec,
 	ToolResultMessage,
 	UserMessage,
-} from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
+} from "@zero2ai/ai/types";
+import { buildModel } from "@zero2ai/catalog/build";
 
 /**
  * End-to-end encoder contract for #2851. GitHub Copilot's `anthropic-messages`

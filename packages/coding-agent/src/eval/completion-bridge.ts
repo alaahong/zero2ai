@@ -12,11 +12,11 @@
  * in, text (or, with `schema`, a structured object) out.
  */
 
-import { type } from "@oh-my-pi/omptype";
-import { instrumentedCompleteSimple, resolveTelemetry, type ThinkingLevel } from "@oh-my-pi/pi-agent-core";
-import { type Api, type AssistantMessage, Effort, type Model, type Tool } from "@oh-my-pi/pi-ai";
-import { clampThinkingLevelForModel, getSupportedEfforts } from "@oh-my-pi/pi-catalog/model-thinking";
-import { Snowflake } from "@oh-my-pi/pi-utils";
+import { type } from "@zero2ai/schema";
+import { instrumentedCompleteSimple, resolveTelemetry, type ThinkingLevel } from "@zero2ai/agent-core";
+import { type Api, type AssistantMessage, Effort, type Model, type Tool } from "@zero2ai/ai";
+import { clampThinkingLevelForModel, getSupportedEfforts } from "@zero2ai/catalog/model-thinking";
+import { Snowflake } from "@zero2ai/utils";
 import { extractTextContent, extractToolCall, parseJsonPayload } from "../commit/utils";
 
 import type { ModelRegistry } from "../config/model-registry";

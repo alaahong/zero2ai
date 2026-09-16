@@ -1,4 +1,4 @@
-import { tryParseJson } from "@oh-my-pi/pi-utils";
+import { tryParseJson } from "@zero2ai/utils";
 import type { RenderResult, SpecialHandler } from "./types";
 import { buildResult, formatNumber, loadPage } from "./types";
 

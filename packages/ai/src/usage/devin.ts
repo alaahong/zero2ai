@@ -19,10 +19,10 @@ import {
 	type PlanStatus,
 	TeamsTier,
 	type Timestamp,
-} from "@oh-my-pi/pi-catalog/discovery/devin-proto";
-import { create, toBinary } from "@oh-my-pi/pi-catalog/discovery/protobuf";
-import { DEVIN_DEFAULT_BASE_URL, devinCliMetadata, normalizeDevinSessionToken } from "@oh-my-pi/pi-catalog/wire/devin";
-import { decodeDevinUnaryMessage } from "@oh-my-pi/pi-catalog/wire/devin-proto";
+} from "@zero2ai/catalog/discovery/devin-proto";
+import { create, toBinary } from "@zero2ai/catalog/discovery/protobuf";
+import { DEVIN_DEFAULT_BASE_URL, devinCliMetadata, normalizeDevinSessionToken } from "@zero2ai/catalog/wire/devin";
+import { decodeDevinUnaryMessage } from "@zero2ai/catalog/wire/devin-proto";
 import type {
 	UsageAmount,
 	UsageCredential,

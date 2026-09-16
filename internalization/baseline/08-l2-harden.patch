@@ -1,0 +1,276 @@
+diff --git a/docs/internalization-plan.md b/docs/internalization-plan.md
+--- a/docs/internalization-plan.md
++++ b/docs/internalization-plan.md
+@@ -8,6 +8,43 @@
+ | 适用读者 | 立项评审、架构、安全、DevOps、研发效能 |
+ 
+ > 本文所有技术判断均基于对仓库源码的实地核查，关键结论附带文件与符号位置，便于复核。
++
++---
++
++## 0. 执行摘要（管理层一页）
++
++**要做什么**：把开源的 AI 编码代理（MIT）内化为行内可控版本，让研发在**数据不出域、用量可计量、操作可审计、风险可阻断**的前提下使用。
++
++**为什么可行**：许可为 MIT（仅需保留版权声明）；模型接入、代理、私有 CA/mTLS、集中凭据、工具审批、审计遥测等企业要素**均为开箱能力**，约 80% 的收敛需求无需改源码。
++
++**三个必须正面处理的缺口**：
++
++| 缺口 | 事实 | 应对 |
++|---|---|---|
++| 无管理员托管策略层 | 审批默认 `yolo`，配置优先级为 `runtime flags > --config > 项目 > 全局`，**用户加 `--yolo` 即可抬过全部配置** | 受控启动器 + 不暴露二进制 + 目录 ACL + 终端白名单（配置层本身无强制力） |
++| 无 OS 级沙箱 | 审批通过后 `bash`/`eval`/`browser` 继承宿主全部权限；`zero2ai-iso` 是子代理工作区隔离，**非安全边界** | 沙箱由虚拟化团队提供（VM/容器 + egress 白名单） |
++| 默认存在外联面 | 启动版本检查、`catalog.stencil.so` 目录刷新（无开关）、Auto-QA、市场检查、share/collab | 网络侧封禁 + 少量源码补丁（L2 清单 6 项） |
++
++**投入与产出**：核心 **2–3 人 × 6–9 人月**（另需虚拟化/安全/法务共建），**4–6 个月达到生产可用**（P4）。年度运行成本主要是模型推理费（由网关计量）与平台资源（镜像库、collector、沙箱）。
++
++**要的资源**：① 内网模型网关（或复用现有 LiteLLM）② 内网 npm/crates 镜像与制品库 ③ 虚拟化资源用于沙箱 ④ 日志/可观测平台接入 ⑤ Windows 代码签名证书 ⑥ 法务对三处 copyleft 例外的书面结论。
++
++**成功标准（可验证）**：隔离网可完整构建运行；抓包除网关外零连接；`agent.db` 无明文凭据；高危操作被阻断且留痕；成本可归集到人/项目；季度 rebase 上游后补丁全量应用。
++
++---
++
++## 0.5 当前完成度
++
++| 里程碑 | 状态 | 证据 |
++|---|---|---|
++| 表面内化（命令/目录/环境变量/品牌） | ✅ 已完成 | CLI 为 `zero2ai`、配置目录 `.zero2ai`、ZERO2AI 标记与字标；1511 文件改动 + 12 处路径改名 |
++| **深度改名第二阶段**（包作用域/crate/环境变量/模型库/遥测） | ✅ 已完成 | 作用域 `@oh-my-pi/*` → `@zero2ai/*` 且去 `pi-`/`omp` 前缀（如 `@zero2ai/coding-agent`）；crate `pi-*` → `zero2ai-*`；环境变量 `PI_*` → `ZERO2AI_*`；`omptype` → `schema`；遥测扩展属性 `pi.gen_ai.*` → `zero2ai.gen_ai.*`；4013 文件改写 + 19 处路径 + napi `binaryName`。**16/16 包类型检查通过**；CLI 冒烟通过；`env`/`dirs`/`install-id` 32 项测试通过 |
++| 改名结果固化（可 rebase 基线） | ✅ 已完成 | `internalization/baseline/`（**7 个补丁**）+ `apply-baseline.sh` / `revert-baseline.sh`；**应用到干净 HEAD 后与工作区逐文件 SHA256 零差异（7328 文件），回滚残留 0** |
++| P1 落地包（策略/网关/启动器/验收） | ✅ 已产出 | `internalization/p1/`：`config.yml`、`models.yml`、`disabled-providers.yml`（71 项）、env 基线、受控启动器（sh/ps1）、4 个验收脚本 |
++| **L2 源码补丁（§8 清单）** | 🔶 已做 3/6 | ✅ catalog 刷新开关与镜像改写（`ZERO2AI_DISABLE_MODEL_CATALOG` / `ZERO2AI_MODEL_CATALOG_URL`）；✅ 自更新源可覆盖（`ZERO2AI_UPDATE_NPM_REGISTRY` / `_GITHUB_API` / `_GITHUB_REPO`）；✅ 日志级别阈值与敏感字段脱敏（`ZERO2AI_LOG_LEVEL`，本地传输与外部 sink 双路径脱敏）。⏳ 未做：Windows 凭据 DPAPI、托管配置层、受管扩展目录锁定（均需改加载器/优先级语义，见 §8 备注） |
++| P1 真实断网构建 / P2 网关与密钥 / P3 策略 / P4 沙箱 / P5 推广 | ⏳ 待实施 | 需行内基础设施到位后按 §6 推进 |
++
++> 未完成且必须在行内环境做的三件事：① Rust 侧编译验证（本机无 cargo）② 内网镜像与制品库落地 ③ 沙箱外层与网关上线。
+ 
+ ---
+ 
+@@ -156,6 +193,9 @@
+ 
+ ### 6.1 阶段、周期与验收
+ 
++> 状态：**P0 与「表面内化 + 深度改名 + 基线固化 + P1 落地包」已完成**（见 §0.5）；下表 P0.5 之后的阶段需行内基础设施到位后启动。
++> 基线补丁与应用脚本位于 `internalization/`，验收脚本位于 `internalization/p1/verify/`。
++
+ | 阶段 | 周期 | 目标 | 关键交付 | 验收 |
+ |---|---|---|---|---|
+ | **P0 评估与立项** | 2–4 周 | 放行与划界 | 许可合规结论；内化范围清单（`metaharness`/`collab-web`/`typescript-edit-benchmark` 可裁）；L2 补丁清单 v0；OS 基线与形态决策 | 法务书面放行；补丁清单评审通过 |
+@@ -234,7 +274,8 @@
+     web_search: deny
+     computer: deny
+     browser: prompt
+-disabledProviders: [ ... ]          # 整体替换语义：必须列全内置 provider
++disabledProviders: [ ... ]          # 整体替换语义：必须列全内置 provider。
++                                    # 71 项完整清单见 internalization/p1/disabled-providers.yml（由内置 provider 规则实测导出）
+ mcp:
+   enableProjectConfig: false
+ startup:
+@@ -257,9 +298,11 @@
+ ### 7.2 环境变量基线
+ 
+ ```bash
+-ZERO2AI_CONFIG_DIR=/opt/corp/zero2ai
+-ZERO2AI_CODING_AGENT_DIR=/opt/corp/zero2ai/agent
+-ZERO2AI_CONFIG_FILES=/etc/corp/zero2ai/baseline.yml   # 只读追加配置
++# ZERO2AI_CONFIG_DIR 必须是「相对 home 的路径段」：引擎把它与 os.homedir() 拼接，
++# 给绝对路径会得到 <home>/<绝对路径> 的畸形结果（Windows 上实测会直接失败）。
++ZERO2AI_CONFIG_DIR=.zero2ai-corp
++ZERO2AI_CODING_AGENT_DIR=/opt/corp/zero2ai/agent        # 该变量可用绝对路径
++ZERO2AI_CONFIG_FILES=/etc/corp/zero2ai/baseline.yml   # 只读追加配置（OS 路径分隔符分隔多个）
+ ZERO2AI_PROXY=http://proxy.corp:3128
+ NO_PROXY=localhost,127.0.0.1,.corp.local
+ NODE_EXTRA_CA_CERTS=/etc/corp/ca-bundle.pem
+@@ -295,6 +338,13 @@
+ | 4 | `packages/ai/src/auth/sqlite-credential-store.ts` | Windows 接 DPAPI/凭据管理器，或强制 broker 模式 | 明文 JSON；Windows 下 chmod 无效 |
+ | 5 | 新增 | 托管配置层（系统级只读 config，优先级高于用户 config 且不可被 `--yolo` 覆盖） | 仓库中未提供 managed policy 机制 |
+ | 6 | 新增 | 受管扩展目录锁定（忽略 `--no-extensions` / `disabledExtensions`） | hook 闸门依赖扩展，而用户可关闭 |
++
++> **实施状态（2026-09）**：第 1、2、3 项已完成并纳入 `internalization/baseline/08-l2-harden.patch`：
++> - 目录刷新：`ZERO2AI_DISABLE_MODEL_CATALOG=1` 完全关闭公网刷新；`ZERO2AI_MODEL_CATALOG_URL` 指向内网镜像。
++> - 自更新：`ZERO2AI_UPDATE_NPM_REGISTRY` / `ZERO2AI_UPDATE_GITHUB_API` / `ZERO2AI_UPDATE_GITHUB_REPO` 覆盖官方源（`--registry` 亦随之指向内网）。
++> - 日志：`ZERO2AI_LOG_LEVEL=error|warn|info|debug` 控制本地传输阈值；`redactSecrets` 对本地传输与外部 sink **双路径**递归脱敏（`pass`/`secret`/`token`/`apiKey`/`authorization`/`credential`/`cookie`/`privateKey` 等键，深度上限 4）。
++>
++> 第 4、5、6 项尚未编码，原因是它们不是"加开关"而是**语义改动**：DPAPI 需要原生绑定（Bun 无 OS 凭据库 API），托管配置层要改 `settings` 的优先级链并让运行时标志无法覆盖，受管扩展锁定要改扩展/hook 发现器。建议在 P3 阶段与策略基线一并设计实现。
+ 
+ ---
+ 
+@@ -325,7 +375,8 @@
+ 
+ ## 11. 交付物清单
+ 
+-1. 本方案文档；2. L2 补丁集（含上游 issue 链接）；3. 配置基线包（`config.yml` / `models.yml` / env / 启动器）；4. 内网镜像与依赖清单；5. 构建与发行流水线（含 Windows 签名）；6. 验收与回归脚本（smoke + 测试分桶）；7. 审计与成本看板；8. 项目模板仓（`.zero2ai/` + skills/hooks/rules）；9. 培训材料与 SOP；10. 风险与例外台账。
++1. ✅ 本方案文档（本文）；2. ⏳ L2 补丁集（§8 的 6 项源码改动，尚未编码）；3. ✅ 配置基线包（`internalization/p1/`：`config.yml` / `models.yml` / env / 启动器 / 禁用清单）；4. ⏳ 内网镜像与依赖清单；5. ⏳ 构建与发行流水线（含 Windows 签名）；6. ✅ 验收与回归脚本（`internalization/p1/verify/` 4 个脚本）；7. ⏳ 审计与成本看板；8. ⏳ 项目模板仓（`.zero2ai/` + skills/hooks/rules）；9. ⏳ 培训材料与 SOP；10. ⏳ 风险与例外台账。
++11. ✅ **改名基线补丁序列**（`internalization/baseline/`，7 个补丁；含第一/第二阶段）与 `apply-baseline.sh` / `revert-baseline.sh`。
+ 
+ ---
+ 
+@@ -338,6 +389,25 @@
+ | 3 | 模型来源 | 复用现有内网网关（LiteLLM 优先） |
+ | 4 | 沙箱责任 | 接受外层沙箱由虚拟化团队提供 |
+ | 5 | 跟版策略 | 季度 rebase + 补丁最小化 |
++
++---
++
++## 13. 工程交付物索引（`internalization/`）
++
++| 路径 | 作用 | 已验证 |
++|---|---|---|
++| `baseline/01-core-identity.patch` … `07-deep-rename.patch` | 改名基线：01–06 为第一阶段（`omp`→`zero2ai`），**07 为第二阶段深度改名**（包作用域、crate、环境变量、`omptype`→`schema`、遥测属性） | 应用 7/7 成功；与工作区逐文件 SHA256 **零差异（7328 文件）**；纯重命名以 `rename from/to` 表达（含二进制 tokenizer 数据） |
++| `baseline/08-l2-harden.patch` | **L2 收紧**：catalog 刷新开关与镜像、自更新源可覆盖、日志级别与敏感字段脱敏 | 4 文件 / 14.9 KB；全序列 8/8 应用成功 |
++| `apply-baseline.sh` / `apply-baseline.ps1` | 应用基线（`--check` 预演、`--target` 指定仓库） | `--check` 全绿；应用后条目数与主树一致 |
++| `revert-baseline.sh` | 逆序回滚 | 回滚后残留改动 0 |
++| `p1/config.yml` | 项目级策略基线（审批收紧、工具开关、外发面关闭） | YAML 可解析；键名逐条核对 |
++| `p1/disabled-providers.yml` | 71 个内置 provider 禁用清单（整体替换语义） | 由 KDL 规则实测导出 |
++| `p1/models.yml` | 行内网关 provider 样例（`apiKey` 指向环境变量名） | YAML 可解析 |
++| `p1/env.example.sh` / `.ps1` | 环境变量基线（含合规红线 unset 兜底） | bash `-n` / PowerShell 解析通过 |
++| `p1/zero2ai-launch.sh` / `.ps1` | 受控启动器（固定 `--config/--approval-mode/--tools/--no-extensions`） | 语法与解析通过；强制力边界写在脚本头 |
++| `p1/verify/verify-policy.sh` | 策略验收：6 项基于 `config get` 生效值的机械断言 + 2 项人工复核 | 语法通过；需在具备原生插件的环境实跑 |
++| `p1/verify/verify-egress.sh` / `.ps1` | 出口核查：非允许对端即失败 | 语法与解析通过 |
++| `p1/verify/verify-offline-build.sh` | 离线构建链（支持 `--dry-run`） | 语法通过 |
+ 
+ ---
+ 
+diff --git a/packages/catalog/src/provider-models/openai-compat.ts b/packages/catalog/src/provider-models/openai-compat.ts
+--- a/packages/catalog/src/provider-models/openai-compat.ts
++++ b/packages/catalog/src/provider-models/openai-compat.ts
+@@ -66,7 +66,20 @@
+ 	return identity.family === undefined || identity.family === "air" || identity.family === "turbo";
+ }
+ 
+-const MODELS_DEV_URL = "https://catalog.stencil.so/models.json.zstd";
++const DEFAULT_MODELS_DEV_URL = "https://catalog.stencil.so/models.json.zstd";
++
++/**
++ * Catalogue endpoint, or `undefined` when the remote refresh is switched off.
++ *
++ * Air-gapped deployments point `ZERO2AI_MODEL_CATALOG_URL` at an internal
++ * mirror, or set `ZERO2AI_DISABLE_MODEL_CATALOG=1` to stay strictly on the
++ * bundled/cached catalogue with no egress at all.
++ */
++function resolveModelsDevUrl(): string | undefined {
++	const disabled = process.env.ZERO2AI_DISABLE_MODEL_CATALOG?.trim().toLowerCase();
++	if (disabled === "1" || disabled === "true" || disabled === "yes") return undefined;
++	return process.env.ZERO2AI_MODEL_CATALOG_URL?.trim() || DEFAULT_MODELS_DEV_URL;
++}
+ 
+ /** Little-endian magic number opening every zstd frame (RFC 8878). */
+ const ZSTD_MAGIC = 0xfd2fb528;
+@@ -217,6 +230,12 @@
+ 	session: CatalogSession,
+ 	signal?: AbortSignal,
+ ): Promise<unknown> {
++	const url = resolveModelsDevUrl();
++	if (!url) {
++		// Managed/air-gapped hosts: never reach out, let callers fall back to the
++		// bundled or cached catalogue exactly as they would on a network failure.
++		throw new Error("remote model catalogue refresh is disabled (ZERO2AI_DISABLE_MODEL_CATALOG)");
++	}
+ 	const headers: Record<string, string> = {
+ 		Accept: "application/zstd, application/json",
+ 		"User-Agent": CATALOG_USER_AGENT,
+@@ -224,7 +243,7 @@
+ 	if (session.hasPayload && session.etag) {
+ 		headers["If-None-Match"] = session.etag;
+ 	}
+-	const response = await fetchImpl(MODELS_DEV_URL, { method: "GET", headers, signal });
++	const response = await fetchImpl(url, { method: "GET", headers, signal });
+ 	if (response.status === 304 && session.hasPayload) {
+ 		return session.payload;
+ 	}
+diff --git a/packages/coding-agent/src/cli/update-cli.ts b/packages/coding-agent/src/cli/update-cli.ts
+--- a/packages/coding-agent/src/cli/update-cli.ts
++++ b/packages/coding-agent/src/cli/update-cli.ts
+@@ -23,7 +23,7 @@
+ 	withTimeoutSignal,
+ } from "../utils/fetch-timeout";
+ 
+-const REPO = "can1357/oh-my-pi";
++const REPO = process.env.ZERO2AI_UPDATE_GITHUB_REPO?.trim() || "can1357/oh-my-pi";
+ const PACKAGE = "@zero2ai/coding-agent";
+ const HOMEBREW_FORMULA = "can1357/tap/zero2ai";
+ const MISE_TOOL = "github:can1357/oh-my-pi";
+@@ -39,8 +39,8 @@
+  * `No version matching "X" found for specifier "<pkg>" (but package exists)`.
+  * See #1686.
+  */
+-const NPM_REGISTRY = "https://registry.npmjs.org/";
+-const GITHUB_API = "https://api.github.com";
++const NPM_REGISTRY = process.env.ZERO2AI_UPDATE_NPM_REGISTRY?.trim() || "https://registry.npmjs.org/";
++const GITHUB_API = process.env.ZERO2AI_UPDATE_GITHUB_API?.trim() || "https://api.github.com";
+ const RELEASE_METADATA_TIMEOUT_MS = 30_000;
+ const BINARY_DOWNLOAD_TIMEOUT_MS = 15 * 60_000;
+ 
+diff --git a/packages/utils/src/logger.ts b/packages/utils/src/logger.ts
+--- a/packages/utils/src/logger.ts
++++ b/packages/utils/src/logger.ts
+@@ -43,7 +43,12 @@
+ 
+ function emitToSinks(level: LogLevel, message: string, context: Record<string, unknown> | undefined): void {
+ 	if (logSinks.size === 0) return;
+-	const event: LogEvent = { level, message, context, timestamp: new Date() };
++	const event: LogEvent = {
++		level,
++		message,
++		context: redactSecrets(context) as Record<string, unknown> | undefined,
++		timestamp: new Date(),
++	};
+ 	for (const sink of logSinks) {
+ 		try {
+ 			sink(event);
+@@ -218,6 +223,39 @@
+ 
+ const FORMAT_TOKEN_PATTERN = /%[scdjifoO%]/;
+ 
++/** Rank used by the `ZERO2AI_LOG_LEVEL` threshold; higher = more verbose. */
++const LOG_LEVEL_RANK: Record<LogLevel, number> = { error: 0, warn: 1, info: 2, debug: 3 };
++
++/**
++ * Highest level written to the local transports. Unset keeps the historical
++ * behaviour (everything is written); set `ZERO2AI_LOG_LEVEL=info` (or `warn` /
++ * `error`) on managed hosts so debug detail stops accumulating on disk.
++ */
++function levelThreshold(): number {
++	const raw = process.env.ZERO2AI_LOG_LEVEL?.trim().toLowerCase();
++	if (!raw) return LOG_LEVEL_RANK.debug;
++	return LOG_LEVEL_RANK[raw as LogLevel] ?? LOG_LEVEL_RANK.debug;
++}
++
++/** Keys whose values must never reach a log line or an external sink. */
++const SECRET_KEY_PATTERN = /pass|secret|token|api[-_]?key|authorization|credential|cookie|private[-_]?key/i;
++const REDACTION_MAX_DEPTH = 4;
++
++/**
++ * Replace values behind secret-shaped keys (recursively, bounded) so logs never
++ * carry credentials. Returns a copy — callers keep their original object.
++ */
++export function redactSecrets(value: unknown, depth = 0): unknown {
++	if (depth > REDACTION_MAX_DEPTH) return "[truncated]";
++	if (Array.isArray(value)) return value.map(item => redactSecrets(item, depth + 1));
++	if (value === null || typeof value !== "object") return value;
++	const out: Record<string, unknown> = {};
++	for (const [key, entry] of Object.entries(value as Record<string, unknown>)) {
++		out[key] = SECRET_KEY_PATTERN.test(key) ? "[redacted]" : redactSecrets(entry, depth + 1);
++	}
++	return out;
++}
++
+ function normalizeLogInfo(
+ 	level: LogLevel,
+ 	message: string,
+@@ -229,7 +267,7 @@
+ 	if (metadata?.message) info.message = `${message} ${metadata.message}`;
+ 	if (metadata?.stack) info.stack = metadata.stack;
+ 	if (metadata?.cause) info.cause = metadata.cause;
+-	return info;
++	return redactSecrets(info) as NormalizedLogInfo;
+ }
+ 
+ function formatLogInfo(info: NormalizedLogInfo): string {
+@@ -288,6 +326,7 @@
+ }
+ 
+ function emitLocally(level: LogLevel, message: string, context: Record<string, unknown> | undefined): void {
++	if (LOG_LEVEL_RANK[level] > levelThreshold()) return;
+ 	const transports = getLocalTransports();
+ 	if (!transports.file && !transports.console) return;
+ 	const info = normalizeLogInfo(level, message, context);

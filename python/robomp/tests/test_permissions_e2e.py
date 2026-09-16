@@ -36,7 +36,7 @@ _REPO = "octo/permission-e2e"
 
 def _require_linux_root_toolchain() -> None:
     if platform.system() != "Linux" or os.geteuid() != 0:
-        pytest.skip("slot permission e2e tests require Linux root so subprocesses can drop to omp-N UIDs")
+        pytest.skip("slot permission e2e tests require Linux root so subprocesses can drop to zero2ai-N UIDs")
     missing = [cmd for cmd in ("git", "bun", "cargo", "python3") if shutil.which(cmd) is None]
     if missing:
         pytest.skip(f"slot permission e2e tests require tools on PATH: {', '.join(missing)}")
@@ -260,7 +260,7 @@ def test_slot_workspace_runs_bun_biome_cargo_and_git_after_root_reentry(
     workspaces = slot_tmp_path / "workspaces"
 
     first = _ensure_workspace(workspaces, upstream_repo, number=101, slot_uid=_SLOT_ONE)
-    stale_bun_cache = first.root / ".omp-xdg" / "cache" / "bun-install" / "root-owned-stale"
+    stale_bun_cache = first.root / ".zero2ai-xdg" / "cache" / "bun-install" / "root-owned-stale"
     stale_bun_cache.mkdir(parents=True, exist_ok=True)
     stale_marker = stale_bun_cache / "marker.txt"
     stale_marker.write_text("root-owned\n", encoding="utf-8")
@@ -338,8 +338,8 @@ def test_git_pool_metadata_survives_root_push_and_retry_slot(
 
 
 def _prepare_shared_natives_cache(slot_tmp_path: Path) -> NativesCache:
-    """Provision `/data/cache/pi-natives` shape (root:omp, setgid 2770)."""
-    cache_root = slot_tmp_path / "cache" / "pi-natives"
+    """Provision `/data/cache/zero2ai-natives` shape (root:zero2ai, setgid 2770)."""
+    cache_root = slot_tmp_path / "cache" / "zero2ai-natives"
     cache_root.mkdir(parents=True)
     os.chown(cache_root, 0, _SHARED_OMP_GID)
     cache_root.chmod(0o2770)
@@ -371,7 +371,7 @@ def test_natives_cache_shares_artifacts_across_slot_workspaces(
     """End-to-end: capture under slot 1, populate under slot 2, prove that:
 
     1. A capture from a slot-owned workspace lands in the shared cache with
-       group `omp` setgid inheritance so any other slot can read it.
+       group `zero2ai` setgid inheritance so any other slot can read it.
     2. ensure_workspace under a different slot UID auto-populates the cached
        `.node` (hardlink, inode shared) and copies the companions.
     3. Slot 2 can read the populated `.node`, and a temp-rename rebuild
@@ -409,8 +409,8 @@ def test_natives_cache_shares_artifacts_across_slot_workspaces(
     assert stored is not None
     cached_node = stored / "pi_natives.linux-arm64.node"
     cached_companion = stored / "index.d.ts"
-    # Cache root is setgid `omp`; new files inherit gid `omp` so any slot
-    # with `extra_groups=[omp]` can read them.
+    # Cache root is setgid `zero2ai`; new files inherit gid `zero2ai` so any slot
+    # with `extra_groups=[zero2ai]` can read them.
     assert cached_node.stat().st_gid == _SHARED_OMP_GID
     assert cached_companion.stat().st_gid == _SHARED_OMP_GID
 
@@ -438,7 +438,7 @@ def test_natives_cache_shares_artifacts_across_slot_workspaces(
     # The companion is COPIED: independent inode.
     assert ws2_companion.stat().st_ino != cached_companion.stat().st_ino
 
-    # Slot 2 must be able to read the populated artifacts (group omp + 0660
+    # Slot 2 must be able to read the populated artifacts (group zero2ai + 0660
     # via setgid inheritance from the cache root).
     _run_ok(bindings2, ["test", "-r", "packages/natives/native/pi_natives.linux-arm64.node"])
     _run_ok(bindings2, ["test", "-r", "packages/natives/native/index.d.ts"])

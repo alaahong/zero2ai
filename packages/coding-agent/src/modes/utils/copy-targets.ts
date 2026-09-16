@@ -1,6 +1,6 @@
-import type { AgentMessage } from "@oh-my-pi/pi-agent-core";
-import type { ToolCall } from "@oh-my-pi/pi-ai";
-import { extractMarkdownLinks } from "@oh-my-pi/pi-tui";
+import type { AgentMessage } from "@zero2ai/agent-core";
+import type { ToolCall } from "@zero2ai/ai";
+import { extractMarkdownLinks } from "@zero2ai/tui";
 
 /** A fenced code block extracted from assistant markdown. */
 export interface CodeBlock {

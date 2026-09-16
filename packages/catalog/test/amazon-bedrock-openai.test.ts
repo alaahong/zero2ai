@@ -2,12 +2,12 @@ import { describe, expect, test } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { resolveProviderModels } from "@oh-my-pi/pi-catalog/model-manager";
-import { DEFAULT_MODEL_PER_PROVIDER, PROVIDER_DESCRIPTORS } from "@oh-my-pi/pi-catalog/provider-models/descriptors";
-import { seedModels } from "@oh-my-pi/pi-catalog/compat/providers";
-import { filterModelsDevCatalogRows } from "@oh-my-pi/pi-catalog/provider-models/models-dev-policies";
-import { bedrockMantleModelManagerOptions } from "@oh-my-pi/pi-catalog/provider-models/openai-compat";
-import type { FetchImpl, ModelSpec } from "@oh-my-pi/pi-catalog/types";
+import { resolveProviderModels } from "@zero2ai/catalog/model-manager";
+import { DEFAULT_MODEL_PER_PROVIDER, PROVIDER_DESCRIPTORS } from "@zero2ai/catalog/provider-models/descriptors";
+import { seedModels } from "@zero2ai/catalog/compat/providers";
+import { filterModelsDevCatalogRows } from "@zero2ai/catalog/provider-models/models-dev-policies";
+import { bedrockMantleModelManagerOptions } from "@zero2ai/catalog/provider-models/openai-compat";
+import type { FetchImpl, ModelSpec } from "@zero2ai/catalog/types";
 
 const MANTLE_MODEL_IDS = [
 	"openai.gpt-5.4",
@@ -94,7 +94,7 @@ describe("Amazon Bedrock OpenAI routing", () => {
 
 		// The bearer-scoped /v1/models response is the complete account catalog:
 		// a successful refresh must prune static seeds the account cannot use.
-		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-catalog-bedrock-mantle-"));
+		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-catalog-bedrock-mantle-"));
 		try {
 			const refreshed = await resolveProviderModels(
 				{ ...managerOptions, cacheDbPath: path.join(tempDir, "models.db") },

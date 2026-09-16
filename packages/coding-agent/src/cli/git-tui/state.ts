@@ -1,21 +1,21 @@
 /**
- * Git data model for the `omp git` fullscreen TUI.
+ * Git data model for the `zero2ai git` fullscreen TUI.
  *
  * Owns porcelain status parsing into staged/unstaged file lists, HEAD commit
  * metadata for the clean-tree view, per-file old/new content resolution for
  * the split diff pane, and the staging/commit actions the sidebar triggers.
  */
 import * as path from "node:path";
-import type { VcsGitRepo, VcsNumstatEntry } from "@oh-my-pi/pi-natives";
+import type { VcsGitRepo, VcsNumstatEntry } from "@zero2ai/natives";
 import {
 	DiffSide,
 	DiffStream,
 	type DiffStreamProgress,
 	type DiffStreamResult,
 	rasterizeSvg,
-} from "@oh-my-pi/pi-natives";
-import * as vcs from "@oh-my-pi/pi-natives/vcs";
-import { BINARY_SNIFF_BYTES, isEnoent, isProbablyBinaryHeader } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/natives";
+import * as vcs from "@zero2ai/natives/vcs";
+import { BINARY_SNIFF_BYTES, isEnoent, isProbablyBinaryHeader } from "@zero2ai/utils";
 import type { NumstatEntry } from "../../commit/types";
 
 /** SHA of git's canonical empty tree: diff base for a root commit. */
@@ -297,7 +297,7 @@ function mapNumstat(entries: VcsNumstatEntry[]): NumstatEntry[] {
 export class GitModel {
 	readonly cwd: string;
 	readonly #repo: VcsGitRepo;
-	/** Resolved SHA when the TUI is pinned to one commit (`omp git <rev>`). */
+	/** Resolved SHA when the TUI is pinned to one commit (`zero2ai git <rev>`). */
 	readonly pinnedSha: string | null;
 	branch: string | null = null;
 	unstaged: ChangedFile[] = [];

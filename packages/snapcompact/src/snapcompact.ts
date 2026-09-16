@@ -40,16 +40,16 @@
  *
  * The whole pass is local and deterministic — no LLM call, no API key, no
  * latency beyond rendering. Rasterization and PNG encoding happen in native
- * code (`renderSnapcompactPng` in `crates/pi-natives/src/snapcompact.rs`).
+ * code (`renderSnapcompactPng` in `crates/zero2ai-natives/src/snapcompact.rs`).
  * Frames persist in the compaction entry's `preserveData` and are
  * re-attached to the compaction summary message on every context rebuild.
  */
 
-import type { Api, ImageContent, Message, TextContent } from "@oh-my-pi/pi-ai";
-import { classifyModel, compareRevision, parseRevision } from "@oh-my-pi/pi-catalog/identity";
-import { renderSnapcompactPng, snapcompactSupportedChars } from "@oh-my-pi/pi-natives";
-import { formatGroupedPaths, prompt } from "@oh-my-pi/pi-utils";
-import { INTENT_FIELD } from "@oh-my-pi/pi-wire";
+import type { Api, ImageContent, Message, TextContent } from "@zero2ai/ai";
+import { classifyModel, compareRevision, parseRevision } from "@zero2ai/catalog/identity";
+import { renderSnapcompactPng, snapcompactSupportedChars } from "@zero2ai/natives";
+import { formatGroupedPaths, prompt } from "@zero2ai/utils";
+import { INTENT_FIELD } from "@zero2ai/wire";
 import fileOperationsTemplate from "./prompts/file-operations.md" with { type: "text" };
 import snapcompactSummaryPrompt from "./prompts/snapcompact-summary.md" with { type: "text" };
 
@@ -398,7 +398,7 @@ export interface ShapeTarget {
  * eval-winning shape — and frame size — for its model line, falling back to
  * the API family's winner when the model is unmeasured. Billing (token
  * estimate, detail hint) always follows the API family actually carrying
- * the request, computed for the resolved frame size. Accepts a full pi-ai
+ * the request, computed for the resolved frame size. Accepts a full zero2ai-ai
  * `Model` or any `{ api, id }` subset.
  */
 export function resolveShape(model?: ShapeTarget, variant?: ShapeVariantName | "auto"): Shape {
@@ -1417,7 +1417,7 @@ const DOC_GUTTER = 3;
 
 /** East Asian Wide / Fullwidth code points that occupy two grid cells when a
  *  narrow bitmap shape draws them through the Silver fallback. Mirrors
- *  `is_wide` in `crates/pi-natives/src/snapcompact.rs`; the two MUST stay in
+ *  `is_wide` in `crates/zero2ai-natives/src/snapcompact.rs`; the two MUST stay in
  *  sync or native layout and this capacity math disagree on cell counts. */
 function isWideCodePoint(cp: number): boolean {
 	return (

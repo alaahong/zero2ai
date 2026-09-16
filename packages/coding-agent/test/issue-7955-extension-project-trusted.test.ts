@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import { ExtensionRunner } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/runner";
-import type { ExtensionRuntime } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/types";
+import { ExtensionRunner } from "@zero2ai/coding-agent/extensibility/extensions/runner";
+import type { ExtensionRuntime } from "@zero2ai/coding-agent/extensibility/extensions/types";
 
 function createRunner(): ExtensionRunner {
 	const runtime = {
@@ -13,7 +13,7 @@ function createRunner(): ExtensionRunner {
 describe("ExtensionRunner project-trust context (issue #7955)", () => {
 	it("exposes isProjectTrusted() so Pi-authored extensions can seed SettingsManager", () => {
 		const ctx = createRunner().createContext();
-		// Regression: this method was missing, so pi-cliproxyapi-provider's
+		// Regression: this method was missing, so zero2ai-cliproxyapi-provider's
 		// session_start handler crashed with "ctx.isProjectTrusted is not a function".
 		expect(typeof ctx.isProjectTrusted).toBe("function");
 		expect(ctx.isProjectTrusted()).toBe(true);

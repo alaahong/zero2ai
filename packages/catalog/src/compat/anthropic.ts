@@ -2,7 +2,7 @@
  * Anthropic endpoint-shape predicates: which URLs are the official first-party
  * API, and which non-official hosts enforce Anthropic's thinking-signature
  * protocol on replay. Compat resolution (`./resolve`) and runtime routing in
- * pi-ai both consume these; URL matching is the one detection surface that
+ * zero2ai-ai both consume these; URL matching is the one detection surface that
  * stays in code.
  */
 import { hostMatchesUrl } from "../hosts";

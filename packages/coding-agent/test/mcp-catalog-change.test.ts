@@ -2,13 +2,13 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it } from "bun:test
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { MCPManager } from "@oh-my-pi/pi-coding-agent/mcp/manager";
-import type { MCPStdioServerConfig } from "@oh-my-pi/pi-coding-agent/mcp/types";
-import { ExtensionDashboard } from "@oh-my-pi/pi-coding-agent/modes/components/extensions/extension-dashboard";
-import { snapshotMcpRuntime } from "@oh-my-pi/pi-coding-agent/modes/components/extensions/mcp-runtime";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { removeSyncWithRetries } from "@oh-my-pi/pi-utils";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
+import { MCPManager } from "@zero2ai/coding-agent/mcp/manager";
+import type { MCPStdioServerConfig } from "@zero2ai/coding-agent/mcp/types";
+import { ExtensionDashboard } from "@zero2ai/coding-agent/modes/components/extensions/extension-dashboard";
+import { snapshotMcpRuntime } from "@zero2ai/coding-agent/modes/components/extensions/mcp-runtime";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import { removeSyncWithRetries } from "@zero2ai/utils";
 import { PROMPT_NAME, RESOURCE_NAME, RESOURCE_URI, TOOL_NAME } from "./fixtures/delayed-catalog-mcp";
 
 const FIXTURE_PATH = path.join(import.meta.dir, "fixtures", "delayed-catalog-mcp.ts");
@@ -52,7 +52,7 @@ describe("MCP catalog-change after connect", () => {
 
 	beforeEach(() => {
 		resetSettingsForTest();
-		workDir = fs.mkdtempSync(path.join(os.tmpdir(), "omp-mcp-catalog-"));
+		workDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-mcp-catalog-"));
 		gate = path.join(workDir, "release-catalog");
 		manager = new MCPManager(workDir);
 	});
@@ -101,7 +101,7 @@ describe("MCP catalog-change after connect", () => {
 			{
 				name: SERVER,
 				command: process.execPath,
-				_source: { provider: "native", providerName: "OMP", level: "user", path: workDir },
+				_source: { provider: "native", providerName: "ZERO2AI", level: "user", path: workDir },
 			},
 			manager,
 		);

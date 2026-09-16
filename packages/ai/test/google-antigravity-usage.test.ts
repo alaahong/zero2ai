@@ -5,13 +5,13 @@
  * different model entries, and handles mixed-case tier names.
  */
 import { describe, expect, it } from "bun:test";
-import type { FetchImpl } from "@oh-my-pi/pi-ai/types";
-import type { UsageFetchContext, UsageFetchParams, UsageLimit } from "@oh-my-pi/pi-ai/usage";
+import type { FetchImpl } from "@zero2ai/ai/types";
+import type { UsageFetchContext, UsageFetchParams, UsageLimit } from "@zero2ai/ai/usage";
 import {
 	antigravityRankingStrategy,
 	antigravityUsageProvider,
 	scopeAntigravityLimitsForModel,
-} from "@oh-my-pi/pi-ai/usage/google-antigravity";
+} from "@zero2ai/ai/usage/google-antigravity";
 
 const accessTokenFixture = (() => {
 	const header = Buffer.from(JSON.stringify({ alg: "none", typ: "JWT" })).toString("base64url");

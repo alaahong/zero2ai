@@ -7,15 +7,15 @@ import type {
 	AgentLoopConfig,
 	SpeculativeCommitContext,
 	SpeculativeOperationContext,
-} from "@oh-my-pi/pi-agent-core";
-import { SpeculativeOperationCoordinator } from "@oh-my-pi/pi-agent-core";
-import type { Message } from "@oh-my-pi/pi-ai";
-import { createMockModel } from "@oh-my-pi/pi-ai/providers/mock";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { CodingAgentSpeculativeExecutionHost } from "@oh-my-pi/pi-coding-agent/speculation/host";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { ReadTool } from "@oh-my-pi/pi-coding-agent/tools/read";
-import { removeWithRetries } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/agent-core";
+import { SpeculativeOperationCoordinator } from "@zero2ai/agent-core";
+import type { Message } from "@zero2ai/ai";
+import { createMockModel } from "@zero2ai/ai/providers/mock";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { CodingAgentSpeculativeExecutionHost } from "@zero2ai/coding-agent/speculation/host";
+import type { ToolSession } from "@zero2ai/coding-agent/tools";
+import { ReadTool } from "@zero2ai/coding-agent/tools/read";
+import { removeWithRetries } from "@zero2ai/utils";
 
 const temporaryDirectories: string[] = [];
 

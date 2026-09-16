@@ -1,5 +1,5 @@
-import type { AgentToolUpdateCallback } from "@oh-my-pi/pi-agent-core";
-import { formatBytes, materializeString, sanitizeText } from "@oh-my-pi/pi-utils";
+import type { AgentToolUpdateCallback } from "@zero2ai/agent-core";
+import { formatBytes, materializeString, sanitizeText } from "@zero2ai/utils";
 import { sanitizeWithOptionalSixelPassthrough } from "../utils/sixel";
 
 // =============================================================================

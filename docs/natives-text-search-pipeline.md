@@ -1,27 +1,27 @@
 # Natives Text/Search Pipeline
 
-This document maps the `@oh-my-pi/pi-natives` text/search/code surface from generated JS/TS exports to Rust N-API modules and back to JS result objects.
+This document maps the `@zero2ai/natives` text/search/code surface from generated JS/TS exports to Rust N-API modules and back to JS result objects.
 
 Terminology follows `docs/natives-architecture.md`:
 
 - **Generated binding**: public API in `packages/natives/native/index.d.ts`.
-- **Rust module layer**: N-API exports in `crates/pi-natives/src/*`.
-- **Shared scan cache**: `pi-walker`-backed directory-entry cache (`crates/pi-walker/src/cache.rs`) used by discovery flows; N-API filesystem DTOs/conversions live in `crates/pi-natives/src/iofs.rs`.
+- **Rust module layer**: N-API exports in `crates/zero2ai-natives/src/*`.
+- **Shared scan cache**: `zero2ai-walker`-backed directory-entry cache (`crates/zero2ai-walker/src/cache.rs`) used by discovery flows; N-API filesystem DTOs/conversions live in `crates/zero2ai-natives/src/iofs.rs`.
 
 ## Implementation files
 
 - `packages/natives/native/index.d.ts`
-- `crates/pi-natives/src/grep.rs`
-- `crates/pi-natives/src/glob.rs`
-- `crates/pi-natives/src/glob_util.rs`
-- `crates/pi-natives/src/fd.rs`
-- `crates/pi-natives/src/iofs.rs`
-- `crates/pi-walker/src/lib.rs`
-- `crates/pi-walker/src/cache.rs`
-- `crates/pi-natives/src/ast.rs`
-- `crates/pi-natives/src/text.rs`
-- `crates/pi-natives/src/highlight.rs`
-- `crates/pi-natives/src/tokens.rs`
+- `crates/zero2ai-natives/src/grep.rs`
+- `crates/zero2ai-natives/src/glob.rs`
+- `crates/zero2ai-natives/src/glob_util.rs`
+- `crates/zero2ai-natives/src/fd.rs`
+- `crates/zero2ai-natives/src/iofs.rs`
+- `crates/zero2ai-walker/src/lib.rs`
+- `crates/zero2ai-walker/src/cache.rs`
+- `crates/zero2ai-natives/src/ast.rs`
+- `crates/zero2ai-natives/src/text.rs`
+- `crates/zero2ai-natives/src/highlight.rs`
+- `crates/zero2ai-natives/src/tokens.rs`
 
 ## JS API ↔ Rust export mapping
 
@@ -67,13 +67,13 @@ Terminology follows `docs/natives-architecture.md`:
 - **Single-file branch**
   - `grep` resolves path, checks metadata is file, and searches that file.
 - **Directory branch**
-  - Rust builds a `pi_walker::WalkRequest` with `.cache(false)` hard-coded (`build_grep_walk_request`): directory searches stream while the tree is walked and never read or populate the shared scan cache.
+  - Rust builds a `zero2ai_walker::WalkRequest` with `.cache(false)` hard-coded (`build_grep_walk_request`): directory searches stream while the tree is walked and never read or populate the shared scan cache.
   - The walk yields file candidates directly to searchers (`glob`/type filters run walker-side; the type filter is applied per candidate).
   - Files larger than the size cap are deferred to a trailing prefix pass that reads only the leading window into an owned buffer.
 
 ### Search/collection semantics
 
-- Matcher selection: the Rust regex engine is tried first, then PCRE2 for features such as lookaround/backreferences. `OMP_PCRE2_JIT=0`/`false` disables PCRE2 JIT and `1` enables it; when unset, JIT is enabled except on macOS.
+- Matcher selection: the Rust regex engine is tried first, then PCRE2 for features such as lookaround/backreferences. `ZERO2AI_PCRE2_JIT=0`/`false` disables PCRE2 JIT and `1` enables it; when unset, JIT is enabled except on macOS.
 - Context resolution:
   - `contextBefore/contextAfter` override legacy `context`.
   - Non-content modes do not collect context.
@@ -113,13 +113,13 @@ Terminology follows `docs/natives-architecture.md`:
 
 ## 2) File discovery (`glob`) and fuzzy path search (`fuzzyFind`)
 
-`glob` and `fuzzyFind` share the optional `pi-walker` scan cache; matching logic differs. Cache use defaults to `false` for both APIs.
+`glob` and `fuzzyFind` share the optional `zero2ai-walker` scan cache; matching logic differs. Cache use defaults to `false` for both APIs.
 
 ### `glob` flow
 
 1. Caller passes `GlobOptions` directly. `pattern` and `path` are required in the generated type.
-2. Rust resolves the search path (via `pi_walker::resolve_search_path`) and normalizes the pattern via `glob_util::build_glob_pattern`, compiled into a walker-side `pi_walker::CompiledWalkGlob` filter.
-3. Entry source: a `pi_walker::WalkRequest` with the glob filter pushed down walker-side; `.cache(config.cache)` selects cached vs fresh collection, and the walker's `EmptyRecheck` policy performs one fresh rescan when a cached scan filters to empty.
+2. Rust resolves the search path (via `zero2ai_walker::resolve_search_path`) and normalizes the pattern via `glob_util::build_glob_pattern`, compiled into a walker-side `zero2ai_walker::CompiledWalkGlob` filter.
+3. Entry source: a `zero2ai_walker::WalkRequest` with the glob filter pushed down walker-side; `.cache(config.cache)` selects cached vs fresh collection, and the walker's `EmptyRecheck` policy performs one fresh rescan when a cached scan filters to empty.
 4. Filtering:
    - skip `.git` always;
    - skip `node_modules` unless requested (`includeNodeModules`) or pattern mentions `node_modules`;
@@ -130,7 +130,7 @@ Terminology follows `docs/natives-architecture.md`:
 ### `fuzzyFind` flow
 
 1. Rust implementation lives in `fd.rs`; generated export is `fuzzyFind`.
-2. Shared scan source from `pi-walker` with the same cache/no-cache split and walker-side stale-empty recheck policy.
+2. Shared scan source from `zero2ai-walker` with the same cache/no-cache split and walker-side stale-empty recheck policy.
 3. Scoring:
    - exact / starts-with / contains / subsequence-based fuzzy score;
    - separator/punctuation-normalized scoring path;
@@ -139,7 +139,7 @@ Terminology follows `docs/natives-architecture.md`:
 
 ### Failure behavior
 
-- Invalid glob pattern returns an error from walker glob compilation (`pi_walker::CompiledWalkGlob`).
+- Invalid glob pattern returns an error from walker glob compilation (`zero2ai_walker::CompiledWalkGlob`).
 - Search root must resolve to an existing directory for directory discovery flows.
 - Cancellation/timeouts propagate as abort errors via `CancelToken::heartbeat()` checks in walker and result-processing loops.
 
@@ -164,9 +164,9 @@ Terminology follows `docs/natives-architecture.md`:
 
 These exports are direct native APIs used by tooling; they are not mediated by a TS wrapper in `packages/natives`.
 
-## 4) Shared scan/cache lifecycle (`pi-walker`)
+## 4) Shared scan/cache lifecycle (`zero2ai-walker`)
 
-`pi-walker` owns traversal and cache policy. `crates/pi-natives/src/iofs.rs` contains only JavaScript-facing DTO conversion, error mapping, and the invalidation export.
+`zero2ai-walker` owns traversal and cache policy. `crates/zero2ai-natives/src/iofs.rs` contains only JavaScript-facing DTO conversion, error mapping, and the invalidation export.
 
 The cache stores normalized relative entries (`path`, `fileType`, optional `mtime` and regular-file `size`) keyed by canonical search root plus the full traversal-level `WalkOptions` with the cache flag itself excluded — calls that differ only in `cache` share an entry. Keyed dimensions: hidden/gitignore and directory-pruning policy, link following, metadata detail, traversal order/depth, root emission, directory-error handling, and filesystem boundary. `WalkFilter` predicates, ranking, and result limits run after collection and do not independently partition the cache, so requests with different glob, file-type, size-threshold, or limit values can share an entry. A filter or rank that requires extra metadata can still promote the effective detail policy and thereby select a different key.
 
@@ -176,7 +176,7 @@ Configuration is read from environment once:
 - `FS_SCAN_EMPTY_RECHECK_MS`: cached-empty recheck age, default `200`.
 - `FS_SCAN_CACHE_MAX_ENTRIES`: maximum entries in the cache map, default `16`.
 - `FS_SCAN_CACHE_MAX_BYTES`: maximum retained vector and path-string allocation bytes, default `67108864` (64 MiB).
-- `PI_WALK_WORKERS`: walker Rayon pool size, default `4`.
+- `ZERO2AI_WALK_WORKERS`: walker Rayon pool size, default `4`.
 
 ### Cache state transitions
 
@@ -189,7 +189,7 @@ Configuration is read from environment once:
    - when the caller enables configured rechecking, an empty cached query at or beyond the threshold is scanned once again.
 4. **Invalidation**
    - `invalidateFsScanCache()` clears all keys;
-   - `invalidateFsScanCache(path)` removes every entry whose cached root is a prefix of the target (canonicalization with parent fallback supports create/delete/rename invalidation). The binding lives in `iofs.rs` and forwards to `pi_walker::invalidate_path_string` / `pi_walker::invalidate_all`.
+   - `invalidateFsScanCache(path)` removes every entry whose cached root is a prefix of the target (canonicalization with parent fallback supports create/delete/rename invalidation). The binding lives in `iofs.rs` and forwards to `zero2ai_walker::invalidate_path_string` / `zero2ai_walker::invalidate_all`.
 
 Cache favors low-latency repeated scans over immediate consistency. Explicit invalidation is the correctness hook after writes, edits, renames, or deletes.
 
@@ -215,7 +215,7 @@ These are pure, in-memory utilities.
 - `sliceWithWidth`: column slicing with optional strict width enforcement.
 - `extractSegments`: extracts before/after segments around an overlay while restoring ANSI state for the `after` segment.
 - `setHangulCompatJamoWidthOverride(value)` controls U+3131–U+318E width correction for client-terminal compatibility: `0` uses the platform fallback, `1` forces one cell, `2` forces two, and `3` follows Unicode width.
-- `sanitizeText` (ANSI/control/surrogate stripping with line-ending normalization) no longer lives in `text.rs`; it moved to `@oh-my-pi/pi-utils` as a pure-JS implementation in `packages/utils/src/sanitize-text.ts`. The native binding was removed in the same change because the JS version was competitive on the benchmarked workloads, and keeping a Rust copy forced every caller (including `pi-utils`) to pull in `@oh-my-pi/pi-natives`.
+- `sanitizeText` (ANSI/control/surrogate stripping with line-ending normalization) no longer lives in `text.rs`; it moved to `@zero2ai/utils` as a pure-JS implementation in `packages/utils/src/sanitize-text.ts`. The native binding was removed in the same change because the JS version was competitive on the benchmarked workloads, and keeping a Rust copy forced every caller (including `zero2ai-utils`) to pull in `@zero2ai/natives`.
 - `visibleWidth`: counts visible terminal cells using caller-supplied tab width.
 
 ### Failure behavior

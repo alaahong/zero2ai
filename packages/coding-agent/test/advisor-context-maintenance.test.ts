@@ -1,20 +1,20 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
-import { Agent, type AgentMessage, type CompactionSummaryMessage } from "@oh-my-pi/pi-agent-core";
-import * as compactionModule from "@oh-my-pi/pi-agent-core/compaction";
-import { calculateContextTokens, resolveThresholdTokens } from "@oh-my-pi/pi-agent-core/compaction";
-import { buildOpenAiNativeHistory } from "@oh-my-pi/pi-agent-core/compaction/openai";
-import type { AssistantMessage, Model, OpenAIResponsesHistoryPayload } from "@oh-my-pi/pi-ai";
-import { convertAnthropicMessages } from "@oh-my-pi/pi-ai/providers/anthropic";
-import { createMockModel, type MockModel, registerMockApi } from "@oh-my-pi/pi-ai/providers/mock";
-import { buildParams } from "@oh-my-pi/pi-ai/providers/openai-responses";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { estimateToolSchemaTokens } from "@oh-my-pi/pi-coding-agent/modes/utils/context-usage";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import type { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { Agent, type AgentMessage, type CompactionSummaryMessage } from "@zero2ai/agent-core";
+import * as compactionModule from "@zero2ai/agent-core/compaction";
+import { calculateContextTokens, resolveThresholdTokens } from "@zero2ai/agent-core/compaction";
+import { buildOpenAiNativeHistory } from "@zero2ai/agent-core/compaction/openai";
+import type { AssistantMessage, Model, OpenAIResponsesHistoryPayload } from "@zero2ai/ai";
+import { convertAnthropicMessages } from "@zero2ai/ai/providers/anthropic";
+import { createMockModel, type MockModel, registerMockApi } from "@zero2ai/ai/providers/mock";
+import { buildParams } from "@zero2ai/ai/providers/openai-responses";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { estimateToolSchemaTokens } from "@zero2ai/coding-agent/modes/utils/context-usage";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import type { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { TempDir } from "@zero2ai/utils";
 import { createInMemoryAuthStorage } from "./helpers/agent-session-setup";
 import { asGlobalFetch } from "./helpers/fetch-mock";
 
@@ -41,7 +41,7 @@ describe("AgentSession advisor context maintenance", () => {
 	let session: AgentSession;
 
 	beforeAll(() => {
-		tempDir = TempDir.createSync("@pi-advisor-context-maintenance-");
+		tempDir = TempDir.createSync("@zero2ai-advisor-context-maintenance-");
 		authStorage = createInMemoryAuthStorage();
 		authStorage.setRuntimeApiKey("anthropic", "test-key");
 	});

@@ -10,8 +10,8 @@ import type {
 	ToolResultMessage,
 	Usage,
 	UserMessage,
-} from "@oh-my-pi/pi-ai";
-import { isRecord, parseJsonlLenient } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/ai";
+import { isRecord, parseJsonlLenient } from "@zero2ai/utils";
 import { resolveClaudePaths } from "../config/claude-paths";
 import { collectForeignJsonRecords, type ForeignJsonRecord, readForeignJsonRecords } from "./foreign-session-jsonl";
 import type { ForeignSessionInfo, ForeignSessionStore } from "./foreign-session-store";
@@ -341,7 +341,7 @@ function uniqueEntryId(base: string, used: Set<string>): string {
 	return id;
 }
 
-/** Imports Claude Code JSONL sessions into non-persistent OMP session managers. */
+/** Imports Claude Code JSONL sessions into non-persistent ZERO2AI session managers. */
 export class ClaudeSessionStore implements ForeignSessionStore {
 	readonly source = "claude";
 	readonly #root: string;

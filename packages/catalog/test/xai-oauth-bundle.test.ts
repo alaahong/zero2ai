@@ -1,9 +1,9 @@
 import { describe, expect, it } from "bun:test";
-import MODELS_JSON from "@oh-my-pi/pi-catalog/models.json" with { type: "json" };
-import { providerEntry } from "@oh-my-pi/pi-catalog/compat/providers";
-import { DEFAULT_MODEL_PER_PROVIDER } from "@oh-my-pi/pi-catalog/provider-models/descriptors";
-import { buildXaiOAuthStaticSeed } from "@oh-my-pi/pi-catalog/provider-models/openai-compat";
-import type { ModelSpec } from "@oh-my-pi/pi-catalog/types";
+import MODELS_JSON from "@zero2ai/catalog/models.json" with { type: "json" };
+import { providerEntry } from "@zero2ai/catalog/compat/providers";
+import { DEFAULT_MODEL_PER_PROVIDER } from "@zero2ai/catalog/provider-models/descriptors";
+import { buildXaiOAuthStaticSeed } from "@zero2ai/catalog/provider-models/openai-compat";
+import type { ModelSpec } from "@zero2ai/catalog/types";
 
 // Pins the invariant: bundled `models.json` carries every entry the runtime
 // xai-oauth KDL seed (surfaced via buildXaiOAuthStaticSeed) emits. Without

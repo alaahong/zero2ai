@@ -1,8 +1,8 @@
-import { type } from "@oh-my-pi/omptype";
-import type { AgentTool, AgentToolContext, AgentToolResult, AgentToolUpdateCallback } from "@oh-my-pi/pi-agent-core";
-import type { Component } from "@oh-my-pi/pi-tui";
-import { Text } from "@oh-my-pi/pi-tui";
-import { formatNumber, prompt } from "@oh-my-pi/pi-utils";
+import { type } from "@zero2ai/schema";
+import type { AgentTool, AgentToolContext, AgentToolResult, AgentToolUpdateCallback } from "@zero2ai/agent-core";
+import type { Component } from "@zero2ai/tui";
+import { Text } from "@zero2ai/tui";
+import { formatNumber, prompt } from "@zero2ai/utils";
 import type { RenderResultOptions } from "../../extensibility/custom-tools/types";
 import type { Theme, ThemeColor } from "../../modes/theme/theme";
 import goalDescription from "../../prompts/tools/goal.md" with { type: "text" };

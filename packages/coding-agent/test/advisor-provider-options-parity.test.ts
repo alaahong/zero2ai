@@ -11,16 +11,16 @@
  * and its explicit websocket preference.
  */
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "bun:test";
-import { Agent, type StreamFn } from "@oh-my-pi/pi-agent-core";
-import type { FetchImpl, Model, SimpleStreamOptions } from "@oh-my-pi/pi-ai";
-import { streamSimple } from "@oh-my-pi/pi-ai";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import type { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { Agent, type StreamFn } from "@zero2ai/agent-core";
+import type { FetchImpl, Model, SimpleStreamOptions } from "@zero2ai/ai";
+import { streamSimple } from "@zero2ai/ai";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import type { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { TempDir } from "@zero2ai/utils";
 import { createInMemoryAuthStorage } from "./helpers/agent-session-setup";
 
 /** Provider-facing advisor session ids must be UUIDv7 (issue #5040): Codex writes
@@ -69,7 +69,7 @@ describe("AgentSession advisor provider-options parity", () => {
 		});
 
 	beforeEach(() => {
-		tempDir = TempDir.createSync("@pi-advisor-parity-");
+		tempDir = TempDir.createSync("@zero2ai-advisor-parity-");
 		sessionManager = SessionManager.create(tempDir.path(), tempDir.path());
 	});
 

@@ -1,5 +1,5 @@
-import type { AuthStorage } from "@oh-my-pi/pi-ai";
-import { type Element, parseHTML } from "@oh-my-pi/pi-utils/dom";
+import type { AuthStorage } from "@zero2ai/ai";
+import { type Element, parseHTML } from "@zero2ai/utils/dom";
 import type { SearchResponse, SearchSource } from "../../../web/search/types";
 import { SearchProviderError } from "../../../web/search/types";
 import { formatScraperQuery } from "../query";

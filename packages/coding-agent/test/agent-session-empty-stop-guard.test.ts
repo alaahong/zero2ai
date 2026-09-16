@@ -1,18 +1,18 @@
 import { afterAll, afterEach, describe, expect, it, vi } from "bun:test";
 import * as path from "node:path";
 import { scheduler } from "node:timers/promises";
-import { type } from "@oh-my-pi/omptype";
-import { Agent, type AgentMessage, type AgentTool } from "@oh-my-pi/pi-agent-core";
-import type { ThinkingContent } from "@oh-my-pi/pi-ai";
-import { createMockModel, type MockModel, type MockResponse } from "@oh-my-pi/pi-ai/providers/mock";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { type SettingPath, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { ExtensionRunner } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/runner";
-import { AgentSession, type AgentSessionEvent } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { convertToLlm } from "@oh-my-pi/pi-coding-agent/session/messages";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TempDir, withTimeout } from "@oh-my-pi/pi-utils";
+import { type } from "@zero2ai/schema";
+import { Agent, type AgentMessage, type AgentTool } from "@zero2ai/agent-core";
+import type { ThinkingContent } from "@zero2ai/ai";
+import { createMockModel, type MockModel, type MockResponse } from "@zero2ai/ai/providers/mock";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { type SettingPath, Settings } from "@zero2ai/coding-agent/config/settings";
+import type { ExtensionRunner } from "@zero2ai/coding-agent/extensibility/extensions/runner";
+import { AgentSession, type AgentSessionEvent } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { convertToLlm } from "@zero2ai/coding-agent/session/messages";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { TempDir, withTimeout } from "@zero2ai/utils";
 
 const recordToolSchema = type({ value: type("string") });
 
@@ -23,7 +23,7 @@ type Harness = {
 type SettingsOverrides = Partial<Record<SettingPath, unknown>>;
 
 const activeHarnesses: Harness[] = [];
-const sharedDir = TempDir.createSync("@pi-empty-stop-guard-shared-");
+const sharedDir = TempDir.createSync("@zero2ai-empty-stop-guard-shared-");
 const sharedAuthStorage = await AuthStorage.create(path.join(sharedDir.path(), "auth.db"));
 sharedAuthStorage.setRuntimeApiKey("mock", "test-key");
 const sharedModelRegistry = new ModelRegistry(sharedAuthStorage, path.join(sharedDir.path(), "models.yml"));
@@ -123,7 +123,7 @@ async function createHarness(
 		id?: string;
 	} = {},
 ): Promise<Harness & { mock: MockModel }> {
-	const tempDir = TempDir.createSync("@pi-empty-stop-guard-");
+	const tempDir = TempDir.createSync("@zero2ai-empty-stop-guard-");
 	const authStorage = sharedAuthStorage;
 
 	const mock = createMockModel({ provider: options.provider, id: options.id, responses });

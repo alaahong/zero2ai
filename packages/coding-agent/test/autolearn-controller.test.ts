@@ -1,15 +1,15 @@
 import { describe, expect, it } from "bun:test";
-import { type } from "@oh-my-pi/omptype";
-import { Agent, type AgentMessage, type AgentOptions, type AgentTool } from "@oh-my-pi/pi-agent-core";
-import type { AssistantMessage, FetchImpl, Model, ProviderSessionState, Usage } from "@oh-my-pi/pi-ai";
-import { streamGoogle } from "@oh-my-pi/pi-ai/providers/google";
-import { createMockModel } from "@oh-my-pi/pi-ai/providers/mock";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { AutoLearnController, buildAutoLearnInstructions } from "@oh-my-pi/pi-coding-agent/autolearn/controller";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { createAutoLearnCaptureRunner } from "@oh-my-pi/pi-coding-agent/sdk";
-import type { AgentSession, AgentSessionEvent } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { convertToLlm } from "@oh-my-pi/pi-coding-agent/session/messages";
+import { type } from "@zero2ai/schema";
+import { Agent, type AgentMessage, type AgentOptions, type AgentTool } from "@zero2ai/agent-core";
+import type { AssistantMessage, FetchImpl, Model, ProviderSessionState, Usage } from "@zero2ai/ai";
+import { streamGoogle } from "@zero2ai/ai/providers/google";
+import { createMockModel } from "@zero2ai/ai/providers/mock";
+import { buildModel } from "@zero2ai/catalog/build";
+import { AutoLearnController, buildAutoLearnInstructions } from "@zero2ai/coding-agent/autolearn/controller";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { createAutoLearnCaptureRunner } from "@zero2ai/coding-agent/sdk";
+import type { AgentSession, AgentSessionEvent } from "@zero2ai/coding-agent/session/agent-session";
+import { convertToLlm } from "@zero2ai/coding-agent/session/messages";
 
 class FakeSession {
 	readonly listeners: Array<(event: AgentSessionEvent) => void> = [];

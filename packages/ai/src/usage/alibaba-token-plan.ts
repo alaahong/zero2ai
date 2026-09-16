@@ -1,8 +1,8 @@
-import { toNumber } from "@oh-my-pi/pi-catalog/utils";
+import { toNumber } from "@zero2ai/catalog/utils";
 import {
 	ALIBABA_TOKEN_PLAN_CN_BASE_URL,
 	parseAlibabaTokenPlanCredential,
-} from "@oh-my-pi/pi-catalog/wire/alibaba-token-plan";
+} from "@zero2ai/catalog/wire/alibaba-token-plan";
 import type {
 	CredentialRankingStrategy,
 	UsageFetchContext,

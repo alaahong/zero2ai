@@ -2,14 +2,14 @@ import { afterEach, beforeEach, describe, expect, it, spyOn } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
 import {
 	registerArtifactsDir,
 	resetRegisteredArtifactDirsForTests,
-} from "@oh-my-pi/pi-coding-agent/internal-urls/registry-helpers";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { formatTruncationMetaNotice } from "@oh-my-pi/pi-coding-agent/tools/output-meta";
-import { ReadTool } from "@oh-my-pi/pi-coding-agent/tools/read";
+} from "@zero2ai/coding-agent/internal-urls/registry-helpers";
+import type { ToolSession } from "@zero2ai/coding-agent/tools";
+import { formatTruncationMetaNotice } from "@zero2ai/coding-agent/tools/output-meta";
+import { ReadTool } from "@zero2ai/coding-agent/tools/read";
 
 function getTextOutput(result: { content: Array<{ type: string; text?: string }> }): string {
 	return result.content

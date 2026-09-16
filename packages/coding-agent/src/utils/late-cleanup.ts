@@ -1,4 +1,4 @@
-import { logger } from "@oh-my-pi/pi-utils";
+import { logger } from "@zero2ai/utils";
 
 const pendingCleanups = new Set<Promise<void>>();
 

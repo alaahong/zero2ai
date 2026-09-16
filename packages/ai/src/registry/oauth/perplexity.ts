@@ -3,7 +3,7 @@
  * or HTTP email OTP (including authenticator challenges).
  */
 import * as os from "node:os";
-import { $env } from "@oh-my-pi/pi-utils";
+import { $env } from "@zero2ai/utils";
 import { $, Cookie, CookieMap } from "bun";
 import * as AIError from "../../error";
 import type { OAuthController, OAuthCredentials } from "./types";
@@ -338,7 +338,7 @@ export async function loginPerplexity(ctrl: OAuthController): Promise<OAuthCrede
 	if (!ctrl.onPrompt) throw new AIError.OnPromptRequiredError("Perplexity");
 	if (ctrl.signal?.aborted) throw new AIError.LoginCancelledError();
 
-	if (!$env.PI_AUTH_NO_BORROW) {
+	if (!$env.ZERO2AI_AUTH_NO_BORROW) {
 		ctrl.onProgress?.("Checking for Perplexity desktop app...");
 		const nativeJwt = await extractFromNativeApp();
 		if (ctrl.signal?.aborted) throw new AIError.LoginCancelledError();

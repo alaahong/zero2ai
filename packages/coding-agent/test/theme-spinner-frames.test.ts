@@ -5,15 +5,15 @@ import * as path from "node:path";
 import {
 	SPINNER_GLYPH_ADVANCE_MS,
 	sharedSpinnerFrame,
-} from "@oh-my-pi/pi-coding-agent/modes/components/tool-execution";
-import { getThemeByName } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { getConfigRootDir, getCustomThemesDir, removeWithRetries, setAgentDir } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/modes/components/tool-execution";
+import { getThemeByName } from "@zero2ai/coding-agent/modes/theme/theme";
+import { getConfigRootDir, getCustomThemesDir, removeWithRetries, setAgentDir } from "@zero2ai/utils";
 
 // Path of the built-in dark theme JSON, used as a known-valid base we can
 // extend with custom `symbols.spinnerFrames` shapes.
 const DARK_THEME_PATH = path.join(import.meta.dir, "..", "src", "modes", "theme", "dark.json");
 
-const originalAgentDir = process.env.PI_CODING_AGENT_DIR;
+const originalAgentDir = process.env.ZERO2AI_CODING_AGENT_DIR;
 const fallbackAgentDir = path.join(getConfigRootDir(), "agent");
 
 let tmpAgentDir: string;
@@ -33,7 +33,7 @@ async function writeCustomTheme(name: string, extraSymbols: Record<string, unkno
 
 describe("theme symbols.spinnerFrames", () => {
 	beforeEach(async () => {
-		tmpAgentDir = await fs.mkdtemp(path.join(os.tmpdir(), "omp-spinner-frames-"));
+		tmpAgentDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-spinner-frames-"));
 		setAgentDir(tmpAgentDir);
 	});
 
@@ -42,7 +42,7 @@ describe("theme symbols.spinnerFrames", () => {
 			setAgentDir(originalAgentDir);
 		} else {
 			setAgentDir(fallbackAgentDir);
-			delete process.env.PI_CODING_AGENT_DIR;
+			delete process.env.ZERO2AI_CODING_AGENT_DIR;
 		}
 		await removeWithRetries(tmpAgentDir);
 	});

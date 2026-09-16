@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, spyOn, vi } from "bun:test";
-import type { Api, Model, ModelSpec } from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { renderProviderModels } from "@oh-my-pi/pi-coding-agent/cli/models-cli";
+import type { Api, Model, ModelSpec } from "@zero2ai/ai/types";
+import { buildModel } from "@zero2ai/catalog/build";
+import { renderProviderModels } from "@zero2ai/coding-agent/cli/models-cli";
 
 afterEach(() => {
 	vi.restoreAllMocks();
@@ -34,7 +34,7 @@ function makeModel(spec: {
 	} as ModelSpec);
 }
 
-/** Render one model through `omp models ls` and return its `images` cell. */
+/** Render one model through `zero2ai models ls` and return its `images` cell. */
 function imagesCell(model: Model<Api>): string {
 	const output: string[] = [];
 	spyOn(process.stdout, "write").mockImplementation((chunk: string | Uint8Array) => {
@@ -55,7 +55,7 @@ function imagesCell(model: Model<Api>): string {
 	return cells.at(-1) ?? "";
 }
 
-describe("omp models image support column", () => {
+describe("zero2ai models image support column", () => {
 	it("reports wire truth for a DeepSeek-class id served by a proxy that accepts images", () => {
 		// The catalog strips images for the DeepSeek class on any provider, so the
 		// listing must not advertise the declared `input: [text, image]`.
@@ -83,21 +83,21 @@ describe("omp models image support column", () => {
 	});
 
 	it("strips images on the OpenRouter chat fallback", () => {
-		// PI_OPENROUTER_RESPONSES=0 dispatches openrouter models through
+		// ZERO2AI_OPENROUTER_RESPONSES=0 dispatches openrouter models through
 		// streamOpenAICompletions, so the Chat Completions guard applies.
-		const previous = Bun.env.PI_OPENROUTER_RESPONSES;
-		Bun.env.PI_OPENROUTER_RESPONSES = "0";
+		const previous = Bun.env.ZERO2AI_OPENROUTER_RESPONSES;
+		Bun.env.ZERO2AI_OPENROUTER_RESPONSES = "0";
 		try {
 			expect(imagesCell(makeModel({ id: "deepseek-v4-flash", api: "openrouter" }))).toBe("no");
 		} finally {
-			if (previous === undefined) delete Bun.env.PI_OPENROUTER_RESPONSES;
-			else Bun.env.PI_OPENROUTER_RESPONSES = previous;
+			if (previous === undefined) delete Bun.env.ZERO2AI_OPENROUTER_RESPONSES;
+			else Bun.env.ZERO2AI_OPENROUTER_RESPONSES = previous;
 		}
 	});
 
 	it("honours the strip opt-out on the OpenRouter chat fallback", () => {
-		const previous = Bun.env.PI_OPENROUTER_RESPONSES;
-		Bun.env.PI_OPENROUTER_RESPONSES = "0";
+		const previous = Bun.env.ZERO2AI_OPENROUTER_RESPONSES;
+		Bun.env.ZERO2AI_OPENROUTER_RESPONSES = "0";
 		try {
 			expect(
 				imagesCell(
@@ -109,35 +109,35 @@ describe("omp models image support column", () => {
 				),
 			).toBe("yes");
 		} finally {
-			if (previous === undefined) delete Bun.env.PI_OPENROUTER_RESPONSES;
-			else Bun.env.PI_OPENROUTER_RESPONSES = previous;
+			if (previous === undefined) delete Bun.env.ZERO2AI_OPENROUTER_RESPONSES;
+			else Bun.env.ZERO2AI_OPENROUTER_RESPONSES = previous;
 		}
 	});
 
 	it("reports declared input on the OpenRouter Responses path", () => {
 		// The default Responses transport ignores stripImageInput (openai-shared
 		// derives supportsImages from the declared input), so the column must too.
-		const previous = Bun.env.PI_OPENROUTER_RESPONSES;
-		delete Bun.env.PI_OPENROUTER_RESPONSES;
+		const previous = Bun.env.ZERO2AI_OPENROUTER_RESPONSES;
+		delete Bun.env.ZERO2AI_OPENROUTER_RESPONSES;
 		try {
 			expect(imagesCell(makeModel({ id: "deepseek-v4-flash", api: "openrouter" }))).toBe("yes");
 		} finally {
-			if (previous === undefined) delete Bun.env.PI_OPENROUTER_RESPONSES;
-			else Bun.env.PI_OPENROUTER_RESPONSES = previous;
+			if (previous === undefined) delete Bun.env.ZERO2AI_OPENROUTER_RESPONSES;
+			else Bun.env.ZERO2AI_OPENROUTER_RESPONSES = previous;
 		}
 	});
-	it("forwards declared images on the pi-native transport despite the strip rule", () => {
-		// pi-native short-circuits to streamPiNative before the Chat Completions
+	it("forwards declared images on the zero2ai-native transport despite the strip rule", () => {
+		// zero2ai-native short-circuits to streamPiNative before the Chat Completions
 		// encoder, so compat.stripImageInput never runs client-side.
 		expect(
-			imagesCell(makeModel({ id: "deepseek-v4-flash", api: "openai-completions", transport: "pi-native" })),
+			imagesCell(makeModel({ id: "deepseek-v4-flash", api: "openai-completions", transport: "zero2ai-native" })),
 		).toBe("yes");
 	});
 
-	it("keeps declared text-only pi-native models at no", () => {
+	it("keeps declared text-only zero2ai-native models at no", () => {
 		expect(
 			imagesCell(
-				makeModel({ id: "text-only-model", api: "openai-completions", input: ["text"], transport: "pi-native" }),
+				makeModel({ id: "text-only-model", api: "openai-completions", input: ["text"], transport: "zero2ai-native" }),
 			),
 		).toBe("no");
 	});

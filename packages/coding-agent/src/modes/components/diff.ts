@@ -1,5 +1,5 @@
-import { diffWords } from "@oh-my-pi/pi-natives";
-import { DEFAULT_TAB_WIDTH, sanitizeText } from "@oh-my-pi/pi-utils";
+import { diffWords } from "@zero2ai/natives";
+import { DEFAULT_TAB_WIDTH, sanitizeText } from "@zero2ai/utils";
 import { theme as activeTheme, getLanguageFromPath, highlightCode, type Theme } from "../../modes/theme/theme";
 import { type CodeFrameMarker, formatCodeFrameLine, replaceTabs } from "../../tools/render-utils";
 

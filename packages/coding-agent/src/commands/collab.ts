@@ -1,7 +1,7 @@
 /**
  * Discover local Collab hosts and retrieve a link on explicit request.
  */
-import { Args, CliUsageError, Command, Flags } from "@oh-my-pi/pi-utils/cli";
+import { Args, CliUsageError, Command, Flags } from "@zero2ai/utils/cli";
 import { runCollabLinkCommand, runCollabListCommand } from "../cli/collab-cli";
 import { collabHelp as commandHelp } from "../cli/command-help";
 import { CollabLinkError } from "../collab/registry";
@@ -27,10 +27,10 @@ export default class Collab extends Command {
 	};
 
 	static examples = [
-		"omp collab list",
-		"omp collab list --json",
-		"omp collab link <instanceId|pid>",
-		"omp collab link <pid> --view",
+		"zero2ai collab list",
+		"zero2ai collab list --json",
+		"zero2ai collab link <instanceId|pid>",
+		"zero2ai collab link <pid> --view",
 	];
 
 	async run(): Promise<void> {

@@ -2,13 +2,13 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { AgentToolResult } from "@oh-my-pi/pi-agent-core";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { EditTool } from "@oh-my-pi/pi-coding-agent/edit";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import type { ReadToolDetails } from "@oh-my-pi/pi-coding-agent/tools/read";
-import { ReadTool } from "@oh-my-pi/pi-coding-agent/tools/read";
-import { removeWithRetries } from "@oh-my-pi/pi-utils";
+import type { AgentToolResult } from "@zero2ai/agent-core";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { EditTool } from "@zero2ai/coding-agent/edit";
+import type { ToolSession } from "@zero2ai/coding-agent/tools";
+import type { ReadToolDetails } from "@zero2ai/coding-agent/tools/read";
+import { ReadTool } from "@zero2ai/coding-agent/tools/read";
+import { removeWithRetries } from "@zero2ai/utils";
 
 function textOutput(result: AgentToolResult<ReadToolDetails>): string {
 	return result.content
@@ -76,7 +76,7 @@ describe("read → edit round-trip for out-of-cwd files", () => {
 	});
 
 	it("round-trips a home-relative path through read and edit", async () => {
-		homeDir = await fs.mkdtemp(path.join(os.homedir(), ".omp-read-edit-"));
+		homeDir = await fs.mkdtemp(path.join(os.homedir(), ".zero2ai-read-edit-"));
 		const homeFile = path.join(homeDir, "settings.txt");
 		const authoredPath = `~/${path.relative(os.homedir(), homeFile)}`;
 		await Bun.write(homeFile, "alpha\nbeta\n");

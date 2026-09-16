@@ -15,20 +15,20 @@
  *   with `{ summary, shortSummary? }`.
  */
 
-import { ProviderHttpError } from "@oh-my-pi/pi-ai/error";
-import { applyCodexResponsesLiteShape } from "@oh-my-pi/pi-ai/providers/openai-codex/request-transformer";
+import { ProviderHttpError } from "@zero2ai/ai/error";
+import { applyCodexResponsesLiteShape } from "@zero2ai/ai/providers/openai-codex/request-transformer";
 import {
 	createOpenAICodexCompactionRequestContext,
 	createOpenAICodexCompatibilityMetadata,
 	getCodexAttestationHeader,
-} from "@oh-my-pi/pi-ai/providers/openai-codex-responses";
+} from "@zero2ai/ai/providers/openai-codex-responses";
 import {
 	encodeResponsesToolResultOutput,
 	hoistInterleavedResponsesToolBatchMessages,
 	parseAzureDeploymentNameMap,
 	parseTextSignature,
-} from "@oh-my-pi/pi-ai/providers/openai-shared";
-import { transformMessages } from "@oh-my-pi/pi-ai/providers/transform-messages";
+} from "@zero2ai/ai/providers/openai-shared";
+import { transformMessages } from "@zero2ai/ai/providers/transform-messages";
 import type {
 	Api,
 	AssistantMessage,
@@ -37,14 +37,14 @@ import type {
 	Message,
 	Model,
 	ProviderSessionState,
-} from "@oh-my-pi/pi-ai/types";
+} from "@zero2ai/ai/types";
 import {
 	getOpenAIResponsesHistoryItems,
 	getOpenAIResponsesHistoryPayload,
 	normalizeResponsesToolCallId,
 	stripOpenAIResponsesOutputOnlyStatusesForReplay,
-} from "@oh-my-pi/pi-ai/utils";
-import { captureOpenAIHttpError } from "@oh-my-pi/pi-ai/utils/openai-http";
+} from "@zero2ai/ai/utils";
+import { captureOpenAIHttpError } from "@zero2ai/ai/utils/openai-http";
 import {
 	applyCodexResidencyHeader,
 	CODEX_BASE_URL,
@@ -52,8 +52,8 @@ import {
 	getCodexAccountId,
 	OPENAI_HEADER_VALUES,
 	OPENAI_HEADERS,
-} from "@oh-my-pi/pi-catalog/wire/codex";
-import { $env, isRecord, logger, prompt, stringifyJson, structuredCloneJSON } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/catalog/wire/codex";
+import { $env, isRecord, logger, prompt, stringifyJson, structuredCloneJSON } from "@zero2ai/utils";
 import { Tokenizer } from "../tokenizer";
 import contextWindowTruncatedOutputPrompt from "./prompts/context-window-truncated-output.md" with { type: "text" };
 
@@ -67,7 +67,7 @@ export const OPENAI_REMOTE_COMPACTION_PRESERVE_KEY = "openaiRemoteCompaction";
 
 /**
  * Hard ceiling on remote compaction HTTP requests (5 minutes). Unlike every
- * provider stream (guarded by first-event/idle watchdogs in pi-ai), these are
+ * provider stream (guarded by first-event/idle watchdogs in zero2ai-ai), these are
  * raw fetches awaiting one non-streamed JSON body — a connection silently
  * dropped by a middlebox would otherwise hang the whole compaction pipeline
  * forever (frozen "Auto context-full maintenance…" spinner, manual /compact
@@ -917,10 +917,10 @@ export async function requestOpenAiRemoteCompaction(
 /**
  * Generic remote-compaction POST. Two wire shapes are auto-selected by
  * endpoint suffix so a single `compaction.remoteEndpoint` setting can point at
- * either a purpose-built omp summarizer (`{systemPrompt, prompt}` → `{summary}`)
+ * either a purpose-built zero2ai summarizer (`{systemPrompt, prompt}` → `{summary}`)
  * or any OpenAI-compatible chat-completions server (`/chat/completions`,
  * `/v1/chat/completions`, …) as reported for llama.cpp / vLLM / etc. in
- * issue #4630: without this, the omp payload was rejected with
+ * issue #4630: without this, the zero2ai payload was rejected with
  * HTTP 400 `"'messages' is required"`, compaction silently fell back to
  * local summarization, and context grew unbounded.
  *

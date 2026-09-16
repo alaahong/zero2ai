@@ -7,11 +7,11 @@
 
 import * as os from "node:os";
 import * as path from "node:path";
-import { ThinkingLevel, type ToolCallContext } from "@oh-my-pi/pi-agent-core";
-import type { Ellipsis } from "@oh-my-pi/pi-natives";
-import type { Component } from "@oh-my-pi/pi-tui";
-import { getKeybindings, replaceTabs, sliceByColumn, truncateToWidth, visibleWidth } from "@oh-my-pi/pi-tui";
-import { pluralize, sanitizeText } from "@oh-my-pi/pi-utils";
+import { ThinkingLevel, type ToolCallContext } from "@zero2ai/agent-core";
+import type { Ellipsis } from "@zero2ai/natives";
+import type { Component } from "@zero2ai/tui";
+import { getKeybindings, replaceTabs, sliceByColumn, truncateToWidth, visibleWidth } from "@zero2ai/tui";
+import { pluralize, sanitizeText } from "@zero2ai/utils";
 import { formatKeyHints, type KeyId } from "../config/keybindings";
 import { isSettingsInitialized, settings } from "../config/settings";
 import { getDefault } from "../config/settings-schema";
@@ -20,8 +20,8 @@ import { AUTO_THINKING, type ConfiguredThinkingLevel } from "../thinking";
 import { Hasher } from "../tui/utils";
 import { formatDimensionNote, type ResizedImage } from "../utils/image-resize";
 
-export { Ellipsis } from "@oh-my-pi/pi-natives";
-export { replaceTabs, truncateToWidth, wrapTextWithAnsi } from "@oh-my-pi/pi-tui";
+export { Ellipsis } from "@zero2ai/natives";
+export { replaceTabs, truncateToWidth, wrapTextWithAnsi } from "@zero2ai/tui";
 
 /**
  * Normalize stray carriage returns in model-authored display text. Some models
@@ -234,7 +234,7 @@ export function getDomain(url: string): string {
 // Formatting Utilities
 // =============================================================================
 
-export { formatAge, formatBytes, formatCount, formatDuration, pluralize } from "@oh-my-pi/pi-utils";
+export { formatAge, formatBytes, formatCount, formatDuration, pluralize } from "@zero2ai/utils";
 
 // =============================================================================
 // Theme Helper Utilities

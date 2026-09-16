@@ -1,4 +1,4 @@
-import type { AgentToolResult } from "@oh-my-pi/pi-agent-core";
+import type { AgentToolResult } from "@zero2ai/agent-core";
 import { github } from "../utils/github";
 import type { ToolSession } from ".";
 import type { GhToolDetails } from "./gh";

@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it } from "bun:test";
 import * as path from "node:path";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { FileSessionStorage } from "@oh-my-pi/pi-coding-agent/session/session-storage";
-import { removeWithRetries, TempDir } from "@oh-my-pi/pi-utils";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { FileSessionStorage } from "@zero2ai/coding-agent/session/session-storage";
+import { removeWithRetries, TempDir } from "@zero2ai/utils";
 
 const tempDirs: TempDir[] = [];
 
@@ -31,8 +31,8 @@ async function writeSession(cwd: string, sessionDir: string): Promise<string> {
 
 describe("SessionManager cwd adoption on resume", () => {
 	it("adopts the resumed session's own cwd and session directory", async () => {
-		const projectA = makeTempDir("@pi-cwd-a-");
-		const projectB = makeTempDir("@pi-cwd-b-");
+		const projectA = makeTempDir("@zero2ai-cwd-a-");
+		const projectB = makeTempDir("@zero2ai-cwd-b-");
 		const sessionsB = path.join(projectB, "sessions");
 		const fileB = await writeSession(projectB, sessionsB);
 
@@ -49,8 +49,8 @@ describe("SessionManager cwd adoption on resume", () => {
 	});
 
 	it("leaves cwd untouched when the resumed session has no recorded cwd", async () => {
-		const projectA = makeTempDir("@pi-cwd-a-");
-		const projectB = makeTempDir("@pi-cwd-b-");
+		const projectA = makeTempDir("@zero2ai-cwd-a-");
+		const projectB = makeTempDir("@zero2ai-cwd-b-");
 		const sessionsB = path.join(projectB, "sessions");
 		const fileB = await writeSession(projectB, sessionsB);
 
@@ -80,8 +80,8 @@ describe("SessionManager cwd adoption on resume", () => {
 	});
 
 	it("restores cwd and session directory when a switch is rolled back", async () => {
-		const projectA = makeTempDir("@pi-cwd-a-");
-		const projectB = makeTempDir("@pi-cwd-b-");
+		const projectA = makeTempDir("@zero2ai-cwd-a-");
+		const projectB = makeTempDir("@zero2ai-cwd-b-");
 		const sessionsA = path.join(projectA, "sessions");
 		const sessionsB = path.join(projectB, "sessions");
 		const fileB = await writeSession(projectB, sessionsB);
@@ -97,9 +97,9 @@ describe("SessionManager cwd adoption on resume", () => {
 		expect(manager.getSessionDir()).toBe(path.resolve(sessionsA));
 	});
 	it("clears fallback persistence after adopting an accessible session", async () => {
-		const launch = makeTempDir("@pi-cwd-fallback-launch-");
-		const deniedProject = makeTempDir("@pi-cwd-fallback-denied-");
-		const store = makeTempDir("@pi-cwd-fallback-store-");
+		const launch = makeTempDir("@zero2ai-cwd-fallback-launch-");
+		const deniedProject = makeTempDir("@zero2ai-cwd-fallback-denied-");
+		const store = makeTempDir("@zero2ai-cwd-fallback-store-");
 		const launchSessions = path.join(launch, "sessions");
 		const deniedFile = await writeSession(deniedProject, store);
 		const accessibleFile = await writeSession(launch, launchSessions);
@@ -120,10 +120,10 @@ describe("SessionManager cwd adoption on resume", () => {
 	});
 
 	it("keeps the current cwd when the resumed session's project directory is gone", async () => {
-		const launch = makeTempDir("@pi-cwd-launch-");
-		const store = makeTempDir("@pi-cwd-store-");
-		const goneProject = makeTempDir("@pi-cwd-gone-");
-		// The session file survives in `store` (like ~/.omp), but its header cwd
+		const launch = makeTempDir("@zero2ai-cwd-launch-");
+		const store = makeTempDir("@zero2ai-cwd-store-");
+		const goneProject = makeTempDir("@zero2ai-cwd-gone-");
+		// The session file survives in `store` (like ~/.zero2ai), but its header cwd
 		// points at a project directory that we then delete.
 		const file = await writeSession(goneProject, store);
 		await removeWithRetries(goneProject);
@@ -139,9 +139,9 @@ describe("SessionManager cwd adoption on resume", () => {
 	});
 
 	it("falls back to the launch cwd with one full read when the recorded project directory is gone", async () => {
-		const launch = makeTempDir("@pi-cwd-launch-");
-		const store = makeTempDir("@pi-cwd-store-");
-		const goneProject = makeTempDir("@pi-cwd-gone-");
+		const launch = makeTempDir("@zero2ai-cwd-launch-");
+		const store = makeTempDir("@zero2ai-cwd-store-");
+		const goneProject = makeTempDir("@zero2ai-cwd-gone-");
 		const file = await writeSession(goneProject, store);
 		await removeWithRetries(goneProject);
 		class CountingFileSessionStorage extends FileSessionStorage {

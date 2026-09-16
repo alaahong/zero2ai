@@ -1,7 +1,7 @@
-import { instrumentedCompleteSimple, resolveTelemetry } from "@oh-my-pi/pi-agent-core";
-import { sendsImageInputOnWire } from "@oh-my-pi/pi-ai/providers/vision-guard";
-import { type Api, type AssistantMessage, completeSimple, type Model, type Usage } from "@oh-my-pi/pi-ai";
-import { prompt } from "@oh-my-pi/pi-utils";
+import { instrumentedCompleteSimple, resolveTelemetry } from "@zero2ai/agent-core";
+import { sendsImageInputOnWire } from "@zero2ai/ai/providers/vision-guard";
+import { type Api, type AssistantMessage, completeSimple, type Model, type Usage } from "@zero2ai/ai";
+import { prompt } from "@zero2ai/utils";
 import { extractTextContent } from "../commit/utils";
 import {
 	expandRoleAlias,

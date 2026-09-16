@@ -1,7 +1,7 @@
     (function() {
       'use strict';
 
-      const THEME_STORAGE_KEY = 'omp-export-theme';
+      const THEME_STORAGE_KEY = 'zero2ai-export-theme';
       const themeSelect = document.getElementById('theme-select');
       let themePreference = 'auto';
       try {
@@ -45,7 +45,7 @@
 
       // Parse URL parameters for deep linking: leafId and targetId
       // Check for injected params (when loaded in iframe via srcdoc) or use window.location
-      const injectedParams = document.querySelector('meta[name="pi-url-params"]');
+      const injectedParams = document.querySelector('meta[name="zero2ai-url-params"]');
       const searchString = injectedParams ? injectedParams.content : window.location.search.substring(1);
       const urlParams = new URLSearchParams(searchString);
       const urlLeafId = urlParams.get('leafId');
@@ -570,8 +570,8 @@
       }
 
       /**
-       * Split an OMP interleaved assistant into sidebar text/tool rows.
-       * Pi stores those continuations as separate entries; OMP keeps one
+       * Split an ZERO2AI interleaved assistant into sidebar text/tool rows.
+       * Pi stores those continuations as separate entries; ZERO2AI keeps one
        * content array. Do not mutate session entries or parentIds.
        */
       function buildInterleavedAssistantRows(flatNode, toolResultNodes, includeTools) {
@@ -916,7 +916,7 @@
       // TOOL CALL RENDERING
       // ============================================================
       //
-      // Tool calls render through the bundled <omp-tool-view> web component
+      // Tool calls render through the bundled <zero2ai-tool-view> web component
       // (tool-views.generated.js — the same React renderers collab-web uses).
       // Payloads are handed over via a global store keyed by data-key, which
       // survives innerHTML serialization and cloneNode round trips.
@@ -938,7 +938,7 @@
             openAgent: (id) => openSubSession(joinKey(sctx.prefix, id)),
           },
         });
-        return '<omp-tool-view class="tool-execution ' + statusClass + '" id="' + blockId + '" data-key="' + key + '" open></omp-tool-view>';
+        return '<zero2ai-tool-view class="tool-execution ' + statusClass + '" id="' + blockId + '" data-key="' + key + '" open></zero2ai-tool-view>';
       }
 
       // ============================================================
@@ -1140,7 +1140,7 @@
        */
       function buildShareUrl(entryId) {
         // Check for injected base URL (used when loaded in iframe via srcdoc)
-        const baseUrlMeta = document.querySelector('meta[name="pi-share-base-url"]');
+        const baseUrlMeta = document.querySelector('meta[name="zero2ai-share-base-url"]');
         const baseUrl = baseUrlMeta ? baseUrlMeta.content : window.location.href.split('?')[0];
 
         const url = new URL(window.location.href);
@@ -1626,7 +1626,7 @@
       const overlay = document.getElementById('sidebar-overlay');
       const hamburger = document.getElementById('hamburger');
       const sidebarResizer = document.getElementById('sidebar-resizer');
-      const SIDEBAR_WIDTH_STORAGE_KEY = 'pi-share:v1:sidebar-width';
+      const SIDEBAR_WIDTH_STORAGE_KEY = 'zero2ai-share:v1:sidebar-width';
       const MIN_CONTENT_WIDTH = 320;
 
       function isMobileLayout() {

@@ -6078,7 +6078,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "pi-ast"
+name = "zero2ai-ast"
 version = "18.2.1"
 dependencies = [
  "anyhow",
@@ -6148,7 +6148,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "pi-builtins"
+name = "zero2ai-builtins"
 version = "18.2.1"
 dependencies = [
  "ansi-width",
@@ -6204,7 +6204,7 @@ dependencies = [
  "os_display",
  "parking_lot",
  "parse_datetime",
- "pi-walker",
+ "zero2ai-walker",
  "platform-info",
  "pretty_assertions",
  "procfs",
@@ -6233,18 +6233,18 @@ dependencies = [
 ]
 
 [[package]]
-name = "pi-diff"
+name = "zero2ai-diff"
 version = "18.2.1"
 
 [[package]]
-name = "pi-edit"
+name = "zero2ai-edit"
 version = "18.2.1"
 dependencies = [
  "async-trait",
  "parking_lot",
- "pi-ast",
- "pi-diff",
- "pi-walker",
+ "zero2ai-ast",
+ "zero2ai-diff",
+ "zero2ai-walker",
  "regex",
  "serde",
  "serde_json",
@@ -6256,7 +6256,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "pi-iso"
+name = "zero2ai-iso"
 version = "18.2.1"
 dependencies = [
  "async-trait",
@@ -6268,7 +6268,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "pi-natives"
+name = "zero2ai-natives"
 version = "18.2.1"
 dependencies = [
  "anyhow",
@@ -6312,14 +6312,14 @@ dependencies = [
  "parking_lot",
  "pdf-inspector",
  "phf 0.14.0",
- "pi-ast",
- "pi-diff",
- "pi-edit",
- "pi-iso",
- "pi-shell",
- "pi-vcs",
- "pi-voice",
- "pi-walker",
+ "zero2ai-ast",
+ "zero2ai-diff",
+ "zero2ai-edit",
+ "zero2ai-iso",
+ "zero2ai-shell",
+ "zero2ai-vcs",
+ "zero2ai-voice",
+ "zero2ai-walker",
  "pipewire",
  "png",
  "portable-pty",
@@ -6352,7 +6352,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "pi-shell"
+name = "zero2ai-shell"
 version = "18.2.1"
 dependencies = [
  "anyhow",
@@ -6365,7 +6365,7 @@ dependencies = [
  "libc",
  "os_pipe",
  "parking_lot",
- "pi-builtins",
+ "zero2ai-builtins",
  "regex",
  "serde",
  "serde_json",
@@ -6380,14 +6380,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "pi-vcs"
+name = "zero2ai-vcs"
 version = "18.2.1"
 dependencies = [
  "gix",
  "gix-utils",
  "jj-lib",
  "libc",
- "pi-iso",
+ "zero2ai-iso",
  "tempfile",
  "thiserror 2.0.20",
  "tokio",
@@ -6395,7 +6395,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "pi-voice"
+name = "zero2ai-voice"
 version = "18.2.1"
 dependencies = [
  "bytes",
@@ -6409,7 +6409,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "pi-walker"
+name = "zero2ai-walker"
 version = "18.2.1"
 dependencies = [
  "globset",

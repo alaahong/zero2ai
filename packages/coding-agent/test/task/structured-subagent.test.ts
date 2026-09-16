@@ -2,25 +2,25 @@ import { afterEach, describe, expect, it, vi } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import path from "node:path";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
 import {
 	artifactsDirsFromRegistry,
 	resetRegisteredArtifactDirsForTests,
-} from "@oh-my-pi/pi-coding-agent/internal-urls/registry-helpers";
-import * as planHandoff from "@oh-my-pi/pi-coding-agent/plan-mode/plan-handoff";
-import * as discoveryModule from "@oh-my-pi/pi-coding-agent/task/discovery";
-import { createEvalCustomTools } from "@oh-my-pi/pi-coding-agent/task/eval-tools";
-import * as executorModule from "@oh-my-pi/pi-coding-agent/task/executor";
-import * as isolationRunner from "@oh-my-pi/pi-coding-agent/task/isolation-runner";
+} from "@zero2ai/coding-agent/internal-urls/registry-helpers";
+import * as planHandoff from "@zero2ai/coding-agent/plan-mode/plan-handoff";
+import * as discoveryModule from "@zero2ai/coding-agent/task/discovery";
+import { createEvalCustomTools } from "@zero2ai/coding-agent/task/eval-tools";
+import * as executorModule from "@zero2ai/coding-agent/task/executor";
+import * as isolationRunner from "@zero2ai/coding-agent/task/isolation-runner";
 import {
 	buildStructuredSubagentRecoveryHint,
 	resolveEffectiveSubagentPolicy,
 	runStructuredSubagent,
 	StructuredSubagentError,
 	type StructuredSubagentRequest,
-} from "@oh-my-pi/pi-coding-agent/task/structured-subagent";
-import type { AgentDefinition, SingleResult } from "@oh-my-pi/pi-coding-agent/task/types";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
+} from "@zero2ai/coding-agent/task/structured-subagent";
+import type { AgentDefinition, SingleResult } from "@zero2ai/coding-agent/task/types";
+import type { ToolSession } from "@zero2ai/coding-agent/tools";
 
 const AGENT: AgentDefinition = {
 	name: "worker",
@@ -132,8 +132,8 @@ describe("structured subagent primitive", () => {
 	});
 
 	it("gives task and eval invocations identical blocked-agent preflight errors", async () => {
-		const previous = Bun.env.PI_BLOCKED_AGENT;
-		Bun.env.PI_BLOCKED_AGENT = "worker";
+		const previous = Bun.env.ZERO2AI_BLOCKED_AGENT;
+		Bun.env.ZERO2AI_BLOCKED_AGENT = "worker";
 		try {
 			const discover = vi.spyOn(discoveryModule, "discoverAgents");
 			const taskRequest = request();
@@ -153,8 +153,8 @@ describe("structured subagent primitive", () => {
 			]);
 			expect(discover).not.toHaveBeenCalled();
 		} finally {
-			if (previous === undefined) delete Bun.env.PI_BLOCKED_AGENT;
-			else Bun.env.PI_BLOCKED_AGENT = previous;
+			if (previous === undefined) delete Bun.env.ZERO2AI_BLOCKED_AGENT;
+			else Bun.env.ZERO2AI_BLOCKED_AGENT = previous;
 		}
 	});
 
@@ -191,7 +191,7 @@ describe("structured subagent primitive", () => {
 		expect(discover).not.toHaveBeenCalled();
 	});
 	it("reloads project task and retry policy before resolving an agent added during the session", async () => {
-		const root = await fs.mkdtemp(path.join(os.tmpdir(), "omp-task-hot-reload-"));
+		const root = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-task-hot-reload-"));
 		const projectDir = path.join(root, "project");
 		const agentDir = path.join(root, "agent");
 		await fs.mkdir(projectDir, { recursive: true });
@@ -208,11 +208,11 @@ describe("structured subagent primitive", () => {
 
 		try {
 			await Bun.write(
-				path.join(projectDir, ".omp", "config.yml"),
+				path.join(projectDir, ".zero2ai", "config.yml"),
 				"task:\n  agentModelOverrides:\n    hot-worker: xai-oauth/grok-4.6:medium\n  enableEffort: false\nretry:\n  modelFallback: false\n",
 			);
 			await Bun.write(
-				path.join(projectDir, ".omp", "agents", "hot-worker.md"),
+				path.join(projectDir, ".zero2ai", "agents", "hot-worker.md"),
 				"---\nname: hot-worker\ndescription: Newly added worker.\nmodel: openai/gpt-4o\n---\n\nInspect the assignment.\n",
 			);
 
@@ -242,10 +242,10 @@ describe("structured subagent primitive", () => {
 	});
 
 	it("reloads persisted per-agent service-tier overrides before each launch", async () => {
-		const root = await fs.mkdtemp(path.join(os.tmpdir(), "omp-task-tier-reload-"));
+		const root = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-task-tier-reload-"));
 		const projectDir = path.join(root, "project");
 		const agentDir = path.join(root, "agent");
-		await fs.mkdir(path.join(projectDir, ".omp"), { recursive: true });
+		await fs.mkdir(path.join(projectDir, ".zero2ai"), { recursive: true });
 		await fs.mkdir(agentDir, { recursive: true });
 		const liveSettings = await Settings.loadIsolated({ cwd: projectDir, agentDir });
 		const liveSession = session({ cwd: projectDir, settings: liveSettings });
@@ -418,7 +418,7 @@ describe("structured subagent primitive", () => {
 			mode: "permissive",
 			data: { ok: true },
 		});
-		expect(path.basename(settled.artifactsDir)).toStartWith("omp-task-");
+		expect(path.basename(settled.artifactsDir)).toStartWith("zero2ai-task-");
 		await fs.rm(settled.artifactsDir, { recursive: true, force: true });
 	});
 
@@ -501,10 +501,10 @@ describe("structured subagent primitive", () => {
 	});
 
 	it("persists nested patch text with the compatible recovery path and wording", async () => {
-		const artifactsDir = await fs.mkdtemp(path.join(os.tmpdir(), "omp-structured-subagent-"));
+		const artifactsDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-structured-subagent-"));
 		const completed = result();
 		completed.patchPath = "/recovery/Worker.patch";
-		completed.branchName = "omp/task/Worker";
+		completed.branchName = "zero2ai/task/Worker";
 		completed.nestedPatches = [{ relativePath: "sub/nested", patch: "diff --git a/file b/file\n" }];
 
 		const hint = await buildStructuredSubagentRecoveryHint(completed, artifactsDir);
@@ -512,7 +512,7 @@ describe("structured subagent primitive", () => {
 
 		expect(hint).toContain("Captured patch preserved at /recovery/Worker.patch.");
 		expect(hint).toContain(`Captured nested patch preserved at ${nestedPath}.`);
-		expect(hint).toContain("Captured branch preserved as omp/task/Worker.");
+		expect(hint).toContain("Captured branch preserved as zero2ai/task/Worker.");
 		expect(await fs.readFile(nestedPath, "utf8")).toBe("diff --git a/file b/file\n");
 		await fs.rm(artifactsDir, { recursive: true, force: true });
 	});
@@ -520,7 +520,7 @@ describe("structured subagent primitive", () => {
 	it("names the failure when nested patches cannot be written as a fallback", async () => {
 		// `Bun.write` creates missing parents, so a genuine failure needs a path
 		// that cannot become a directory: a regular file in its place.
-		const parent = await fs.mkdtemp(path.join(os.tmpdir(), "omp-structured-subagent-unwritable-"));
+		const parent = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-structured-subagent-unwritable-"));
 		const artifactsDir = path.join(parent, "artifacts");
 		await fs.writeFile(artifactsDir, "");
 		const completed = result();
@@ -750,7 +750,7 @@ describe("structured subagent primitive", () => {
 		vi.spyOn(isolationRunner, "prepareIsolationContext").mockResolvedValue({ repoRoot: "/tmp" } as never);
 		vi.spyOn(isolationRunner, "runIsolatedSubprocess").mockImplementation(async () => ({
 			...result(),
-			branchName: "omp/task/Worker",
+			branchName: "zero2ai/task/Worker",
 			branchBaseSha: "base",
 			nestedPatches: [{ relativePath: "inner", patch: "diff --git a/b.txt b/b.txt\n" }],
 			error: "Nested patch capture failed: ENOSPC. Isolation workspace retained at /wt/abc.",
@@ -760,7 +760,7 @@ describe("structured subagent primitive", () => {
 			request({ session: session({ isolationEnabled: true }), isolation: { requested: true } }),
 		);
 
-		expect(settled.mergeSummary).toContain("omp/task/Worker");
+		expect(settled.mergeSummary).toContain("zero2ai/task/Worker");
 		await fs.rm(settled.artifactsDir, { recursive: true, force: true });
 	});
 

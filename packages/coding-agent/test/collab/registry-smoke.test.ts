@@ -10,8 +10,8 @@ import { afterEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { CollabListJsonOutput } from "@oh-my-pi/pi-coding-agent/cli/collab-cli";
-import { COLLAB_REGISTRY_VERSION, listCollabHosts } from "@oh-my-pi/pi-coding-agent/collab/registry";
+import type { CollabListJsonOutput } from "@zero2ai/coding-agent/cli/collab-cli";
+import { COLLAB_REGISTRY_VERSION, listCollabHosts } from "@zero2ai/coding-agent/collab/registry";
 
 const HELPER_PATH = path.resolve(import.meta.dir, "helpers/registry-host-process.ts");
 const CLI_PATH = path.resolve(import.meta.dir, "../../src/cli.ts");
@@ -93,7 +93,7 @@ afterEach(async () => {
 
 describe("collab host registry (two-process smoke)", () => {
 	it("discovers a separately-spawned host without a URL and prunes it after a crash", async () => {
-		const dir = await tempDir("omp-collab-smoke-seam-");
+		const dir = await tempDir("zero2ai-collab-smoke-seam-");
 		const marker = `seam-${Date.now().toString(36)}`;
 		const instanceId = "seam-host";
 		const { child, stderr } = spawnHelper([dir, marker, instanceId]);
@@ -122,7 +122,7 @@ describe("collab host registry (two-process smoke)", () => {
 	}, 40_000);
 
 	it("lists metadata and explicitly retrieves control or view links through the real CLI under a fake HOME", async () => {
-		const home = await tempDir("omp-collab-smoke-home-");
+		const home = await tempDir("zero2ai-collab-smoke-home-");
 		const marker = `cli-${Date.now().toString(36)}`;
 		const instanceId = "cli-host";
 		const controlUrl = `https://collab.example/control/${marker}`;
@@ -133,13 +133,13 @@ describe("collab host registry (two-process smoke)", () => {
 			HOME: home,
 			USERPROFILE: home,
 			NO_COLOR: "1",
-			OMP_SMOKE_MARKER: marker,
-			OMP_SMOKE_INSTANCE_ID: instanceId,
+			ZERO2AI_SMOKE_MARKER: marker,
+			ZERO2AI_SMOKE_INSTANCE_ID: instanceId,
 		};
-		delete env.PI_CONFIG_DIR;
-		delete env.PI_PROFILE;
-		delete env.OMP_PROFILE;
-		delete env.PI_CODING_AGENT_DIR;
+		delete env.ZERO2AI_CONFIG_DIR;
+		delete env.ZERO2AI_PROFILE;
+		delete env.ZERO2AI_PROFILE;
+		delete env.ZERO2AI_CODING_AGENT_DIR;
 
 		const { child, stderr } = spawnHelper([], env);
 		const ready = await readUntil(child.stdout, "READY", READY_TIMEOUT_MS);
@@ -165,7 +165,7 @@ describe("collab host registry (two-process smoke)", () => {
 		const listed = await runCli(["list", "--json"]);
 		expect({ code: listed.code, stderr: listed.stderr }).toEqual({ code: 0, stderr: "" });
 		const listJson: CollabListJsonOutput = JSON.parse(listed.stdout);
-		const hosts = await listCollabHosts({ dir: path.join(home, ".omp", "run", "collab-hosts") });
+		const hosts = await listCollabHosts({ dir: path.join(home, ".zero2ai", "run", "collab-hosts") });
 		expect(listJson).toEqual({ version: COLLAB_REGISTRY_VERSION, hosts });
 		expect(listJson.hosts).toHaveLength(1);
 		expect(listJson.hosts[0]).toMatchObject({ instanceId, pid: child.pid });

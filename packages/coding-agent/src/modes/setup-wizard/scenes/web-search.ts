@@ -4,7 +4,7 @@ import {
 	SelectList,
 	type SgrMouseEvent,
 	truncateToWidth,
-} from "@oh-my-pi/pi-tui";
+} from "@zero2ai/tui";
 import { getSearchProvider, setSearchProviderOrder } from "../../../web/search/provider";
 import {
 	isSearchProviderId,

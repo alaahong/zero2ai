@@ -2,17 +2,17 @@ import { afterEach, describe, expect, it, vi } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { Skill } from "@oh-my-pi/pi-coding-agent/extensibility/skills";
+import type { Skill } from "@zero2ai/coding-agent/extensibility/skills";
 import {
 	applyResolvedSystemPromptInputs,
 	readPipedInput,
 	submitInteractiveInput,
-} from "@oh-my-pi/pi-coding-agent/main";
-import type { SubmittedUserInput } from "@oh-my-pi/pi-coding-agent/modes/types";
-import type { CreateAgentSessionOptions } from "@oh-my-pi/pi-coding-agent/sdk";
-import { SKILL_PROMPT_MESSAGE_TYPE } from "@oh-my-pi/pi-coding-agent/session/messages";
-import { discoverTitleSystemPromptFile } from "@oh-my-pi/pi-coding-agent/system-prompt";
-import { removeWithRetries } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/main";
+import type { SubmittedUserInput } from "@zero2ai/coding-agent/modes/types";
+import type { CreateAgentSessionOptions } from "@zero2ai/coding-agent/sdk";
+import { SKILL_PROMPT_MESSAGE_TYPE } from "@zero2ai/coding-agent/session/messages";
+import { discoverTitleSystemPromptFile } from "@zero2ai/coding-agent/system-prompt";
+import { removeWithRetries } from "@zero2ai/utils";
 
 const cleanupDirs: string[] = [];
 
@@ -32,10 +32,10 @@ function createInput(overrides: Partial<SubmittedUserInput> = {}): SubmittedUser
 }
 
 describe("discoverTitleSystemPromptFile", () => {
-	it("discovers TITLE_SYSTEM.md from the project omp config directory", async () => {
-		const projectDir = await fs.mkdtemp(path.join(os.tmpdir(), "omp-title-system-"));
+	it("discovers TITLE_SYSTEM.md from the project zero2ai config directory", async () => {
+		const projectDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-title-system-"));
 		cleanupDirs.push(projectDir);
-		const configDir = path.join(projectDir, ".omp");
+		const configDir = path.join(projectDir, ".zero2ai");
 		await fs.mkdir(configDir, { recursive: true });
 		const promptPath = path.join(configDir, "TITLE_SYSTEM.md");
 		await fs.writeFile(promptPath, "custom title prompt");
@@ -324,7 +324,7 @@ describe("submitInteractiveInput", () => {
 	});
 
 	it("routes a resubmitted /skill: prompt through promptCustomMessage instead of raw text (regression for #8137-style loop resubmit)", async () => {
-		const skillDir = await fs.mkdtemp(path.join(os.tmpdir(), "omp-skill-command-"));
+		const skillDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-skill-command-"));
 		cleanupDirs.push(skillDir);
 		const skillPath = path.join(skillDir, "recap.md");
 		await fs.writeFile(skillPath, "---\nname: recap\n---\nSummarize recent changes.\n");

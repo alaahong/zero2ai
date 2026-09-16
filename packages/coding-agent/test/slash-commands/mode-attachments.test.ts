@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "bun:test";
-import type { ImageContent } from "@oh-my-pi/pi-ai";
-import { InputController } from "@oh-my-pi/pi-coding-agent/modes/controllers/input-controller";
-import type { InteractiveModeContext, SubmittedUserInput } from "@oh-my-pi/pi-coding-agent/modes/types";
+import type { ImageContent } from "@zero2ai/ai";
+import { InputController } from "@zero2ai/coding-agent/modes/controllers/input-controller";
+import type { InteractiveModeContext, SubmittedUserInput } from "@zero2ai/coding-agent/modes/types";
 
 type Attachments = Pick<SubmittedUserInput, "images" | "imageLinks">;
 

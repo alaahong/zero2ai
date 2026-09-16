@@ -1,5 +1,5 @@
 import * as path from "node:path";
-import { CONFIG_DIR_NAME, prompt } from "@oh-my-pi/pi-utils";
+import { CONFIG_DIR_NAME, prompt } from "@zero2ai/utils";
 import { invalidate as invalidateCapabilityCache } from "../../capability";
 import type { Rule } from "../../capability/rule";
 import omfgUserPrompt from "../../prompts/system/omfg-user.md" with { type: "text" };
@@ -33,8 +33,8 @@ interface GenerateCandidateOptions {
 type SaveCandidateResult = { kind: "saved" | "aborted" | "rejected" } | { kind: "amend"; feedback: string };
 
 const MAX_ATTEMPTS = 3;
-const PROJECT_OPTION = "This project (.omp/rules)";
-const GLOBAL_OPTION = "Global — all projects (~/.omp/agent/rules)";
+const PROJECT_OPTION = "This project (.zero2ai/rules)";
+const GLOBAL_OPTION = "Global — all projects (~/.zero2ai/agent/rules)";
 const AMEND_OPTION = "Amend with feedback…";
 
 export class OmfgController {
@@ -240,7 +240,7 @@ export class OmfgController {
 			// a stale listing that would make `replaceTtsrRules` evict the live rule
 			// registered below (issue #10940 review). Invalidating the file clears its
 			// parent (rules dir); invalidating that dir clears its parent (the config dir)
-			// so a first-ever rule in a freshly created `.omp/rules` is still discovered.
+			// so a first-ever rule in a freshly created `.zero2ai/rules` is still discovered.
 			invalidateCapabilityCache(target.filePath);
 			invalidateCapabilityCache(path.dirname(target.filePath));
 			if (!this.#isActiveRequest(request)) return { kind: "aborted" };

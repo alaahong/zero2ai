@@ -1,0 +1,80 @@
+# ZERO2AI 出口收敛：内置 provider 禁用清单（实测导出，共 76 个内置 provider）
+#
+# 用法：把下面的 YAML 数组整体复制到 <项目>/.zero2ai/config.yml 的 disabledProviders 键。
+# 注意：该键是「整体替换」语义而非增量合并——必须一次列全，否则漏列的 provider 仍可用。
+# 保留未禁用的：litellm, llama.cpp, lm-studio, ollama, vllm（行内网关与本地推理）
+#
+# 生成依据：packages/catalog/src/compat/rules/providers/*.kdl
+
+disabledProviders:
+  - abliteration
+  - aiand
+  - aimlapi
+  - alibaba-coding-plan
+  - alibaba-token-plan
+  - amazon-bedrock
+  - anthropic
+  - azure
+  - baseten
+  - bedrock-mantle
+  - cerebras
+  - charm-hyper
+  - cline-pass
+  - cloudflare-ai-gateway
+  - commandcode
+  - coreweave
+  - cursor
+  - deepinfra
+  - deepseek
+  - devin
+  - firepass
+  - fireworks
+  - github-copilot
+  - gitlab-duo
+  - gitlab-duo-agent
+  - gmi-cloud
+  - google
+  - google-antigravity
+  - google-gemini-cli
+  - google-vertex
+  - groq
+  - huggingface
+  - kilo
+  - kimi-code
+  - meta
+  - minimax
+  - minimax-code
+  - minimax-code-cn
+  - mistral
+  - moonshot
+  - muse-code
+  - nanogpt
+  - novita
+  - nvidia
+  - ollama-cloud
+  - openai
+  - openai-codex
+  - opencode-go
+  - opencode-zen
+  - openrouter
+  - qianfan
+  - qwen-portal
+  - sakana
+  - siliconflow
+  - siliconflow-cn
+  - synthetic
+  - together
+  - umans
+  - venice
+  - vercel-ai-gateway
+  - wafer-serverless
+  - xai
+  - xai-oauth
+  - xiaomi
+  - xiaomi-token-plan-ams
+  - xiaomi-token-plan-cn
+  - xiaomi-token-plan-sgp
+  - yolo-auto
+  - zai
+  - zenmux
+  - zhipu-coding-plan

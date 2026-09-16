@@ -4,8 +4,8 @@
  * Note: command execution is async to avoid blocking the TUI.
  */
 
-import { executeShell } from "@oh-my-pi/pi-natives";
-import { $envExact, ptree } from "@oh-my-pi/pi-utils";
+import { executeShell } from "@zero2ai/natives";
+import { $envExact, ptree } from "@zero2ai/utils";
 
 /** Cache for successful shell command results (persists for process lifetime). */
 const commandResultCache = new Map<string, string>();
@@ -93,7 +93,7 @@ export async function runShellCommand(command: string, timeoutMs: number): Promi
 		}
 	}
 	try {
-		// Absolute OS shell, not a PATH-resolved name: a launcher may hand omp a
+		// Absolute OS shell, not a PATH-resolved name: a launcher may hand zero2ai a
 		// minimal tool-only PATH (same shape as execSync's default shell).
 		const result = await ptree.exec(["/bin/sh", "-c", command], {
 			timeout: timeoutMs,

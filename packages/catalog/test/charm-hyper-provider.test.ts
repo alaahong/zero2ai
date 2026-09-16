@@ -1,13 +1,13 @@
 import { afterEach, describe, expect, test, vi } from "bun:test";
-import { getProviderDefinition } from "@oh-my-pi/pi-ai/registry";
-import { getOAuthProviders } from "@oh-my-pi/pi-ai/registry/oauth";
-import { getEnvApiKey } from "@oh-my-pi/pi-ai/stream";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { normalizeCharmHyperBaseUrl } from "@oh-my-pi/pi-catalog/wire/charm-hyper";
-import { isCatalogDescriptor, resolveModelCacheProviderId } from "@oh-my-pi/pi-catalog/provider-models";
-import { DEFAULT_MODEL_PER_PROVIDER, PROVIDER_DESCRIPTORS } from "@oh-my-pi/pi-catalog/provider-models/descriptors";
-import { charmHyperModelManagerOptions } from "@oh-my-pi/pi-catalog/provider-models/openai-compat";
-import type { FetchImpl, ModelSpec } from "@oh-my-pi/pi-catalog/types";
+import { getProviderDefinition } from "@zero2ai/ai/registry";
+import { getOAuthProviders } from "@zero2ai/ai/registry/oauth";
+import { getEnvApiKey } from "@zero2ai/ai/stream";
+import { buildModel } from "@zero2ai/catalog/build";
+import { normalizeCharmHyperBaseUrl } from "@zero2ai/catalog/wire/charm-hyper";
+import { isCatalogDescriptor, resolveModelCacheProviderId } from "@zero2ai/catalog/provider-models";
+import { DEFAULT_MODEL_PER_PROVIDER, PROVIDER_DESCRIPTORS } from "@zero2ai/catalog/provider-models/descriptors";
+import { charmHyperModelManagerOptions } from "@zero2ai/catalog/provider-models/openai-compat";
+import type { FetchImpl, ModelSpec } from "@zero2ai/catalog/types";
 
 /**
  * Rows mirror live `https://hyper.charm.land/v1/models` payloads: the display

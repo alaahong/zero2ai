@@ -1,11 +1,11 @@
 import { describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import type { CustomToolContext } from "@oh-my-pi/pi-coding-agent/extensibility/custom-tools";
-import { DeferredMCPTool, MCPTool, type MCPToolDefinition } from "@oh-my-pi/pi-coding-agent/mcp";
-import type { MCPServerConnection } from "@oh-my-pi/pi-coding-agent/mcp/types";
-import { TempDir } from "@oh-my-pi/pi-utils";
-import { INTENT_FIELD } from "@oh-my-pi/pi-wire";
+import type { CustomToolContext } from "@zero2ai/coding-agent/extensibility/custom-tools";
+import { DeferredMCPTool, MCPTool, type MCPToolDefinition } from "@zero2ai/coding-agent/mcp";
+import type { MCPServerConnection } from "@zero2ai/coding-agent/mcp/types";
+import { TempDir } from "@zero2ai/utils";
+import { INTENT_FIELD } from "@zero2ai/wire";
 import { createMockConnection, createMockTransport } from "./mcp-test-utils";
 
 type CapturedRequest = {
@@ -382,7 +382,7 @@ describe("MCP tool arguments", () => {
 	});
 
 	it("resolves local image arguments before forwarding tools/call", async () => {
-		using tempDir = TempDir.createSync("@pi-mcp-local-image-");
+		using tempDir = TempDir.createSync("@zero2ai-mcp-local-image-");
 		const calls: CapturedRequest[] = [];
 		const { context, expectedPath } = await createLocalImageContext(tempDir);
 		const tool = new MCPTool(createCapturedConnection(calls), imageToolDefinition);

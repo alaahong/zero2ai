@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { TUI } from "@oh-my-pi/pi-tui";
-import type { PrivateModeReportHandler } from "@oh-my-pi/pi-tui/terminal";
+import { TUI } from "@zero2ai/tui";
+import type { PrivateModeReportHandler } from "@zero2ai/tui/terminal";
 import { withoutTerminalMultiplexer } from "./helpers/terminal-multiplexer";
 import { VirtualTerminal } from "./virtual-terminal";
 
@@ -16,9 +16,9 @@ import { VirtualTerminal } from "./virtual-terminal";
 withoutTerminalMultiplexer();
 
 const SYNC_OVERRIDE_KEYS = [
-	"PI_NO_SYNC_OUTPUT",
-	"PI_FORCE_SYNC_OUTPUT",
-	"PI_TUI_SYNC_OUTPUT",
+	"ZERO2AI_NO_SYNC_OUTPUT",
+	"ZERO2AI_FORCE_SYNC_OUTPUT",
+	"ZERO2AI_TUI_SYNC_OUTPUT",
 	"TERM_FEATURES",
 	"WT_SESSION",
 ] as const;

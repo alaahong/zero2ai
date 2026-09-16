@@ -1,16 +1,16 @@
 import { describe, expect, it } from "bun:test";
-import { convertAnthropicMessages } from "@oh-my-pi/pi-ai/providers/anthropic";
-import { convertMessages as convertGoogleMessages } from "@oh-my-pi/pi-ai/providers/google-shared";
-import { convertCodexResponsesMessages } from "@oh-my-pi/pi-ai/providers/openai-codex-responses";
-import { convertMessages as convertOpenAICompletionsMessages } from "@oh-my-pi/pi-ai/providers/openai-completions";
+import { convertAnthropicMessages } from "@zero2ai/ai/providers/anthropic";
+import { convertMessages as convertGoogleMessages } from "@zero2ai/ai/providers/google-shared";
+import { convertCodexResponsesMessages } from "@zero2ai/ai/providers/openai-codex-responses";
+import { convertMessages as convertOpenAICompletionsMessages } from "@zero2ai/ai/providers/openai-completions";
 import {
 	appendResponsesToolResultMessages,
 	convertResponsesInputContent,
-} from "@oh-my-pi/pi-ai/providers/openai-shared";
-import { NON_VISION_IMAGE_PLACEHOLDER } from "@oh-my-pi/pi-ai/providers/vision-guard";
-import type { Api, AssistantMessage, Context, Model, ModelSpec, ToolResultMessage, Usage } from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import type { ResolvedOpenAICompat } from "@oh-my-pi/pi-catalog/types";
+} from "@zero2ai/ai/providers/openai-shared";
+import { NON_VISION_IMAGE_PLACEHOLDER } from "@zero2ai/ai/providers/vision-guard";
+import type { Api, AssistantMessage, Context, Model, ModelSpec, ToolResultMessage, Usage } from "@zero2ai/ai/types";
+import { buildModel } from "@zero2ai/catalog/build";
+import type { ResolvedOpenAICompat } from "@zero2ai/catalog/types";
 
 const emptyUsage: Usage = {
 	input: 0,

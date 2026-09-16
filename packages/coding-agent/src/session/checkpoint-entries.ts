@@ -1,6 +1,6 @@
-import type { AgentMessage } from "@oh-my-pi/pi-agent-core";
-import type { ImageContent, TextContent } from "@oh-my-pi/pi-ai";
-import { stringProperty } from "@oh-my-pi/pi-utils";
+import type { AgentMessage } from "@zero2ai/agent-core";
+import type { ImageContent, TextContent } from "@zero2ai/ai";
+import { stringProperty } from "@zero2ai/utils";
 import { stripXdUrlPrefix } from "../internal-urls/xd-protocol";
 import type { CompletedRewindState } from "../tools/checkpoint";
 import { writeDeviceDispatch } from "../tools/resolve";

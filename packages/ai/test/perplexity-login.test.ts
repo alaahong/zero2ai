@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "bun:test";
-import { getProviderDefinition } from "@oh-my-pi/pi-ai/registry";
-import { AuthStorage } from "@oh-my-pi/pi-ai/auth-storage";
-import { LoginCancelledError, OAuthError, ProviderHttpError } from "@oh-my-pi/pi-ai/error";
-import type { OAuthCredentials, OAuthController } from "@oh-my-pi/pi-ai/registry/oauth/types";
-import type { FetchImpl } from "@oh-my-pi/pi-ai/types";
+import { getProviderDefinition } from "@zero2ai/ai/registry";
+import { AuthStorage } from "@zero2ai/ai/auth-storage";
+import { LoginCancelledError, OAuthError, ProviderHttpError } from "@zero2ai/ai/error";
+import type { OAuthCredentials, OAuthController } from "@zero2ai/ai/registry/oauth/types";
+import type { FetchImpl } from "@zero2ai/ai/types";
 import { withEnv } from "./helpers";
 
 type CapturedRequest = {
@@ -60,7 +60,7 @@ describe("Perplexity email OTP login", () => {
 			});
 			const answers = ["user@example.com", "123456"];
 
-			await withEnv({ PI_AUTH_NO_BORROW: "1" }, async () => {
+			await withEnv({ ZERO2AI_AUTH_NO_BORROW: "1" }, async () => {
 				const credentials = await loginPerplexity({
 					fetch: fetchMock,
 					onPrompt: async () => answers.shift() ?? "",
@@ -126,7 +126,7 @@ describe("Perplexity email OTP login", () => {
 		});
 		const answers = ["email", "user@example.com", "123456", "654321"];
 
-		await withEnv({ PI_AUTH_NO_BORROW: "1" }, async () => {
+		await withEnv({ ZERO2AI_AUTH_NO_BORROW: "1" }, async () => {
 			const credentials = await loginPerplexity({
 				fetch: fetchMock,
 				onPrompt: async () => answers.shift() ?? "",
@@ -156,7 +156,7 @@ describe("Perplexity browser SSO login", () => {
 		const token = "sso-session-cookie";
 		let prompts = 0;
 		try {
-			await withEnv({ PI_AUTH_NO_BORROW: "1" }, async () => {
+			await withEnv({ ZERO2AI_AUTH_NO_BORROW: "1" }, async () => {
 				const identity = await storage.login("perplexity", {
 					onAuth: () => {
 						throw new Error("The host already owns the login browser");
@@ -188,7 +188,7 @@ describe("Perplexity browser SSO login", () => {
 	});
 
 	it("rejects a successful HTTP response without an authenticated identity", async () => {
-		await withEnv({ PI_AUTH_NO_BORROW: "1" }, async () => {
+		await withEnv({ ZERO2AI_AUTH_NO_BORROW: "1" }, async () => {
 			await expect(
 				loginPerplexity({
 					onPrompt: async () => "",
@@ -200,7 +200,7 @@ describe("Perplexity browser SSO login", () => {
 	});
 
 	it("surfaces HTTP failure status without exposing the session or response body", async () => {
-		await withEnv({ PI_AUTH_NO_BORROW: "1" }, async () => {
+		await withEnv({ ZERO2AI_AUTH_NO_BORROW: "1" }, async () => {
 			const token = "private-session-cookie";
 			const result = loginPerplexity({
 				onPrompt: async () => "",
@@ -214,7 +214,7 @@ describe("Perplexity browser SSO login", () => {
 	});
 
 	it("does not expose session content through malformed JSON errors", async () => {
-		await withEnv({ PI_AUTH_NO_BORROW: "1" }, async () => {
+		await withEnv({ ZERO2AI_AUTH_NO_BORROW: "1" }, async () => {
 			const token = "PrivateSessionTokenDontLog";
 			const response = new Response(token);
 			vi.spyOn(response, "json").mockImplementation(async () => JSON.parse(await response.text()));
@@ -230,7 +230,7 @@ describe("Perplexity browser SSO login", () => {
 
 	it("rejects cookie-header injection before contacting the service", async () => {
 		const fetchSession = vi.fn(async () => Response.json({ user: { email: "sso@example.com" } }));
-		await withEnv({ PI_AUTH_NO_BORROW: "1" }, async () => {
+		await withEnv({ ZERO2AI_AUTH_NO_BORROW: "1" }, async () => {
 			await expect(
 				loginPerplexity({
 					onPrompt: async () => "",
@@ -247,7 +247,7 @@ describe("Perplexity browser SSO login", () => {
 		const captureStarted = Promise.withResolvers<void>();
 		const captured = Promise.withResolvers<string>();
 		const fetchSession = vi.fn(async () => Response.json({ user: { email: "sso@example.com" } }));
-		await withEnv({ PI_AUTH_NO_BORROW: "1" }, async () => {
+		await withEnv({ ZERO2AI_AUTH_NO_BORROW: "1" }, async () => {
 			const result = loginPerplexity({
 				signal: controller.signal,
 				onPrompt: async () => "",
@@ -271,7 +271,7 @@ describe("Perplexity browser SSO login", () => {
 		const validationStarted = Promise.withResolvers<void>();
 		const response = Promise.withResolvers<Response>();
 		try {
-			await withEnv({ PI_AUTH_NO_BORROW: "1" }, async () => {
+			await withEnv({ ZERO2AI_AUTH_NO_BORROW: "1" }, async () => {
 				const result = storage.login("perplexity", {
 					signal: controller.signal,
 					onAuth: () => {},

@@ -1,7 +1,7 @@
 /**
- * CLI handler for `omp grievances` — view, clean, and manually push reported tool issues.
+ * CLI handler for `zero2ai grievances` — view, clean, and manually push reported tool issues.
  */
-import chalk from "@oh-my-pi/pi-utils/chalk";
+import chalk from "@zero2ai/utils/chalk";
 import { Settings } from "../config/settings";
 import { flushGrievances, openAutoQaDb } from "../tools/report-tool-issue";
 
@@ -155,7 +155,7 @@ export async function cleanGrievances(options: CleanGrievancesOptions): Promise<
 }
 
 // ───────────────────────────────────────────────────────────────────────────
-// Manual push (`omp grievances push`)
+// Manual push (`zero2ai grievances push`)
 // ───────────────────────────────────────────────────────────────────────────
 
 /**
@@ -230,7 +230,7 @@ export async function pushGrievances(options: PushGrievancesOptions): Promise<vo
 		if (result.skipped) {
 			console.log(
 				chalk.yellow(
-					"Push skipped — no endpoint configured. Set `dev.autoqaPush.endpoint` or `PI_AUTO_QA_PUSH_URL`.",
+					"Push skipped — no endpoint configured. Set `dev.autoqaPush.endpoint` or `ZERO2AI_AUTO_QA_PUSH_URL`.",
 				),
 			);
 			return;

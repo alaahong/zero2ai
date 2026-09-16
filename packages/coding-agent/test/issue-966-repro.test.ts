@@ -10,9 +10,9 @@ import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
 import { $ } from "bun";
-import * as vcs from "@oh-my-pi/pi-natives/vcs";
+import * as vcs from "@zero2ai/natives/vcs";
 
-const dir = await fs.mkdtemp(path.join(os.tmpdir(), "omp-issue-966-"));
+const dir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-issue-966-"));
 try {
 	await $\`git init --initial-branch=main\`.cwd(dir).quiet();
 	await $\`git config user.email tester@example.com\`.cwd(dir).quiet();
@@ -21,14 +21,14 @@ try {
 	await $\`git add tracked.txt\`.cwd(dir).quiet();
 	await $\`git commit -m baseline\`.cwd(dir).quiet();
 	let repo = vcs.requireGit(dir);
-	// #10130: pi-vcs memoizes a gix index snapshot and only refreshes it when the
+	// #10130: zero2ai-vcs memoizes a gix index snapshot and only refreshes it when the
 	// index mtime is strictly newer than the snapshot's own timestamp. Both of the
 	// stage -> commit pairs below can land inside a single mtime tick on a fresh
 	// tmpdir, so the second read is served the pre-stage index and commitCreate
 	// reports "nothing to commit, working tree clean". Pushing the index mtime
 	// forward after every mutation makes that staleness check fire every time.
 	// PR CI runs against the published natives addon rather than a locally built
-	// one (.github/workflows/ci.yml: "PRs never build"), so the pi-vcs-side fix in
+	// one (.github/workflows/ci.yml: "PRs never build"), so the zero2ai-vcs-side fix in
 	// #10132 cannot green this job until it ships in a release. Drop this helper
 	// once a natives release carrying #10132 is the default for PR runs.
 	// The tick keeps each bump strictly greater than the previous one even if two

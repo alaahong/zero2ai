@@ -4,16 +4,16 @@
  * Extends the base AgentMessage type with coding-agent specific message types,
  * and provides a transformer to convert them to LLM-compatible messages.
  */
-import type { AgentMessage } from "@oh-my-pi/pi-agent-core";
+import type { AgentMessage } from "@zero2ai/agent-core";
 import {
 	invalidateMessageCache,
 	registerMessageCacheInvalidator,
-} from "@oh-my-pi/pi-agent-core/compaction/message-cache";
+} from "@zero2ai/agent-core/compaction/message-cache";
 import {
 	type BranchSummaryMessage,
 	type CompactionSummaryMessage,
 	convertMessageToLlm,
-} from "@oh-my-pi/pi-agent-core/compaction/messages";
+} from "@zero2ai/agent-core/compaction/messages";
 import type {
 	AssistantMessage,
 	ImageContent,
@@ -21,11 +21,11 @@ import type {
 	MessageAttribution,
 	TextContent,
 	UserMessage,
-} from "@oh-my-pi/pi-ai";
-import * as AIError from "@oh-my-pi/pi-ai/error";
-import { copyPerCallContextMessage } from "@oh-my-pi/pi-ai/utils/block-symbols";
-import { isRecord, logger, prompt } from "@oh-my-pi/pi-utils";
-import { COLLAB_PROMPT_MESSAGE_TYPE } from "@oh-my-pi/pi-wire";
+} from "@zero2ai/ai";
+import * as AIError from "@zero2ai/ai/error";
+import { copyPerCallContextMessage } from "@zero2ai/ai/utils/block-symbols";
+import { isRecord, logger, prompt } from "@zero2ai/utils";
+import { COLLAB_PROMPT_MESSAGE_TYPE } from "@zero2ai/wire";
 import userInterjectionTemplate from "../prompts/steering/user-interjection.md" with { type: "text" };
 import { formatTitleConversationContext, type TitleConversationTurn } from "../tiny/message-preproc";
 
@@ -35,7 +35,7 @@ export {
 	createBranchSummaryMessage,
 	createCompactionSummaryMessage,
 	createCustomMessage,
-} from "@oh-my-pi/pi-agent-core/compaction/messages";
+} from "@zero2ai/agent-core/compaction/messages";
 
 import type { OutputMeta } from "../tools/output-meta";
 import { formatOutputNotice } from "../tools/output-meta";
@@ -1022,7 +1022,7 @@ export interface FileMentionMessage {
 
 // Extend CustomAgentMessages via declaration merging
 // Legacy hookMessage is kept for migration; new code should use custom.
-declare module "@oh-my-pi/pi-agent-core" {
+declare module "@zero2ai/agent-core" {
 	interface CustomAgentMessages {
 		bashExecution: BashExecutionMessage;
 		pythonExecution: PythonExecutionMessage;

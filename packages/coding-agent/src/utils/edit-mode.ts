@@ -1,5 +1,5 @@
-import { classifyModel } from "@oh-my-pi/pi-catalog/identity";
-import { $env, $flag } from "@oh-my-pi/pi-utils";
+import { classifyModel } from "@zero2ai/catalog/identity";
+import { $env, $flag } from "@zero2ai/utils";
 
 export type EditMode = "replace" | "patch" | "hashline" | "apply_patch" | "sloppy";
 
@@ -35,12 +35,12 @@ export function resolveEditMode(session: EditModeSessionLike): EditMode {
 	const modelVariant = session.settings.getEditVariantForModel?.(activeModel);
 	if (modelVariant) return modelVariant;
 
-	const envMode = normalizeEditMode($env.PI_EDIT_VARIANT);
+	const envMode = normalizeEditMode($env.ZERO2AI_EDIT_VARIANT);
 	if (envMode) return envMode;
 
 	const settingsMode = normalizeEditMode(String(session.settings.get("edit.mode") ?? ""));
 	const mode = settingsMode ?? DEFAULT_EDIT_MODE;
-	if (mode === "hashline" && !$flag("PI_STRICT_EDIT_MODE") && activeModel) {
+	if (mode === "hashline" && !$flag("ZERO2AI_STRICT_EDIT_MODE") && activeModel) {
 		const identity = classifyModel("", activeModel, { lenient: true });
 		if (
 			identity.class === "kimi" ||

@@ -1,9 +1,9 @@
 import { describe, expect, it } from "bun:test";
 import * as path from "node:path";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AgentStorage } from "@oh-my-pi/pi-coding-agent/session/agent-storage";
-import { renderHtmlToText } from "@oh-my-pi/pi-coding-agent/tools/fetch";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { AgentStorage } from "@zero2ai/coding-agent/session/agent-storage";
+import { renderHtmlToText } from "@zero2ai/coding-agent/tools/fetch";
+import { TempDir } from "@zero2ai/utils";
 import { asGlobalFetch } from "../helpers/fetch-mock";
 
 /**
@@ -131,7 +131,7 @@ describe("renderHtmlToText: Jina response validation", () => {
 	it("uses a stored Jina credential when the environment key is absent", async () => {
 		const originalApiKey = process.env.JINA_API_KEY;
 		delete process.env.JINA_API_KEY;
-		const tempDir = TempDir.createSync("@omp-jina-reader-auth-");
+		const tempDir = TempDir.createSync("@zero2ai-jina-reader-auth-");
 		try {
 			const storage = await AgentStorage.open(path.join(tempDir.path(), "agent.db"));
 			storage.replaceAuthCredentialsForProvider("jina", [{ type: "api_key", key: "stored-jina-key" }]);

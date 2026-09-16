@@ -2,8 +2,8 @@ import { beforeAll, describe, expect, test } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { DiffSide, DiffStream } from "@oh-my-pi/pi-natives";
-import { sanitizeText } from "@oh-my-pi/pi-utils";
+import { DiffSide, DiffStream } from "@zero2ai/natives";
+import { sanitizeText } from "@zero2ai/utils";
 import { $ } from "bun";
 import {
 	buildDiffDocument,
@@ -24,7 +24,7 @@ beforeAll(async () => {
 });
 
 async function withReviewRepo(run: (repo: string) => Promise<void>): Promise<void> {
-	const repo = await fs.mkdtemp(path.join(os.tmpdir(), "omp-git-tui-stream-"));
+	const repo = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-git-tui-stream-"));
 	try {
 		await $`git init --initial-branch=main`.cwd(repo).quiet();
 		await $`git config user.name "Test User"`.cwd(repo).quiet();

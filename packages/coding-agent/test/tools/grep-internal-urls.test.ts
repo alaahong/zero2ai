@@ -2,24 +2,24 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import * as capability from "@oh-my-pi/pi-coding-agent/capability";
-import type { CapabilityResult } from "@oh-my-pi/pi-coding-agent/capability/types";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { resetActiveSkillsForTests, setActiveSkills } from "@oh-my-pi/pi-coding-agent/extensibility/skills";
+import * as capability from "@zero2ai/coding-agent/capability";
+import type { CapabilityResult } from "@zero2ai/coding-agent/capability/types";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { resetActiveSkillsForTests, setActiveSkills } from "@zero2ai/coding-agent/extensibility/skills";
 import {
 	type InternalResource,
 	type InternalUrl,
 	InternalUrlRouter,
 	LocalProtocolHandler,
 	type ProtocolHandler,
-} from "@oh-my-pi/pi-coding-agent/internal-urls";
-import { AgentRegistry } from "@oh-my-pi/pi-coding-agent/registry/agent-registry";
-import type { SessionEntry } from "@oh-my-pi/pi-coding-agent/session/session-entries";
-import * as sshFileTransfer from "@oh-my-pi/pi-coding-agent/ssh/file-transfer";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { formatOutputNotice } from "@oh-my-pi/pi-coding-agent/tools/output-meta";
-import { ReadTool } from "@oh-my-pi/pi-coding-agent/tools/read";
-import { removeWithRetries } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/internal-urls";
+import { AgentRegistry } from "@zero2ai/coding-agent/registry/agent-registry";
+import type { SessionEntry } from "@zero2ai/coding-agent/session/session-entries";
+import * as sshFileTransfer from "@zero2ai/coding-agent/ssh/file-transfer";
+import type { ToolSession } from "@zero2ai/coding-agent/tools";
+import { formatOutputNotice } from "@zero2ai/coding-agent/tools/output-meta";
+import { ReadTool } from "@zero2ai/coding-agent/tools/read";
+import { removeWithRetries } from "@zero2ai/utils";
 import { GlobTool } from "../../src/tools/glob";
 import { GrepTool } from "../../src/tools/grep";
 
@@ -375,31 +375,31 @@ describe("GrepTool internal URL resolution", () => {
 		);
 	});
 
-	it("expands omp:// root to grep embedded documentation files", async () => {
+	it("expands zero2ai:// root to grep embedded documentation files", async () => {
 		const session = createSession();
 		const tool = new GrepTool(session);
 
 		const result = await tool.execute("test-call", {
 			pattern: "Grep file contents with a regex across files",
-			path: "omp://",
+			path: "zero2ai://",
 		});
 
 		const text = getResultText(result);
-		expect(text).toContain("# omp://tools/grep.md");
+		expect(text).toContain("# zero2ai://tools/grep.md");
 		expect(text).toContain("Grep file contents with a regex across files");
 	});
 
-	it("expands omp://docs to grep embedded documentation files", async () => {
+	it("expands zero2ai://docs to grep embedded documentation files", async () => {
 		const session = createSession();
 		const tool = new GrepTool(session);
 
 		const result = await tool.execute("test-call", {
 			pattern: "Read files, directories, archives",
-			path: "omp://docs",
+			path: "zero2ai://docs",
 		});
 
 		const text = getResultText(result);
-		expect(text).toContain("# omp://tools/read.md");
+		expect(text).toContain("# zero2ai://tools/read.md");
 		expect(text).toContain("Read files, directories, archives");
 	});
 

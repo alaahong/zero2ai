@@ -1,11 +1,11 @@
 import { describe, expect, it } from "bun:test";
-import { streamAnthropic } from "@oh-my-pi/pi-ai/providers/anthropic";
-import { streamOpenAICompletions } from "@oh-my-pi/pi-ai/providers/openai-completions";
-import { streamOpenAIResponses } from "@oh-my-pi/pi-ai/providers/openai-responses";
-import { streamSimple } from "@oh-my-pi/pi-ai/stream";
-import type { Context, FetchImpl, ModelSpec } from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { Effort } from "@oh-my-pi/pi-catalog/effort";
+import { streamAnthropic } from "@zero2ai/ai/providers/anthropic";
+import { streamOpenAICompletions } from "@zero2ai/ai/providers/openai-completions";
+import { streamOpenAIResponses } from "@zero2ai/ai/providers/openai-responses";
+import { streamSimple } from "@zero2ai/ai/stream";
+import type { Context, FetchImpl, ModelSpec } from "@zero2ai/ai/types";
+import { buildModel } from "@zero2ai/catalog/build";
+import { Effort } from "@zero2ai/catalog/effort";
 
 const ctx: Context = {
 	systemPrompt: ["hi"],

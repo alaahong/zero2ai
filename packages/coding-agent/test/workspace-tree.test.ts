@@ -2,13 +2,13 @@ import { afterEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { buildDirectoryTree, buildWorkspaceTree } from "@oh-my-pi/pi-coding-agent/workspace-tree";
-import { removeWithRetries } from "@oh-my-pi/pi-utils";
+import { buildDirectoryTree, buildWorkspaceTree } from "@zero2ai/coding-agent/workspace-tree";
+import { removeWithRetries } from "@zero2ai/utils";
 
 const tempDirs: string[] = [];
 
 async function makeTempDir(): Promise<string> {
-	const dir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-workspace-tree-"));
+	const dir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-workspace-tree-"));
 	tempDirs.push(dir);
 	return dir;
 }

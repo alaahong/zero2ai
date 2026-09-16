@@ -1,4 +1,4 @@
-import { logger, once } from "@oh-my-pi/pi-utils";
+import { logger, once } from "@zero2ai/utils";
 import { buildModel } from "../build";
 import { apiRouteFor } from "../compat/behavior";
 import { seedModels } from "../compat/providers";

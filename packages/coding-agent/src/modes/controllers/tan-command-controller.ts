@@ -1,7 +1,7 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import type { AssistantMessage } from "@oh-my-pi/pi-ai";
-import { prompt, Snowflake, untilAborted } from "@oh-my-pi/pi-utils";
+import type { AssistantMessage } from "@zero2ai/ai";
+import { prompt, Snowflake, untilAborted } from "@zero2ai/utils";
 import backgroundTanDispatchPrompt from "../../prompts/system/background-tan-dispatch.md" with { type: "text" };
 import tanContextSwitchPrompt from "../../prompts/system/tan-context-switch.md" with { type: "text" };
 import { AgentRegistry, MAIN_AGENT_ID } from "../../registry/agent-registry";
@@ -98,7 +98,7 @@ export class TanCommandController {
 		// `session.sessionId`, which can diverge after `/fresh` or a provider
 		// session override) so the tan resolves the same local root the parent's
 		// large-paste writes and `local://` reads use — notably the Windows
-		// short-root fallback keys `%TEMP%/omp-local/<id>` off this id.
+		// short-root fallback keys `%TEMP%/zero2ai-local/<id>` off this id.
 		const parentLocalSessionId = this.ctx.sessionManager.getSessionId();
 		const localProtocolOptions = {
 			getArtifactsDir: () => parentArtifactsDir,

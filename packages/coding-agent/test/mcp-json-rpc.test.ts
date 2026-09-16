@@ -1,9 +1,9 @@
 import type { BodyInit } from "bun";
 import { afterEach, describe, expect, it, vi } from "bun:test";
-import type { FetchImpl } from "@oh-my-pi/pi-ai";
-import { fetchExaTools } from "@oh-my-pi/pi-coding-agent/exa/mcp-client";
-import { callMCP, redactUrlForLog } from "@oh-my-pi/pi-coding-agent/mcp/json-rpc";
-import { isRecord } from "@oh-my-pi/pi-utils";
+import type { FetchImpl } from "@zero2ai/ai";
+import { fetchExaTools } from "@zero2ai/coding-agent/exa/mcp-client";
+import { callMCP, redactUrlForLog } from "@zero2ai/coding-agent/mcp/json-rpc";
+import { isRecord } from "@zero2ai/utils";
 import { asGlobalFetch } from "./helpers/fetch-mock";
 
 interface PostedJsonRpcRequest {
@@ -170,14 +170,14 @@ describe("callMCP", () => {
 			"http://127.0.0.1:1/mcp",
 			"tools/call",
 			{ name: "web_search" },
-			{ fetch: fetchMock, headers: { "User-Agent": "omp/test" }, signal },
+			{ fetch: fetchMock, headers: { "User-Agent": "zero2ai/test" }, signal },
 		);
 
 		expect(capturedUrl).toBe("http://127.0.0.1:1/mcp");
 		expect(capturedRequest?.headers).toEqual({
 			"Content-Type": "application/json",
 			Accept: "application/json, text/event-stream",
-			"User-Agent": "omp/test",
+			"User-Agent": "zero2ai/test",
 		});
 		expect(capturedRequest?.signal).toBe(signal);
 		expect(response.result).toEqual({ ok: true });

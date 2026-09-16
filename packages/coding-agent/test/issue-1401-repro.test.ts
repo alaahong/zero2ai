@@ -2,8 +2,8 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { processFileArguments } from "@oh-my-pi/pi-coding-agent/cli/file-processor";
-import { removeSyncWithRetries } from "@oh-my-pi/pi-utils";
+import { processFileArguments } from "@zero2ai/coding-agent/cli/file-processor";
+import { removeSyncWithRetries } from "@zero2ai/utils";
 
 function createPdfWithText(text: string): string {
 	const chunks: string[] = [];
@@ -44,7 +44,7 @@ describe("processFileArguments", () => {
 	let testDir: string;
 
 	beforeEach(() => {
-		testDir = fs.mkdtempSync(path.join(os.tmpdir(), "omp-pdf-file-args-"));
+		testDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-pdf-file-args-"));
 	});
 
 	afterEach(() => {

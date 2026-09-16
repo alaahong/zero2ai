@@ -6,13 +6,13 @@
  * carrying data must advertise the `agent://<id>` handle (PR #10625 review).
  */
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
-import { AsyncJobManager } from "@oh-my-pi/pi-coding-agent/async/job-manager";
-import type { AsyncJobRunResult } from "@oh-my-pi/pi-coding-agent/async/job-manager";
-import { IrcBus } from "@oh-my-pi/pi-coding-agent/irc/bus";
-import { AgentRegistry } from "@oh-my-pi/pi-coding-agent/registry/agent-registry";
-import type { StructuredSubagentOutput } from "@oh-my-pi/pi-coding-agent/task/types";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { HubTool } from "@oh-my-pi/pi-coding-agent/tools/hub";
+import { AsyncJobManager } from "@zero2ai/coding-agent/async/job-manager";
+import type { AsyncJobRunResult } from "@zero2ai/coding-agent/async/job-manager";
+import { IrcBus } from "@zero2ai/coding-agent/irc/bus";
+import { AgentRegistry } from "@zero2ai/coding-agent/registry/agent-registry";
+import type { StructuredSubagentOutput } from "@zero2ai/coding-agent/task/types";
+import type { ToolSession } from "@zero2ai/coding-agent/tools";
+import { HubTool } from "@zero2ai/coding-agent/tools/hub";
 
 const SELF_ID = "Main";
 

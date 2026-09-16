@@ -2,11 +2,11 @@ import { afterEach, beforeEach, describe, expect, mock, spyOn, test } from "bun:
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { EditTool } from "@oh-my-pi/pi-coding-agent/edit";
-import * as lsp from "@oh-my-pi/pi-coding-agent/lsp";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { removeWithRetries } from "@oh-my-pi/pi-utils";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
+import { EditTool } from "@zero2ai/coding-agent/edit";
+import * as lsp from "@zero2ai/coding-agent/lsp";
+import type { ToolSession } from "@zero2ai/coding-agent/tools";
+import { removeWithRetries } from "@zero2ai/utils";
 
 function makeSession(cwd: string): ToolSession {
 	return {
@@ -26,7 +26,7 @@ let tempDir: string;
 
 beforeEach(async () => {
 	resetSettingsForTest();
-	tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "omp-patch-unchanged-"));
+	tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-patch-unchanged-"));
 	await Settings.init({ inMemory: true, cwd: tempDir });
 });
 

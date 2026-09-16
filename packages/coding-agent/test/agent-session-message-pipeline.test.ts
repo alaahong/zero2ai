@@ -5,7 +5,7 @@ import {
 	type AgentTool,
 	AppendOnlyContextManager,
 	type StreamFn,
-} from "@oh-my-pi/pi-agent-core";
+} from "@zero2ai/agent-core";
 import {
 	type Api,
 	type Context,
@@ -18,21 +18,21 @@ import {
 	type SimpleStreamOptions,
 	type TextContent,
 	type ToolCall,
-} from "@oh-my-pi/pi-ai";
-import { AssistantMessageEventStream } from "@oh-my-pi/pi-ai/utils/event-stream";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import * as memoryBackend from "@oh-my-pi/pi-coding-agent/memory-backend";
-import type { MemoryBackend } from "@oh-my-pi/pi-coding-agent/memory-backend/types";
-import { type MnemopiSessionState, setMnemopiSessionState } from "@oh-my-pi/pi-coding-agent/mnemopi/state";
-import { createAgentSession, type ExtensionContext, type ExtensionFactory } from "@oh-my-pi/pi-coding-agent/sdk";
-import { obfuscateProviderContext, SecretObfuscator } from "@oh-my-pi/pi-coding-agent/secrets";
-import { AgentSession, type AgentSessionEvent } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { convertToLlm, wrapSteeringForModel } from "@oh-my-pi/pi-coding-agent/session/messages";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TempDir } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/ai";
+import { AssistantMessageEventStream } from "@zero2ai/ai/utils/event-stream";
+import { buildModel } from "@zero2ai/catalog/build";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import * as memoryBackend from "@zero2ai/coding-agent/memory-backend";
+import type { MemoryBackend } from "@zero2ai/coding-agent/memory-backend/types";
+import { type MnemopiSessionState, setMnemopiSessionState } from "@zero2ai/coding-agent/mnemopi/state";
+import { createAgentSession, type ExtensionContext, type ExtensionFactory } from "@zero2ai/coding-agent/sdk";
+import { obfuscateProviderContext, SecretObfuscator } from "@zero2ai/coding-agent/secrets";
+import { AgentSession, type AgentSessionEvent } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { convertToLlm, wrapSteeringForModel } from "@zero2ai/coding-agent/session/messages";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { TempDir } from "@zero2ai/utils";
 import { createAssistantMessage } from "./helpers/agent-session-setup";
 
 function createAgent(): Agent {
@@ -67,15 +67,15 @@ function getConvertedUserText(message: Message | undefined): string {
 }
 
 async function withNativeDialectEnv<T>(fn: () => Promise<T>): Promise<T> {
-	const previous = Bun.env.PI_DIALECT;
-	delete Bun.env.PI_DIALECT;
+	const previous = Bun.env.ZERO2AI_DIALECT;
+	delete Bun.env.ZERO2AI_DIALECT;
 	try {
 		return await fn();
 	} finally {
 		if (previous === undefined) {
-			delete Bun.env.PI_DIALECT;
+			delete Bun.env.ZERO2AI_DIALECT;
 		} else {
-			Bun.env.PI_DIALECT = previous;
+			Bun.env.ZERO2AI_DIALECT = previous;
 		}
 	}
 }
@@ -188,7 +188,7 @@ describe("AgentSession message pipeline", () => {
 	});
 
 	it("normalizes historical WebP on the main provider request path", async () => {
-		using tempDir = TempDir.createSync("@pi-stb-main-path-");
+		using tempDir = TempDir.createSync("@zero2ai-stb-main-path-");
 		const api = "test-stb-main-path";
 		const contexts: Context[] = [];
 		registerCustomApi(api, (_model, context) => {
@@ -279,7 +279,7 @@ describe("AgentSession message pipeline", () => {
 	});
 
 	it("continues a user turn when an attached WebP is undecodable by an STB model", async () => {
-		using tempDir = TempDir.createSync("@pi-stb-corrupt-attachment-");
+		using tempDir = TempDir.createSync("@zero2ai-stb-corrupt-attachment-");
 		const api = "test-stb-corrupt-attachment";
 		const contexts: Context[] = [];
 		registerCustomApi(api, (_model, context) => {
@@ -1010,7 +1010,7 @@ describe("AgentSession message pipeline", () => {
 	});
 
 	it("preserves append-only prefixes in subagent sessions when context handlers rewrite prior turns", async () => {
-		using tempDir = TempDir.createSync("@pi-subagent-append-only-");
+		using tempDir = TempDir.createSync("@zero2ai-subagent-append-only-");
 		const api = "test-subagent-append-only-cache";
 		const contexts: Context[] = [];
 		registerCustomApi(api, (_model, context) => {
@@ -1102,7 +1102,7 @@ describe("AgentSession message pipeline", () => {
 		// own emission is suppressed via the runner marker), the revision is what
 		// tool_execution_start reports, what bash executes, and what the
 		// assistant message persists.
-		using tempDir = TempDir.createSync("@pi-tool-call-revision-");
+		using tempDir = TempDir.createSync("@zero2ai-tool-call-revision-");
 		const api = "test-tool-call-revision";
 		let requests = 0;
 		registerCustomApi(api, () => {
@@ -1204,7 +1204,7 @@ describe("AgentSession message pipeline", () => {
 	it("exposes ctx.invokeTool to a re-registered built-in so it can delegate to the native tool", async () => {
 		// End-to-end for the extension path: a tool that re-registers `bash` receives ctx.invokeTool
 		// (bound to its own name), delegates to the native bash, and the native output flows back.
-		using tempDir = TempDir.createSync("@pi-invoke-tool-");
+		using tempDir = TempDir.createSync("@zero2ai-invoke-tool-");
 		const api = "test-invoke-tool";
 		let requests = 0;
 		registerCustomApi(api, () => {
@@ -1308,7 +1308,7 @@ describe("AgentSession message pipeline", () => {
 	});
 
 	it("uses an extension web_search implementation when the built-in is enabled", async () => {
-		using tempDir = TempDir.createSync("@pi-web-search-override-");
+		using tempDir = TempDir.createSync("@zero2ai-web-search-override-");
 		const api: Api = "test-web-search-override";
 		let requests = 0;
 		registerCustomApi(api, () => {
@@ -1403,7 +1403,7 @@ describe("AgentSession message pipeline", () => {
 	});
 
 	it("clears promoted memory from the base prompt when switching sessions", async () => {
-		using tempDir = TempDir.createSync("@pi-injected-memory-switch-");
+		using tempDir = TempDir.createSync("@zero2ai-injected-memory-switch-");
 		const sessionManager = SessionManager.create(tempDir.path(), tempDir.join("sessions"));
 		const firstSessionFile = sessionManager.getSessionFile();
 		expect(firstSessionFile).toBeString();
@@ -1601,7 +1601,7 @@ describe("AgentSession message pipeline", () => {
 	});
 
 	it("does not duplicate promoted memory in the base prompt when forking", async () => {
-		using tempDir = TempDir.createSync("@pi-injected-memory-fork-");
+		using tempDir = TempDir.createSync("@zero2ai-injected-memory-fork-");
 		const sessionManager = SessionManager.create(tempDir.path(), tempDir.join("sessions"));
 		expect(sessionManager.getSessionFile()).toBeString();
 		await sessionManager.flush();

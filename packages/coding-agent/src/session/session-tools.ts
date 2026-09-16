@@ -1,8 +1,8 @@
 import { AsyncLocalStorage } from "node:async_hooks";
-import type { Agent, AgentTool, AgentToolContext } from "@oh-my-pi/pi-agent-core";
-import type { Model } from "@oh-my-pi/pi-ai";
-import { resolveDelegationBias } from "@oh-my-pi/pi-catalog/compat/delegation";
-import { isRecord, logger, prompt, stringProperty, structuredCloneJSON, untilAborted } from "@oh-my-pi/pi-utils";
+import type { Agent, AgentTool, AgentToolContext } from "@zero2ai/agent-core";
+import type { Model } from "@zero2ai/ai";
+import { resolveDelegationBias } from "@zero2ai/catalog/compat/delegation";
+import { isRecord, logger, prompt, stringProperty, structuredCloneJSON, untilAborted } from "@zero2ai/utils";
 import { reset as resetCapabilities } from "../capability";
 import type { EffectiveExtensionRoots } from "../capability/types";
 import type { ModelRegistry } from "../config/model-registry";

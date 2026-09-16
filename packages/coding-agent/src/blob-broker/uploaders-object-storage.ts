@@ -1,4 +1,4 @@
-import { type AwsCredentials, type SignedHeaders, signRequest } from "@oh-my-pi/pi-ai/providers/aws-sigv4";
+import { type AwsCredentials, type SignedHeaders, signRequest } from "@zero2ai/ai/providers/aws-sigv4";
 import type { BlobDestinationId } from "./destinations";
 import type { BlobUploader, RemoteDeleteAction } from "./publication";
 import {
@@ -279,7 +279,7 @@ function createGcsUploader(config: DestinationRuntimeConfig): BlobUploader {
 		destination,
 		async upload(uploadRequest) {
 			const key = objectKey(prefix, fileNameFor(uploadRequest));
-			const boundary = `omp-${crypto.randomUUID()}`;
+			const boundary = `zero2ai-${crypto.randomUUID()}`;
 			const metadata: Record<string, string> = { name: key, contentType: uploadRequest.mimeType };
 			if (cacheControl) metadata.cacheControl = cacheControl;
 			const opening = encoder.encode(

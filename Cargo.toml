@@ -4,16 +4,16 @@
 # because an ignored file stayed behind) is a hard error that fails the whole
 # workspace, not a skipped entry.
 members = [
-   "crates/pi-ast",
-   "crates/pi-builtins",
-   "crates/pi-diff",
-   "crates/pi-edit",
-   "crates/pi-iso",
-   "crates/pi-natives",
-   "crates/pi-shell",
-   "crates/pi-vcs",
-   "crates/pi-voice",
-   "crates/pi-walker",
+   "crates/zero2ai-ast",
+   "crates/zero2ai-builtins",
+   "crates/zero2ai-diff",
+   "crates/zero2ai-edit",
+   "crates/zero2ai-iso",
+   "crates/zero2ai-natives",
+   "crates/zero2ai-shell",
+   "crates/zero2ai-vcs",
+   "crates/zero2ai-voice",
+   "crates/zero2ai-walker",
    "crates/vendor/brush-core",
    "crates/vendor/cfg_aliases",
 ]
@@ -40,8 +40,8 @@ codegen-units = 1
 strip = true
 # Unwind (not abort) so panics inside vendored code and native tasks stay
 # recoverable at the appropriate boundary: the uutils boundary
-# (pi-shell coreutils) turns a panic into a failed command, and the
-# `task::blocking` wrapper in `crates/pi-natives/src/task.rs` catches unwinds
+# (zero2ai-shell coreutils) turns a panic into a failed command, and the
+# `task::blocking` wrapper in `crates/zero2ai-natives/src/task.rs` catches unwinds
 # inside `Blocking::compute` before they cross napi-rs's async-work
 # `extern "C"` callback (napi `src/async_work.rs:109`) so they surface as
 # rejected JS Promises instead of forced process aborts under Rust's C-unwind
@@ -49,7 +49,7 @@ strip = true
 # per-call `catch_unwind` on the `Task`/`AsyncTask` path; the tokio-future
 # path (`env.spawn_future`) is guarded upstream. Recoverable uutils panics
 # are kept out of the crash report by the crash hook
-# (see crates/pi-natives/src/crash_handler.rs).
+# (see crates/zero2ai-natives/src/crash_handler.rs).
 panic = "unwind"
 
 [profile.ci]
@@ -214,16 +214,16 @@ too_many_lines = "allow"     # Arbitrary limits don't account for necessary comp
 # ──────────────────────────────────────────────────────────────────────────────
 # Internal Libraries
 # ──────────────────────────────────────────────────────────────────────────────
-pi-ast = { path = "crates/pi-ast" }
-pi-diff = { path = "crates/pi-diff" }
-pi-edit = { path = "crates/pi-edit" }
-pi-iso = { path = "crates/pi-iso" }
-pi-shell = { path = "crates/pi-shell" }
-pi-voice = { path = "crates/pi-voice" }
-pi-walker = { path = "crates/pi-walker" }
-pi-vcs = { path = "crates/pi-vcs" }
+zero2ai-ast = { path = "crates/zero2ai-ast" }
+zero2ai-diff = { path = "crates/zero2ai-diff" }
+zero2ai-edit = { path = "crates/zero2ai-edit" }
+zero2ai-iso = { path = "crates/zero2ai-iso" }
+zero2ai-shell = { path = "crates/zero2ai-shell" }
+zero2ai-voice = { path = "crates/zero2ai-voice" }
+zero2ai-walker = { path = "crates/zero2ai-walker" }
+zero2ai-vcs = { path = "crates/zero2ai-vcs" }
 brush-core = { path = "crates/vendor/brush-core" }
-pi-builtins = { path = "crates/pi-builtins" }
+zero2ai-builtins = { path = "crates/zero2ai-builtins" }
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Async Runtime & Concurrency

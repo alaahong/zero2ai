@@ -1,12 +1,12 @@
 /**
  * Read CLI command handler.
  *
- * Handles `omp read` — invokes the `read` agent tool against a path/URL and
+ * Handles `zero2ai read` — invokes the `read` agent tool against a path/URL and
  * prints the resulting content blocks exactly as the model would receive them
  * (including truncation/limit notices appended by the meta-notice wrapper).
  */
-import { getProjectDir } from "@oh-my-pi/pi-utils";
-import chalk from "@oh-my-pi/pi-utils/chalk";
+import { getProjectDir } from "@zero2ai/utils";
+import chalk from "@zero2ai/utils/chalk";
 import { ModelRegistry } from "../config/model-registry";
 import { Settings } from "../config/settings";
 import { initializeWithSettings } from "../discovery";
@@ -82,7 +82,7 @@ export async function runReadCommand(cmd: ReadCommandArgs): Promise<void> {
 			const result = await discoverAndLoadMCPTools(cwd, {
 				enableProjectConfig: settings.get("mcp.enableProjectConfig") ?? true,
 				filterExa: true,
-				// `omp read` has no Eval prelude, so browser MCP remains available.
+				// `zero2ai read` has no Eval prelude, so browser MCP remains available.
 				filterBrowser: false,
 				cacheStorage: settings.getStorage(),
 				authStorage,
@@ -107,7 +107,7 @@ export async function runReadCommand(cmd: ReadCommandArgs): Promise<void> {
 		}
 
 		const tool = wrapToolWithMetaNotice(new ReadTool(session));
-		const result = await tool.execute("omp-read", { path: cmd.path });
+		const result = await tool.execute("zero2ai-read", { path: cmd.path });
 
 		for (const block of result.content) {
 			if (block.type === "text") {

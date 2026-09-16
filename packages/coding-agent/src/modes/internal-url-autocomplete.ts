@@ -1,12 +1,12 @@
 /**
- * Autocomplete for internal-url schemes (skill://, rule://, omp://, local://,
+ * Autocomplete for internal-url schemes (skill://, rule://, zero2ai://, local://,
  * memory://, agent://, artifact://) while composing a prompt.
  *
  * Detection here MUST stay in sync with the generic URL-scheme trigger in the
  * TUI editor (`packages/tui/src/components/editor.ts`); the editor fires the
  * popup, this module decides whether there are candidates to show.
  */
-import type { AutocompleteItem } from "@oh-my-pi/pi-tui";
+import type { AutocompleteItem } from "@zero2ai/tui";
 import { InternalUrlRouter } from "../internal-urls/router";
 import type { ResolveContext } from "../internal-urls/types";
 

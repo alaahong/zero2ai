@@ -1,21 +1,21 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "bun:test";
-import { Agent } from "@oh-my-pi/pi-agent-core";
-import { createMockModel, type MockHandler } from "@oh-my-pi/pi-ai/providers/mock";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { SettingPath } from "@oh-my-pi/pi-coding-agent/config/settings-schema";
-import { IrcBus, type IrcMessage } from "@oh-my-pi/pi-coding-agent/irc/bus";
-import { AgentLifecycleManager } from "@oh-my-pi/pi-coding-agent/registry/agent-lifecycle";
-import { AgentRegistry } from "@oh-my-pi/pi-coding-agent/registry/agent-registry";
-import { AgentSession, type AgentSessionEvent } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { IrcBridge } from "@oh-my-pi/pi-coding-agent/session/irc-bridge";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import type { CustomMessage } from "@oh-my-pi/pi-coding-agent/session/messages";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { type CoordinationDetails, HubTool, isIrcEnabled } from "@oh-my-pi/pi-coding-agent/tools/hub";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { Agent } from "@zero2ai/agent-core";
+import { createMockModel, type MockHandler } from "@zero2ai/ai/providers/mock";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import type { SettingPath } from "@zero2ai/coding-agent/config/settings-schema";
+import { IrcBus, type IrcMessage } from "@zero2ai/coding-agent/irc/bus";
+import { AgentLifecycleManager } from "@zero2ai/coding-agent/registry/agent-lifecycle";
+import { AgentRegistry } from "@zero2ai/coding-agent/registry/agent-registry";
+import { AgentSession, type AgentSessionEvent } from "@zero2ai/coding-agent/session/agent-session";
+import { IrcBridge } from "@zero2ai/coding-agent/session/irc-bridge";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import type { CustomMessage } from "@zero2ai/coding-agent/session/messages";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import type { ToolSession } from "@zero2ai/coding-agent/tools";
+import { type CoordinationDetails, HubTool, isIrcEnabled } from "@zero2ai/coding-agent/tools/hub";
+import { TempDir } from "@zero2ai/utils";
 
 interface FakeSession {
 	session: AgentSession;
@@ -154,7 +154,7 @@ describe("IRC", () => {
 	let authStorage: AuthStorage;
 	let modelRegistry: ModelRegistry;
 	beforeAll(async () => {
-		authDir = TempDir.createSync("@pi-irc-auth-");
+		authDir = TempDir.createSync("@zero2ai-irc-auth-");
 		authStorage = await AuthStorage.create(authDir.join("auth.db"));
 		authStorage.setRuntimeApiKey("anthropic", "test-key");
 		modelRegistry = new ModelRegistry(authStorage, authDir.join("models.yml"));

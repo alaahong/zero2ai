@@ -1,14 +1,14 @@
 import { describe, expect, test } from "bun:test";
-import type { UsageProvider, UsageReport } from "@oh-my-pi/pi-ai";
-import { unregisterOAuthProvider } from "@oh-my-pi/pi-ai/oauth";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { ExtensionRuntime, loadExtensionFromFactory } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/loader";
-import { ExtensionRunner } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/runner";
-import type { ProviderConfig } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/types";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { EventBus } from "@oh-my-pi/pi-coding-agent/utils/event-bus";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import type { UsageProvider, UsageReport } from "@zero2ai/ai";
+import { unregisterOAuthProvider } from "@zero2ai/ai/oauth";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { ExtensionRuntime, loadExtensionFromFactory } from "@zero2ai/coding-agent/extensibility/extensions/loader";
+import { ExtensionRunner } from "@zero2ai/coding-agent/extensibility/extensions/runner";
+import type { ProviderConfig } from "@zero2ai/coding-agent/extensibility/extensions/types";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { EventBus } from "@zero2ai/coding-agent/utils/event-bus";
+import { TempDir } from "@zero2ai/utils";
 
 const testProviderConfig: ProviderConfig = {
 	baseUrl: "https://example.invalid/v1",
@@ -63,14 +63,14 @@ describe("extension provider registration rollback", () => {
 			process.cwd(),
 			events,
 			runtime,
-			"pi-cliproxyapi-provider@1.4.13",
+			"zero2ai-cliproxyapi-provider@1.4.13",
 		);
 
 		expect(runtime.pendingProviderRegistrations).toEqual([
 			{
 				name: "cliproxyapi",
 				config: { baseUrl: "https://replacement.example.invalid/v1" },
-				sourceId: "pi-cliproxyapi-provider@1.4.13",
+				sourceId: "zero2ai-cliproxyapi-provider@1.4.13",
 			},
 		]);
 	});
@@ -162,7 +162,7 @@ describe("extension provider registration rollback", () => {
 		const authStorage = await AuthStorage.create(tempDir.join("auth.db"));
 		try {
 			const modelRegistry = new ModelRegistry(authStorage, tempDir.join("models.json"));
-			modelRegistry.registerProvider("cliproxyapi", testProviderConfig, "pi-cliproxyapi-provider");
+			modelRegistry.registerProvider("cliproxyapi", testProviderConfig, "zero2ai-cliproxyapi-provider");
 
 			const runtime = new ExtensionRuntime();
 			const events = new EventBus();
@@ -185,7 +185,7 @@ describe("extension provider registration rollback", () => {
 				process.cwd(),
 				events,
 				runtime,
-				"pi-cliproxyapi-provider",
+				"zero2ai-cliproxyapi-provider",
 			);
 			const runner = new ExtensionRunner(
 				[extension],

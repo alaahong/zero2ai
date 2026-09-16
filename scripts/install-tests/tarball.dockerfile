@@ -40,7 +40,7 @@ uplinks:
   npmjs:
     url: https://registry.npmjs.org/
 packages:
-  '@oh-my-pi/*':
+  '@zero2ai/*':
     access: $all
     publish: $all
     unpublish: $all
@@ -128,9 +128,9 @@ RUN verdaccio --config /root/.config/verdaccio/config.yaml &>/dev/null & \
 WORKDIR /test
 RUN verdaccio --config /root/.config/verdaccio/config.yaml &>/dev/null & \
     sleep 3 && \
-    bun add @oh-my-pi/pi-coding-agent --registry http://localhost:4873 && \
+    bun add @zero2ai/coding-agent --registry http://localhost:4873 && \
     pkill -f verdaccio
 
 # Verify the installed package works
 ENV PATH="/test/node_modules/.bin:$PATH"
-RUN omp --version
+RUN zero2ai --version

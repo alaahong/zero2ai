@@ -1,14 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
-import { Agent, CompactionCancelledError } from "@oh-my-pi/pi-agent-core";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { ExtensionRuntime, loadExtensionFromFactory } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/loader";
-import { ExtensionRunner } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/runner";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { USER_INTERRUPT_LABEL } from "@oh-my-pi/pi-coding-agent/session/messages";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
+import { Agent, CompactionCancelledError } from "@zero2ai/agent-core";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { ExtensionRuntime, loadExtensionFromFactory } from "@zero2ai/coding-agent/extensibility/extensions/loader";
+import { ExtensionRunner } from "@zero2ai/coding-agent/extensibility/extensions/runner";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { USER_INTERRUPT_LABEL } from "@zero2ai/coding-agent/session/messages";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
 import {
 	ContextNotesTool,
 	GrepTool,
@@ -16,9 +16,9 @@ import {
 	ReadTool,
 	type Tool,
 	type ToolSession,
-} from "@oh-my-pi/pi-coding-agent/tools";
-import { EventBus } from "@oh-my-pi/pi-coding-agent/utils/event-bus";
-import { TempDir } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/tools";
+import { EventBus } from "@zero2ai/coding-agent/utils/event-bus";
+import { TempDir } from "@zero2ai/utils";
 
 type HookMode = "extension-veto" | "park";
 
@@ -28,7 +28,7 @@ describe.each([false, true])("AgentSession compaction cancellation source (exper
 	let session: AgentSession;
 
 	beforeEach(async () => {
-		tempDir = TempDir.createSync("@pi-compaction-cancellation-");
+		tempDir = TempDir.createSync("@zero2ai-compaction-cancellation-");
 		vi.spyOn(globalThis, "fetch").mockRejectedValue(
 			new Error("Network access is forbidden in compaction cancellation tests"),
 		);

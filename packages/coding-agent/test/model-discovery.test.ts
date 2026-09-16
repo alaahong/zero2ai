@@ -3,23 +3,23 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { Effort, type FetchImpl, type Model } from "@oh-my-pi/pi-ai";
-import type { OAuthCredentials } from "@oh-my-pi/pi-ai/oauth/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { writeModelCache } from "@oh-my-pi/pi-catalog/model-cache";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { resolveModelCacheProviderId, resolveOllamaModelCacheProviderId } from "@oh-my-pi/pi-catalog/provider-models";
-import type { ModelSpec, OpenAICompat } from "@oh-my-pi/pi-catalog/types";
+import { Effort, type FetchImpl, type Model } from "@zero2ai/ai";
+import type { OAuthCredentials } from "@zero2ai/ai/oauth/types";
+import { buildModel } from "@zero2ai/catalog/build";
+import { writeModelCache } from "@zero2ai/catalog/model-cache";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { resolveModelCacheProviderId, resolveOllamaModelCacheProviderId } from "@zero2ai/catalog/provider-models";
+import type { ModelSpec, OpenAICompat } from "@zero2ai/catalog/types";
 import {
 	applyLlamaCppQwenThinking,
 	discoverOllamaModels,
 	discoveryProbeTimeoutMs,
-} from "@oh-my-pi/pi-coding-agent/config/model-discovery";
-import { kNoAuth, ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { ProviderDiscoverySchema } from "@oh-my-pi/pi-coding-agent/config/models-config-schema";
-import { resetSettingsForTest } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { removeSyncWithRetries, Snowflake } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/config/model-discovery";
+import { kNoAuth, ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { ProviderDiscoverySchema } from "@zero2ai/coding-agent/config/models-config-schema";
+import { resetSettingsForTest } from "@zero2ai/coding-agent/config/settings";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { removeSyncWithRetries, Snowflake } from "@zero2ai/utils";
 
 describe("ModelRegistry runtime discovery", () => {
 	let tempDir: string;
@@ -41,7 +41,7 @@ describe("ModelRegistry runtime discovery", () => {
 		delete Bun.env.OLLAMA_HOST;
 		delete Bun.env.OLLAMA_CONTEXT_LENGTH;
 		delete Bun.env.ANTHROPIC_API_KEY;
-		tempDir = path.join(os.tmpdir(), `pi-test-model-registry-${Snowflake.next()}`);
+		tempDir = path.join(os.tmpdir(), `zero2ai-test-model-registry-${Snowflake.next()}`);
 		fs.mkdirSync(tempDir, { recursive: true });
 		modelsJsonPath = path.join(tempDir, "models.json");
 		cacheDbPath = path.join(tempDir, "models.db");
@@ -731,14 +731,14 @@ describe("ModelRegistry runtime discovery", () => {
 	});
 
 	test("keeps OLLAMA_BASE_URL precedence over OLLAMA_HOST", async () => {
-		using _baseUrl = withEnv("OLLAMA_BASE_URL", "http://omp-ollama.example:2222");
+		using _baseUrl = withEnv("OLLAMA_BASE_URL", "http://zero2ai-ollama.example:2222");
 		using _host = withEnv("OLLAMA_HOST", "ollama-host.example:3333");
-		const fetchMock = mockOllamaDiscovery(["phi4-mini"], "http://omp-ollama.example:2222");
+		const fetchMock = mockOllamaDiscovery(["phi4-mini"], "http://zero2ai-ollama.example:2222");
 		const registry = new ModelRegistry(authStorage, modelsJsonPath, { fetch: fetchMock });
 		await registry.refresh();
 
 		const model = registry.find("ollama", "phi4-mini");
-		expect(model?.baseUrl).toBe("http://omp-ollama.example:2222/v1");
+		expect(model?.baseUrl).toBe("http://zero2ai-ollama.example:2222/v1");
 		expect(registry.getProviderDiscoveryState("ollama")?.optional).toBe(false);
 	});
 
@@ -1463,7 +1463,7 @@ providers:
 		expect(qwen?.baseUrl).toBe("http://127.0.0.1:8080/v1");
 	});
 
-	test("applyLlamaCppQwenThinking keeps a pi-native gateway base URL without doubling /v1", () => {
+	test("applyLlamaCppQwenThinking keeps a zero2ai-native gateway base URL without doubling /v1", () => {
 		const upgraded = applyLlamaCppQwenThinking(
 			buildModel({
 				id: "qwen3-8b",
@@ -1471,7 +1471,7 @@ providers:
 				api: "openai-responses",
 				provider: "llama.cpp",
 				baseUrl: "http://gw:4000",
-				transport: "pi-native",
+				transport: "zero2ai-native",
 				reasoning: false,
 				input: ["text"],
 				cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
@@ -1482,7 +1482,7 @@ providers:
 		// streamPiNative appends `/v1/pi/stream`, so the gateway URL must stay bare
 		// rather than gaining a `/v1` that would double to `.../v1/v1/pi/stream`.
 		expect(upgraded.baseUrl).toBe("http://gw:4000");
-		expect(upgraded.transport).toBe("pi-native");
+		expect(upgraded.transport).toBe("zero2ai-native");
 		expect(upgraded.reasoning).toBe(true);
 		expect((upgraded.compat as { reasoningDisableMode?: string }).reasoningDisableMode).toBe("qwen-template-false");
 	});

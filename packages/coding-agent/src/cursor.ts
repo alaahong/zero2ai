@@ -7,7 +7,7 @@ import type {
 	AgentToolContext,
 	AgentToolResult,
 	AgentToolUpdateCallback,
-} from "@oh-my-pi/pi-agent-core";
+} from "@zero2ai/agent-core";
 import type {
 	CursorMcpCall,
 	CursorMcpResource,
@@ -16,7 +16,7 @@ import type {
 	CursorTodoSnapshot,
 	CursorExecHandlers as ICursorExecHandlers,
 	ToolResultMessage,
-} from "@oh-my-pi/pi-ai";
+} from "@zero2ai/ai";
 import {
 	omitUndefinedArgs,
 	piEscapeRegexLiteral,
@@ -26,8 +26,8 @@ import {
 	piLsPath,
 	piReadPath,
 	piTimeout,
-} from "@oh-my-pi/pi-ai/providers/cursor/exec-modern";
-import { sanitizeText } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/ai/providers/cursor/exec-modern";
+import { sanitizeText } from "@zero2ai/utils";
 import { cursorMcpPrefersReplaceEdit, normalizeCursorReplaceArgs } from "./cursor-bridge-tools";
 import type { MCPResourceReadResult } from "./mcp/types";
 import { resolveApproval, resolveApprovalFromContext } from "./tools/approval";
@@ -65,7 +65,7 @@ interface CursorExecBridgeOptions {
 	/** Resolves execution overrides (mounted-device permission wrappers) before the canonical map. */
 	getExecutableTool?: (name: string) => AgentTool | undefined;
 	/**
-	 * The `replace`-mode `edit` instance `pi_edit` must run, when the session
+	 * The `replace`-mode `edit` instance `zero2ai_edit` must run, when the session
 	 * granted `edit` at all.
 	 *
 	 * `PiEditExecArgs` is that mode's schema verbatim, and the session's own
@@ -111,7 +111,7 @@ interface CursorExecBridgeOptions {
 	/**
 	 * Build a `grep` tool honoring a frame's own context width and match cap.
 	 *
-	 * The modern `pi_grep` frame carries both, and the shared `grep` instance
+	 * The modern `zero2ai_grep` frame carries both, and the shared `grep` instance
 	 * is fixed to the session settings at construction — so without this the
 	 * two fields are silently dropped. Callers that cannot supply it keep the
 	 * shared instance and the session's defaults.
@@ -436,7 +436,7 @@ export class CursorExecHandlers implements ICursorExecHandlers {
 
 	/**
 	 * Modern Cursor builds paginate the legacy `read` frame with
-	 * `offset`/`limit`, exactly as `pi_read` does. Dropping them returns the
+	 * `offset`/`limit`, exactly as `zero2ai_read` does. Dropping them returns the
 	 * whole file (or its own truncation) for every page, so a model walking a
 	 * large file never advances. Composed with the same helper, so both frames
 	 * translate a range identically.
@@ -707,7 +707,7 @@ export class CursorExecHandlers implements ICursorExecHandlers {
 	}
 
 	/**
-	 * `pi_find` is a filename search, which is the local `glob` tool — not
+	 * `zero2ai_find` is a filename search, which is the local `glob` tool — not
 	 * `grep`. Its `pattern` is a glob, joined onto `path` because `glob` takes a
 	 * single combined path spec.
 	 *

@@ -2,11 +2,12 @@
  * Extension loader - loads TypeScript extension modules using native Bun import.
  */
 import type * as fs1 from "node:fs";
+import { managedExtensionPaths } from "../../config/managed-policy";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import { type } from "@oh-my-pi/omptype";
-import * as zod from "@oh-my-pi/omptype/zod";
-import type { ThinkingLevel } from "@oh-my-pi/pi-agent-core";
+import { type } from "@zero2ai/schema";
+import * as zod from "@zero2ai/schema/zod";
+import type { ThinkingLevel } from "@zero2ai/agent-core";
 import type {
 	ImageContent,
 	Model,
@@ -15,9 +16,9 @@ import type {
 	ServiceTierFamily,
 	TextContent,
 	TSchema,
-} from "@oh-my-pi/pi-ai";
-import { isBuiltinComposerStyle, type KeyId } from "@oh-my-pi/pi-tui";
-import { hasFsCode, isEacces, isEnoent, logger } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/ai";
+import { isBuiltinComposerStyle, type KeyId } from "@zero2ai/tui";
+import { hasFsCode, isEacces, isEnoent, logger } from "@zero2ai/utils";
 import { type ExtensionModule, extensionModuleCapability } from "../../capability/extension-module";
 import { type Hook, hookCapability } from "../../capability/hook";
 import { isServiceTierFamily, isServiceTierForFamily } from "../../config/service-tier";
@@ -544,7 +545,7 @@ async function discoverHooksInPackageRoot(root: string): Promise<string[]> {
 /**
  * Discover absolute paths of extensions to load, without importing or
  * binding factories. Hot path on session startup — the scan walks native
- * `.omp`/`.pi` extension capabilities, JS/TS hook factories, the
+ * `.zero2ai`/`.pi` extension capabilities, JS/TS hook factories, the
  * installed-plugin tree, and any configured paths.
  *
  * The root session imports these paths once and forwards prepared factories to
@@ -588,7 +589,7 @@ export async function discoverExtensionPaths(
 
 	const ambient = options.ambient !== false;
 	if (ambient) {
-		// 1. Discover extension modules via capability API (native .omp/.pi only).
+		// 1. Discover extension modules via capability API (native .zero2ai/.pi only).
 		// Scope the load to the native provider — the extension-module capability
 		// also has claude/codex/gemini/opencode providers, and their items were
 		// discarded here anyway (see #4198). The provider filter skips the walk
@@ -644,6 +645,13 @@ export async function discoverExtensionPaths(
 		}
 
 		addPath(resolved);
+	}
+
+	// 5. Administrator-mandated extensions: added through `addPath`, which skips
+	// the `disabledExtensions` filter above, so a user cannot switch off the
+	// operator's audit/redaction hooks.
+	for (const managedPath of managedExtensionPaths()) {
+		addPath(managedPath);
 	}
 
 	return allPaths;

@@ -8,7 +8,7 @@
  * the construction lives in one place rather than being repeated per callsite.
  */
 
-import type { AgentTool } from "@oh-my-pi/pi-agent-core";
+import type { AgentTool } from "@zero2ai/agent-core";
 import { EditTool } from "./edit";
 import type { ExtensionRunner } from "./extensibility/extensions";
 import { ExtensionToolWrapper } from "./extensibility/extensions";
@@ -18,7 +18,7 @@ import { GrepTool } from "./tools";
 /**
  * Build the bridge's `createGrepTool` factory for one tool session.
  *
- * A `pi_grep` frame carries its own context width and total match cap. Neither
+ * A `zero2ai_grep` frame carries its own context width and total match cap. Neither
  * is expressible in the model-facing `grep` schema — context comes from
  * `grep.contextBefore`/`grep.contextAfter`, fixed when the shared instance is
  * constructed — so honoring them needs a fresh tool per call.
@@ -37,7 +37,7 @@ export function createBridgeGrepFactory(
 }
 
 /**
- * Build the `replace`-mode `edit` the bridge answers `pi_edit` with.
+ * Build the `replace`-mode `edit` the bridge answers `zero2ai_edit` with.
  *
  * `PiEditExecArgs` carries `old_string`/`new_string` replacements, which is exactly
  * `replace`'s schema and nothing else's. The session's own instance follows the
@@ -57,7 +57,7 @@ export function createBridgeEditTool(session: ToolSession, extensionRunner: Exte
 /**
  * The tool map the exec bridge should run, given the map a caller granted.
  *
- * `pi_edit` needs a `replace`-mode instance, but only when `edit` was granted:
+ * `zero2ai_edit` needs a `replace`-mode instance, but only when `edit` was granted:
  * the tool is constructed rather than looked up, so substituting
  * unconditionally would hand a restricted roster a mutating tool it was denied
  * (issue #5680). The granted map is never mutated: an unsubstituted result is a
@@ -81,7 +81,7 @@ export function bridgeToolMap(
 }
 
 /**
- * Server-injected Cursor CLI edit names that are not in the OMP registry.
+ * Server-injected Cursor CLI edit names that are not in the ZERO2AI registry.
  *
  * Native Ultra edits arrive as `editToolCall`. If that frame is absent, the
  * model still follows the injected instructions and calls these as MCP — which

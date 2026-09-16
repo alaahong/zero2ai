@@ -1,6 +1,6 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { logger } from "@oh-my-pi/pi-utils";
+import { logger } from "@zero2ai/utils";
 import type { ToolSession } from "../tools";
 import type { EditMode } from "../utils/edit-mode";
 

@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
-import * as AIError from "@oh-my-pi/pi-ai/error";
-import { streamAnthropic } from "@oh-my-pi/pi-ai/providers/anthropic";
-import { AnthropicMessagesClient, type AnthropicMessagesClientLike } from "@oh-my-pi/pi-ai/providers/anthropic-client";
-import type { Context, FetchImpl, Model } from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
+import * as AIError from "@zero2ai/ai/error";
+import { streamAnthropic } from "@zero2ai/ai/providers/anthropic";
+import { AnthropicMessagesClient, type AnthropicMessagesClientLike } from "@zero2ai/ai/providers/anthropic-client";
+import type { Context, FetchImpl, Model } from "@zero2ai/ai/types";
+import { buildModel } from "@zero2ai/catalog/build";
 import { waitForDelayOrAbort } from "./helpers";
 
 const model: Model<"anthropic-messages"> = buildModel({
@@ -205,17 +205,17 @@ async function resolveAfterMicrotasks<T>(promise: Promise<T>, errorMessage: stri
 }
 
 const STREAM_TIMEOUT_ENV_KEYS = [
-	"PI_STREAM_IDLE_TIMEOUT_MS",
-	"PI_OPENAI_STREAM_IDLE_TIMEOUT_MS",
-	"PI_STREAM_FIRST_EVENT_TIMEOUT_MS",
+	"ZERO2AI_STREAM_IDLE_TIMEOUT_MS",
+	"ZERO2AI_OPENAI_STREAM_IDLE_TIMEOUT_MS",
+	"ZERO2AI_STREAM_FIRST_EVENT_TIMEOUT_MS",
 ] as const;
 
 type StreamTimeoutEnvKey = (typeof STREAM_TIMEOUT_ENV_KEYS)[number];
 
 const originalStreamTimeoutEnv: Record<StreamTimeoutEnvKey, string | undefined> = {
-	PI_STREAM_IDLE_TIMEOUT_MS: undefined,
-	PI_OPENAI_STREAM_IDLE_TIMEOUT_MS: undefined,
-	PI_STREAM_FIRST_EVENT_TIMEOUT_MS: undefined,
+	ZERO2AI_STREAM_IDLE_TIMEOUT_MS: undefined,
+	ZERO2AI_OPENAI_STREAM_IDLE_TIMEOUT_MS: undefined,
+	ZERO2AI_STREAM_FIRST_EVENT_TIMEOUT_MS: undefined,
 };
 
 beforeEach(() => {

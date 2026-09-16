@@ -1,8 +1,8 @@
 import { describe, expect, it } from "bun:test";
-import { type } from "@oh-my-pi/omptype";
-import type { Tool } from "@oh-my-pi/pi-ai/types";
-import { isArkSchema, toolWireSchema } from "@oh-my-pi/pi-ai/utils/schema";
-import { validateToolArguments } from "@oh-my-pi/pi-ai/utils/validation";
+import { type } from "@zero2ai/schema";
+import type { Tool } from "@zero2ai/ai/types";
+import { isArkSchema, toolWireSchema } from "@zero2ai/ai/utils/schema";
+import { validateToolArguments } from "@zero2ai/ai/utils/validation";
 
 // ---------------------------------------------------------------------------
 // Phase-1 parity gate: ArkType schemas must flow through the same wire-emission

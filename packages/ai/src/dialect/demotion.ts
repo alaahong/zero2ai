@@ -1,4 +1,4 @@
-import { preferredDialect } from "@oh-my-pi/pi-catalog/identity";
+import { preferredDialect } from "@zero2ai/catalog/identity";
 import { getDialectDefinition } from "./factory";
 
 /**

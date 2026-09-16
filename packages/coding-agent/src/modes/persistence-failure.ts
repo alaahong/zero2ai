@@ -1,4 +1,4 @@
-import { sanitizeText } from "@oh-my-pi/pi-utils";
+import { sanitizeText } from "@zero2ai/utils";
 import { replaceTabs, TRUNCATE_LENGTHS, truncateToWidth } from "../tools/render-utils";
 
 /**

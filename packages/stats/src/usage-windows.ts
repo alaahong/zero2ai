@@ -13,9 +13,9 @@
  * dashboard must keep working for API-key-only setups that never record usage.
  */
 import { Database } from "bun:sqlite";
-import { AuthBrokerClient, resolveAuthBrokerConfig } from "@oh-my-pi/pi-ai/auth-broker";
-import type { ClientUsageClientSummary } from "@oh-my-pi/pi-ai/usage";
-import { getAgentDbPath, logger } from "@oh-my-pi/pi-utils";
+import { AuthBrokerClient, resolveAuthBrokerConfig } from "@zero2ai/ai/auth-broker";
+import type { ClientUsageClientSummary } from "@zero2ai/ai/usage";
+import { getAgentDbPath, logger } from "@zero2ai/utils";
 import type { ProviderWindowInsight, UsageWindowPoint, UsageWindowSeries } from "./shared-types";
 
 /** Subset of a `usage_history` row consumed by the window analytics. */

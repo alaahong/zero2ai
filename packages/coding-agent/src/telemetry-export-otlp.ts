@@ -18,8 +18,8 @@ import type {
 	AgentTelemetryWarning,
 	ChatUsageEvent,
 	ToolStatus,
-} from "@oh-my-pi/pi-agent-core";
-import { logger, postmortem } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/agent-core";
+import { logger, postmortem } from "@zero2ai/utils";
 import {
 	type Attributes,
 	type AttributeValue,
@@ -42,7 +42,7 @@ import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
 import type { TelemetrySignalConfig } from "./telemetry-export";
 
 /**
- * Periodic flush interval. A long-lived `omp` process (the ACP server is
+ * Periodic flush interval. A long-lived `zero2ai` process (the ACP server is
  * spawned once and reused across many turns) would otherwise hold finished
  * telemetry until a batch window elapses or the process exits.
  */
@@ -138,7 +138,7 @@ export async function registerProviders(signalConfig: TelemetrySignalConfig): Pr
 			readers: [new PeriodicExportingMetricReader({ exporter })],
 		});
 		metrics.setGlobalMeterProvider(meterProvider);
-		metricRecorder = new AgentMetricRecorder(metrics.getMeter("@oh-my-pi/pi-coding-agent"));
+		metricRecorder = new AgentMetricRecorder(metrics.getMeter("@zero2ai/coding-agent"));
 	}
 
 	if (signalConfig.log) {
@@ -148,13 +148,13 @@ export async function registerProviders(signalConfig: TelemetrySignalConfig): Pr
 			processors: [new BatchLogRecordProcessor({ exporter })],
 		});
 		logs.setGlobalLoggerProvider(logProvider);
-		otelLogger = logProvider.getLogger("@oh-my-pi/pi-coding-agent");
+		otelLogger = logProvider.getLogger("@zero2ai/coding-agent");
 		unregisterLogSink = logger.registerLogSink(event => {
 			emitOtelLog(
 				event.level,
 				event.message,
 				logAttributesFromContext(event.context),
-				"pi.omp.log",
+				"pi.zero2ai.log",
 				event.timestamp,
 			);
 		});
@@ -193,35 +193,35 @@ class AgentMetricRecorder {
 			description: "Token usage reported by GenAI chat calls.",
 			unit: "{token}",
 		});
-		this.#chatCostUsd = meter.createCounter("pi.omp.agent.chat.cost.estimated_usd", {
+		this.#chatCostUsd = meter.createCounter("pi.zero2ai.agent.chat.cost.estimated_usd", {
 			description: "Estimated USD cost for completed chat calls.",
 			unit: "USD",
 		});
-		this.#runs = meter.createCounter("pi.omp.agent.runs", {
+		this.#runs = meter.createCounter("pi.zero2ai.agent.runs", {
 			description: "Completed agent runs.",
 			unit: "{run}",
 		});
-		this.#steps = meter.createCounter("pi.omp.agent.steps", {
+		this.#steps = meter.createCounter("pi.zero2ai.agent.steps", {
 			description: "Agent loop steps completed inside a run.",
 			unit: "{step}",
 		});
-		this.#chatCalls = meter.createCounter("pi.omp.agent.chat.calls", {
+		this.#chatCalls = meter.createCounter("pi.zero2ai.agent.chat.calls", {
 			description: "Chat calls completed inside agent runs.",
 			unit: "{call}",
 		});
-		this.#chatDurationMs = meter.createHistogram("pi.omp.agent.chat.duration", {
+		this.#chatDurationMs = meter.createHistogram("pi.zero2ai.agent.chat.duration", {
 			description: "Total chat latency observed in an agent run.",
 			unit: "ms",
 		});
-		this.#toolCalls = meter.createCounter("pi.omp.agent.tool.calls", {
+		this.#toolCalls = meter.createCounter("pi.zero2ai.agent.tool.calls", {
 			description: "Tool calls completed inside agent runs.",
 			unit: "{call}",
 		});
-		this.#toolDurationMs = meter.createHistogram("pi.omp.agent.tool.duration", {
+		this.#toolDurationMs = meter.createHistogram("pi.zero2ai.agent.tool.duration", {
 			description: "Total tool latency observed in an agent run.",
 			unit: "ms",
 		});
-		this.#errors = meter.createCounter("pi.omp.agent.errors", {
+		this.#errors = meter.createCounter("pi.zero2ai.agent.errors", {
 			description: "Errors observed in chat and tool execution.",
 			unit: "{error}",
 		});
@@ -233,8 +233,8 @@ class AgentMetricRecorder {
 			"gen_ai.provider.name": event.provider,
 			"gen_ai.request.model": event.model,
 			"gen_ai.response.service_tier": event.serviceTier,
-			"pi.gen_ai.agent.id": event.agent?.id,
-			"pi.gen_ai.agent.name": event.agent?.name,
+			"zero2ai.gen_ai.agent.id": event.agent?.id,
+			"zero2ai.gen_ai.agent.name": event.agent?.name,
 		});
 
 		this.#recordToken(event.usage.inputTokens, baseAttrs, "input");
@@ -251,11 +251,11 @@ class AgentMetricRecorder {
 
 	recordRun(summary: AgentRunSummary, coverage: AgentRunCoverage): void {
 		const runAttrs = metricAttributes({
-			"pi.omp.agent.models_used.count": coverage.modelsUsed.length,
-			"pi.omp.agent.providers_used.count": coverage.providersUsed.length,
-			"pi.omp.agent.tools_available.count": coverage.toolsAvailable.length,
-			"pi.omp.agent.tools_invoked.count": coverage.toolsInvoked.length,
-			"pi.omp.agent.tools_unused.count": coverage.toolsUnused.length,
+			"pi.zero2ai.agent.models_used.count": coverage.modelsUsed.length,
+			"pi.zero2ai.agent.providers_used.count": coverage.providersUsed.length,
+			"pi.zero2ai.agent.tools_available.count": coverage.toolsAvailable.length,
+			"pi.zero2ai.agent.tools_invoked.count": coverage.toolsInvoked.length,
+			"pi.zero2ai.agent.tools_unused.count": coverage.toolsUnused.length,
 		});
 
 		this.#runs.add(1, runAttrs);
@@ -273,7 +273,7 @@ class AgentMetricRecorder {
 			if (counters.totalLatencyMs > 0) this.#toolDurationMs.record(counters.totalLatencyMs, toolAttrs);
 			for (const status of TOOL_STATUSES) {
 				const count = counters[status];
-				if (count > 0) this.#toolCalls.add(count, metricAttributes({ ...toolAttrs, "pi.omp.tool.status": status }));
+				if (count > 0) this.#toolCalls.add(count, metricAttributes({ ...toolAttrs, "pi.zero2ai.tool.status": status }));
 			}
 		}
 		for (const errorType in summary.errors.byType) {
@@ -308,33 +308,33 @@ function emitRunSummaryLog(summary: AgentRunSummary, coverage: AgentRunCoverage)
 		"info",
 		"agent run completed",
 		{
-			"pi.omp.agent.step_count": summary.stepCount,
-			"pi.omp.agent.chats.total": summary.chats.total,
-			"pi.omp.agent.chats.total_latency_ms": summary.chats.totalLatencyMs,
-			"pi.omp.agent.tools.total": summary.tools.total,
-			"pi.omp.agent.tools.ok": summary.tools.ok,
-			"pi.omp.agent.tools.error": summary.tools.error,
-			"pi.omp.agent.tools.skipped": summary.tools.skipped,
-			"pi.omp.agent.tools.blocked": summary.tools.blocked,
-			"pi.omp.agent.tools.timeout": summary.tools.timeout,
-			"pi.omp.agent.tools.aborted": summary.tools.aborted,
-			"pi.omp.agent.tools.total_latency_ms": summary.tools.totalLatencyMs,
-			"pi.omp.agent.usage.input_tokens": summary.usage.inputTokens,
-			"pi.omp.agent.usage.output_tokens": summary.usage.outputTokens,
-			"pi.omp.agent.usage.cached_input_tokens": summary.usage.cachedInputTokens,
-			"pi.omp.agent.usage.cache_write_tokens": summary.usage.cacheWriteTokens,
-			"pi.omp.agent.usage.reasoning_output_tokens": summary.usage.reasoningOutputTokens,
-			"pi.omp.agent.usage.total_tokens": summary.usage.totalTokens,
-			"pi.omp.agent.cost.estimated_usd": summary.cost.estimatedUsd,
-			"pi.omp.agent.cost.unavailable_reasons": summary.cost.unavailableReasons.join(","),
-			"pi.omp.agent.errors.total": summary.errors.total,
-			"pi.omp.agent.coverage.tools_available": coverage.toolsAvailable.join(","),
-			"pi.omp.agent.coverage.tools_invoked": coverage.toolsInvoked.join(","),
-			"pi.omp.agent.coverage.tools_unused": coverage.toolsUnused.join(","),
-			"pi.omp.agent.coverage.models_used": coverage.modelsUsed.join(","),
-			"pi.omp.agent.coverage.providers_used": coverage.providersUsed.join(","),
+			"pi.zero2ai.agent.step_count": summary.stepCount,
+			"pi.zero2ai.agent.chats.total": summary.chats.total,
+			"pi.zero2ai.agent.chats.total_latency_ms": summary.chats.totalLatencyMs,
+			"pi.zero2ai.agent.tools.total": summary.tools.total,
+			"pi.zero2ai.agent.tools.ok": summary.tools.ok,
+			"pi.zero2ai.agent.tools.error": summary.tools.error,
+			"pi.zero2ai.agent.tools.skipped": summary.tools.skipped,
+			"pi.zero2ai.agent.tools.blocked": summary.tools.blocked,
+			"pi.zero2ai.agent.tools.timeout": summary.tools.timeout,
+			"pi.zero2ai.agent.tools.aborted": summary.tools.aborted,
+			"pi.zero2ai.agent.tools.total_latency_ms": summary.tools.totalLatencyMs,
+			"pi.zero2ai.agent.usage.input_tokens": summary.usage.inputTokens,
+			"pi.zero2ai.agent.usage.output_tokens": summary.usage.outputTokens,
+			"pi.zero2ai.agent.usage.cached_input_tokens": summary.usage.cachedInputTokens,
+			"pi.zero2ai.agent.usage.cache_write_tokens": summary.usage.cacheWriteTokens,
+			"pi.zero2ai.agent.usage.reasoning_output_tokens": summary.usage.reasoningOutputTokens,
+			"pi.zero2ai.agent.usage.total_tokens": summary.usage.totalTokens,
+			"pi.zero2ai.agent.cost.estimated_usd": summary.cost.estimatedUsd,
+			"pi.zero2ai.agent.cost.unavailable_reasons": summary.cost.unavailableReasons.join(","),
+			"pi.zero2ai.agent.errors.total": summary.errors.total,
+			"pi.zero2ai.agent.coverage.tools_available": coverage.toolsAvailable.join(","),
+			"pi.zero2ai.agent.coverage.tools_invoked": coverage.toolsInvoked.join(","),
+			"pi.zero2ai.agent.coverage.tools_unused": coverage.toolsUnused.join(","),
+			"pi.zero2ai.agent.coverage.models_used": coverage.modelsUsed.join(","),
+			"pi.zero2ai.agent.coverage.providers_used": coverage.providersUsed.join(","),
 		},
-		"pi.omp.agent.run.completed",
+		"pi.zero2ai.agent.run.completed",
 	);
 }
 
@@ -343,7 +343,7 @@ function emitTelemetryWarningLog(warning: AgentTelemetryWarning): void {
 		code: warning.code,
 		error: warning.error,
 	});
-	emitOtelLog("warn", warning.message, attrs, "pi.omp.telemetry.warning");
+	emitOtelLog("warn", warning.message, attrs, "pi.zero2ai.telemetry.warning");
 }
 
 function emitOtelLog(

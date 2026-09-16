@@ -1,9 +1,9 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
-import { streamOpenAIResponses } from "@oh-my-pi/pi-ai/providers/openai-responses";
-import { configureCredentialRedaction } from "@oh-my-pi/pi-ai/providers/transform-messages";
-import type { Context, FetchImpl, Model, ModelSpec } from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
+import { streamOpenAIResponses } from "@zero2ai/ai/providers/openai-responses";
+import { configureCredentialRedaction } from "@zero2ai/ai/providers/transform-messages";
+import type { Context, FetchImpl, Model, ModelSpec } from "@zero2ai/ai/types";
+import { buildModel } from "@zero2ai/catalog/build";
+import { getBundledModel } from "@zero2ai/catalog/models";
 
 beforeAll(() => configureCredentialRedaction(true));
 afterAll(() => configureCredentialRedaction(false));

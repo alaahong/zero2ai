@@ -1,5 +1,5 @@
-import type { ThinkingLevel } from "@oh-my-pi/pi-agent-core";
-import type { Api, ApiKey, Model } from "@oh-my-pi/pi-ai";
+import type { ThinkingLevel } from "@zero2ai/agent-core";
+import type { Api, ApiKey, Model } from "@zero2ai/ai";
 import type { ApiKeyResolverRegistry } from "../config/api-key-resolver";
 import {
 	getModelMatchPreferences,

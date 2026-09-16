@@ -1,4 +1,4 @@
-import { prompt } from "@oh-my-pi/pi-utils";
+import { prompt } from "@zero2ai/utils";
 import type { CustomEntry, SessionEntry } from "./session-entries";
 import contextNotesPrompt from "../prompts/system/context-notes.md" with { type: "text" };
 

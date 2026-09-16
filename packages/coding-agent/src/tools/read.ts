@@ -1,7 +1,7 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import { type EditStore, notebookToEditableText } from "@oh-my-pi/pi-natives";
-import { type } from "@oh-my-pi/omptype";
+import { type EditStore, notebookToEditableText } from "@zero2ai/natives";
+import { type } from "@zero2ai/schema";
 import type {
 	AgentTool,
 	AgentToolContext,
@@ -13,8 +13,8 @@ import type {
 	ToolSpeculationDiscardContext,
 	ToolSpeculationExecutionContext,
 	ToolTier,
-} from "@oh-my-pi/pi-agent-core";
-import { completeSimple, type ImageContent, type TextContent } from "@oh-my-pi/pi-ai";
+} from "@zero2ai/agent-core";
+import { completeSimple, type ImageContent, type TextContent } from "@zero2ai/ai";
 import {
 	BINARY_SNIFF_BYTES,
 	type ImageMetadata,
@@ -26,7 +26,7 @@ import {
 	parseImageMetadata,
 	prompt,
 	readImageMetadata,
-} from "@oh-my-pi/pi-utils";
+} from "@zero2ai/utils";
 import { normalizeToLF } from "../edit/normalize";
 import { getEditStore } from "../edit/store";
 import { InternalUrlRouter, resolveLocalUrlToFile, resolveLocalUrlToPath } from "../internal-urls";
@@ -1621,7 +1621,7 @@ export class ReadTool implements AgentTool<typeof readSchema, ReadToolDetails> {
 			return executeReadUrl(this.session, { path: parsedUrlTarget.path, raw: urlRaw }, signal);
 		}
 
-		// Handle native OMP URLs and custom-scheme resources advertised by MCP servers.
+		// Handle native ZERO2AI URLs and custom-scheme resources advertised by MCP servers.
 		const internalRouter = InternalUrlRouter.instance();
 		const delimitedInternalResult = internalRouter.canResolve(readPath)
 			? await this.#tryReadDelimitedPaths(readPath, signal, entry => internalRouter.canResolve(entry))

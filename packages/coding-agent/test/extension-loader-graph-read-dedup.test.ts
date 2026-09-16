@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, type Mock, spyOn } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { loadExtensions } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/loader";
-import { loadLegacyPiModule } from "@oh-my-pi/pi-coding-agent/extensibility/plugins/legacy-pi-compat";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { loadExtensions } from "@zero2ai/coding-agent/extensibility/extensions/loader";
+import { loadLegacyPiModule } from "@zero2ai/coding-agent/extensibility/plugins/legacy-pi-compat";
+import { TempDir } from "@zero2ai/utils";
 import type { BunFile } from "bun";
 
 describe("Extension Loader Graph Read Dedup", () => {
@@ -12,7 +12,7 @@ describe("Extension Loader Graph Read Dedup", () => {
 	let fileSpy: Mock<typeof Bun.file>;
 
 	beforeEach(() => {
-		tempDir = TempDir.createSync("@pi-ext-dedup-");
+		tempDir = TempDir.createSync("@zero2ai-ext-dedup-");
 		reads = new Map<string, number>();
 
 		const realBunFile = Bun.file.bind(Bun);

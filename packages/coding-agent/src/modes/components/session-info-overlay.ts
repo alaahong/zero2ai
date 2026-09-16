@@ -1,4 +1,4 @@
-import { type Component, Ellipsis, matchesKey, ScrollView, Text, truncateToWidth } from "@oh-my-pi/pi-tui";
+import { type Component, Ellipsis, matchesKey, ScrollView, Text, truncateToWidth } from "@zero2ai/tui";
 import { theme } from "../theme/theme";
 import { matchesSelectCancel } from "../utils/keybinding-matchers";
 import { OverlayPanel, PanelDivider } from "./overlay-box";

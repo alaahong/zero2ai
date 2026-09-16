@@ -4,7 +4,7 @@ import {
 	type AgentMessage,
 	isSyntheticToolResultMessage,
 	type ThinkingLevel,
-} from "@oh-my-pi/pi-agent-core";
+} from "@zero2ai/agent-core";
 import type {
 	AssistantMessage,
 	AssistantRetryRecovery,
@@ -16,14 +16,14 @@ import type {
 	TextContent,
 	ThinkingContent,
 	ToolChoice,
-} from "@oh-my-pi/pi-ai";
-import { calculateRateLimitBackoffMs, parseRateLimitReason } from "@oh-my-pi/pi-ai";
-import * as AIError from "@oh-my-pi/pi-ai/error";
-import { extractProviderRetryHint } from "@oh-my-pi/pi-ai/utils/retry-after";
-import { resolveModelPolicy } from "@oh-my-pi/pi-catalog/compat/resolve";
-import { isFireworksFastModelId, toFireworksBaseModelId } from "@oh-my-pi/pi-catalog/fireworks-model-id";
-import { modelsAreEqual } from "@oh-my-pi/pi-catalog/models";
-import { logger, prompt, sleepLong } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/ai";
+import { calculateRateLimitBackoffMs, parseRateLimitReason } from "@zero2ai/ai";
+import * as AIError from "@zero2ai/ai/error";
+import { extractProviderRetryHint } from "@zero2ai/ai/utils/retry-after";
+import { resolveModelPolicy } from "@zero2ai/catalog/compat/resolve";
+import { isFireworksFastModelId, toFireworksBaseModelId } from "@zero2ai/catalog/fireworks-model-id";
+import { modelsAreEqual } from "@zero2ai/catalog/models";
+import { logger, prompt, sleepLong } from "@zero2ai/utils";
 import type { ModelRegistry } from "../config/model-registry";
 import { formatModelStringWithRouting, resolveModelOverride } from "../config/model-resolver";
 
@@ -1539,7 +1539,7 @@ export class TurnRecovery {
 	 * Re-run fallback-chain validation once background discovery has settled and
 	 * reconcile `configWarnings`. Startup validation suppresses "unknown model"
 	 * warnings for selectors whose config-declared discovery provider had not yet
-	 * populated the registry (a cold cache after `omp update` bumps the discovery
+	 * populated the registry (a cold cache after `zero2ai update` bumps the discovery
 	 * namespace, #10048). With discovery done, drop any startup warning discovery
 	 * resolved and surface warnings for selectors that stayed unknown.
 	 *

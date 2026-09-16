@@ -9,17 +9,17 @@
  */
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as path from "node:path";
-import { Agent, type AgentMessage } from "@oh-my-pi/pi-agent-core";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { SkillMessageComponent } from "@oh-my-pi/pi-coding-agent/modes/components/skill-message";
-import { InteractiveMode } from "@oh-my-pi/pi-coding-agent/modes/interactive-mode";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SKILL_PROMPT_MESSAGE_TYPE, type SkillPromptDetails } from "@oh-my-pi/pi-coding-agent/session/messages";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { Agent, type AgentMessage } from "@zero2ai/agent-core";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
+import { SkillMessageComponent } from "@zero2ai/coding-agent/modes/components/skill-message";
+import { InteractiveMode } from "@zero2ai/coding-agent/modes/interactive-mode";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SKILL_PROMPT_MESSAGE_TYPE, type SkillPromptDetails } from "@zero2ai/coding-agent/session/messages";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { TempDir } from "@zero2ai/utils";
 
 const WIDTH = 80;
 
@@ -56,7 +56,7 @@ describe("InteractiveMode optimistic skill reconcile (#11217)", () => {
 	beforeAll(async () => {
 		initTheme();
 		resetSettingsForTest();
-		tempDir = TempDir.createSync("@pi-optimistic-skill-");
+		tempDir = TempDir.createSync("@zero2ai-optimistic-skill-");
 		await Settings.init({ inMemory: true, cwd: tempDir.path() });
 		authStorage = await AuthStorage.create(path.join(tempDir.path(), "testauth.db"));
 		const modelRegistry = new ModelRegistry(authStorage);

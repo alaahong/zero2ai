@@ -48,8 +48,8 @@ Example across three calls:
 
 | Token | Runtime | Setting/default | Environment override | Additional prerequisite |
 | --- | --- | --- | --- | --- |
-| `py` | retained IPython-style Python kernel | `eval.py=true` | `PI_PY` | usable configured Python interpreter/kernel |
-| `js` | retained Bun worker VM | `eval.js=true` | `PI_JS` | bundled JS runtime |
+| `py` | retained IPython-style Python kernel | `eval.py=true` | `ZERO2AI_PY` | usable configured Python interpreter/kernel |
+| `js` | retained Bun worker VM | `eval.js=true` | `ZERO2AI_JS` | bundled JS runtime |
 
 When at least one runtime is enabled, disabled runtimes are removed from the session-scoped wire schema and model prompt. A requested unavailable runtime raises `ToolError`; the tool never substitutes another language. `eval.tools.enabled=true` (default) independently controls whether kernel-defined tools and the `tools` subagent fields are advertised and usable.
 

@@ -3,9 +3,9 @@
  */
 import * as fs from "node:fs";
 import * as path from "node:path";
-import type { ImageContent } from "@oh-my-pi/pi-ai";
-import { getProjectDir, isEnoent, readImageMetadata } from "@oh-my-pi/pi-utils";
-import chalk from "@oh-my-pi/pi-utils/chalk";
+import type { ImageContent } from "@zero2ai/ai";
+import { getProjectDir, isEnoent, readImageMetadata } from "@zero2ai/utils";
+import chalk from "@zero2ai/utils/chalk";
 import { resolveReadPath } from "../tools/path-utils";
 import { formatBytes } from "../tools/render-utils";
 import { formatDimensionNote, resizeImage } from "../utils/image-resize";

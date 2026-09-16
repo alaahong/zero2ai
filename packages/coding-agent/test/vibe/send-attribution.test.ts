@@ -7,15 +7,15 @@
  * reads as something the human typed.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
-import { AsyncJobManager } from "@oh-my-pi/pi-coding-agent/async/job-manager";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AgentRegistry } from "@oh-my-pi/pi-coding-agent/registry/agent-registry";
-import type { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import type { ExecutorOptions } from "@oh-my-pi/pi-coding-agent/task/executor";
-import * as executorModule from "@oh-my-pi/pi-coding-agent/task/executor";
-import type { SingleResult } from "@oh-my-pi/pi-coding-agent/task/types";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { VibeSessionRegistry } from "@oh-my-pi/pi-coding-agent/vibe/runtime";
+import { AsyncJobManager } from "@zero2ai/coding-agent/async/job-manager";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { AgentRegistry } from "@zero2ai/coding-agent/registry/agent-registry";
+import type { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import type { ExecutorOptions } from "@zero2ai/coding-agent/task/executor";
+import * as executorModule from "@zero2ai/coding-agent/task/executor";
+import type { SingleResult } from "@zero2ai/coding-agent/task/types";
+import type { ToolSession } from "@zero2ai/coding-agent/tools";
+import { VibeSessionRegistry } from "@zero2ai/coding-agent/vibe/runtime";
 
 const ATTRIBUTION_OWNER = "vibe-parent";
 

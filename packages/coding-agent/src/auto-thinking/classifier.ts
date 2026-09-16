@@ -21,10 +21,10 @@ import {
 	type Model,
 	retryTransientCompletion,
 	type Usage,
-} from "@oh-my-pi/pi-ai";
-import * as AIError from "@oh-my-pi/pi-ai/error";
-import { getSupportedEfforts } from "@oh-my-pi/pi-catalog/model-thinking";
-import { prompt } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/ai";
+import * as AIError from "@zero2ai/ai/error";
+import { getSupportedEfforts } from "@zero2ai/catalog/model-thinking";
+import { prompt } from "@zero2ai/utils";
 
 import type { ModelRegistry } from "../config/model-registry";
 import { collectOnlineTinyCandidates } from "../tiny/online-candidates";

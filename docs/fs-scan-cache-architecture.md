@@ -1,20 +1,20 @@
 # Filesystem scan cache architecture contract
 
-This document defines the shared Rust filesystem scan cache implemented by `crates/pi-walker` and consumed by native discovery APIs exposed to `packages/coding-agent`.
+This document defines the shared Rust filesystem scan cache implemented by `crates/zero2ai-walker` and consumed by native discovery APIs exposed to `packages/coding-agent`.
 
 ## Ownership and data model
 
-The cache lives in `crates/pi-walker/src/cache.rs`. It stores owned `CollectedEntry` lists from a directory walk, not final glob, fuzzy, grep, or AST results. `WalkRequest` in `crates/pi-walker/src/lib.rs` applies static filters, ranking, limits, and optional empty-result revalidation around that collection layer.
+The cache lives in `crates/zero2ai-walker/src/cache.rs`. It stores owned `CollectedEntry` lists from a directory walk, not final glob, fuzzy, grep, or AST results. `WalkRequest` in `crates/zero2ai-walker/src/lib.rs` applies static filters, ranking, limits, and optional empty-result revalidation around that collection layer.
 
 Current native consumers:
 
-- `crates/pi-natives/src/glob.rs` — opt-in with `GlobOptions.cache`
-- `crates/pi-natives/src/fd.rs` (`fuzzyFind`) — opt-in with `FuzzyFindOptions.cache`
-- `crates/pi-natives/src/ast.rs` (`astGrep` / `astEdit` discovery) — always cached for directory operands
+- `crates/zero2ai-natives/src/glob.rs` — opt-in with `GlobOptions.cache`
+- `crates/zero2ai-natives/src/fd.rs` (`fuzzyFind`) — opt-in with `FuzzyFindOptions.cache`
+- `crates/zero2ai-natives/src/ast.rs` (`astGrep` / `astEdit` discovery) — always cached for directory operands
 
-`crates/pi-natives/src/grep.rs` uses `WalkRequest` for candidate discovery but explicitly sets `.cache(false)`; the current public `GrepOptions` has no cache field.
+`crates/zero2ai-natives/src/grep.rs` uses `WalkRequest` for candidate discovery but explicitly sets `.cache(false)`; the current public `GrepOptions` has no cache field.
 
-The N-API DTO layer that bridges walker results to JavaScript lives in `crates/pi-natives/src/iofs.rs`; per its own header, "`pi-walker` owns traversal and cache policy" and `iofs.rs` keeps only the JS-facing shapes and conversions. The public invalidation binding remains `invalidateFsScanCache(path?)` — declared in `iofs.rs` (forwarding to `pi_walker::invalidate_path_string` / `pi_walker::invalidate_all`) and exported in `packages/natives/native/index.d.ts` / `index.js`. Coding-agent mutation helpers live in `packages/coding-agent/src/tools/fs-cache-invalidation.ts`.
+The N-API DTO layer that bridges walker results to JavaScript lives in `crates/zero2ai-natives/src/iofs.rs`; per its own header, "`zero2ai-walker` owns traversal and cache policy" and `iofs.rs` keeps only the JS-facing shapes and conversions. The public invalidation binding remains `invalidateFsScanCache(path?)` — declared in `iofs.rs` (forwarding to `zero2ai_walker::invalidate_path_string` / `zero2ai_walker::invalidate_all`) and exported in `packages/natives/native/index.d.ts` / `index.js`. Coding-agent mutation helpers live in `packages/coding-agent/src/tools/fs-cache-invalidation.ts`.
 
 ## Cache key partitioning
 
@@ -29,13 +29,13 @@ High-level `WalkRequest` filters, ranking, result limits, empty-recheck policy, 
 
 ## Collection behavior
 
-`pi-walker` resolves relative roots against current cwd, requires an existing directory, and canonicalizes it when possible. `WalkOptions` controls traversal; consumers explicitly choose their policies rather than inheriting every walker default.
+`zero2ai-walker` resolves relative roots against current cwd, requires an existing directory, and canonicalizes it when possible. `WalkOptions` controls traversal; consumers explicitly choose their policies rather than inheriting every walker default.
 
 Collected entries contain normalized forward-slash relative paths and file types. `WalkDetail::Full` additionally requests mtime and regular-file size. Cancellation is delivered through the caller-supplied heartbeat.
 
 Traversal-adjacent parallel work uses a shared Rayon pool:
 
-- `PI_WALK_WORKERS` defaults to `4`
+- `ZERO2AI_WALK_WORKERS` defaults to `4`
 - `0` auto-detects available parallelism
 - `1` forces serial work
 - helper operations parallelize only at 256 or more items
@@ -121,4 +121,4 @@ Current write, hashline, patch, replace, auto-repair, sloppy-edit, and ACP-bridg
 
 ## Measuring the budget
 
-Run `FS_SCAN_CACHE_TTL_MS=60000 cargo run -p pi-walker --example scan-cache-bench -- /path/to/tree` to measure scan allocation bytes, owned-vector copying, and cache hits across 16 traversal-option partitions. Set `FS_SCAN_CACHE_MAX_BYTES` to compare budgets. The example leaves the supplied tree unchanged; use an optimized Cargo profile for timing comparisons.
+Run `FS_SCAN_CACHE_TTL_MS=60000 cargo run -p zero2ai-walker --example scan-cache-bench -- /path/to/tree` to measure scan allocation bytes, owned-vector copying, and cache hits across 16 traversal-option partitions. Set `FS_SCAN_CACHE_MAX_BYTES` to compare budgets. The example leaves the supplied tree unchanged; use an optimized Cargo profile for timing comparisons.

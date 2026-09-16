@@ -2,10 +2,10 @@ import { expect, test } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { startAuthGateway } from "@oh-my-pi/pi-ai/auth-gateway";
-import { AuthStorage } from "@oh-my-pi/pi-ai/auth-storage";
-import { createMockModel } from "@oh-my-pi/pi-ai/providers/mock";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
+import { startAuthGateway } from "@zero2ai/ai/auth-gateway";
+import { AuthStorage } from "@zero2ai/ai/auth-storage";
+import { createMockModel } from "@zero2ai/ai/providers/mock";
+import { getBundledModel } from "@zero2ai/catalog/models";
 
 test("model listing exposes one provider-qualified route per upstream model", async () => {
 	const dir = await fs.mkdtemp(path.join(os.tmpdir(), "gw-model-list-"));

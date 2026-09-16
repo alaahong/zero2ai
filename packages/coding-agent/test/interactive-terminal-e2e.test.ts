@@ -1,16 +1,16 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from "bun:test";
 import * as path from "node:path";
-import { Agent } from "@oh-my-pi/pi-agent-core";
-import type { AssistantMessage, ToolResultMessage, Usage } from "@oh-my-pi/pi-ai";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { Composer } from "@oh-my-pi/pi-coding-agent/modes/composer";
-import { InteractiveMode } from "@oh-my-pi/pi-coding-agent/modes/interactive-mode";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { Agent } from "@zero2ai/agent-core";
+import type { AssistantMessage, ToolResultMessage, Usage } from "@zero2ai/ai";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
+import { Composer } from "@zero2ai/coding-agent/modes/composer";
+import { InteractiveMode } from "@zero2ai/coding-agent/modes/interactive-mode";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { TempDir } from "@zero2ai/utils";
 import { VirtualTerminal } from "../../tui/test/virtual-terminal";
 
 function plainRows(rows: readonly string[]): string[] {
@@ -35,7 +35,7 @@ describe("libkitty end-to-end", () => {
 
 	beforeEach(async () => {
 		resetSettingsForTest();
-		tempDir = TempDir.createSync("@pi-libkitty-e2e-");
+		tempDir = TempDir.createSync("@zero2ai-libkitty-e2e-");
 		await Settings.init({ inMemory: true, cwd: tempDir.path() });
 		authStorage = await AuthStorage.create(path.join(tempDir.path(), "testauth.db"));
 		const modelRegistry = new ModelRegistry(authStorage);
@@ -65,17 +65,17 @@ describe("libkitty end-to-end", () => {
 		const pending = mode.getUserInput();
 		await term.waitForRender();
 
-		term.sendInput("hi there omp");
+		term.sendInput("hi there zero2ai");
 		await term.waitForRender();
 		term.sendInput("\r");
 		const input = await pending;
-		expect(input.text).toBe("hi there omp");
+		expect(input.text).toBe("hi there zero2ai");
 
 		// The optimistic user-message block must be on the physical screen now,
 		// before any assistant output exists.
-		await term.waitForRender(() => plainRows(term.getViewport()).some(row => row.includes("hi there omp")));
+		await term.waitForRender(() => plainRows(term.getViewport()).some(row => row.includes("hi there zero2ai")));
 		const viewport = plainRows(term.getViewport());
-		const hits = viewport.filter(row => row.includes("hi there omp"));
+		const hits = viewport.filter(row => row.includes("hi there zero2ai"));
 		if (hits.length !== 1) dump("viewport after submit", viewport);
 		expect(hits.length).toBe(1);
 	});

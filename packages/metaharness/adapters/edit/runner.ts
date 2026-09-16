@@ -7,31 +7,31 @@
 /// <reference types="./bun-imports.d.ts" />
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { EditStore, hashlineCountOps, hashlineFormatHeader } from "@oh-my-pi/pi-natives";
-import type { AgentMessage, ResolvedThinkingLevel, ThinkingLevel } from "@oh-my-pi/pi-agent-core";
-import type { Model, ToolExample } from "@oh-my-pi/pi-ai";
-import { formatSessionDumpText, RpcClient } from "@oh-my-pi/pi-coding-agent";
-import { prompt } from "@oh-my-pi/pi-utils";
+import { EditStore, hashlineCountOps, hashlineFormatHeader } from "@zero2ai/natives";
+import type { AgentMessage, ResolvedThinkingLevel, ThinkingLevel } from "@zero2ai/agent-core";
+import type { Model, ToolExample } from "@zero2ai/ai";
+import { formatSessionDumpText, RpcClient } from "@zero2ai/coding-agent";
+import { prompt } from "@zero2ai/utils";
 import { diffLines } from "diff";
-import { formatDirectory } from "@oh-my-pi/typescript-edit-benchmark/formatter";
+import { formatDirectory } from "@zero2ai/typescript-edit-benchmark/formatter";
 import {
 	discoverSharedInfra,
 	InProcessClient,
 	type SharedInfra,
-} from "@oh-my-pi/typescript-edit-benchmark/in-process-client";
+} from "@zero2ai/typescript-edit-benchmark/in-process-client";
 import benchmarkRetryPrompt from "./prompts/benchmark-retry.md" with { type: "text" };
 import benchmarkSystemPrompt from "./prompts/benchmark-system.md" with { type: "text" };
 import benchmarkTaskPrompt from "./prompts/benchmark-task.md" with { type: "text" };
-import type { EditTask } from "@oh-my-pi/typescript-edit-benchmark/tasks";
+import type { EditTask } from "@zero2ai/typescript-edit-benchmark/tasks";
 import {
 	verifyExpectedFileSubset,
 	verifyExpectedFiles,
-} from "@oh-my-pi/typescript-edit-benchmark/verify";
+} from "@zero2ai/typescript-edit-benchmark/verify";
 
 const REPO_ROOT = path.resolve(import.meta.dir, "..", "..", "..", "..");
 const RUNS_DIR = path.join(REPO_ROOT, "runs");
 const TMP = path.join(RUNS_DIR, `rb-${Math.random().toString(36).slice(2, 10)}`);
-const CLI_PATH = Bun.fileURLToPath(import.meta.resolve("@oh-my-pi/pi-coding-agent/cli"));
+const CLI_PATH = Bun.fileURLToPath(import.meta.resolve("@zero2ai/coding-agent/cli"));
 
 function formatLogPath(logFile: string): string {
 	const relativePath = path.relative(REPO_ROOT, logFile);
@@ -1050,11 +1050,11 @@ async function runSingleTask(
 	let providerFailureRetries = 0;
 
 	const previousEnv = {
-		PI_EDIT_VARIANT: process.env.PI_EDIT_VARIANT,
-		PI_EDIT_FUZZY: process.env.PI_EDIT_FUZZY,
-		PI_EDIT_FUZZY_THRESHOLD: process.env.PI_EDIT_FUZZY_THRESHOLD,
-		PI_STRICT_EDIT_MODE: process.env.PI_STRICT_EDIT_MODE,
-		PI_NO_TITLE: process.env.PI_NO_TITLE,
+		ZERO2AI_EDIT_VARIANT: process.env.ZERO2AI_EDIT_VARIANT,
+		ZERO2AI_EDIT_FUZZY: process.env.ZERO2AI_EDIT_FUZZY,
+		ZERO2AI_EDIT_FUZZY_THRESHOLD: process.env.ZERO2AI_EDIT_FUZZY_THRESHOLD,
+		ZERO2AI_STRICT_EDIT_MODE: process.env.ZERO2AI_STRICT_EDIT_MODE,
+		ZERO2AI_NO_TITLE: process.env.ZERO2AI_NO_TITLE,
 	};
 	try {
 		const sessionSetup = await prepareBenchmarkSessionSetup({
@@ -1069,14 +1069,14 @@ async function runSingleTask(
 			`{"type":"meta","task":"${task.id}","run":${runIndex},"workDir":"${cwd}","providerSessionId":${JSON.stringify(sessionSetup.providerSessionId)}}\n`,
 		);
 
-		if (config.editVariant !== undefined) process.env.PI_EDIT_VARIANT = config.editVariant;
+		if (config.editVariant !== undefined) process.env.ZERO2AI_EDIT_VARIANT = config.editVariant;
 		if (config.editFuzzy !== undefined)
-			process.env.PI_EDIT_FUZZY = config.editFuzzy === "auto" ? "auto" : config.editFuzzy ? "1" : "0";
+			process.env.ZERO2AI_EDIT_FUZZY = config.editFuzzy === "auto" ? "auto" : config.editFuzzy ? "1" : "0";
 		if (config.editFuzzyThreshold !== undefined)
-			process.env.PI_EDIT_FUZZY_THRESHOLD =
+			process.env.ZERO2AI_EDIT_FUZZY_THRESHOLD =
 				config.editFuzzyThreshold === "auto" ? "auto" : String(config.editFuzzyThreshold);
-		process.env.PI_STRICT_EDIT_MODE = "1";
-		process.env.PI_NO_TITLE = "1";
+		process.env.ZERO2AI_STRICT_EDIT_MODE = "1";
+		process.env.ZERO2AI_NO_TITLE = "1";
 
 		const useInProcess = config.inProcess !== false;
 		const client: BenchmarkClient = useInProcess
@@ -1366,11 +1366,11 @@ async function runSingleTask(
 				process.env[key] = value;
 			}
 		};
-		restoreEnvKey("PI_EDIT_VARIANT");
-		restoreEnvKey("PI_EDIT_FUZZY");
-		restoreEnvKey("PI_EDIT_FUZZY_THRESHOLD");
-		restoreEnvKey("PI_STRICT_EDIT_MODE");
-		restoreEnvKey("PI_NO_TITLE");
+		restoreEnvKey("ZERO2AI_EDIT_VARIANT");
+		restoreEnvKey("ZERO2AI_EDIT_FUZZY");
+		restoreEnvKey("ZERO2AI_EDIT_FUZZY_THRESHOLD");
+		restoreEnvKey("ZERO2AI_STRICT_EDIT_MODE");
+		restoreEnvKey("ZERO2AI_NO_TITLE");
 	}
 
 	const duration = Date.now() - startTime;

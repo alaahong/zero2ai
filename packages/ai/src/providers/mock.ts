@@ -2,11 +2,11 @@
  * Mock provider for tests.
  *
  * Implements `Model<"mock">` + `streamMock` so test code can drive
- * pi-agent-core / streamSimple-shaped consumers without an HTTP client.
+ * zero2ai-agent-core / streamSimple-shaped consumers without an HTTP client.
  *
  * Usage:
  *
- *   import { createMockModel, registerMockApi } from "@oh-my-pi/pi-ai/providers/mock";
+ *   import { createMockModel, registerMockApi } from "@zero2ai/ai/providers/mock";
  *
  *   // 1. Array of responses, one per call.
  *   const mock = createMockModel({
@@ -42,7 +42,7 @@
  *   expect(mock.calls).toHaveLength(2);
  */
 
-import { classifyModel } from "@oh-my-pi/pi-catalog/compat/taxonomy";
+import { classifyModel } from "@zero2ai/catalog/compat/taxonomy";
 import { registerCustomApi } from "../api-registry";
 import * as AIError from "../error";
 import type {
@@ -239,7 +239,7 @@ export function createMockModel(options: MockModelOptions = {}): MockModel {
 	return new MockModel(options);
 }
 
-/** Stream function for `Model<"mock">`. Matches the pi-ai per-provider stream signature. */
+/** Stream function for `Model<"mock">`. Matches the zero2ai-ai per-provider stream signature. */
 export function streamMock(
 	model: Model<Api>,
 	context: Context,
@@ -263,7 +263,7 @@ export function streamMock(
 }
 
 /** Convenience: register the mock provider with the global custom API registry. */
-export function registerMockApi(sourceId = "pi-ai/mock"): void {
+export function registerMockApi(sourceId = "zero2ai-ai/mock"): void {
 	registerCustomApi(MOCK_API, streamMock, sourceId);
 }
 

@@ -10,7 +10,7 @@ import {
 	diffWords,
 	type PatchHunk,
 	structuredPatchHunks,
-} from "@oh-my-pi/pi-natives";
+} from "@zero2ai/natives";
 
 function applyHunks(oldText: string, hunks: PatchHunk[]): string {
 	if (hunks.length === 0) return oldText;
@@ -161,7 +161,7 @@ describe("native diff correctness", () => {
 	});
 
 	test("native file open streams complete lines without a JS file read", async () => {
-		const dir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-diff-stream-"));
+		const dir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-diff-stream-"));
 		const file = path.join(dir, "source.txt");
 		try {
 			await Bun.write(file, "first\nsecond\n");

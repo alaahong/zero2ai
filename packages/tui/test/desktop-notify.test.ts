@@ -7,8 +7,8 @@ import {
 	resolveDesktopNotifier,
 	sendDesktopNotification,
 	shouldDeliverDesktopNotification,
-} from "@oh-my-pi/pi-tui/desktop-notify";
-import * as utils from "@oh-my-pi/pi-utils";
+} from "@zero2ai/tui/desktop-notify";
+import * as utils from "@zero2ai/utils";
 
 const LINUX_ENV: NodeJS.ProcessEnv = { DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/1000/bus" };
 
@@ -50,11 +50,11 @@ describe("shouldDeliverDesktopNotification", () => {
 		expect(shouldDeliverDesktopNotification("kitty", false, "linux", LINUX_ENV)).toBe(false);
 	});
 
-	it("respects the PI_NO_DESKTOP_NOTIFY=1 opt-out", () => {
+	it("respects the ZERO2AI_NO_DESKTOP_NOTIFY=1 opt-out", () => {
 		expect(
 			shouldDeliverDesktopNotification("trueColor", true, "linux", {
 				...LINUX_ENV,
-				PI_NO_DESKTOP_NOTIFY: "1",
+				ZERO2AI_NO_DESKTOP_NOTIFY: "1",
 			}),
 		).toBe(false);
 	});

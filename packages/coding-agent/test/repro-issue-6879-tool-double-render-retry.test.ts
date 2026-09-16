@@ -1,17 +1,17 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "bun:test";
-import { Agent } from "@oh-my-pi/pi-agent-core";
-import type { AssistantMessage, ToolCall } from "@oh-my-pi/pi-ai";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { InteractiveMode } from "@oh-my-pi/pi-coding-agent/modes/interactive-mode";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import type { AgentSessionEvent } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { buildSessionContext } from "@oh-my-pi/pi-coding-agent/session/session-context";
-import type { SessionEntry } from "@oh-my-pi/pi-coding-agent/session/session-entries";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { Agent } from "@zero2ai/agent-core";
+import type { AssistantMessage, ToolCall } from "@zero2ai/ai";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
+import { InteractiveMode } from "@zero2ai/coding-agent/modes/interactive-mode";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import type { AgentSessionEvent } from "@zero2ai/coding-agent/session/agent-session";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { buildSessionContext } from "@zero2ai/coding-agent/session/session-context";
+import type { SessionEntry } from "@zero2ai/coding-agent/session/session-entries";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { TempDir } from "@zero2ai/utils";
 
 /**
  * Regression for issue #6879 — a tool call renders twice (follow-up to #6516).
@@ -74,7 +74,7 @@ describe("issue #6879 — tool output appears twice after a superseded turn", ()
 	beforeAll(async () => {
 		initTheme();
 		resetSettingsForTest();
-		settingsDir = TempDir.createSync("@pi-issue-6879-settings-");
+		settingsDir = TempDir.createSync("@zero2ai-issue-6879-settings-");
 		await Settings.init({ inMemory: true, cwd: settingsDir.path() });
 		authStorage = await AuthStorage.create(":memory:");
 		modelRegistry = new ModelRegistry(authStorage);
@@ -89,7 +89,7 @@ describe("issue #6879 — tool output appears twice after a superseded turn", ()
 			vi.spyOn(process.stdin, "setRawMode").mockReturnValue(process.stdin);
 		}
 
-		tempDir = TempDir.createSync("@pi-issue-6879-");
+		tempDir = TempDir.createSync("@zero2ai-issue-6879-");
 		const model = modelRegistry.find("anthropic", "claude-sonnet-4-5");
 		if (!model) throw new Error("Expected claude-sonnet-4-5 test model");
 

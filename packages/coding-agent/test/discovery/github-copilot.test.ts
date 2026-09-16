@@ -12,19 +12,19 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { loadCapability, setDisabledProviders } from "@oh-my-pi/pi-coding-agent/capability";
-import type { ContextFile } from "@oh-my-pi/pi-coding-agent/capability/context-file";
-import { clearCache } from "@oh-my-pi/pi-coding-agent/capability/fs";
-import type { Instruction } from "@oh-my-pi/pi-coding-agent/capability/instruction";
-import type { Prompt } from "@oh-my-pi/pi-coding-agent/capability/prompt";
-import { type Rule, resetActiveRulesForTests, setActiveRules } from "@oh-my-pi/pi-coding-agent/capability/rule";
-import { RuleProtocolHandler } from "@oh-my-pi/pi-coding-agent/internal-urls/rule-protocol";
-import { removeSyncWithRetries } from "@oh-my-pi/pi-utils";
-import "@oh-my-pi/pi-coding-agent/capability/context-file";
-import "@oh-my-pi/pi-coding-agent/capability/instruction";
-import "@oh-my-pi/pi-coding-agent/capability/prompt";
-import "@oh-my-pi/pi-coding-agent/capability/rule";
-import "@oh-my-pi/pi-coding-agent/discovery/github";
+import { loadCapability, setDisabledProviders } from "@zero2ai/coding-agent/capability";
+import type { ContextFile } from "@zero2ai/coding-agent/capability/context-file";
+import { clearCache } from "@zero2ai/coding-agent/capability/fs";
+import type { Instruction } from "@zero2ai/coding-agent/capability/instruction";
+import type { Prompt } from "@zero2ai/coding-agent/capability/prompt";
+import { type Rule, resetActiveRulesForTests, setActiveRules } from "@zero2ai/coding-agent/capability/rule";
+import { RuleProtocolHandler } from "@zero2ai/coding-agent/internal-urls/rule-protocol";
+import { removeSyncWithRetries } from "@zero2ai/utils";
+import "@zero2ai/coding-agent/capability/context-file";
+import "@zero2ai/coding-agent/capability/instruction";
+import "@zero2ai/coding-agent/capability/prompt";
+import "@zero2ai/coding-agent/capability/rule";
+import "@zero2ai/coding-agent/discovery/github";
 
 const ENV_KEYS = ["COPILOT_HOME", "COPILOT_CUSTOM_INSTRUCTIONS_DIRS"] as const;
 
@@ -42,7 +42,7 @@ describe("github discovery — Copilot user-global surface", () => {
 	beforeEach(() => {
 		clearCache();
 		for (const key of ENV_KEYS) savedEnv[key] = process.env[key];
-		tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "pi-github-copilot-"));
+		tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-github-copilot-"));
 		cwd = path.join(tempDir, "project");
 		copilotHome = path.join(tempDir, "copilot-home");
 		fs.mkdirSync(cwd, { recursive: true });

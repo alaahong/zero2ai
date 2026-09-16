@@ -13,7 +13,7 @@
  * stays linear in depth rather than exponential.
  */
 import { afterEach, describe, expect, it } from "bun:test";
-import { createLiveConfigHeaders } from "@oh-my-pi/pi-coding-agent/config/model-config-values";
+import { createLiveConfigHeaders } from "@zero2ai/coding-agent/config/model-config-values";
 
 const TEMP_ENV_KEYS: string[] = [];
 
@@ -37,20 +37,20 @@ describe("createLiveConfigHeaders nesting", () => {
 	});
 
 	it("applies the outer authHeader over a nested source", () => {
-		setEnv("OMP_TEST_LIVE_KEY", "sekret");
+		setEnv("ZERO2AI_TEST_LIVE_KEY", "sekret");
 		const inner = createLiveConfigHeaders([{ "X-Keep": "k" }]);
-		const outer = createLiveConfigHeaders([inner], { authHeader: true, apiKeyConfig: "OMP_TEST_LIVE_KEY" });
+		const outer = createLiveConfigHeaders([inner], { authHeader: true, apiKeyConfig: "ZERO2AI_TEST_LIVE_KEY" });
 
 		expect(outer?.Authorization).toBe("Bearer sekret");
 	});
 
 	it("keeps values live through a nested wrap so a rotated credential is observed", () => {
-		setEnv("OMP_TEST_LIVE_DYN", "v1");
-		const base = createLiveConfigHeaders([{ "X-Dyn": "OMP_TEST_LIVE_DYN" }]);
+		setEnv("ZERO2AI_TEST_LIVE_DYN", "v1");
+		const base = createLiveConfigHeaders([{ "X-Dyn": "ZERO2AI_TEST_LIVE_DYN" }]);
 		const wrapped = createLiveConfigHeaders([base, { "X-Extra": "e" }]);
 
 		expect(wrapped?.["X-Dyn"]).toBe("v1");
-		setEnv("OMP_TEST_LIVE_DYN", "v2");
+		setEnv("ZERO2AI_TEST_LIVE_DYN", "v2");
 		expect(wrapped?.["X-Dyn"]).toBe("v2");
 	});
 

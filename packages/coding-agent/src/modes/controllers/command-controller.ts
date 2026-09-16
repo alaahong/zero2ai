@@ -1,7 +1,7 @@
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { CompactionCancelledError, type CompactionOutcome } from "@oh-my-pi/pi-agent-core/compaction";
+import { CompactionCancelledError, type CompactionOutcome } from "@zero2ai/agent-core/compaction";
 import {
 	getEnvApiKey,
 	getProviderDetails,
@@ -9,9 +9,9 @@ import {
 	resolveUsedFraction,
 	type UsageLimit,
 	type UsageReport,
-} from "@oh-my-pi/pi-ai";
-import { Loader, Markdown, padding, Spacer, Text, visibleWidth } from "@oh-my-pi/pi-tui";
-import { formatDuration, logger, Snowflake, sanitizeText } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/ai";
+import { Loader, Markdown, padding, Spacer, Text, visibleWidth } from "@zero2ai/tui";
+import { formatDuration, logger, Snowflake, sanitizeText } from "@zero2ai/utils";
 import { shouldEnableAppendOnlyContext } from "../../config/append-only-context-mode";
 import { type BashResult, isPersistentShellCdCommand } from "../../exec/bash-executor";
 import { type LoadedCustomShare, loadCustomShare } from "../../export/custom-share";
@@ -164,7 +164,7 @@ export class CommandController {
 		try {
 			// Lazy: the stats dashboard (server + sqlite) loads on demand only,
 			// matching src/cli/stats-cli.ts, to keep CLI startup fast.
-			const { formatStatsDashboardUrl, startServer } = await import("@oh-my-pi/omp-stats");
+			const { formatStatsDashboardUrl, startServer } = await import("@zero2ai/stats");
 			const { hostname, port } = await startServer();
 			const url = `${formatStatsDashboardUrl(hostname, port)}/#/traces?s=${encodeURIComponent(sessionFile)}`;
 			this.openInBrowser(url);
@@ -1411,7 +1411,7 @@ export class CommandController {
 				if (shouldPersistCwd) return await this.#applyBashResultCwd(result);
 			} catch (error) {
 				this.ctx.showError(
-					`Bash command completed, but OMP failed to update its working directory: ${
+					`Bash command completed, but ZERO2AI failed to update its working directory: ${
 						error instanceof Error ? error.message : "Unknown error"
 					}`,
 				);
@@ -2154,7 +2154,7 @@ export function renderUsageReports(
 			}
 		}
 
-		// Provider-wide disclaimers (e.g. "OMP-observed spend only") render once
+		// Provider-wide disclaimers (e.g. "ZERO2AI-observed spend only") render once
 		// above the per-account sections instead of duplicating onto every limit.
 		const providerNotes = [...new Set(providerReports.flatMap(report => report.notes ?? []))];
 		if (providerNotes.length > 0) {

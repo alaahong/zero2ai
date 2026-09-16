@@ -7,7 +7,7 @@
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import path from "node:path";
-import { $env, prompt, Snowflake } from "@oh-my-pi/pi-utils";
+import { $env, prompt, Snowflake } from "@zero2ai/utils";
 import { resolveAgentModelSelection } from "../config/model-resolver";
 import { type ServiceTierInheritSettingValue, validateAgentServiceTierOverrides } from "../config/service-tier";
 import type { CustomTool } from "../extensibility/custom-tools/types";
@@ -244,7 +244,7 @@ function assertDepthAndSpawnAllowed(request: StructuredSubagentRequest, agentNam
 			`Cannot spawn another agent at task depth ${taskDepth}; maximum depth is ${maxDepth}.`,
 		);
 	}
-	const blockedAgent = request.blockedAgent ?? $env.PI_BLOCKED_AGENT;
+	const blockedAgent = request.blockedAgent ?? $env.ZERO2AI_BLOCKED_AGENT;
 	if (blockedAgent && blockedAgent === agentName) {
 		throw new StructuredSubagentError(
 			"preflight",
@@ -387,7 +387,7 @@ async function leaseArtifacts(
 	}
 	const artifactsDir = path.join(
 		os.tmpdir(),
-		`${invocationKind === "eval" ? "omp-eval-agent" : "omp-task"}-${Snowflake.next()}`,
+		`${invocationKind === "eval" ? "zero2ai-eval-agent" : "zero2ai-task"}-${Snowflake.next()}`,
 	);
 	await fs.mkdir(artifactsDir, { recursive: true });
 	return { sessionFile: null, artifactsDir, temporary: true, unregister: registerArtifactsDir(artifactsDir) };

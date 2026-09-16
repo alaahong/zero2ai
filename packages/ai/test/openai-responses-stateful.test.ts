@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "bun:test";
-import { streamOpenAIResponses } from "@oh-my-pi/pi-ai/providers/openai-responses";
-import type { Context, FetchImpl, Model, ModelSpec, ProviderSessionState } from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { resolveModelPolicy } from "@oh-my-pi/pi-catalog/compat/resolve";
-import { classifyModel } from "@oh-my-pi/pi-catalog/compat/taxonomy";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
+import { streamOpenAIResponses } from "@zero2ai/ai/providers/openai-responses";
+import type { Context, FetchImpl, Model, ModelSpec, ProviderSessionState } from "@zero2ai/ai/types";
+import { buildModel } from "@zero2ai/catalog/build";
+import { resolveModelPolicy } from "@zero2ai/catalog/compat/resolve";
+import { classifyModel } from "@zero2ai/catalog/compat/taxonomy";
+import { getBundledModel } from "@zero2ai/catalog/models";
 
 const model = getBundledModel("openai", "gpt-5-mini") as Model<"openai-responses">;
 

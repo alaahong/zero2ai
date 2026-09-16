@@ -1,5 +1,5 @@
-import { TERMINAL } from "@oh-my-pi/pi-tui";
-import { hexToOklch, oklchCusp, oklchToHex, relativeLuminance } from "@oh-my-pi/pi-utils";
+import { TERMINAL } from "@zero2ai/tui";
+import { hexToOklch, oklchCusp, oklchToHex, relativeLuminance } from "@zero2ai/utils";
 
 /**
  * Derive a stable 32-bit hash from a string using djb2.

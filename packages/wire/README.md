@@ -1,14 +1,14 @@
-# @oh-my-pi/pi-wire
+# @zero2ai/wire
 
-Shared TypeScript wire contracts for omp collab live sessions.
+Shared TypeScript wire contracts for zero2ai collab live sessions.
 
-The package contains only JSON-safe protocol shapes and constants. It has no runtime dependencies and is consumed by both the host CLI (`@oh-my-pi/pi-coding-agent`) and browser guest (`@oh-my-pi/collab-web`).
+The package contains only JSON-safe protocol shapes and constants. It has no runtime dependencies and is consumed by both the host CLI (`@zero2ai/coding-agent`) and browser guest (`@zero2ai/collab-web`).
 
 ## Exports
 
 ```ts
-import type { GuestFrame, HostFrame, SessionEntry } from "@oh-my-pi/pi-wire";
-import { COLLAB_PROTO, DEFAULT_RELAY_URL, ENVELOPE_HEADER_LENGTH } from "@oh-my-pi/pi-wire";
+import type { GuestFrame, HostFrame, SessionEntry } from "@zero2ai/wire";
+import { COLLAB_PROTO, DEFAULT_RELAY_URL, ENVELOPE_HEADER_LENGTH } from "@zero2ai/wire";
 ```
 
 Key groups:
@@ -21,7 +21,7 @@ Key groups:
 
 ## Protocol boundary
 
-`pi-wire` does not encode, decode, validate, encrypt, or route frames. It defines the shared contract used at those boundaries:
+`zero2ai-wire` does not encode, decode, validate, encrypt, or route frames. It defines the shared contract used at those boundaries:
 
 1. callers build a `GuestFrame` or `HostFrame`,
 2. transport code serializes it as JSON inside an encrypted payload,

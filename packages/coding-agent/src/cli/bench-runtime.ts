@@ -1,5 +1,5 @@
 /**
- * Shared plumbing for the benchmark-style CLI commands (`omp bench`, `omp if-bench`).
+ * Shared plumbing for the benchmark-style CLI commands (`zero2ai bench`, `zero2ai if-bench`).
  *
  * Owns the three pieces every benchmark command needs before it can talk to a
  * provider: the auth/settings/model-registry runtime, selector → model
@@ -7,7 +7,7 @@
  * landing on an unauthenticated provider), and the injectable `streamSimple`
  * signature tests substitute for a synthetic stream.
  */
-import type { ResolvedThinkingLevel } from "@oh-my-pi/pi-agent-core";
+import type { ResolvedThinkingLevel } from "@zero2ai/agent-core";
 import type {
 	Api,
 	ApiKeyResolver,
@@ -15,10 +15,10 @@ import type {
 	Context,
 	Model,
 	SimpleStreamOptions,
-} from "@oh-my-pi/pi-ai";
-import { buildModelProviderPriorityRank } from "@oh-my-pi/pi-catalog/identity";
-import { getProjectDir, logger } from "@oh-my-pi/pi-utils";
-import chalk from "@oh-my-pi/pi-utils/chalk";
+} from "@zero2ai/ai";
+import { buildModelProviderPriorityRank } from "@zero2ai/catalog/identity";
+import { getProjectDir, logger } from "@zero2ai/utils";
+import chalk from "@zero2ai/utils/chalk";
 import type { ApiKeyResolverModel } from "../config/api-key-resolver";
 import { ModelRegistry } from "../config/model-registry";
 import { formatModelString, getModelMatchPreferences, resolveCliModel } from "../config/model-resolver";

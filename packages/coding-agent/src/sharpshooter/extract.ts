@@ -1,8 +1,8 @@
-import { type } from "@oh-my-pi/omptype";
-import type { AgentMessage } from "@oh-my-pi/pi-agent-core";
-import { completeSimple, Effort, type Model, retryTransientCompletion } from "@oh-my-pi/pi-ai";
-import { clampThinkingLevelForModel } from "@oh-my-pi/pi-catalog/model-thinking";
-import { logger, prompt } from "@oh-my-pi/pi-utils";
+import { type } from "@zero2ai/schema";
+import type { AgentMessage } from "@zero2ai/agent-core";
+import { completeSimple, Effort, type Model, retryTransientCompletion } from "@zero2ai/ai";
+import { clampThinkingLevelForModel } from "@zero2ai/catalog/model-thinking";
+import { logger, prompt } from "@zero2ai/utils";
 import type { ModelRegistry } from "../config/model-registry";
 import { getModelMatchPreferences, resolveModelRoleValue, resolveRoleSelection } from "../config/model-resolver";
 import type { Settings } from "../config/settings";

@@ -4,7 +4,7 @@ import {
 	hashlineFormatNumberedLines,
 	hashlineIsReadTruncationNotice,
 	hashlineStripPrefixes,
-} from "@oh-my-pi/pi-natives";
+} from "@zero2ai/natives";
 
 export const HL_FILE_PREFIX = "[";
 export const HL_FILE_SUFFIX = "]";

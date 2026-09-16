@@ -1,8 +1,8 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import * as vcs from "@oh-my-pi/pi-natives/vcs";
-import { getSecurityProjectDir, isEnoent } from "@oh-my-pi/pi-utils";
-import { withFileLock } from "@oh-my-pi/pi-utils/file-lock";
+import * as vcs from "@zero2ai/natives/vcs";
+import { getSecurityProjectDir, isEnoent } from "@zero2ai/utils";
+import { withFileLock } from "@zero2ai/utils/file-lock";
 import { compareSecurityLineage } from "./comparison";
 import type {
 	SecurityComparisonReport,

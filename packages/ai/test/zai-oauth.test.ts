@@ -1,11 +1,11 @@
 import type { Mock } from "bun:test";
 import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
-import * as AIError from "@oh-my-pi/pi-ai/error";
-import { getProviderDefinition } from "@oh-my-pi/pi-ai/registry";
-import * as nativeSchemeCallback from "@oh-my-pi/pi-ai/registry/oauth/native-scheme-callback";
-import type { NativeSchemeCallbackReceiver } from "@oh-my-pi/pi-ai/registry/oauth/native-scheme-callback";
-import type { OAuthCredentials, OAuthController } from "@oh-my-pi/pi-ai/registry/oauth/types";
-import type { FetchImpl } from "@oh-my-pi/pi-ai/types";
+import * as AIError from "@zero2ai/ai/error";
+import { getProviderDefinition } from "@zero2ai/ai/registry";
+import * as nativeSchemeCallback from "@zero2ai/ai/registry/oauth/native-scheme-callback";
+import type { NativeSchemeCallbackReceiver } from "@zero2ai/ai/registry/oauth/native-scheme-callback";
+import type { OAuthCredentials, OAuthController } from "@zero2ai/ai/registry/oauth/types";
+import type { FetchImpl } from "@zero2ai/ai/types";
 
 const CLIENT_ID = "client_P8X5CMWmlaRO9gyO-KSqtg";
 const AUTHORIZE_URL = "https://chat.z.ai/api/oauth/authorize";
@@ -433,7 +433,7 @@ describe("zai oauth flow", () => {
 		for (const bizReq of requests.slice(2)) {
 			expect(bizReq.authorization).toBe("Bearer biz-token");
 		}
-		// Created OMP's own key name, never ZCode's.
+		// Created ZERO2AI's own key name, never ZCode's.
 		expect(requests[4]?.body).toEqual({ name: "oh-my-pi" });
 	});
 

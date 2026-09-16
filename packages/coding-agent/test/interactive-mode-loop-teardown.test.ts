@@ -1,17 +1,17 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as path from "node:path";
-import { Agent } from "@oh-my-pi/pi-agent-core";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { InteractiveMode } from "@oh-my-pi/pi-coding-agent/modes/interactive-mode";
-import * as loopCondition from "@oh-my-pi/pi-coding-agent/modes/loop-condition";
-import type { LoopConditionVerdict } from "@oh-my-pi/pi-coding-agent/modes/loop-condition";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import type { SubmittedUserInput } from "@oh-my-pi/pi-coding-agent/modes/types";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { postmortem, TempDir } from "@oh-my-pi/pi-utils";
+import { Agent } from "@zero2ai/agent-core";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
+import { InteractiveMode } from "@zero2ai/coding-agent/modes/interactive-mode";
+import * as loopCondition from "@zero2ai/coding-agent/modes/loop-condition";
+import type { LoopConditionVerdict } from "@zero2ai/coding-agent/modes/loop-condition";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import type { SubmittedUserInput } from "@zero2ai/coding-agent/modes/types";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { postmortem, TempDir } from "@zero2ai/utils";
 
 async function flushMicrotasks(): Promise<void> {
 	await Promise.resolve();
@@ -37,7 +37,7 @@ describe("InteractiveMode shutdown during a loop condition gate", () => {
 
 	beforeEach(async () => {
 		resetSettingsForTest();
-		tempDir = TempDir.createSync("@omp-loop-teardown-");
+		tempDir = TempDir.createSync("@zero2ai-loop-teardown-");
 		await Settings.init({ inMemory: true, cwd: tempDir.path() });
 		authStorage = await AuthStorage.create(path.join(tempDir.path(), "auth.db"));
 		const modelRegistry = new ModelRegistry(authStorage);

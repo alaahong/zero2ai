@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { SelectList, type SelectListTheme } from "@oh-my-pi/pi-tui/components/select-list";
-import { KeybindingsManager, setKeybindings, TUI_KEYBINDINGS } from "@oh-my-pi/pi-tui/keybindings";
-import type { SgrMouseEvent } from "@oh-my-pi/pi-tui/mouse";
-import { visibleWidth } from "@oh-my-pi/pi-tui/utils";
+import { SelectList, type SelectListTheme } from "@zero2ai/tui/components/select-list";
+import { KeybindingsManager, setKeybindings, TUI_KEYBINDINGS } from "@zero2ai/tui/keybindings";
+import type { SgrMouseEvent } from "@zero2ai/tui/mouse";
+import { visibleWidth } from "@zero2ai/tui/utils";
 
 const testTheme = {
 	selectedPrefix: (text: string) => text,

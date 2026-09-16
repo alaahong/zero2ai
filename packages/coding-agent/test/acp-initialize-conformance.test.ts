@@ -7,15 +7,15 @@ import { afterEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { type } from "@oh-my-pi/omptype";
-import type { Model } from "@oh-my-pi/pi-ai";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { AcpAgent } from "@oh-my-pi/pi-coding-agent/modes/acp/acp-agent";
-import { ACP_TERMINAL_AUTH_FLAG, prepareAcpTerminalAuthArgs } from "@oh-my-pi/pi-coding-agent/modes/acp/terminal-auth";
-import type { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { getConfigRootDir, setAgentDir, VERSION } from "@oh-my-pi/pi-utils";
-import type { AgentSideConnection, InitializeRequest } from "@oh-my-pi/pi-utils/acp";
+import { type } from "@zero2ai/schema";
+import type { Model } from "@zero2ai/ai";
+import { buildModel } from "@zero2ai/catalog/build";
+import { AcpAgent } from "@zero2ai/coding-agent/modes/acp/acp-agent";
+import { ACP_TERMINAL_AUTH_FLAG, prepareAcpTerminalAuthArgs } from "@zero2ai/coding-agent/modes/acp/terminal-auth";
+import type { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { getConfigRootDir, setAgentDir, VERSION } from "@zero2ai/utils";
+import type { AgentSideConnection, InitializeRequest } from "@zero2ai/utils/acp";
 import { expectAcpStructure } from "./helpers/acp-schema";
 
 const arkInitializeResponse = type({
@@ -126,7 +126,7 @@ class FakeAgentSession {
 }
 
 const cleanupRoots: string[] = [];
-const originalAgentDir = process.env.PI_CODING_AGENT_DIR;
+const originalAgentDir = process.env.ZERO2AI_CODING_AGENT_DIR;
 const fallbackAgentDir = path.join(getConfigRootDir(), "agent");
 
 afterEach(async () => {
@@ -134,7 +134,7 @@ afterEach(async () => {
 		setAgentDir(originalAgentDir);
 	} else {
 		setAgentDir(fallbackAgentDir);
-		delete process.env.PI_CODING_AGENT_DIR;
+		delete process.env.ZERO2AI_CODING_AGENT_DIR;
 	}
 	for (const root of cleanupRoots.splice(0)) {
 		await fs.promises.rm(root, { recursive: true, force: true });
@@ -142,7 +142,7 @@ afterEach(async () => {
 });
 
 async function createAgent(): Promise<AcpAgent> {
-	const root = await fs.promises.mkdtemp(path.join(os.tmpdir(), "omp-acp-init-"));
+	const root = await fs.promises.mkdtemp(path.join(os.tmpdir(), "zero2ai-acp-init-"));
 	cleanupRoots.push(root);
 	const agentDir = path.join(root, "agent");
 	const cwd = path.join(root, "cwd");

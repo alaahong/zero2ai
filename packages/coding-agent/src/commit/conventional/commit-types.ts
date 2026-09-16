@@ -1,4 +1,4 @@
-import { isRecord } from "@oh-my-pi/pi-utils";
+import { isRecord } from "@zero2ai/utils";
 import type {
 	ChangelogCategory,
 	CommitType,

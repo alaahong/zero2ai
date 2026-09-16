@@ -2,8 +2,8 @@
 
 The auth broker and auth gateway are two cooperating HTTP services that move OAuth refresh tokens and provider access tokens off developer laptops and into a single broker host.
 
-- **`omp auth-broker serve`** holds the canonical SQLite credential vault, performs OAuth refreshes, and exposes snapshot, credential, block, usage, and health APIs under `/v1`.
-- **`omp auth-gateway serve`** is a forward-proxy. It accepts OpenAI Chat Completions, Anthropic Messages, OpenAI Responses, and pi-native stream requests, resolves the broker-backed credential, and dispatches through `pi-ai` provider logic. Clients (containerised omp, llm-git, the macOS usage widget, …) never see the access token.
+- **`zero2ai auth-broker serve`** holds the canonical SQLite credential vault, performs OAuth refreshes, and exposes snapshot, credential, block, usage, and health APIs under `/v1`.
+- **`zero2ai auth-gateway serve`** is a forward-proxy. It accepts OpenAI Chat Completions, Anthropic Messages, OpenAI Responses, and zero2ai-native stream requests, resolves the broker-backed credential, and dispatches through `zero2ai-ai` provider logic. Clients (containerised zero2ai, llm-git, the macOS usage widget, …) never see the access token.
 
 Transport security between operator, broker, and gateway is delegated to the operator (Tailscale / Wireguard / reverse proxy + TLS). Every endpoint except `/v1/healthz` (broker) and `/healthz` (gateway) requires a bearer token.
 
@@ -16,7 +16,7 @@ Source: `packages/ai/src/auth-broker/`, `packages/ai/src/auth-gateway/`, `packag
                 │ broker host                                                │
                 │                                                            │
   developer ──▶ │  ┌──────────────────────────┐    ┌────────────────────┐    │
-  laptop /      │  │  omp auth-broker serve   │◀──▶│  SQLite agent.db    │    │
+  laptop /      │  │  zero2ai auth-broker serve   │◀──▶│  SQLite agent.db    │    │
   CI / robomp   │  │  - holds refresh tokens  │    │  (canonical writer)│    │
                 │  │  - background refresher  │    └────────────────────┘    │
                 │  │  /v1/{snapshot,refresh,…}│                              │
@@ -24,7 +24,7 @@ Source: `packages/ai/src/auth-broker/`, `packages/ai/src/auth-gateway/`, `packag
                 │            │  bearer ($CONFIG_DIR/auth-broker.token)       │
                 │            ▼                                               │
                 │  ┌──────────────────────────┐                              │
-                │  │  omp auth-gateway serve  │  RemoteAuthCredentialStore   │
+                │  │  zero2ai auth-gateway serve  │  RemoteAuthCredentialStore   │
                 │  │  /v1/{chat,messages,…}   │  receives snapshot stream,   │
                 │  │  /v1/usage,/v1/models    │  refreshes credentials by id │
                 │  │  /v1/credentials/check   │  via the broker on expiry    │
@@ -39,29 +39,29 @@ Source: `packages/ai/src/auth-broker/`, `packages/ai/src/auth-gateway/`, `packag
                   api.anthropic.com / api.openai.com / …
 ```
 
-The broker is the only writer of OAuth refresh tokens. Clients (including the gateway itself) load a redacted snapshot in which every `refresh` field has been replaced with `REMOTE_REFRESH_SENTINEL`; when an access token expires the client calls `POST /v1/credential/:id/refresh` and the broker performs the refresh server-side. `RemoteAuthCredentialStore` rejects local replace/upsert/delete-by-provider mutations, with errors pointing at `omp auth-broker login` / `omp auth-broker logout`.
+The broker is the only writer of OAuth refresh tokens. Clients (including the gateway itself) load a redacted snapshot in which every `refresh` field has been replaced with `REMOTE_REFRESH_SENTINEL`; when an access token expires the client calls `POST /v1/credential/:id/refresh` and the broker performs the refresh server-side. `RemoteAuthCredentialStore` rejects local replace/upsert/delete-by-provider mutations, with errors pointing at `zero2ai auth-broker login` / `zero2ai auth-broker logout`.
 
 ## auth-broker
 
 ### CLI
 
 ```
-omp auth-broker serve     [--bind=host:port]                    # boot the broker
-omp auth-broker token     [--regenerate] [--json]               # print or rotate the bearer token
-omp auth-broker login     [<provider>] [--via=user@host] [--dry-run]
-omp auth-broker logout    [<provider>]
-omp auth-broker list      [--json]
-omp auth-broker import    <file|dir> [--provider=<id>] [--include-disabled] [--dry-run] [--json]
-omp auth-broker migrate   --from-local [--include-oauth] [--include-env] [--dry-run] [--json]
-omp auth-broker status    [--json]
+zero2ai auth-broker serve     [--bind=host:port]                    # boot the broker
+zero2ai auth-broker token     [--regenerate] [--json]               # print or rotate the bearer token
+zero2ai auth-broker login     [<provider>] [--via=user@host] [--dry-run]
+zero2ai auth-broker logout    [<provider>]
+zero2ai auth-broker list      [--json]
+zero2ai auth-broker import    <file|dir> [--provider=<id>] [--include-disabled] [--dry-run] [--json]
+zero2ai auth-broker migrate   --from-local [--include-oauth] [--include-env] [--dry-run] [--json]
+zero2ai auth-broker status    [--json]
 ```
 
 - `serve` opens the local SQLite store at `getAgentDbPath()` and binds an HTTP listener (default `127.0.0.1:8765`). On startup a token is ensured at `<config-dir>/auth-broker.token` (mode `0600`, `0700` parent dir). The background refresher refreshes any OAuth credential whose `expires - Date.now() < refreshSkewMs` (default 5 min) every `refreshIntervalMs` (default 60 s).
 - `token` prints the cached bearer or generates a new one. `--regenerate` rotates it.
-- `login [<provider>]` runs the per-provider OAuth flow locally — when no provider is supplied, it falls back to an interactive numbered picker. With `--via=user@host` it shells out `ssh -L <callback-port>:127.0.0.1:<callback-port> user@host omp auth-broker login <provider>` so the OAuth callback hits the local browser but the credential is written on the broker host (`--via` requires `<provider>`). Built-in callback ports: `anthropic:54545`, `openai-codex:1455`, `google-gemini-cli:8085`, `google-antigravity:51121`, `gitlab-duo:8080`, `devin:59653`, `gitlab-duo-agent:8080`, `zai-coding-plan:9999`. The OAuth dance is driven in-process via `AuthStorage.login()` — there is no longer a `pi-ai` bin to spawn.
+- `login [<provider>]` runs the per-provider OAuth flow locally — when no provider is supplied, it falls back to an interactive numbered picker. With `--via=user@host` it shells out `ssh -L <callback-port>:127.0.0.1:<callback-port> user@host zero2ai auth-broker login <provider>` so the OAuth callback hits the local browser but the credential is written on the broker host (`--via` requires `<provider>`). Built-in callback ports: `anthropic:54545`, `openai-codex:1455`, `google-gemini-cli:8085`, `google-antigravity:51121`, `gitlab-duo:8080`, `devin:59653`, `gitlab-duo-agent:8080`, `zai-coding-plan:9999`. The OAuth dance is driven in-process via `AuthStorage.login()` — there is no longer a `zero2ai-ai` bin to spawn.
 - `logout [<provider>]` deletes every credential row for `<provider>`. With no argument it shows an interactive numbered picker of currently-stored providers.
 - `list` enumerates every registered OAuth provider id/name (the union of built-ins + `registerOAuthProvider` custom providers). `--json` emits a machine-readable array.
-- `import <file|dir>` imports CLIProxyAPI-style JSON credentials into the local SQLite store. Maps `type` field → omp provider (`claude → anthropic`, `codex → openai-codex`, `gemini → google-gemini-cli`, `antigravity → google-antigravity`, `gemini-cli → google-gemini-cli`).
+- `import <file|dir>` imports CLIProxyAPI-style JSON credentials into the local SQLite store. Maps `type` field → zero2ai provider (`claude → anthropic`, `codex → openai-codex`, `gemini → google-gemini-cli`, `antigravity → google-antigravity`, `gemini-cli → google-gemini-cli`).
 - `migrate --from-local` uploads local SQLite credentials to the configured broker (`POST /v1/credential`). Local API keys are included by default; local OAuth rows are skipped unless `--include-oauth` is set; environment-derived API keys are skipped unless `--include-env` is set. Re-runs are idempotent against the broker snapshot.
 - `status` health-pings the configured remote broker.
 
@@ -105,17 +105,17 @@ response state machine is:
 
 Every `200`, `304`, and `499` snapshot response carries the current generation
 as a quoted `ETag`, plus `Cache-Control: no-store` and
-`Vary: OMP-Auth-Broker-Capabilities`.
+`Vary: ZERO2AI-Auth-Broker-Capabilities`.
 
 ### Codex block-scope compatibility
 
-Clients that understand per-meter Codex blocks send `OMP-Auth-Broker-Capabilities: codex-meter-block-scopes`. Snapshot responses then carry the canonical `chat` and `spark` scopes. Without that capability, the broker projects those rows to the legacy `shared` scope on the wire.
+Clients that understand per-meter Codex blocks send `ZERO2AI-Auth-Broker-Capabilities: codex-meter-block-scopes`. Snapshot responses then carry the canonical `chat` and `spark` scopes. Without that capability, the broker projects those rows to the legacy `shared` scope on the wire.
 
 Local SQLite schema 7 keeps `chat` and `spark` as the canonical scopes exposed by current store APIs. It also maintains a physical `shared` compatibility mirror for pre-meter binaries that read `agent.db` directly. SQLite triggers derive that mirror's deadline and update time independently from the meter rows, and copy a legacy process's `shared` writes back to both meters. Current store APIs omit the physical mirror, so broker snapshots and model selection do not double-count it.
 
 Clients released before this capability, including 17.1.4, receive the conservative `shared` projection until they are upgraded. Those clients are indistinguishable on the existing wire, so mixed-version deployments favor keeping a rate-limited credential blocked over allowing repeated provider requests and 429 responses.
 
-Capability-dependent responses include `Vary: OMP-Auth-Broker-Capabilities` so intermediaries do not reuse one representation for another client. The encrypted client snapshot cache also uses a new format version: older cache files are ignored and fetched again, preventing legacy and meter-scoped representations from being mixed across client versions.
+Capability-dependent responses include `Vary: ZERO2AI-Auth-Broker-Capabilities` so intermediaries do not reuse one representation for another client. The encrypted client snapshot cache also uses a new format version: older cache files are ignored and fetched again, preventing legacy and meter-scoped representations from being mixed across client versions.
 
 ### Background refresher
 
@@ -129,13 +129,13 @@ Capability-dependent responses include `Vary: OMP-Auth-Broker-Capabilities` so i
 ### CLI
 
 ```
-omp auth-gateway serve   [--bind=host:port] [--no-auth]
-omp auth-gateway token   [--regenerate] [--json]
-omp auth-gateway status  [--json]
-omp auth-gateway check   [--strict] [--json]
+zero2ai auth-gateway serve   [--bind=host:port] [--no-auth]
+zero2ai auth-gateway token   [--regenerate] [--json]
+zero2ai auth-gateway status  [--json]
+zero2ai auth-gateway check   [--strict] [--json]
 ```
 
-- `serve` requires `OMP_AUTH_BROKER_URL` (or `auth.broker.url` in `config.yml`) — the gateway is itself a broker client. It calls `AuthBrokerClient.fetchSnapshot()`, wraps it in `RemoteAuthCredentialStore`, and constructs an `AuthStorage` that resolves access tokens through the broker. Default bind is `127.0.0.1:4000`. The gateway token is stored at `<config-dir>/auth-gateway.token` (`0600`); `--no-auth` disables the bearer check entirely (loopback-only use).
+- `serve` requires `ZERO2AI_AUTH_BROKER_URL` (or `auth.broker.url` in `config.yml`) — the gateway is itself a broker client. It calls `AuthBrokerClient.fetchSnapshot()`, wraps it in `RemoteAuthCredentialStore`, and constructs an `AuthStorage` that resolves access tokens through the broker. Default bind is `127.0.0.1:4000`. The gateway token is stored at `<config-dir>/auth-gateway.token` (`0600`); `--no-auth` disables the bearer check entirely (loopback-only use).
 - `token` / `status` manage and inspect the gateway bearer token and upstream broker readiness.
 - `check` probes broker-backed credentials through the gateway store. Without `--strict` it uses provider usage probes; `--strict` also exercises each credential against its chat-completion endpoint and can consume a small amount of quota.
 
@@ -150,11 +150,11 @@ omp auth-gateway check   [--strict] [--json]
 | `POST` | `/v1/chat/completions`  | bearer | OpenAI Chat Completions wire format                          |
 | `POST` | `/v1/messages`          | bearer | Anthropic Messages wire format                               |
 | `POST` | `/v1/responses`         | bearer | OpenAI Responses wire format                                 |
-| `POST` | `/v1/pi/stream`         | bearer | Native `pi-ai` stream wire format                            |
+| `POST` | `/v1/pi/stream`         | bearer | Native `zero2ai-ai` stream wire format                            |
 
-The model id is read from the top-level `model` field for foreign wire formats and from the pi-native request body for `/v1/pi/stream`. The gateway picks the first bundled `Model<Api>` matching that id, parses the inbound wire format into an omp `Context`, resolves the provider credential from broker-backed `AuthStorage`, dispatches through `streamSimple()`, and re-encodes the result to the inbound format (SSE for streamed responses).
+The model id is read from the top-level `model` field for foreign wire formats and from the zero2ai-native request body for `/v1/pi/stream`. The gateway picks the first bundled `Model<Api>` matching that id, parses the inbound wire format into an zero2ai `Context`, resolves the provider credential from broker-backed `AuthStorage`, dispatches through `streamSimple()`, and re-encodes the result to the inbound format (SSE for streamed responses).
 
-There is no raw provider passthrough path. All supported routes go through `pi-ai` provider logic so credential-specific request shaping, OAuth refresh-on-auth-error, and provider quirks stay centralized.
+There is no raw provider passthrough path. All supported routes go through `zero2ai-ai` provider logic so credential-specific request shaping, OAuth refresh-on-auth-error, and provider quirks stay centralized.
 
 `idleTimeout` on the underlying `Bun.serve` is set to `255 s` so long thinking-budget calls do not get killed by Bun’s default idle timeout.
 
@@ -180,15 +180,15 @@ The 15 s client window deliberately sits below the broker’s 5 min server cache
 
 ## Client snapshot cache
 
-`discoverAuthStorage()` persists the broker snapshot to `~/.omp/cache/auth-broker-snapshot.enc` after the initial `/v1/snapshot` fetch and after later broker-sourced full snapshots. The file is AES-256-GCM encrypted with `SHA-256(OMP_AUTH_BROKER_TOKEN)` and authenticated with the broker URL as additional data, so changing either the token or URL makes the cache unreadable. The file is written atomically with mode `0600`.
+`discoverAuthStorage()` persists the broker snapshot to `~/.zero2ai/cache/auth-broker-snapshot.enc` after the initial `/v1/snapshot` fetch and after later broker-sourced full snapshots. The file is AES-256-GCM encrypted with `SHA-256(ZERO2AI_AUTH_BROKER_TOKEN)` and authenticated with the broker URL as additional data, so changing either the token or URL makes the cache unreadable. The file is written atomically with mode `0600`.
 
-Freshness is anchored to the broker-stamped `snapshot.generatedAt`, not local write time. Default TTL is 1 h (`OMP_AUTH_BROKER_SNAPSHOT_TTL_MS`); `0` disables cache reads and writes. A fresh cache is revalidated against a reachable broker with a 500 ms startup budget, so an imported, revoked, or rotated credential is visible to one-shot commands immediately. If revalidation fails because the broker is unavailable or slow, `omp` starts from the cache and `RemoteAuthCredentialStore` continues normal SSE / long-poll synchronization in the background. Expired OAuth access tokens still refresh through `POST /v1/credential/:id/refresh`.
+Freshness is anchored to the broker-stamped `snapshot.generatedAt`, not local write time. Default TTL is 1 h (`ZERO2AI_AUTH_BROKER_SNAPSHOT_TTL_MS`); `0` disables cache reads and writes. A fresh cache is revalidated against a reachable broker with a 500 ms startup budget, so an imported, revoked, or rotated credential is visible to one-shot commands immediately. If revalidation fails because the broker is unavailable or slow, `zero2ai` starts from the cache and `RemoteAuthCredentialStore` continues normal SSE / long-poll synchronization in the background. Expired OAuth access tokens still refresh through `POST /v1/credential/:id/refresh`.
 
 If the broker is down at boot and a fresh cache exists, startup succeeds from the cached snapshot. Authentication failures (401/403) are not masked by the cache; transient server errors fall back to it. If the cache is missing, expired, corrupt, written for a different URL, or encrypted with a different token, startup falls back to the live fetch and fails if the broker is unreachable.
 
 ## Client account pools (routing, not authorization)
 
-Broker clients can restrict their visible OAuth accounts by setting `OMP_AUTH_BROKER_ACCOUNT_POOL_FILE` to a JSON file. The file maps provider IDs to exact `identityKey` values from the broker snapshot protocol:
+Broker clients can restrict their visible OAuth accounts by setting `ZERO2AI_AUTH_BROKER_ACCOUNT_POOL_FILE` to a JSON file. The file maps provider IDs to exact `identityKey` values from the broker snapshot protocol:
 
 ```json
 {
@@ -212,41 +212,41 @@ This is a **trusted-client routing policy, not an authorization boundary**. The 
 
 ## Operator opt-in
 
-The broker is **off** unless `OMP_AUTH_BROKER_URL` (or `auth.broker.url` in `config.yml`) is set. When set, `discoverAuthStorage` in `packages/coding-agent/src/sdk.ts` swaps the local SQLite credential store for `RemoteAuthCredentialStore` and every API call resolves credentials through the broker.
+The broker is **off** unless `ZERO2AI_AUTH_BROKER_URL` (or `auth.broker.url` in `config.yml`) is set. When set, `discoverAuthStorage` in `packages/coding-agent/src/sdk.ts` swaps the local SQLite credential store for `RemoteAuthCredentialStore` and every API call resolves credentials through the broker.
 
 ### Environment variables
 
 | Variable                            | Purpose                                                                                                                                                                | Required when                                                                                                             |
 | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `OMP_AUTH_BROKER_URL`               | Base URL of the remote auth-broker (e.g. `https://broker.tailnet:8765`). Selecting this puts the client in broker mode — local SQLite is bypassed.                     | Any time the omp client should resolve credentials through a broker (and required by `omp auth-gateway serve`).           |
-| `OMP_AUTH_BROKER_TOKEN`             | Bearer token used for every broker endpoint except `/v1/healthz`.                                                                                                      | When `OMP_AUTH_BROKER_URL` is set and no token is available from `auth.broker.token` or `<config-dir>/auth-broker.token`. |
-| `OMP_AUTH_BROKER_SNAPSHOT_TTL_MS`   | Freshness window for the encrypted local snapshot cache. Default `3600000` (1 h); `0` disables cache reads and writes.                                                 | Optional in broker mode.                                                                                                  |
-| `OMP_AUTH_BROKER_SNAPSHOT_CACHE`    | Path override for the encrypted local snapshot cache. Default `~/.omp/cache/auth-broker-snapshot.enc` (or XDG cache equivalent).                                       | Optional in broker mode.                                                                                                  |
-| `OMP_AUTH_BROKER_ACCOUNT_POOL_FILE` | JSON file mapping provider IDs to OAuth `identityKey` values visible to this trusted client. Parsed once; invalid files abort initialization. API keys are unaffected. | Optional in broker mode.                                                                                                  |
+| `ZERO2AI_AUTH_BROKER_URL`               | Base URL of the remote auth-broker (e.g. `https://broker.tailnet:8765`). Selecting this puts the client in broker mode — local SQLite is bypassed.                     | Any time the zero2ai client should resolve credentials through a broker (and required by `zero2ai auth-gateway serve`).           |
+| `ZERO2AI_AUTH_BROKER_TOKEN`             | Bearer token used for every broker endpoint except `/v1/healthz`.                                                                                                      | When `ZERO2AI_AUTH_BROKER_URL` is set and no token is available from `auth.broker.token` or `<config-dir>/auth-broker.token`. |
+| `ZERO2AI_AUTH_BROKER_SNAPSHOT_TTL_MS`   | Freshness window for the encrypted local snapshot cache. Default `3600000` (1 h); `0` disables cache reads and writes.                                                 | Optional in broker mode.                                                                                                  |
+| `ZERO2AI_AUTH_BROKER_SNAPSHOT_CACHE`    | Path override for the encrypted local snapshot cache. Default `~/.zero2ai/cache/auth-broker-snapshot.enc` (or XDG cache equivalent).                                       | Optional in broker mode.                                                                                                  |
+| `ZERO2AI_AUTH_BROKER_ACCOUNT_POOL_FILE` | JSON file mapping provider IDs to OAuth `identityKey` values visible to this trusted client. Parsed once; invalid files abort initialization. API keys are unaffected. | Optional in broker mode.                                                                                                  |
 
 Resolution order in `resolveAuthBrokerConfig()`:
 
-1. `OMP_AUTH_BROKER_URL` env (else `auth.broker.url` from `config.yml`, resolved through `resolveConfigValue`);
-2. `OMP_AUTH_BROKER_TOKEN` env (else `auth.broker.token` from `config.yml`, else `<config-dir>/auth-broker.token`);
+1. `ZERO2AI_AUTH_BROKER_URL` env (else `auth.broker.url` from `config.yml`, resolved through `resolveConfigValue`);
+2. `ZERO2AI_AUTH_BROKER_TOKEN` env (else `auth.broker.token` from `config.yml`, else `<config-dir>/auth-broker.token`);
 3. URL set but no token resolvable → hard error pointing at the token file path.
 
-The gateway has no dedicated env vars — it inherits `OMP_AUTH_BROKER_*` because it is itself a broker client.
+The gateway has no dedicated env vars — it inherits `ZERO2AI_AUTH_BROKER_*` because it is itself a broker client.
 
 ### `config.yml` keys
 
 | Key                 | Default | Purpose                                                                                                                                                                            |
 | ------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auth.broker.url`   | unset   | Same as `OMP_AUTH_BROKER_URL`; env wins. Hidden from the settings UI. Values are resolved as a literal, an environment variable name, or `!<shell command>` to use trimmed stdout. |
-| `auth.broker.token` | unset   | Same as `OMP_AUTH_BROKER_TOKEN`; env wins. Values are resolved the same way.                                                                                                       |
+| `auth.broker.url`   | unset   | Same as `ZERO2AI_AUTH_BROKER_URL`; env wins. Hidden from the settings UI. Values are resolved as a literal, an environment variable name, or `!<shell command>` to use trimmed stdout. |
+| `auth.broker.token` | unset   | Same as `ZERO2AI_AUTH_BROKER_TOKEN`; env wins. Values are resolved the same way.                                                                                                       |
 
 ### Token files
 
 | Path                              | Owner                                                | Mode                          |
 | --------------------------------- | ---------------------------------------------------- | ----------------------------- |
-| `<config-dir>/auth-broker.token`  | `omp auth-broker serve` (created at first start)     | `0600` in a `0700` parent dir |
-| `<config-dir>/auth-gateway.token` | `omp auth-gateway serve` (skipped under `--no-auth`) | `0600` in a `0700` parent dir |
+| `<config-dir>/auth-broker.token`  | `zero2ai auth-broker serve` (created at first start)     | `0600` in a `0700` parent dir |
+| `<config-dir>/auth-gateway.token` | `zero2ai auth-gateway serve` (skipped under `--no-auth`) | `0600` in a `0700` parent dir |
 
-`<config-dir>` resolves to `~/.omp/` (respecting `PI_CONFIG_DIR`).
+`<config-dir>` resolves to `~/.zero2ai/` (respecting `ZERO2AI_CONFIG_DIR`).
 
 ## Interaction with the local API-key resolution order
 
@@ -256,6 +256,6 @@ The broker only owns OAuth credentials and provider-API-key credentials that wer
 
 ## See also
 
-- [`secrets.md`](./secrets.md) — secret obfuscation around tokens that _do_ leak through (e.g. `OMP_AUTH_BROKER_TOKEN` in shell output).
+- [`secrets.md`](./secrets.md) — secret obfuscation around tokens that _do_ leak through (e.g. `ZERO2AI_AUTH_BROKER_TOKEN` in shell output).
 - [`models.md`](./models.md) — provider auth resolution order; the broker supplies the stored-credential layers.
-- [`environment-variables.md`](./environment-variables.md) — full env reference including `OMP_AUTH_BROKER_URL` / `OMP_AUTH_BROKER_TOKEN`.
+- [`environment-variables.md`](./environment-variables.md) — full env reference including `ZERO2AI_AUTH_BROKER_URL` / `ZERO2AI_AUTH_BROKER_TOKEN`.

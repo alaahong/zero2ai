@@ -1,12 +1,12 @@
 /**
  * Grep CLI command handlers.
  *
- * Handles `omp grep` subcommand for testing grep tool on Windows.
+ * Handles `zero2ai grep` subcommand for testing grep tool on Windows.
  */
 import * as path from "node:path";
-import { GrepOutputMode, grep } from "@oh-my-pi/pi-natives";
-import { APP_NAME } from "@oh-my-pi/pi-utils";
-import chalk from "@oh-my-pi/pi-utils/chalk";
+import { GrepOutputMode, grep } from "@zero2ai/natives";
+import { APP_NAME } from "@zero2ai/utils";
+import chalk from "@zero2ai/utils/chalk";
 import { expandPath } from "../tools/path-utils";
 
 export interface GrepCommandArgs {
@@ -151,7 +151,7 @@ ${chalk.bold("Options:")}
   --no-gitignore        Include files excluded by .gitignore
 
 ${chalk.bold("Environment:")}
-  PI_WALK_WORKERS=N    Set filesystem walker workers (default 4, 0 = auto)
+  ZERO2AI_WALK_WORKERS=N    Set filesystem walker workers (default 4, 0 = auto)
 
 ${chalk.bold("Examples:")}
   ${APP_NAME} grep "import" src/

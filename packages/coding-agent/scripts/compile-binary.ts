@@ -1,6 +1,6 @@
-// Deep import: the pi-utils barrel loads the host native addon, which is
+// Deep import: the zero2ai-utils barrel loads the host native addon, which is
 // absent on cross-compiling release runners.
-import { USER_AGENT } from "@oh-my-pi/pi-utils/dirs";
+import { USER_AGENT } from "@zero2ai/utils/dirs";
 import { buildDocsIndexPayload } from "./generate-docs-index";
 import { createLegacyPiVirtualModulePlugin } from "./legacy-pi-virtual-module";
 
@@ -42,12 +42,12 @@ export async function compileCodingAgent(options: CodingAgentCompileOptions): Pr
 			root: options.repoRoot,
 			external: [...COMPILED_EXTERNAL_DEPENDENCIES],
 			define: {
-				"process.env.PI_COMPILED": JSON.stringify("true"),
-				"process.env.PI_TINY_TRANSFORMERS_VERSION": JSON.stringify(options.transformersVersion),
-				"process.env.PI_DOCS_EMBED": JSON.stringify((await buildDocsIndexPayload()).payload),
+				"process.env.ZERO2AI_COMPILED": JSON.stringify("true"),
+				"process.env.ZERO2AI_TINY_TRANSFORMERS_VERSION": JSON.stringify(options.transformersVersion),
+				"process.env.ZERO2AI_DOCS_EMBED": JSON.stringify((await buildDocsIndexPayload()).payload),
 			},
 			// Precompiled bytecode skips parsing the ~20 MB bundle at boot:
-			// `omp --version` 256 ms -> 30 ms on M4 Max (+52 MB binary).
+			// `zero2ai --version` 256 ms -> 30 ms on M4 Max (+52 MB binary).
 			// Bytecode rejects top-level await in the bundle graph.
 			bytecode: true,
 			minify: {

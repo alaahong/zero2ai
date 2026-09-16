@@ -13,12 +13,12 @@ import {
 	disableUserSource,
 	enableProvider,
 	enableUserSource,
-} from "@oh-my-pi/pi-coding-agent/capability";
-import { clearCache as clearFsCache } from "@oh-my-pi/pi-coding-agent/capability/fs";
-import { resolveAgentModelPatterns } from "@oh-my-pi/pi-coding-agent/config/model-resolver";
-import { clearClaudePluginRootsCache } from "@oh-my-pi/pi-coding-agent/discovery/helpers";
-import { discoverAgents } from "@oh-my-pi/pi-coding-agent/task/discovery";
-import { removeSyncWithRetries } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/capability";
+import { clearCache as clearFsCache } from "@zero2ai/coding-agent/capability/fs";
+import { resolveAgentModelPatterns } from "@zero2ai/coding-agent/config/model-resolver";
+import { clearClaudePluginRootsCache } from "@zero2ai/coding-agent/discovery/helpers";
+import { discoverAgents } from "@zero2ai/coding-agent/task/discovery";
+import { removeSyncWithRetries } from "@zero2ai/utils";
 import { restoreEnvValue } from "../helpers/settings-test-state";
 const PLUGIN_AGENT_MD = [
 	"---",
@@ -37,7 +37,7 @@ describe("discoverAgents — claude-plugins disabled provider", () => {
 		originalClaudeConfigDir = process.env.CLAUDE_CONFIG_DIR;
 		delete process.env.CLAUDE_CONFIG_DIR;
 		delete Bun.env.CLAUDE_CONFIG_DIR;
-		tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "pi-agent-disco-home-"));
+		tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-agent-disco-home-"));
 
 		// Build a fake Claude plugin install with an agents/ subdirectory.
 		const pluginInstallPath = path.join(tempHome, "plugin-cache", "code-simplifier");

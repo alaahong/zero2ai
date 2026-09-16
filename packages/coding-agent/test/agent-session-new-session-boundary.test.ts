@@ -1,17 +1,17 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it, spyOn } from "bun:test";
 import * as path from "node:path";
-import { Agent, AppendOnlyContextManager } from "@oh-my-pi/pi-agent-core";
-import type { AssistantMessage } from "@oh-my-pi/pi-ai";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { ExtensionRuntime, loadExtensionFromFactory } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/loader";
-import { ExtensionRunner } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/runner";
-import type { ExtensionAPI } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/types";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { EventBus } from "@oh-my-pi/pi-coding-agent/utils/event-bus";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { Agent, AppendOnlyContextManager } from "@zero2ai/agent-core";
+import type { AssistantMessage } from "@zero2ai/ai";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { ExtensionRuntime, loadExtensionFromFactory } from "@zero2ai/coding-agent/extensibility/extensions/loader";
+import { ExtensionRunner } from "@zero2ai/coding-agent/extensibility/extensions/runner";
+import type { ExtensionAPI } from "@zero2ai/coding-agent/extensibility/extensions/types";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { EventBus } from "@zero2ai/coding-agent/utils/event-bus";
+import { TempDir } from "@zero2ai/utils";
 import { assistantMsg } from "./utilities";
 
 const cleanup: Array<() => Promise<void>> = [];
@@ -20,7 +20,7 @@ let authStorage: AuthStorage;
 let modelRegistry: ModelRegistry;
 
 async function setup(): Promise<void> {
-	sharedDir = TempDir.createSync("@pi-new-session-boundary-shared-");
+	sharedDir = TempDir.createSync("@zero2ai-new-session-boundary-shared-");
 	authStorage = await AuthStorage.create(path.join(sharedDir.path(), "auth.db"));
 	modelRegistry = new ModelRegistry(authStorage, path.join(sharedDir.path(), "models.yml"));
 }
@@ -36,7 +36,7 @@ async function createHarness(options?: {
 		register: (api: ExtensionAPI) => void;
 	};
 }): Promise<{ agent: Agent; session: AgentSession; sessionManager: SessionManager }> {
-	const tempDir = TempDir.createSync("@pi-new-session-boundary-");
+	const tempDir = TempDir.createSync("@zero2ai-new-session-boundary-");
 	const cwd = tempDir.path();
 	const sessionManager = SessionManager.create(cwd, path.join(cwd, "sessions"));
 	const agent = new Agent({

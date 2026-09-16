@@ -1,7 +1,7 @@
 import * as path from "node:path";
-import type { AgentToolResult } from "@oh-my-pi/pi-agent-core";
-import * as vcs from "@oh-my-pi/pi-natives/vcs";
-import { untilAborted } from "@oh-my-pi/pi-utils";
+import type { AgentToolResult } from "@zero2ai/agent-core";
+import * as vcs from "@zero2ai/natives/vcs";
+import { untilAborted } from "@zero2ai/utils";
 import { github } from "../utils/github";
 import type { ToolSession } from ".";
 import type { GhToolDetails } from "./gh";

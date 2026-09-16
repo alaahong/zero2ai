@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { createAgentSession } from "@oh-my-pi/pi-coding-agent/sdk";
-import type { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
+import { createAgentSession } from "@zero2ai/coding-agent/sdk";
+import type { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { TempDir } from "@zero2ai/utils";
 import { createInMemoryAuthStorage } from "./helpers/agent-session-setup";
 
 describe("goal tool registration when goal mode is enabled at runtime", () => {
@@ -14,7 +14,7 @@ describe("goal tool registration when goal mode is enabled at runtime", () => {
 
 	beforeEach(async () => {
 		resetSettingsForTest();
-		tempDir = TempDir.createSync("@pi-repro-9444-");
+		tempDir = TempDir.createSync("@zero2ai-repro-9444-");
 		await Settings.init({ inMemory: true, cwd: tempDir.path() });
 	});
 

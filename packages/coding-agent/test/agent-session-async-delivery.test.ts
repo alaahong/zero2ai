@@ -7,31 +7,31 @@
  */
 import { afterEach, describe, expect, it, vi } from "bun:test";
 import * as path from "node:path";
-import { Agent } from "@oh-my-pi/pi-agent-core";
-import type { ImageContent } from "@oh-my-pi/pi-ai";
-import { createMockModel } from "@oh-my-pi/pi-ai/providers/mock";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { AsyncJobManager } from "@oh-my-pi/pi-coding-agent/async";
-import type { AsyncJob } from "@oh-my-pi/pi-coding-agent/async/job-manager";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { DaemonCompletionNotification } from "@oh-my-pi/pi-coding-agent/launch/protocol";
-import { buildAsyncResultBlock } from "@oh-my-pi/pi-coding-agent/modes/utils/transcript-render-helpers";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { ArtifactManager } from "@oh-my-pi/pi-coding-agent/session/artifacts";
+import { Agent } from "@zero2ai/agent-core";
+import type { ImageContent } from "@zero2ai/ai";
+import { createMockModel } from "@zero2ai/ai/providers/mock";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { AsyncJobManager } from "@zero2ai/coding-agent/async";
+import type { AsyncJob } from "@zero2ai/coding-agent/async/job-manager";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import type { DaemonCompletionNotification } from "@zero2ai/coding-agent/launch/protocol";
+import { buildAsyncResultBlock } from "@zero2ai/coding-agent/modes/utils/transcript-render-helpers";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { ArtifactManager } from "@zero2ai/coding-agent/session/artifacts";
 import {
 	buildAsyncResultBatchMessage,
 	type AsyncResultEntry,
-} from "@oh-my-pi/pi-coding-agent/session/async-job-delivery";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { convertToLlm, type CustomMessage } from "@oh-my-pi/pi-coding-agent/session/messages";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
+} from "@zero2ai/coding-agent/session/async-job-delivery";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { convertToLlm, type CustomMessage } from "@zero2ai/coding-agent/session/messages";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
 
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { formatOutputNotice, type OutputMeta } from "@oh-my-pi/pi-coding-agent/tools/output-meta";
-import { ReadTool } from "@oh-my-pi/pi-coding-agent/tools/read";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import type { ToolSession } from "@zero2ai/coding-agent/tools";
+import { formatOutputNotice, type OutputMeta } from "@zero2ai/coding-agent/tools/output-meta";
+import { ReadTool } from "@zero2ai/coding-agent/tools/read";
+import { TempDir } from "@zero2ai/utils";
 function observeAsyncResultEnqueue(session: AgentSession): Promise<void> {
 	const queued = Promise.withResolvers<void>();
 	const enqueue = session.yieldQueue.enqueueWithReceipt.bind(session.yieldQueue);

@@ -1,9 +1,9 @@
 import { describe, expect, it } from "bun:test";
-import { streamOpenAICompletions } from "@oh-my-pi/pi-ai/providers/openai-completions";
-import type { Context, FetchImpl } from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { Effort } from "@oh-my-pi/pi-catalog/effort";
-import { getSupportedEfforts } from "@oh-my-pi/pi-catalog/model-thinking";
+import { streamOpenAICompletions } from "@zero2ai/ai/providers/openai-completions";
+import type { Context, FetchImpl } from "@zero2ai/ai/types";
+import { buildModel } from "@zero2ai/catalog/build";
+import { Effort } from "@zero2ai/catalog/effort";
+import { getSupportedEfforts } from "@zero2ai/catalog/model-thinking";
 
 const model = buildModel({
 	id: "kimi-k3",

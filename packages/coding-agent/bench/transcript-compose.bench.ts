@@ -12,7 +12,7 @@
  * is an export path and intentionally renders committed blocks.
  */
 
-import type { AssistantMessage } from "@oh-my-pi/pi-ai";
+import type { AssistantMessage } from "@zero2ai/ai";
 import { Settings } from "../src/config/settings";
 import { AssistantMessageComponent } from "../src/modes/components/assistant-message";
 import { TranscriptContainer } from "../src/modes/components/transcript-container";

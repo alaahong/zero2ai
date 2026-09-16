@@ -3,8 +3,8 @@ import { isRecord } from "../utils";
 
 /**
  * GitHub Copilot wire metadata: API-key envelope parsing and endpoint
- * derivation shared by catalog discovery and the pi-ai OAuth flow. The device
- * login / token refresh flow lives in `@oh-my-pi/pi-ai`'s registry.
+ * derivation shared by catalog discovery and the zero2ai-ai OAuth flow. The device
+ * login / token refresh flow lives in `@zero2ai/ai`'s registry.
  */
 
 const COPILOT_CLI_VERSION = "1.0.82";
@@ -85,7 +85,7 @@ export function mergeCopilotApiHeaders(headers?: Readonly<Record<string, string>
 
 /**
  * Validate an explicit `Copilot-Integration-Id` override.
- * omp identifies as the Copilot CLI (`copilot-developer-cli`); some Business
+ * zero2ai identifies as the Copilot CLI (`copilot-developer-cli`); some Business
  * organizations allow Chat clients but block CLI/agentic ones, rejecting every
  * model with HTTP 403 on an otherwise valid token (issue #11372). Callers pass
  * the raw `COPILOT_INTEGRATION_ID` value; blank or CR/LF-bearing values are

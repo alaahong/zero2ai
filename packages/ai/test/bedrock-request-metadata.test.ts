@@ -1,8 +1,8 @@
 import { describe, expect, it } from "bun:test";
-import { streamBedrock } from "@oh-my-pi/pi-ai/providers/amazon-bedrock";
-import { setBedrockProviderModule } from "@oh-my-pi/pi-ai/providers/register-builtins";
-import { streamSimple } from "@oh-my-pi/pi-ai/stream";
-import type { Model } from "@oh-my-pi/pi-ai/types";
+import { streamBedrock } from "@zero2ai/ai/providers/amazon-bedrock";
+import { setBedrockProviderModule } from "@zero2ai/ai/providers/register-builtins";
+import { streamSimple } from "@zero2ai/ai/stream";
+import type { Model } from "@zero2ai/ai/types";
 import {
 	bedrockTestModel,
 	BEDROCK_TEST_CONTEXT,
@@ -107,7 +107,7 @@ describe("amazon-bedrock requestMetadata", () => {
 describe("amazon-bedrock requestMetadata via streamSimple mapper", () => {
 	// `mapOptionsForApi`'s `bedrockBase` literal is a hand-picked field list with
 	// no catch-all spread. This proves per-call `requestMetadata` survives that
-	// mapper on a direct (non pi-native) model, rather than only proving it
+	// mapper on a direct (non zero2ai-native) model, rather than only proving it
 	// survives `streamBedrock` called directly as the tests above do.
 	it("carries per-call requestMetadata from streamSimple through to the serialized body", async () => {
 		// Earlier files in the same process install mock Bedrock modules through

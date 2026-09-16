@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { getProviderDefinition } from "@oh-my-pi/pi-ai/registry";
+import { getProviderDefinition } from "@zero2ai/ai/registry";
 
 const loginKagi = getProviderDefinition("kagi")?.login;
 if (!loginKagi) throw new Error("Kagi login is not registered");

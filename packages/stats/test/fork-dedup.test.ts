@@ -2,13 +2,13 @@ import { Database } from "bun:sqlite";
 import { describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import { syncAllSessions } from "@oh-my-pi/omp-stats/aggregator";
-import { closeDb, getOverallStats, getRecentRequests, initDb, insertMessageStats } from "@oh-my-pi/omp-stats/db";
-import type { MessageStats } from "@oh-my-pi/omp-stats/types";
-import { getSessionsDir, getStatsDbPath } from "@oh-my-pi/pi-utils";
+import { syncAllSessions } from "@zero2ai/stats/aggregator";
+import { closeDb, getOverallStats, getRecentRequests, initDb, insertMessageStats } from "@zero2ai/stats/db";
+import type { MessageStats } from "@zero2ai/stats/types";
+import { getSessionsDir, getStatsDbPath } from "@zero2ai/utils";
 import { installStatsTestIsolation } from "./helpers/temp-agent";
 
-installStatsTestIsolation("@pi-stats-fork-dedup-");
+installStatsTestIsolation("@zero2ai-stats-fork-dedup-");
 
 interface AssistantOptions {
 	entryId: string;

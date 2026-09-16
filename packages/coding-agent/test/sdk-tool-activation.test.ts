@@ -2,34 +2,34 @@ import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "bun:te
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { type } from "@oh-my-pi/omptype";
-import type { AgentTool, StreamFn } from "@oh-my-pi/pi-agent-core";
-import type { Model, ToolResultMessage } from "@oh-my-pi/pi-ai";
-import { createMockModel } from "@oh-my-pi/pi-ai/providers/mock";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { CursorExecHandlers } from "@oh-my-pi/pi-coding-agent/cursor";
+import { type } from "@zero2ai/schema";
+import type { AgentTool, StreamFn } from "@zero2ai/agent-core";
+import type { Model, ToolResultMessage } from "@zero2ai/ai";
+import { createMockModel } from "@zero2ai/ai/providers/mock";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import type { CursorExecHandlers } from "@zero2ai/coding-agent/cursor";
 import {
 	EXTENSION_HANDLER_TIMEOUT_MS,
 	testSetExtensionHandlerTimeoutMs,
-} from "@oh-my-pi/pi-coding-agent/extensibility/extensions/runner";
-import { ExtensionToolWrapper } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/wrapper";
-import type { MCPManager } from "@oh-my-pi/pi-coding-agent/mcp/manager";
-import * as memoryBackendModule from "@oh-my-pi/pi-coding-agent/memory-backend";
-import { initializeExtensions } from "@oh-my-pi/pi-coding-agent/modes/runtime-init";
+} from "@zero2ai/coding-agent/extensibility/extensions/runner";
+import { ExtensionToolWrapper } from "@zero2ai/coding-agent/extensibility/extensions/wrapper";
+import type { MCPManager } from "@zero2ai/coding-agent/mcp/manager";
+import * as memoryBackendModule from "@zero2ai/coding-agent/memory-backend";
+import { initializeExtensions } from "@zero2ai/coding-agent/modes/runtime-init";
 import {
 	type CreateAgentSessionOptions,
 	type CustomTool,
 	createAgentSession,
 	discoverAuthStorage,
 	type ExtensionFactory,
-} from "@oh-my-pi/pi-coding-agent/sdk";
-import type { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { VIBE_TOOL_NAMES } from "@oh-my-pi/pi-coding-agent/tools/vibe";
-import { resetYieldTurnState } from "@oh-my-pi/pi-coding-agent/tools/yield";
-import { logger, removeSyncWithRetries, Snowflake, untilAborted } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/sdk";
+import type { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { VIBE_TOOL_NAMES } from "@zero2ai/coding-agent/tools/vibe";
+import { resetYieldTurnState } from "@zero2ai/coding-agent/tools/yield";
+import { logger, removeSyncWithRetries, Snowflake, untilAborted } from "@zero2ai/utils";
 
 const toolActivationExtension: ExtensionFactory = pi => {
 	pi.registerTool({
@@ -76,14 +76,14 @@ describe("createAgentSession defaultInactive tool activation", () => {
 	let registryAuthDir: string;
 
 	const makeTempDir = (): string => {
-		const tempDir = path.join(os.tmpdir(), `pi-sdk-tool-activation-${Snowflake.next()}`);
+		const tempDir = path.join(os.tmpdir(), `zero2ai-sdk-tool-activation-${Snowflake.next()}`);
 		tempDirs.push(tempDir);
 		fs.mkdirSync(tempDir, { recursive: true });
 		return tempDir;
 	};
 
 	beforeAll(async () => {
-		registryAuthDir = path.join(os.tmpdir(), `pi-sdk-tool-activation-auth-${Snowflake.next()}`);
+		registryAuthDir = path.join(os.tmpdir(), `zero2ai-sdk-tool-activation-auth-${Snowflake.next()}`);
 		fs.mkdirSync(registryAuthDir, { recursive: true });
 		modelRegistry = new ModelRegistry(await discoverAuthStorage(registryAuthDir));
 	});
@@ -2213,10 +2213,10 @@ describe("createAgentSession defaultInactive tool activation", () => {
 
 	// Hashline `edit` stays in the registry on Cursor so the model can still
 	// call it as MCP. Native StrReplace arrives as `editToolCall` and is
-	// materialized via exec read/write; `pi_edit` still uses the replace-mode
+	// materialized via exec read/write; `zero2ai_edit` still uses the replace-mode
 	// instance from `getEditReplaceTool`. The roster is built once at creation.
 	// These two cover both directions of that wiring: the granted session must
-	// still reach a replace-mode instance for `pi_edit` (whose `old_string` /
+	// still reach a replace-mode instance for `zero2ai_edit` (whose `old_string` /
 	// `new_string` args do not validate against the default `hashline` schema),
 	// and the restricted one must still be refused.
 	//
@@ -2255,7 +2255,7 @@ describe("createAgentSession defaultInactive tool activation", () => {
 		}
 	};
 
-	it("answers a native pi_edit after a session switches onto Cursor", async () => {
+	it("answers a native zero2ai_edit after a session switches onto Cursor", async () => {
 		const tempDir = makeTempDir();
 		const cursorModel = getBundledModel("cursor", "composer-1.5");
 		if (!cursorModel) throw new Error("expected bundled Cursor model");
@@ -2297,7 +2297,7 @@ describe("createAgentSession defaultInactive tool activation", () => {
 		});
 	});
 
-	it("refuses a native pi_edit after a read-only session switches onto Cursor", async () => {
+	it("refuses a native zero2ai_edit after a read-only session switches onto Cursor", async () => {
 		// The bridge instance is constructed, not looked up, so building it for
 		// a roster that was never granted `edit` would hand a read-only session
 		// a mutating tool the native frames reach regardless of the advertised
@@ -2463,7 +2463,7 @@ describe("createAgentSession defaultInactive tool activation", () => {
 		// not contain. It must stay device-only: routing `edit` through it would
 		// execute a replace-mode edit for a call the model was never offered —
 		// a hallucinated one, or a tool the session deselected after startup.
-		// `pi_edit` gets its instance from `getEditReplaceTool` instead.
+		// `zero2ai_edit` gets its instance from `getEditReplaceTool` instead.
 		const tempDir = makeTempDir();
 		const target = path.join(tempDir, "sample.txt");
 		fs.writeFileSync(target, "alpha\nbeta\n");

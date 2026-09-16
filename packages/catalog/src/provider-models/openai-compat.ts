@@ -1,5 +1,5 @@
-import { USER_AGENT, getInstallId } from "@oh-my-pi/pi-utils";
-import * as logger from "@oh-my-pi/pi-utils/logger";
+import { USER_AGENT, getInstallId } from "@zero2ai/utils";
+import * as logger from "@zero2ai/utils/logger";
 import { toClinePassPublicModelId } from "../cline-pass-model-id";
 import {
 	apiRouteExactModelIds,
@@ -66,7 +66,20 @@ function isGlmReasoningIdentity(provider: string, modelId: string, floor: string
 	return identity.family === undefined || identity.family === "air" || identity.family === "turbo";
 }
 
-const MODELS_DEV_URL = "https://catalog.stencil.so/models.json.zstd";
+const DEFAULT_MODELS_DEV_URL = "https://catalog.stencil.so/models.json.zstd";
+
+/**
+ * Catalogue endpoint, or `undefined` when the remote refresh is switched off.
+ *
+ * Air-gapped deployments point `ZERO2AI_MODEL_CATALOG_URL` at an internal
+ * mirror, or set `ZERO2AI_DISABLE_MODEL_CATALOG=1` to stay strictly on the
+ * bundled/cached catalogue with no egress at all.
+ */
+function resolveModelsDevUrl(): string | undefined {
+	const disabled = process.env.ZERO2AI_DISABLE_MODEL_CATALOG?.trim().toLowerCase();
+	if (disabled === "1" || disabled === "true" || disabled === "yes") return undefined;
+	return process.env.ZERO2AI_MODEL_CATALOG_URL?.trim() || DEFAULT_MODELS_DEV_URL;
+}
 
 /** Little-endian magic number opening every zstd frame (RFC 8878). */
 const ZSTD_MAGIC = 0xfd2fb528;
@@ -217,6 +230,12 @@ async function fetchCatalogPayload(
 	session: CatalogSession,
 	signal?: AbortSignal,
 ): Promise<unknown> {
+	const url = resolveModelsDevUrl();
+	if (!url) {
+		// Managed/air-gapped hosts: never reach out, let callers fall back to the
+		// bundled or cached catalogue exactly as they would on a network failure.
+		throw new Error("remote model catalogue refresh is disabled (ZERO2AI_DISABLE_MODEL_CATALOG)");
+	}
 	const headers: Record<string, string> = {
 		Accept: "application/zstd, application/json",
 		"User-Agent": CATALOG_USER_AGENT,
@@ -224,7 +243,7 @@ async function fetchCatalogPayload(
 	if (session.hasPayload && session.etag) {
 		headers["If-None-Match"] = session.etag;
 	}
-	const response = await fetchImpl(MODELS_DEV_URL, { method: "GET", headers, signal });
+	const response = await fetchImpl(url, { method: "GET", headers, signal });
 	if (response.status === 304 && session.hasPayload) {
 		return session.payload;
 	}
@@ -419,7 +438,7 @@ async function fetchOllamaNativeModels(
  * Ollama's cloud catalog reports for stock models.
  */
 const OLLAMA_FALLBACK_CONTEXT_WINDOW = 128_000;
-/** Cap max output tokens at a value that matches OMP's other openai-responses defaults. */
+/** Cap max output tokens at a value that matches ZERO2AI's other openai-responses defaults. */
 const OLLAMA_DEFAULT_MAX_TOKENS = 8192;
 
 interface OllamaResolvedMetadata {
@@ -1157,12 +1176,12 @@ export function novitaModelManagerOptions(
 export const DEEPINFRA_BASE_URL = "https://api.deepinfra.com/v1/openai";
 /**
  * `filter=with_meta` attaches per-model `metadata` (limits, pricing, tags);
- * `sort_by=omp` asks DeepInfra to return models in omp-priority order
+ * `sort_by=zero2ai` asks DeepInfra to return models in zero2ai-priority order
  * (earlier = better). The mapper does not stamp `priority` yet — see
  * `mapDeepinfraModel` — but the params are sent so discovery picks the
  * ordering up as soon as the server honors it.
  */
-const DEEPINFRA_MODELS_QUERY = "?filter=with_meta&sort_by=omp";
+const DEEPINFRA_MODELS_QUERY = "?filter=with_meta&sort_by=zero2ai";
 const DEEPINFRA_EFFORTS = [Effort.Low, Effort.Medium, Effort.High] as const;
 
 /** DeepInfra OpenAI-compatible discovery configuration. */
@@ -1186,7 +1205,7 @@ function deepinfraTags(metadata: Record<string, unknown>): readonly string[] {
  * Map one DeepInfra catalog entry to a chat model spec. Non-`chat` entries
  * (`tts`, `stt`, `embed`, `image-gen`, `video-gen`) are dropped — those
  * surfaces are served by dedicated tool backends, not the chat catalog.
- * DeepInfra reports token prices in USD per 1M tokens — omp's `ModelCost`
+ * DeepInfra reports token prices in USD per 1M tokens — zero2ai's `ModelCost`
  * unit, used verbatim. A bundled reference (when the generated catalog has
  * one) is spread first so compat/tooling metadata can contribute, but the
  * live metadata always wins for limits, pricing, and modalities.
@@ -1269,7 +1288,7 @@ function mapDeepinfraModel(
  * Bespoke fetch instead of `fetchOpenAICompatibleModels`: the shared helper
  * cannot carry the `filter`/`sort_by` query params and re-sorts results by id,
  * which would destroy DeepInfra's priority ordering once the server honors
- * `sort_by=omp`. Response order is preserved (dedupe keeps the first, i.e.
+ * `sort_by=zero2ai`. Response order is preserved (dedupe keeps the first, i.e.
  * highest-priority, occurrence).
  */
 async function fetchDeepinfraModels(options: {
@@ -2831,7 +2850,7 @@ function openCodeModelManagerOptions(
 					apiKey,
 					// Live discovery hits the OpenCode gateway outside any
 					// conversation: attribute with the stable install id
-					// (x-opencode-session required from 09/06) and omp's UA
+					// (x-opencode-session required from 09/06) and zero2ai's UA
 					// instead of Bun's default.
 					headers: { "User-Agent": USER_AGENT, "x-opencode-session": getInstallId() },
 					mapModel: (entry, defaults) => {
@@ -3680,7 +3699,7 @@ function toSyntheticStringList(value: unknown): readonly string[] {
 
 /**
  * Translate Synthetic's per-model `reasoning_effort` vocabulary into an effort
- * ladder. Every advertised value that names an OMP tier maps verbatim; `none`
+ * ladder. Every advertised value that names an ZERO2AI tier maps verbatim; `none`
  * is the thinking-off state rather than a tier of its own, so it backs the
  * `minimal` selector through the wire map (same shape as the Fireworks
  * `minimal → none` map) and gives these routes a real no-thinking tier.
@@ -3882,9 +3901,9 @@ export interface BasetenModelManagerConfig {
 	fetch?: FetchImpl;
 }
 
-// A previous version of OMP shipped these models without reasoning levels.
+// A previous version of ZERO2AI shipped these models without reasoning levels.
 // We've since fixed that (V4-generation whitelist). This const lets us bust
-// the cache so that users on that version of OMP pick up the reasoning levels
+// the cache so that users on that version of ZERO2AI pick up the reasoning levels
 // immediately.
 const BASETEN_CACHE_MIGRATION_MODEL_IDS = [
 	"zai-org/GLM-5.3",
@@ -3914,10 +3933,10 @@ export function basetenModelManagerOptions(
 			const features = Array.isArray(raw.supported_features) ? raw.supported_features : [];
 			const modalities = Array.isArray(raw.input_modalities) ? raw.input_modalities : [];
 
-			// Baseten's discovery flags are not enough to enable OMP reasoning for every
+			// Baseten's discovery flags are not enough to enable ZERO2AI reasoning for every
 			// model. Only models with a verified Baseten reasoning policy are enabled
 			// here; an unknown model may use a different reasoning wire shape or effort
-			// vocabulary, which OMP must not guess.
+			// vocabulary, which ZERO2AI must not guess.
 			const identity = classifyModel("baseten", defaults.id, { lenient: true });
 			const isSupportedBasetenReasoningModel =
 				(identity.class === "kimi" && identity.family === "k3") ||

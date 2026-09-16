@@ -1,20 +1,20 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it, setDefaultTimeout, vi } from "bun:test";
 import * as path from "node:path";
-import { type } from "@oh-my-pi/omptype";
-import type { AgentTool, AgentToolResult } from "@oh-my-pi/pi-agent-core";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
+import { type } from "@zero2ai/schema";
+import type { AgentTool, AgentToolResult } from "@zero2ai/agent-core";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
 import {
 	disposeAllVmContexts,
 	invokeJsTool,
 	runIfSnapshotMatches,
 	shadowPlanIfPresent,
 	snapshotVmContext,
-} from "@oh-my-pi/pi-coding-agent/eval/js/context-manager";
-import { executeJs, type JsResult } from "@oh-my-pi/pi-coding-agent/eval/js/executor";
-import { createEvalCustomTools, describeEvalTools } from "@oh-my-pi/pi-coding-agent/task/eval-tools";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { TempDir } from "@oh-my-pi/pi-utils";
-import { INTENT_FIELD } from "@oh-my-pi/pi-wire";
+} from "@zero2ai/coding-agent/eval/js/context-manager";
+import { executeJs, type JsResult } from "@zero2ai/coding-agent/eval/js/executor";
+import { createEvalCustomTools, describeEvalTools } from "@zero2ai/coding-agent/task/eval-tools";
+import type { ToolSession } from "@zero2ai/coding-agent/tools";
+import { TempDir } from "@zero2ai/utils";
+import { INTENT_FIELD } from "@zero2ai/wire";
 
 // JS eval cold-starts a Bun worker; under --isolate + high CI concurrency that startup
 // can exceed Bun's 5s default per-test timeout, flaking the suite. Give the worker-backed

@@ -1,7 +1,7 @@
 import { Database, type Statement } from "bun:sqlite";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { checkpointWal, getDbBusyTimeoutMs, getHistoryDbPath, logger, postmortem } from "@oh-my-pi/pi-utils";
+import { checkpointWal, getDbBusyTimeoutMs, getHistoryDbPath, logger, postmortem } from "@zero2ai/utils";
 
 /** A unique prompt with provenance from its most recent submission. */
 export interface HistoryEntry {

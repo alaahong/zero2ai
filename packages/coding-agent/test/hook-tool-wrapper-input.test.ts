@@ -5,14 +5,14 @@
 
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import * as path from "node:path";
-import { Type } from "@oh-my-pi/omptype/typebox";
-import type { AgentTool } from "@oh-my-pi/pi-agent-core";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { HookRunner, type LoadedHook } from "@oh-my-pi/pi-coding-agent/extensibility/hooks";
-import { HookToolWrapper } from "@oh-my-pi/pi-coding-agent/extensibility/hooks/tool-wrapper";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { Type } from "@zero2ai/schema/typebox";
+import type { AgentTool } from "@zero2ai/agent-core";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { HookRunner, type LoadedHook } from "@zero2ai/coding-agent/extensibility/hooks";
+import { HookToolWrapper } from "@zero2ai/coding-agent/extensibility/hooks/tool-wrapper";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { TempDir } from "@zero2ai/utils";
 
 describe("HookToolWrapper tool_call input override", () => {
 	let sharedTempDir: TempDir;
@@ -20,7 +20,7 @@ describe("HookToolWrapper tool_call input override", () => {
 	let authStorage: AuthStorage;
 
 	beforeAll(async () => {
-		sharedTempDir = TempDir.createSync("@pi-hook-wrapper-shared-");
+		sharedTempDir = TempDir.createSync("@zero2ai-hook-wrapper-shared-");
 		authStorage = await AuthStorage.create(path.join(sharedTempDir.path(), "testauth.db"));
 		modelRegistry = new ModelRegistry(authStorage);
 	});

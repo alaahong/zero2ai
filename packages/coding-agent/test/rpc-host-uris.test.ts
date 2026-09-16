@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it } from "bun:test";
-import { InternalUrlRouter } from "@oh-my-pi/pi-coding-agent/internal-urls";
-import { parseInternalUrl } from "@oh-my-pi/pi-coding-agent/internal-urls/parse";
-import { RpcHostUriBridge } from "@oh-my-pi/pi-coding-agent/modes/rpc/host-uris";
-import type { RpcHostUriCancelRequest, RpcHostUriRequest } from "@oh-my-pi/pi-coding-agent/modes/rpc/rpc-types";
+import { InternalUrlRouter } from "@zero2ai/coding-agent/internal-urls";
+import { parseInternalUrl } from "@zero2ai/coding-agent/internal-urls/parse";
+import { RpcHostUriBridge } from "@zero2ai/coding-agent/modes/rpc/host-uris";
+import type { RpcHostUriCancelRequest, RpcHostUriRequest } from "@zero2ai/coding-agent/modes/rpc/rpc-types";
 
 const router = InternalUrlRouter.instance();
 
@@ -121,10 +121,10 @@ describe("RpcHostUriBridge", () => {
 		bridge.clear("test cleanup");
 	});
 
-	it("rejects OMP-reserved schemes", () => {
+	it("rejects ZERO2AI-reserved schemes", () => {
 		const bridge = new RpcHostUriBridge(() => {});
 		expect(() => bridge.setSchemes([{ scheme: "security" }])).toThrow(
-			"Host URI scheme is reserved by OMP: security://",
+			"Host URI scheme is reserved by ZERO2AI: security://",
 		);
 	});
 

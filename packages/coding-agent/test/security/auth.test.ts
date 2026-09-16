@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from "bun:test";
-import type { ApiKeyResolver } from "@oh-my-pi/pi-ai/auth-retry";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
+import type { ApiKeyResolver } from "@zero2ai/ai/auth-retry";
+import { getBundledModel } from "@zero2ai/catalog/models";
 import { createExactSecurityOAuthResolver, createSecurityAuthResolver, selectSecurityAuth } from "../../src/security";
 import type { AuthStorage } from "../../src/session/auth-storage";
 

@@ -1,20 +1,20 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as path from "node:path";
-import { type } from "@oh-my-pi/omptype";
-import { Agent, type AgentMessage, type AgentTool } from "@oh-my-pi/pi-agent-core";
-import type { AssistantMessage, TextContent, ToolCall } from "@oh-my-pi/pi-ai";
-import * as ai from "@oh-my-pi/pi-ai";
-import { AssistantMessageEventStream } from "@oh-my-pi/pi-ai/utils/event-stream";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AgentSession, type AgentSessionConfig } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { convertToLlm } from "@oh-my-pi/pi-coding-agent/session/messages";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { TodoTool } from "@oh-my-pi/pi-coding-agent/tools";
-import { setInteractiveHost, TempDir } from "@oh-my-pi/pi-utils";
+import { type } from "@zero2ai/schema";
+import { Agent, type AgentMessage, type AgentTool } from "@zero2ai/agent-core";
+import type { AssistantMessage, TextContent, ToolCall } from "@zero2ai/ai";
+import * as ai from "@zero2ai/ai";
+import { AssistantMessageEventStream } from "@zero2ai/ai/utils/event-stream";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { AgentSession, type AgentSessionConfig } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { convertToLlm } from "@zero2ai/coding-agent/session/messages";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import type { ToolSession } from "@zero2ai/coding-agent/tools";
+import { TodoTool } from "@zero2ai/coding-agent/tools";
+import { setInteractiveHost, TempDir } from "@zero2ai/utils";
 import { createAssistantMessage } from "./helpers/agent-session-setup";
 
 type ObservedPromptCall = {
@@ -215,7 +215,7 @@ describe("AgentSession eager todo enforcement", () => {
 	}
 
 	beforeAll(async () => {
-		sharedDir = TempDir.createSync("@pi-agent-session-eager-todo-shared-");
+		sharedDir = TempDir.createSync("@zero2ai-agent-session-eager-todo-shared-");
 		sharedAuthStorage = await AuthStorage.create(path.join(sharedDir.path(), "auth.db"));
 		sharedAuthStorage.setRuntimeApiKey("anthropic", "test-key");
 		sharedModelRegistry = new ModelRegistry(sharedAuthStorage, path.join(sharedDir.path(), "models.yml"));
@@ -227,9 +227,9 @@ describe("AgentSession eager todo enforcement", () => {
 	});
 
 	beforeEach(async () => {
-		previousNoTitle = Bun.env.PI_NO_TITLE;
-		delete Bun.env.PI_NO_TITLE;
-		tempDir = TempDir.createSync("@pi-agent-session-eager-todo-");
+		previousNoTitle = Bun.env.ZERO2AI_NO_TITLE;
+		delete Bun.env.ZERO2AI_NO_TITLE;
+		tempDir = TempDir.createSync("@zero2ai-agent-session-eager-todo-");
 		streamCallCount = 0;
 		scriptedResponses = [];
 		observedCalls.length = 0;
@@ -241,8 +241,8 @@ describe("AgentSession eager todo enforcement", () => {
 			await session.dispose();
 		}
 		vi.restoreAllMocks();
-		if (previousNoTitle === undefined) delete Bun.env.PI_NO_TITLE;
-		else Bun.env.PI_NO_TITLE = previousNoTitle;
+		if (previousNoTitle === undefined) delete Bun.env.ZERO2AI_NO_TITLE;
+		else Bun.env.ZERO2AI_NO_TITLE = previousNoTitle;
 		tempDir.removeSync();
 	});
 
@@ -481,7 +481,7 @@ describe("AgentSession eager todo enforcement", () => {
 	});
 
 	it("does not refresh todo-init titles when automatic titles are disabled", async () => {
-		Bun.env.PI_NO_TITLE = "1";
+		Bun.env.ZERO2AI_NO_TITLE = "1";
 		await recreateSession({ "title.refreshOnReplan": true });
 		await session.setSessionName("Old auto title", "auto");
 		const completeSimpleMock = vi.spyOn(ai, "completeSimple");

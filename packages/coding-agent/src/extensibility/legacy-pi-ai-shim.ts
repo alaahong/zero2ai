@@ -1,6 +1,6 @@
 /**
  * Compatibility shim for legacy extensions importing the package root of
- * `@oh-my-pi/pi-ai` (or one of its aliased scopes like `@earendil-works/pi-ai`
+ * `@zero2ai/ai` (or one of its aliased scopes like `@earendil-works/pi-ai`
  * or `@mariozechner/pi-ai`).
  *
  * pi-ai 15.1.0 removed the historical TypeBox root exports (`Type`, plus the
@@ -8,7 +8,7 @@
  * entrypoint. Legacy extensions still author parameter schemas as
  * `Type.Object({ ... })`, so this file is served by `legacy-pi-compat.ts` in
  * place of the real pi-ai entrypoint whenever a legacy extension imports the
- * bare package root. Subpath imports (`@oh-my-pi/pi-ai/oauth`, etc.)
+ * bare package root. Subpath imports (`@zero2ai/ai/oauth`, etc.)
  * continue to resolve directly against the bundled pi-ai package.
  *
  * The `Type` runtime and legacy `StringEnum()` helper are borrowed from the
@@ -27,16 +27,16 @@ import {
 	type Model,
 	type SimpleStreamOptions,
 	streamSimple,
-} from "@oh-my-pi/pi-ai";
-import type { Effort } from "@oh-my-pi/pi-catalog/effort";
-import { clampThinkingLevelForModel, getSupportedEfforts } from "@oh-my-pi/pi-catalog/model-thinking";
+} from "@zero2ai/ai";
+import type { Effort } from "@zero2ai/catalog/effort";
+import { clampThinkingLevelForModel, getSupportedEfforts } from "@zero2ai/catalog/model-thinking";
 import {
 	calculateCost,
 	getBundledModel,
 	getBundledModels,
 	getBundledProviders,
 	modelsAreEqual,
-} from "@oh-my-pi/pi-catalog/models";
+} from "@zero2ai/catalog/models";
 import { type TSchema, Type } from "./legacy-typebox";
 
 export interface StringEnumOptions<T extends string> {
@@ -82,7 +82,7 @@ export function StringEnum<T extends string | number>(
 	return schema;
 }
 
-/** Clamp a historical Pi thinking level against OMP's model metadata. */
+/** Clamp a historical Pi thinking level against ZERO2AI's model metadata. */
 export function clampThinkingLevel<TApi extends Api>(model: Model<TApi>, level: Effort | "off"): Effort | "off" {
 	if (level === "off") return "off";
 	return clampThinkingLevelForModel(model, level) ?? "off";
@@ -92,7 +92,7 @@ export function clampThinkingLevel<TApi extends Api>(model: Model<TApi>, level: 
  * Enumerate the thinking levels a model supports, mirroring historical pi-ai's
  * `getSupportedThinkingLevels` (`@earendil-works/pi-ai` `models.ts`). Upstream
  * returns `["off"]` for non-reasoning models and, for reasoning models, `off`
- * followed by each selectable effort in canonical order; OMP's baked
+ * followed by each selectable effort in canonical order; ZERO2AI's baked
  * `getSupportedEfforts` supplies that effort ladder directly. Legacy `/thinking`
  * menus (e.g. `@companion-ai/feynman`) call this to list the levels a user may
  * pick for the active model.
@@ -107,7 +107,7 @@ export function getSupportedThinkingLevels<TApi extends Api>(model: Model<TApi>)
  * (`@earendil-works/pi-ai` `utils/retry.ts`). Legacy extensions call
  * {@link isRetryableAssistantError} to decide whether to restart a failed
  * assistant turn, so the wording tables must match the upstream semantics they
- * were authored against rather than OMP's own `Error`-based classifiers.
+ * were authored against rather than ZERO2AI's own `Error`-based classifiers.
  */
 const NON_RETRYABLE_PROVIDER_LIMIT_ERROR_PATTERN =
 	/GoUsageLimitError|FreeUsageLimitError|Monthly usage limit reached|available balance|insufficient_quota|out of budget|quota exceeded|billing/i;
@@ -129,13 +129,13 @@ export function isRetryableAssistantError(message: AssistantMessage): boolean {
 	return RETRYABLE_PROVIDER_ERROR_PATTERN.test(errorMessage);
 }
 
-export * from "@oh-my-pi/pi-ai";
+export * from "@zero2ai/ai";
 /**
  * Compatibility re-exports for catalog symbols that pi-ai historically exposed
  * from its own barrel prior to the `refactor(catalog)!: split model catalog
  * from pi-ai` change. Legacy extensions still import these from the pi-ai
  * root, so the shim bridges them through to their new home in
- * `@oh-my-pi/pi-catalog/models`. `getModel`/`getModels` are the historical
+ * `@zero2ai/catalog/models`. `getModel`/`getModels` are the historical
  * pi-ai names for `getBundledModel`/`getBundledModels`; the remaining symbols
  * kept their names across the move.
  */
@@ -151,7 +151,7 @@ export const getModels = getBundledModels;
  *
  * Transient-failure retry (overload, rate-limit, 5xx) is the **caller's
  * responsibility**. Oneshot callers that collect the full result before acting
- * should wrap with `retryTransientCompletion` from `@oh-my-pi/pi-ai`.
+ * should wrap with `retryTransientCompletion` from `@zero2ai/ai`.
  */
 export function streamSimpleOpenAIResponses(
 	model: Model<"openai-responses">,
@@ -162,18 +162,18 @@ export function streamSimpleOpenAIResponses(
 }
 /**
  * Compatibility re-exports for runtime helpers that upstream
- * `@earendil-works/pi-ai` exposed from its package root but omp's
- * `@oh-my-pi/pi-ai` barrel no longer forwards. Each symbol still exists in the
+ * `@earendil-works/pi-ai` exposed from its package root but zero2ai's
+ * `@zero2ai/ai` barrel no longer forwards. Each symbol still exists in the
  * host graph — only its root re-export was dropped — so bridging it here keeps
  * legacy extensions importing it from the pi-ai root resolving through Bun's
- * static named-export check (e.g. `omp plugin install pi-blackhole`).
+ * static named-export check (e.g. `zero2ai plugin install pi-blackhole`).
  *
  * This is the full set derived from an audit of the upstream root surface: the
  * error-classification predicate `isContextOverflow` (now under
- * `@oh-my-pi/pi-ai/error`) and the JSON-repair helpers that omp relocated to
- * `@oh-my-pi/pi-utils`. Upstream root symbols with no omp equivalent are
+ * `@zero2ai/ai/error`) and the JSON-repair helpers that zero2ai relocated to
+ * `@zero2ai/utils`. Upstream root symbols with no zero2ai equivalent are
  * intentionally not shimmed — the package has diverged and there is nothing to
  * forward.
  */
-export { isContextOverflow } from "@oh-my-pi/pi-ai/error";
-export { parseJsonWithRepair, parseStreamingJson, repairJson } from "@oh-my-pi/pi-utils";
+export { isContextOverflow } from "@zero2ai/ai/error";
+export { parseJsonWithRepair, parseStreamingJson, repairJson } from "@zero2ai/utils";

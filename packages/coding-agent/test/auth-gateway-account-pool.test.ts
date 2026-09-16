@@ -2,13 +2,13 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { AuthStorage, SqliteAuthCredentialStore } from "@oh-my-pi/pi-ai";
-import { type AuthBrokerServerHandle, startAuthBroker } from "@oh-my-pi/pi-ai/auth-broker";
-import { runAuthGatewayCommand } from "@oh-my-pi/pi-coding-agent/cli/auth-gateway-cli";
-import { removeWithRetries } from "@oh-my-pi/pi-utils";
+import { AuthStorage, SqliteAuthCredentialStore } from "@zero2ai/ai";
+import { type AuthBrokerServerHandle, startAuthBroker } from "@zero2ai/ai/auth-broker";
+import { runAuthGatewayCommand } from "@zero2ai/coding-agent/cli/auth-gateway-cli";
+import { removeWithRetries } from "@zero2ai/utils";
 
 const BROKER_TOKEN = "gateway-account-pool-token";
-const ENV_KEYS = ["OMP_AUTH_BROKER_URL", "OMP_AUTH_BROKER_TOKEN", "OMP_AUTH_BROKER_ACCOUNT_POOL_FILE"] as const;
+const ENV_KEYS = ["ZERO2AI_AUTH_BROKER_URL", "ZERO2AI_AUTH_BROKER_TOKEN", "ZERO2AI_AUTH_BROKER_ACCOUNT_POOL_FILE"] as const;
 
 describe("auth-gateway account pool", () => {
 	let tempDir = "";
@@ -19,7 +19,7 @@ describe("auth-gateway account pool", () => {
 
 	beforeEach(async () => {
 		savedEnv = Object.fromEntries(ENV_KEYS.map(key => [key, process.env[key]])) as typeof savedEnv;
-		tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "omp-auth-gateway-pool-"));
+		tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-auth-gateway-pool-"));
 		brokerStore = await SqliteAuthCredentialStore.open(path.join(tempDir, "agent.db"));
 		brokerStore.saveOAuth("anthropic", {
 			access: "allowed-access",
@@ -43,9 +43,9 @@ describe("auth-gateway account pool", () => {
 		});
 		const poolPath = path.join(tempDir, "account-pool.json");
 		await Bun.write(poolPath, JSON.stringify({ anthropic: ["email:allowed@example.com"] }));
-		process.env.OMP_AUTH_BROKER_URL = handle.url;
-		process.env.OMP_AUTH_BROKER_TOKEN = BROKER_TOKEN;
-		process.env.OMP_AUTH_BROKER_ACCOUNT_POOL_FILE = poolPath;
+		process.env.ZERO2AI_AUTH_BROKER_URL = handle.url;
+		process.env.ZERO2AI_AUTH_BROKER_TOKEN = BROKER_TOKEN;
+		process.env.ZERO2AI_AUTH_BROKER_ACCOUNT_POOL_FILE = poolPath;
 	});
 
 	afterEach(async () => {

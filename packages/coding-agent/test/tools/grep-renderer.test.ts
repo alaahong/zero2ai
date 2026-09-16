@@ -1,9 +1,9 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "bun:test";
 import * as path from "node:path";
 import * as url from "node:url";
-import { resetSettingsForTest, Settings, settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { getThemeByName } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { sanitizeText } from "@oh-my-pi/pi-utils";
+import { resetSettingsForTest, Settings, settings } from "@zero2ai/coding-agent/config/settings";
+import { getThemeByName } from "@zero2ai/coding-agent/modes/theme/theme";
+import { sanitizeText } from "@zero2ai/utils";
 import { grepToolRenderer } from "../../src/tools/grep";
 
 function extractLinkUris(text: string): string[] {
@@ -126,7 +126,7 @@ describe("grepToolRenderer", () => {
 		expect(theme).toBeDefined();
 		const uiTheme = theme!;
 
-		const projectRoot = path.resolve("/tmp/omp-project");
+		const projectRoot = path.resolve("/tmp/zero2ai-project");
 		const filePath = path.join(projectRoot, "src", "file.ts");
 		const result = {
 			content: [{ type: "text", text: "" }],
@@ -156,7 +156,7 @@ describe("grepToolRenderer", () => {
 		expect(theme).toBeDefined();
 		const uiTheme = theme!;
 
-		const filePath = path.resolve("/tmp/omp-project/file.ts");
+		const filePath = path.resolve("/tmp/zero2ai-project/file.ts");
 		const result = {
 			content: [{ type: "text", text: "" }],
 			details: {
@@ -193,7 +193,7 @@ describe("grepToolRenderer", () => {
 			})
 			.join("\n");
 
-		const filePath = path.resolve("/tmp/omp-project/renderer.ts");
+		const filePath = path.resolve("/tmp/zero2ai-project/renderer.ts");
 		const result = {
 			content: [{ type: "text", text: "" }],
 			details: {

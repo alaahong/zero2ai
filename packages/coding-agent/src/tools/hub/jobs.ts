@@ -4,9 +4,9 @@
  * running-agents roster for activity with no job entry.
  */
 
-import type { AgentToolResult } from "@oh-my-pi/pi-agent-core";
-import type { Component } from "@oh-my-pi/pi-tui";
-import { Text, visibleWidth } from "@oh-my-pi/pi-tui";
+import type { AgentToolResult } from "@zero2ai/agent-core";
+import type { Component } from "@zero2ai/tui";
+import { Text, visibleWidth } from "@zero2ai/tui";
 import type { AsyncJob, AsyncJobDetails, AsyncJobManager, AsyncJobType } from "../../async";
 import type { RenderResultOptions } from "../../extensibility/custom-tools/types";
 import { shimmerEnabled, shimmerText } from "../../modes/theme/shimmer";

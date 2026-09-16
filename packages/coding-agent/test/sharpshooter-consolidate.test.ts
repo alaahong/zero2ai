@@ -1,25 +1,25 @@
 import { afterEach, describe, expect, it, vi } from "bun:test";
 import * as path from "node:path";
-import * as ai from "@oh-my-pi/pi-ai";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
+import * as ai from "@zero2ai/ai";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
 import {
 	renderSharpshooterSessions,
 	runSharpshooterConsolidation,
-} from "@oh-my-pi/pi-coding-agent/sharpshooter/consolidate";
+} from "@zero2ai/coding-agent/sharpshooter/consolidate";
 import {
 	readSharpshooterState,
 	sharpshooterBankDir,
 	sharpshooterMemoryFilePath,
 	writeSharpshooterState,
-} from "@oh-my-pi/pi-coding-agent/sharpshooter/paths";
+} from "@zero2ai/coding-agent/sharpshooter/paths";
 import {
 	appendSharpshooterDelta,
 	listSharpshooterDeltas,
 	type SharpshooterSessionDeltas,
-} from "@oh-my-pi/pi-coding-agent/sharpshooter/queue";
-import type { SharpshooterDelta } from "@oh-my-pi/pi-coding-agent/sharpshooter/types";
-import { TempDir } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/sharpshooter/queue";
+import type { SharpshooterDelta } from "@zero2ai/coding-agent/sharpshooter/types";
+import { TempDir } from "@zero2ai/utils";
 import { createInMemoryAuthStorage } from "./helpers/agent-session-setup";
 
 interface Harness {
@@ -109,7 +109,7 @@ afterEach(() => {
 
 describe("runSharpshooterConsolidation", () => {
 	it("short-circuits while not due and force bypasses the due check", async () => {
-		using temp = TempDir.createSync("@pi-sharpshooter-not-due-");
+		using temp = TempDir.createSync("@zero2ai-sharpshooter-not-due-");
 		const harness = createHarness(temp.path());
 		await appendSharpshooterDelta(harness.agentDir, harness.cwd, delta("session-a", 1, "Keep one boundary."));
 		await writeSharpshooterState(harness.agentDir, harness.cwd, {
@@ -128,7 +128,7 @@ describe("runSharpshooterConsolidation", () => {
 	});
 
 	it("stamps an empty queue without calling the model", async () => {
-		using temp = TempDir.createSync("@pi-sharpshooter-empty-");
+		using temp = TempDir.createSync("@zero2ai-sharpshooter-empty-");
 		const harness = createHarness(temp.path());
 		const before = Date.now();
 		const completeSpy = vi.spyOn(ai, "completeSimple");
@@ -142,7 +142,7 @@ describe("runSharpshooterConsolidation", () => {
 	});
 
 	it("writes all returned files, consumes only the listed deltas, and records the result", async () => {
-		using temp = TempDir.createSync("@pi-sharpshooter-happy-");
+		using temp = TempDir.createSync("@zero2ai-sharpshooter-happy-");
 		const harness = createHarness(temp.path());
 		await appendSharpshooterDelta(harness.agentDir, harness.cwd, delta("session-a", 10, "Keep one boundary."));
 		await appendSharpshooterDelta(
@@ -175,7 +175,7 @@ describe("runSharpshooterConsolidation", () => {
 	});
 
 	it("rejects an over-budget file without consuming deltas or changing memory files", async () => {
-		using temp = TempDir.createSync("@pi-sharpshooter-budget-");
+		using temp = TempDir.createSync("@zero2ai-sharpshooter-budget-");
 		const harness = createHarness(temp.path());
 		await appendSharpshooterDelta(harness.agentDir, harness.cwd, delta("session-a", 1, "Keep one boundary."));
 		const bankDir = sharpshooterBankDir(harness.agentDir, harness.cwd);
@@ -204,7 +204,7 @@ describe("runSharpshooterConsolidation", () => {
 	});
 
 	it("rejects an all-empty replacement without consuming deltas or wiping memory files", async () => {
-		using temp = TempDir.createSync("@pi-sharpshooter-empty-wipe-");
+		using temp = TempDir.createSync("@zero2ai-sharpshooter-empty-wipe-");
 		const harness = createHarness(temp.path());
 		await appendSharpshooterDelta(harness.agentDir, harness.cwd, delta("session-a", 1, "Keep one boundary."));
 		const bankDir = sharpshooterBankDir(harness.agentDir, harness.cwd);
@@ -233,7 +233,7 @@ describe("runSharpshooterConsolidation", () => {
 	});
 
 	it("accepts an all-empty replacement when the current memory files are already empty", async () => {
-		using temp = TempDir.createSync("@pi-sharpshooter-empty-noop-");
+		using temp = TempDir.createSync("@zero2ai-sharpshooter-empty-noop-");
 		const harness = createHarness(temp.path());
 		await appendSharpshooterDelta(
 			harness.agentDir,

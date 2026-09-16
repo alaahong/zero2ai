@@ -1,4 +1,4 @@
-import type { CommandMetadata } from "@oh-my-pi/pi-utils/cli";
+import type { CommandMetadata } from "@zero2ai/utils/cli";
 
 export const acpHelp = {
 	description: "Run Oh My Pi as an ACP (Agent Client Protocol) server over stdio",
@@ -7,7 +7,7 @@ export const acpHelp = {
 export const agentsHelp = { description: "Manage bundled task agents" } satisfies CommandMetadata;
 
 export const authBrokerHelp = {
-	description: "Manage the omp auth-broker (credential vault)",
+	description: "Manage the zero2ai auth-broker (credential vault)",
 } satisfies CommandMetadata;
 
 export const authGatewayHelp = {

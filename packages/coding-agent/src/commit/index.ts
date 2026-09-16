@@ -1,5 +1,5 @@
 /**
- * Entry points for the omp commit command.
+ * Entry points for the zero2ai commit command.
  */
 
 export * from "./conventional";

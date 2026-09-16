@@ -12,8 +12,8 @@
  * multiple reviewer agents based on diff weight and locality.
  */
 
-import * as vcs from "@oh-my-pi/pi-natives/vcs";
-import { prompt } from "@oh-my-pi/pi-utils";
+import * as vcs from "@zero2ai/natives/vcs";
+import { prompt } from "@zero2ai/utils";
 import type { CustomCommand, CustomCommandAPI } from "../../../../extensibility/custom-commands/types";
 import type { HookCommandContext } from "../../../../extensibility/hooks/types";
 import reviewCustomRequestTemplate from "../../../../prompts/review-custom-request.md" with { type: "text" };

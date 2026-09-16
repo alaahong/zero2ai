@@ -1,13 +1,13 @@
 import { createHash } from "node:crypto";
 import * as fs from "node:fs/promises";
 import http2 from "node:http2";
-import { classifyModel, collapseVariantId } from "@oh-my-pi/pi-catalog/compat/taxonomy";
+import { classifyModel, collapseVariantId } from "@zero2ai/catalog/compat/taxonomy";
 import type {
 	ConversationStep,
 	CursorRule,
 	McpToolDefinition,
 	RequestedModel_ModelParameterbytes,
-} from "@oh-my-pi/pi-catalog/discovery/cursor-proto";
+} from "@zero2ai/catalog/discovery/cursor-proto";
 import {
 	AgentClientMessageSchema,
 	AgentConversationTurnStructureSchema,
@@ -148,7 +148,7 @@ import {
 	WriteShellStdinErrorSchema,
 	WriteShellStdinResultSchema,
 	WriteSuccessSchema,
-} from "@oh-my-pi/pi-catalog/discovery/cursor-proto";
+} from "@zero2ai/catalog/discovery/cursor-proto";
 import {
 	create,
 	decodeJsonValue,
@@ -157,9 +157,9 @@ import {
 	type JsonValue,
 	toBinary,
 	toJson,
-} from "@oh-my-pi/pi-catalog/discovery/protobuf";
-import { THINKING_EFFORTS } from "@oh-my-pi/pi-catalog/effort";
-import { calculateCost } from "@oh-my-pi/pi-catalog/models";
+} from "@zero2ai/catalog/discovery/protobuf";
+import { THINKING_EFFORTS } from "@zero2ai/catalog/effort";
+import { calculateCost } from "@zero2ai/catalog/models";
 import {
 	$env,
 	isRecord,
@@ -168,7 +168,7 @@ import {
 	parseStreamingJson,
 	parseStreamingJsonThrottled,
 	sanitizeText,
-} from "@oh-my-pi/pi-utils";
+} from "@zero2ai/utils";
 import * as AIError from "../error";
 import type {
 	Api,
@@ -1691,7 +1691,7 @@ async function handleExecServerMessage(
 			const args = execMsg.message.value;
 			if (!args.toolCallId) args.toolCallId = crypto.randomUUID();
 			// Bridge maps `ls` onto the coding-agent `read` tool (see
-			// `CursorExecHandlers.ls` in `pi-coding-agent/src/cursor.ts`); mirror
+			// `CursorExecHandlers.ls` in `zero2ai-coding-agent/src/cursor.ts`); mirror
 			// that here so the synthesized block matches the toolResult's `toolName`.
 			synthesizeCursorExecToolCall(output, stream, state, args.toolCallId, "read", { path: args.path });
 			const { execResult } = await resolveExecHandler(
@@ -2237,7 +2237,7 @@ async function handleExecServerMessage(
 				case: args.ignoreCase === true ? false : undefined,
 				// Neither field exists in the model-facing `grep` schema — the bridge
 				// serves them by building a scoped tool instead. Recorded anyway, for
-				// the same reason `pi_read` renders its range into the displayed path:
+				// the same reason `zero2ai_read` renders its range into the displayed path:
 				// a capped or context-widened search is otherwise replayed as an
 				// ordinary grep sitting next to output no ordinary grep produces.
 				context: args.context,
@@ -4606,13 +4606,13 @@ function readCursorBlob(blobStore: Map<string, Uint8Array>, blobId: Uint8Array):
 /**
  * Cursor AgentService reconstructs the model prompt from `requestContext.rules`,
  * not from the client-supplied `rootPromptMessagesJson` system blobs. Map each
- * OMP system-prompt entry to a global CursorRule so always-apply rules survive
+ * ZERO2AI system-prompt entry to a global CursorRule so always-apply rules survive
  * that reconstruction.
  */
 export function buildCursorRequestContextRules(systemPrompt: readonly string[] | undefined): CursorRule[] {
 	return normalizeSystemPrompts(systemPrompt).map((content, index) =>
 		create(CursorRuleSchema, {
-			fullPath: `/omp/system-prompt/${index}.mdc`,
+			fullPath: `/zero2ai/system-prompt/${index}.mdc`,
 			content,
 			source: CursorRuleSource.USER,
 			type: create(CursorRuleTypeSchema, {
@@ -4665,7 +4665,7 @@ export function buildMcpToolDefinitions(
 	// The `write` tool doubles as the xd:// transport: forwarded devices such as
 	// `ast_edit` stage previews finalized only by writing a reason to xd://resolve
 	// or xd://reject. Cursor's native catalog may expose no write path, so
-	// re-include the built-in `write` (dropped as native above) whenever pi-agent
+	// re-include the built-in `write` (dropped as native above) whenever zero2ai-agent
 	// devices are advertised — otherwise a staged preview can never be resolved
 	// and the SoftToolRequirement('write') escalation aborts the turn.
 	const writeTool = tools.find(tool => tool.name === "write");
@@ -4682,7 +4682,7 @@ export function buildMcpToolDefinitions(
 		return create(McpToolDefinitionSchema, {
 			name: tool.name,
 			description: tool.description || "",
-			providerIdentifier: "pi-agent",
+			providerIdentifier: "zero2ai-agent",
 			toolName: tool.name,
 			inputSchema,
 		});
@@ -5047,7 +5047,7 @@ function createCursorToolCallStep(toolCall: ToolCall, result: ToolResultMessage 
 			name: toolCall.name,
 			args: encodeCursorMcpArguments(toolCall),
 			toolCallId,
-			providerIdentifier: "pi-agent",
+			providerIdentifier: "zero2ai-agent",
 			toolName: toolCall.name,
 		}),
 		...(result ? { result: createCursorMcpResult(result) } : {}),
@@ -5238,7 +5238,7 @@ function extractImages(content: (TextContent | ImageContent)[]) {
  * Resolve the Cursor Run wire model id and its parameter list.
  *
  * Cursor's `GetUsableModels` lists reasoning models as per-effort sibling
- * slugs (`gpt-5.4-mini-low`, `gpt-5.6-sol-high`), and OMP copies those ids 1:1.
+ * slugs (`gpt-5.4-mini-low`, `gpt-5.6-sol-high`), and ZERO2AI copies those ids 1:1.
  * The Run endpoint rejects a sibling slug as the wire `model_id` with
  * `resource_exhausted` (errorId 528384); the official `cursor-agent` splits the
  * slug into its base model id plus a `reasoning` effort parameter. Mirror that

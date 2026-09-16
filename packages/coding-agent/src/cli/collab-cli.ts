@@ -3,8 +3,8 @@
  * Listing returns metadata only; capabilities travel over authenticated IPC
  * only when a caller requests a link.
  */
-import { formatAge } from "@oh-my-pi/pi-utils";
-import chalk from "@oh-my-pi/pi-utils/chalk";
+import { formatAge } from "@zero2ai/utils";
+import chalk from "@zero2ai/utils/chalk";
 import {
 	COLLAB_REGISTRY_VERSION,
 	type CollabHostSnapshot,
@@ -32,13 +32,13 @@ export interface CollabLinkCommandArgs {
 	registry?: CollabListOptions;
 }
 
-/** Versioned top-level JSON shape for `omp collab list --json`. */
+/** Versioned top-level JSON shape for `zero2ai collab list --json`. */
 export interface CollabListJsonOutput {
 	version: number;
 	hosts: CollabHostSnapshot[];
 }
 
-/** Versioned capability response for `omp collab link --json`. */
+/** Versioned capability response for `zero2ai collab link --json`. */
 export interface CollabLinkJsonOutput extends CollabResolvedLink {
 	version: number;
 }
@@ -82,7 +82,7 @@ export async function runCollabListCommand(
 		print(`${host.instanceId}  ${session}  ${chalk.dim(cwd)}`);
 		print(`  ${chalk.dim(details.join(" · "))}`);
 	}
-	print(chalk.dim("Get a link: omp collab link <instanceId|pid> [--view]"));
+	print(chalk.dim("Get a link: zero2ai collab link <instanceId|pid> [--view]"));
 }
 
 export async function runCollabLinkCommand(

@@ -11,17 +11,17 @@
  *    poll from the transcript; any other tool seals it in place.
  */
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "bun:test";
-import type { AgentMessage } from "@oh-my-pi/pi-agent-core";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
+import type { AgentMessage } from "@zero2ai/agent-core";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
 import {
 	ToolExecutionComponent,
 	type ToolExecutionHandle,
-} from "@oh-my-pi/pi-coding-agent/modes/components/tool-execution";
-import { EventController } from "@oh-my-pi/pi-coding-agent/modes/controllers/event-controller";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { UiHelpers } from "@oh-my-pi/pi-coding-agent/modes/utils/ui-helpers";
-import type { SessionContext } from "@oh-my-pi/pi-coding-agent/session/session-context";
-import type { Component, TUI } from "@oh-my-pi/pi-tui";
+} from "@zero2ai/coding-agent/modes/components/tool-execution";
+import { EventController } from "@zero2ai/coding-agent/modes/controllers/event-controller";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import { UiHelpers } from "@zero2ai/coding-agent/modes/utils/ui-helpers";
+import type { SessionContext } from "@zero2ai/coding-agent/session/session-context";
+import type { Component, TUI } from "@zero2ai/tui";
 import { createInteractiveModeContext } from "./helpers/interactive-mode-context";
 
 const uiStub = { requestRender() {}, requestComponentRender() {} } as unknown as TUI;

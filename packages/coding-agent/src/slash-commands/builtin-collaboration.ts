@@ -1,5 +1,5 @@
-import { Spacer } from "@oh-my-pi/pi-tui";
-import { APP_NAME, formatAge } from "@oh-my-pi/pi-utils";
+import { Spacer } from "@zero2ai/tui";
+import { APP_NAME, formatAge } from "@zero2ai/utils";
 import { CollabGuestLink } from "../collab/guest";
 import type { CollabHost } from "../collab/host";
 import { type CollabHostSnapshot, listCollabHosts } from "../collab/registry";
@@ -208,7 +208,7 @@ export const BUILTIN_COLLABORATION_SLASH_COMMANDS: ReadonlyArray<SlashCommandSpe
 			try {
 				// Lazy: the stats dashboard (server + sqlite) loads on demand only,
 				// matching src/cli/stats-cli.ts, to keep CLI startup fast.
-				const { formatStatsDashboardUrl, startServer } = await import("@oh-my-pi/omp-stats");
+				const { formatStatsDashboardUrl, startServer } = await import("@zero2ai/stats");
 				const { hostname, port } = await startServer();
 				const url = `${formatStatsDashboardUrl(hostname, port)}/#/traces?s=${encodeURIComponent(sessionFile)}`;
 				await runtime.output(url);
@@ -288,7 +288,7 @@ export const BUILTIN_COLLABORATION_SLASH_COMMANDS: ReadonlyArray<SlashCommandSpe
 		inlineHint: "[start|view|list|stop|status] [relayUrl]",
 		subcommands: [
 			{ name: "view", description: "Share a read-only link (guests can watch, not prompt)" },
-			{ name: "list", description: "List active local Collab hosts (no links; use `omp collab link`)" },
+			{ name: "list", description: "List active local Collab hosts (no links; use `zero2ai collab link`)" },
 			{ name: "status", description: "Show link + participants" },
 			{ name: "stop", description: "Stop sharing" },
 		],
@@ -332,8 +332,8 @@ export const BUILTIN_COLLABORATION_SLASH_COMMANDS: ReadonlyArray<SlashCommandSpe
 				return;
 			}
 			if (verb === "list") {
-				// Same registry as `omp collab list`: metadata only, never a link. A
-				// link is a deliberate per-host act (`omp collab link <id> [--view]`),
+				// Same registry as `zero2ai collab list`: metadata only, never a link. A
+				// link is a deliberate per-host act (`zero2ai collab link <id> [--view]`),
 				// so a listing can be shown or logged without granting anything.
 				if (rest.trim()) {
 					ctx.showError(`Usage: /collab list — for links or JSON use \`${APP_NAME} collab link|list\``);

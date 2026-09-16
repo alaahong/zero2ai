@@ -3,8 +3,8 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import * as tls from "node:tls";
-import { type as arkType } from "@oh-my-pi/omptype";
-import { Effort } from "@oh-my-pi/pi-ai";
+import { type as arkType } from "@zero2ai/schema";
+import { Effort } from "@zero2ai/ai";
 import {
 	applyClaudeToolPrefix,
 	buildAnthropicClientOptions,
@@ -18,10 +18,10 @@ import {
 	mapStainlessOs,
 	streamAnthropic,
 	stripClaudeToolPrefix,
-} from "@oh-my-pi/pi-ai/providers/anthropic";
-import type { MessageCreateParams } from "@oh-my-pi/pi-ai/providers/anthropic-wire";
-import { claudeCodeVersion } from "@oh-my-pi/pi-ai/providers/claude-code-fingerprint";
-import { getEnvApiKey, streamSimple } from "@oh-my-pi/pi-ai/stream";
+} from "@zero2ai/ai/providers/anthropic";
+import type { MessageCreateParams } from "@zero2ai/ai/providers/anthropic-wire";
+import { claudeCodeVersion } from "@zero2ai/ai/providers/claude-code-fingerprint";
+import { getEnvApiKey, streamSimple } from "@zero2ai/ai/stream";
 import type {
 	AssistantMessage,
 	CacheRetention,
@@ -31,9 +31,9 @@ import type {
 	TJsonSchema,
 	TokenTaskBudget,
 	Tool,
-} from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { removeSyncWithRetries } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/ai/types";
+import { buildModel } from "@zero2ai/catalog/build";
+import { removeSyncWithRetries } from "@zero2ai/utils";
 import { withEnv, withOfficialAnthropicEndpoint } from "./helpers";
 
 const ANTHROPIC_MODEL_SPEC: ModelSpec<"anthropic-messages"> = {
@@ -2329,7 +2329,7 @@ describe("Anthropic request fingerprint alignment", () => {
 	});
 
 	it("loads Foundry mTLS and CA material from file paths", async () => {
-		const tmpDir = path.join(os.tmpdir(), `pi-ai-foundry-${Date.now()}-${Math.random().toString(16).slice(2)}`);
+		const tmpDir = path.join(os.tmpdir(), `zero2ai-ai-foundry-${Date.now()}-${Math.random().toString(16).slice(2)}`);
 		fs.mkdirSync(tmpDir, { recursive: true });
 		const caPath = path.join(tmpDir, "ca.pem");
 		const certPath = path.join(tmpDir, "client-cert.pem");

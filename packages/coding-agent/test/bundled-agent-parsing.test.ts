@@ -1,14 +1,14 @@
 import { describe, expect, it } from "bun:test";
-import { Effort } from "@oh-my-pi/pi-ai";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
+import { Effort } from "@zero2ai/ai";
+import { buildModel } from "@zero2ai/catalog/build";
 import {
 	resolveAgentModelPatterns,
 	resolveAgentModelSelection,
 	resolveModelOverride,
-} from "@oh-my-pi/pi-coding-agent/config/model-resolver";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { getBundledAgent } from "@oh-my-pi/pi-coding-agent/task/agents";
-import { AUTO_THINKING } from "@oh-my-pi/pi-coding-agent/thinking";
+} from "@zero2ai/coding-agent/config/model-resolver";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { getBundledAgent } from "@zero2ai/coding-agent/task/agents";
+import { AUTO_THINKING } from "@zero2ai/coding-agent/thinking";
 
 describe("bundled agent parsing", () => {
 	it("defaults the task agent to the auto thinking selector", () => {

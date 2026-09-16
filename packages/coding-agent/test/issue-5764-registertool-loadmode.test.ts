@@ -6,18 +6,18 @@
  * / `write xd://<tool>`).
  */
 import { describe, expect, it } from "bun:test";
-import { type } from "@oh-my-pi/omptype";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { CustomToolAdapter } from "@oh-my-pi/pi-coding-agent/extensibility/custom-tools/wrapper";
-import type { ExtensionRunner } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/runner";
-import { RegisteredToolAdapter } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/wrapper";
-import { extensionToolSourceInfo } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/loader";
-import { BUILTIN_TOOLS, type ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
+import { type } from "@zero2ai/schema";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { CustomToolAdapter } from "@zero2ai/coding-agent/extensibility/custom-tools/wrapper";
+import type { ExtensionRunner } from "@zero2ai/coding-agent/extensibility/extensions/runner";
+import { RegisteredToolAdapter } from "@zero2ai/coding-agent/extensibility/extensions/wrapper";
+import { extensionToolSourceInfo } from "@zero2ai/coding-agent/extensibility/extensions/loader";
+import { BUILTIN_TOOLS, type ToolSession } from "@zero2ai/coding-agent/tools";
 import {
 	defaultLoadModeForToolName,
 	ESSENTIAL_BUILTIN_TOOL_NAMES,
-} from "@oh-my-pi/pi-coding-agent/tools/essential-tools";
-import { isMountableUnderXdev } from "@oh-my-pi/pi-coding-agent/tools/xdev";
+} from "@zero2ai/coding-agent/tools/essential-tools";
+import { isMountableUnderXdev } from "@zero2ai/coding-agent/tools/xdev";
 
 function makeSession(): ToolSession {
 	return {

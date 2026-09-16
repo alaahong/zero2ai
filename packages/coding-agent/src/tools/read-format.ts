@@ -1,5 +1,5 @@
 import * as path from "node:path";
-import type { AgentToolResult } from "@oh-my-pi/pi-agent-core";
+import type { AgentToolResult } from "@zero2ai/agent-core";
 import { getEditStore } from "../edit/store";
 import {
 	formatHashlineHeader,

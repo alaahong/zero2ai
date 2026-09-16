@@ -1,12 +1,12 @@
-import type { Api, Model, ModelSpec, RemoteCompactionConfig } from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { getVariantAliasSources, resolveVariantSelector } from "@oh-my-pi/pi-catalog/compat/collapse";
+import type { Api, Model, ModelSpec, RemoteCompactionConfig } from "@zero2ai/ai/types";
+import { buildModel } from "@zero2ai/catalog/build";
+import { getVariantAliasSources, resolveVariantSelector } from "@zero2ai/catalog/compat/collapse";
 import {
 	getBundledModelReferenceIndex,
 	inheritReferenceThinking,
 	resolveModelReference,
-} from "@oh-my-pi/pi-catalog/identity";
-import { logger } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/catalog/identity";
+import { logger } from "@zero2ai/utils";
 import { createLiveConfigHeaders, type HeaderSource } from "./model-config-values";
 import { type ModelPatch, mergeCompat, mergeRemoteCompactionConfig } from "./model-patch";
 import { parseModelString } from "./model-resolver";

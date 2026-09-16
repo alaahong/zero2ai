@@ -4,15 +4,15 @@ import {
 	getDialectDefinition,
 	type InbandScanEvent,
 	ThinkingInbandScanner,
-} from "@oh-my-pi/pi-ai/dialect";
-import { streamGoogleGeminiCli } from "@oh-my-pi/pi-ai/providers/google-gemini-cli";
-import { streamOpenAICompletions } from "@oh-my-pi/pi-ai/providers/openai-completions";
-import { stream } from "@oh-my-pi/pi-ai/stream";
-import type { Context, FetchImpl, Model, TextContent, ThinkingContent, Tool, ToolCall } from "@oh-my-pi/pi-ai/types";
-import { getStreamMarkupHealingPattern, StreamMarkupHealing } from "@oh-my-pi/pi-ai/utils/stream-markup-healing";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { INTENT_FIELD } from "@oh-my-pi/pi-wire";
+} from "@zero2ai/ai/dialect";
+import { streamGoogleGeminiCli } from "@zero2ai/ai/providers/google-gemini-cli";
+import { streamOpenAICompletions } from "@zero2ai/ai/providers/openai-completions";
+import { stream } from "@zero2ai/ai/stream";
+import type { Context, FetchImpl, Model, TextContent, ThinkingContent, Tool, ToolCall } from "@zero2ai/ai/types";
+import { getStreamMarkupHealingPattern, StreamMarkupHealing } from "@zero2ai/ai/utils/stream-markup-healing";
+import { buildModel } from "@zero2ai/catalog/build";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { INTENT_FIELD } from "@zero2ai/wire";
 
 interface SseToolCallDelta {
 	index: number;

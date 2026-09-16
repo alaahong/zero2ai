@@ -1,6 +1,6 @@
-# Porting Hot Paths to `pi-natives`
+# Porting Hot Paths to `zero2ai-natives`
 
-This is the contributor path for moving a measured JS/TS hot path into `crates/pi-natives` and exposing it through `@oh-my-pi/pi-natives`.
+This is the contributor path for moving a measured JS/TS hot path into `crates/zero2ai-natives` and exposing it through `@zero2ai/natives`.
 
 ## Decide whether to port
 
@@ -15,7 +15,7 @@ The package has no `packages/natives/src/<module>` wrapper layer. Its entrypoint
 - eager root: `native/index.js` with generated `native/index.d.ts`;
 - lazy desktop wrapper: `native/desktop.js` / `desktop.d.ts`;
 - lazy clipboard wrapper: `native/clipboard.js` / `clipboard.d.ts`;
-- lazy vcs wrapper: `native/vcs.js` / `vcs.d.ts` (`@oh-my-pi/pi-natives/vcs`).
+- lazy vcs wrapper: `native/vcs.js` / `vcs.d.ts` (`@zero2ai/natives/vcs`).
 
 The vcs subpath exposes the backend-neutral `Vcs*` repository API (added in
 18.0.9, with `VcsGitRepo.mergeBase()` following in 18.0.10): discovery and
@@ -29,13 +29,13 @@ watcher built on `VcsRepo.watchTarget()`.
 Two commands serve different purposes:
 
 - `bun --cwd=packages/natives run build:bindings` runs napi-rs for the host, installs a local variant addon and generated declarations, and regenerates explicit ESM/enum exports. Use this when the Rust public type surface changes.
-- `bun --cwd=packages/natives run build` invokes `scripts/bazel-natives.ts host --dest native`. The host target builds through the local cargo/napi-rs backend by default (`OMP_NATIVE_BUILD_BACKEND=bazel` opts into bazel) but does not regenerate declarations.
+- `bun --cwd=packages/natives run build` invokes `scripts/bazel-natives.ts host --dest native`. The host target builds through the local cargo/napi-rs backend by default (`ZERO2AI_NATIVE_BUILD_BACKEND=bazel` opts into bazel) but does not regenerate declarations.
 
 Release builds use Bazel targets and publish `.node` files in platform leaf packages. The core publish rewrite removes addons and injects lockstep optional dependencies generated from `LEAF_TARGETS` in `gen-npm-packages.ts`.
 
 ## Design the N-API boundary
 
-1. Put implementation in the owning `crates/pi-natives/src/<module>.rs`; register new modules in `lib.rs`.
+1. Put implementation in the owning `crates/zero2ai-natives/src/<module>.rs`; register new modules in `lib.rs`.
 2. Keep the computation in a plain Rust function where practical, then expose a thin `#[napi]` boundary.
 3. Prefer owned N-API-compatible values: `String`, vectors, typed arrays, and `#[napi(object)]` option/result structs. Avoid borrowed public inputs whose lifetime cannot cross N-API work.
 4. Let napi-rs apply the default snake_case-to-camelCase name unless a deliberate public name requires `js_name`.
@@ -56,8 +56,8 @@ Match an existing export with the same scheduling/error shape rather than introd
 
 - Add the Rust logic and focused Rust tests for pure invariants when needed.
 - Add the `#[napi]` item and object/enum types.
-- Register a new module in `crates/pi-natives/src/lib.rs`.
-- If the port uses another first-party crate, add the dependency to `crates/pi-natives/Cargo.toml` and its build-system inputs as required by the native build.
+- Register a new module in `crates/zero2ai-natives/src/lib.rs`.
+- If the port uses another first-party crate, add the dependency to `crates/zero2ai-natives/Cargo.toml` and its build-system inputs as required by the native build.
 
 ### 2. Regenerate and inspect the binding
 
@@ -87,7 +87,7 @@ Do not add a wrapper merely to rename a generated root export.
 
 ### 4. Migrate consumers cleanly
 
-- Import the generated root symbol or intentional lazy subpath from `@oh-my-pi/pi-natives`.
+- Import the generated root symbol or intentional lazy subpath from `@zero2ai/natives`.
 - Compare results and errors against the JS baseline on boundary cases.
 - Switch every intended caller and remove the obsolete implementation in the same change.
 - Keep user-facing policy and rendering in the consumer when the native primitive does not own it.

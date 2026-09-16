@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from "bun:test";
-import { type } from "@oh-my-pi/omptype";
-import type { AgentTool, AgentToolContext, AgentToolResult } from "@oh-my-pi/pi-agent-core";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { callSessionTool } from "@oh-my-pi/pi-coding-agent/eval/js/tool-bridge";
-import type { EvalShadowCellSession } from "@oh-my-pi/pi-coding-agent/eval/speculation/cell-session";
-import { type TodoPhase, TodoTool, type ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { INTENT_FIELD } from "@oh-my-pi/pi-wire";
+import { type } from "@zero2ai/schema";
+import type { AgentTool, AgentToolContext, AgentToolResult } from "@zero2ai/agent-core";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { callSessionTool } from "@zero2ai/coding-agent/eval/js/tool-bridge";
+import type { EvalShadowCellSession } from "@zero2ai/coding-agent/eval/speculation/cell-session";
+import { type TodoPhase, TodoTool, type ToolSession } from "@zero2ai/coding-agent/tools";
+import { INTENT_FIELD } from "@zero2ai/wire";
 
 function createTool(name: string, execute: AgentTool["execute"]): AgentTool {
 	return {

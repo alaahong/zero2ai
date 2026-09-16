@@ -1,14 +1,14 @@
 import { afterEach, expect, it } from "bun:test";
-import { type } from "@oh-my-pi/omptype";
-import { Agent, type AgentMessage, type AgentTool } from "@oh-my-pi/pi-agent-core";
-import { createMockModel, type MockResponse } from "@oh-my-pi/pi-ai/providers/mock";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { type } from "@zero2ai/schema";
+import { Agent, type AgentMessage, type AgentTool } from "@zero2ai/agent-core";
+import { createMockModel, type MockResponse } from "@zero2ai/ai/providers/mock";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { TempDir } from "@zero2ai/utils";
 
 type BoundaryTool = AgentTool<any, any, any>;
 
@@ -54,7 +54,7 @@ afterEach(async () => {
 it.each(["concern", "nit", "blocker"] as const)(
 	"routes late terminal %s correctly before a real next run",
 	async severity => {
-		const temp = TempDir.createSync("@pi-advisor-terminal-unwind-");
+		const temp = TempDir.createSync("@zero2ai-advisor-terminal-unwind-");
 		const auth = await AuthStorage.create(":memory:");
 		auth.setRuntimeApiKey("anthropic", "test-key");
 		const model = getBundledModel("anthropic", "claude-sonnet-4-5");

@@ -1,12 +1,12 @@
 /**
  * Stats CLI command handlers.
  *
- * Handles `omp stats` subcommand for viewing AI usage statistics.
+ * Handles `zero2ai stats` subcommand for viewing AI usage statistics.
  */
 
-import { truncateToWidth } from "@oh-my-pi/pi-tui/utils";
-import { formatDuration, formatNumber, formatPercent } from "@oh-my-pi/pi-utils";
-import chalk from "@oh-my-pi/pi-utils/chalk";
+import { truncateToWidth } from "@zero2ai/tui/utils";
+import { formatDuration, formatNumber, formatPercent } from "@zero2ai/utils";
+import chalk from "@zero2ai/utils/chalk";
 import { openPath } from "../utils/open";
 
 /**
@@ -79,7 +79,7 @@ function normalizePremiumRequests(n: number): number {
 export async function runStatsCommand(cmd: StatsCommandArgs): Promise<void> {
 	// Lazy import to avoid loading stats module when not needed
 	const { closeDb, formatStatsDashboardUrl, getDashboardStats, getTotalMessageCount, startServer, syncAllSessions } =
-		await import("@oh-my-pi/omp-stats");
+		await import("@zero2ai/stats");
 
 	// Sync session files first
 	const progress = createSyncProgressReporter();
@@ -122,7 +122,7 @@ export async function runStatsCommand(cmd: StatsCommandArgs): Promise<void> {
 }
 
 async function printStatsSummary(): Promise<void> {
-	const { getDashboardStats } = await import("@oh-my-pi/omp-stats");
+	const { getDashboardStats } = await import("@zero2ai/stats");
 	const stats = await getDashboardStats();
 	const { overall, byModel, byFolder } = stats;
 

@@ -1,10 +1,10 @@
 import { beforeAll, describe, expect, it, vi } from "bun:test";
-import { LoginDialogComponent } from "@oh-my-pi/pi-coding-agent/modes/components/login-dialog";
-import { SelectorController } from "@oh-my-pi/pi-coding-agent/modes/controllers/selector-controller";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import type { InteractiveModeContext } from "@oh-my-pi/pi-coding-agent/modes/types";
-import type { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import type { TUI } from "@oh-my-pi/pi-tui";
+import { LoginDialogComponent } from "@zero2ai/coding-agent/modes/components/login-dialog";
+import { SelectorController } from "@zero2ai/coding-agent/modes/controllers/selector-controller";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import type { InteractiveModeContext } from "@zero2ai/coding-agent/modes/types";
+import type { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import type { TUI } from "@zero2ai/tui";
 
 interface RenderableBlock {
 	render(width: number): string[];
@@ -125,9 +125,9 @@ describe("SelectorController login", () => {
 		const dialog = new LoginDialogComponent(tui, "openrouter", vi.fn());
 		const prompt = dialog.showPrompt("Paste your OpenRouter API key");
 
-		dialog.pasteText("OMP_PASTE_TEST_123");
+		dialog.pasteText("ZERO2AI_PASTE_TEST_123");
 		dialog.handleInput("\n");
 
-		await expect(prompt).resolves.toBe("OMP_PASTE_TEST_123");
+		await expect(prompt).resolves.toBe("ZERO2AI_PASTE_TEST_123");
 	});
 });

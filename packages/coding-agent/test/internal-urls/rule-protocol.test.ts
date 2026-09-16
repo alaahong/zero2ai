@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it } from "bun:test";
-import type { Rule } from "@oh-my-pi/pi-coding-agent/capability/rule";
-import { resetActiveRulesForTests, setActiveRules } from "@oh-my-pi/pi-coding-agent/capability/rule";
-import type { InternalUrl } from "@oh-my-pi/pi-coding-agent/internal-urls/types";
-import { RuleProtocolHandler } from "@oh-my-pi/pi-coding-agent/internal-urls/rule-protocol";
+import type { Rule } from "@zero2ai/coding-agent/capability/rule";
+import { resetActiveRulesForTests, setActiveRules } from "@zero2ai/coding-agent/capability/rule";
+import type { InternalUrl } from "@zero2ai/coding-agent/internal-urls/types";
+import { RuleProtocolHandler } from "@zero2ai/coding-agent/internal-urls/rule-protocol";
 
 function makeRule(name: string, content: string): Rule {
 	return {

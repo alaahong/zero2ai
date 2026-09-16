@@ -1,14 +1,14 @@
 import { describe, expect, test } from "bun:test";
-import { Effort } from "@oh-my-pi/pi-catalog/effort";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { seedModels } from "@oh-my-pi/pi-catalog/compat/providers";
-import { providerEntry } from "@oh-my-pi/pi-catalog/compat/providers";
+import { Effort } from "@zero2ai/catalog/effort";
+import { buildModel } from "@zero2ai/catalog/build";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { seedModels } from "@zero2ai/catalog/compat/providers";
+import { providerEntry } from "@zero2ai/catalog/compat/providers";
 import {
 	metaModelManagerOptions,
 	museCodeModelManagerOptions,
-} from "@oh-my-pi/pi-catalog/provider-models/openai-compat";
-import type { FetchImpl, ThinkingConfig } from "@oh-my-pi/pi-catalog/types";
+} from "@zero2ai/catalog/provider-models/openai-compat";
+import type { FetchImpl, ThinkingConfig } from "@zero2ai/catalog/types";
 
 const MUSE_SPARK_THINKING: ThinkingConfig = {
 	mode: "effort",

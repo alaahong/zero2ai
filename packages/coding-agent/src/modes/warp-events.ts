@@ -1,7 +1,7 @@
 import * as path from "node:path";
-import type { AgentMessage } from "@oh-my-pi/pi-agent-core";
-import { isInsideTmux, wrapTmuxPassthrough } from "@oh-my-pi/pi-tui/terminal-capabilities";
-import { VERSION } from "@oh-my-pi/pi-utils/dirs";
+import type { AgentMessage } from "@zero2ai/agent-core";
+import { isInsideTmux, wrapTmuxPassthrough } from "@zero2ai/tui/terminal-capabilities";
+import { VERSION } from "@zero2ai/utils/dirs";
 import type { ExtensionContext, ExtensionFactory } from "../extensibility/extensions/types";
 import { isSilentAbort, isUserInterruptAbort, SKILL_PROMPT_MESSAGE_TYPE } from "../session/messages";
 
@@ -56,8 +56,8 @@ export function createWarpEventEmitter(options: WarpEventEmitterOptions): WarpEv
 			const body = {
 				...event,
 				v: WARP_CLI_AGENT_PROTOCOL_VERSION,
-				// Warp resolves this via CLIAgent.command_prefix(); OhMyPi is "omp".
-				agent: "omp",
+				// Warp resolves this via CLIAgent.command_prefix(); OhMyPi is "zero2ai".
+				agent: "zero2ai",
 				session_id: options.sessionId,
 				cwd,
 				project: path.basename(cwd),
@@ -198,7 +198,7 @@ export function createWarpEventBridgeExtension(): ExtensionFactory {
 			emitter?.emit({
 				event: "permission_request",
 				tool_name: event.toolName,
-				summary: `omp wants to run ${event.toolName}`,
+				summary: `zero2ai wants to run ${event.toolName}`,
 			});
 		});
 

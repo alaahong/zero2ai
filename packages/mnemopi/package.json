@@ -1,6 +1,6 @@
 {
   "type": "module",
-  "name": "@oh-my-pi/pi-mnemopi",
+  "name": "@zero2ai/mnemopi",
   "version": "18.2.1",
   "description": "Local SQLite memory engine for Oh My Pi agents",
   "homepage": "https://omp.sh",
@@ -39,10 +39,10 @@
     "fmt": "oxfmt --no-error-on-unmatched-pattern 'src/**/*.{ts,tsx}' '{test,bench,examples,scripts}/**/*.ts' '*.ts'"
   },
   "dependencies": {
-    "@oh-my-pi/pi-ai": "catalog:",
-    "@oh-my-pi/pi-catalog": "catalog:",
-    "@oh-my-pi/pi-natives": "catalog:",
-    "@oh-my-pi/pi-utils": "catalog:"
+    "@zero2ai/ai": "catalog:",
+    "@zero2ai/catalog": "catalog:",
+    "@zero2ai/natives": "catalog:",
+    "@zero2ai/utils": "catalog:"
   },
   "peerDependencies": {
     "fastembed": "2.1.0",

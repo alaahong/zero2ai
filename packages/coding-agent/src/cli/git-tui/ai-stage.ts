@@ -15,10 +15,10 @@ import {
 	completeSimple,
 	type Model,
 	retryTransientCompletion,
-} from "@oh-my-pi/pi-ai";
-import type { VcsHunkSelection } from "@oh-my-pi/pi-natives";
-import * as vcs from "@oh-my-pi/pi-natives/vcs";
-import { logger, prompt } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/ai";
+import type { VcsHunkSelection } from "@zero2ai/natives";
+import * as vcs from "@zero2ai/natives/vcs";
+import { logger, prompt } from "@zero2ai/utils";
 import { parseFileDiffs, parseFileHunks } from "../../commit/git/diff";
 import type { FileDiff } from "../../commit/types";
 import { ModelRegistry } from "../../config/model-registry";

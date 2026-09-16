@@ -18,7 +18,7 @@ import {
 	truncateToWidth,
 	visibleWidth,
 	wrapTextWithAnsi,
-} from "@oh-my-pi/pi-tui";
+} from "@zero2ai/tui";
 import { getMarkdownTheme, type ThemeColor, theme } from "../../modes/theme/theme";
 import {
 	matchesAppExternalEditor,

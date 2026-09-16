@@ -1,0 +1,1896 @@
+diff --git a/.bazelrc b/.bazelrc
+index fba5a336bb..043b6f04e7 100644
+--- a/.bazelrc
++++ b/.bazelrc
+@@ -73,11 +73,11 @@ build:ci --reuse_sandbox_directories
+ 
+ # --- Remote cache ------------------------------------------------------------
+ # The bazel-remote endpoint is cluster-internal only; .github/actions/bazel-cache
+-# composes endpoint + credentials into an rc fragment on omp-kata pods.
++# composes endpoint + credentials into an rc fragment on zero2ai-kata pods.
+ # GitHub-hosted runners never use a remote cache (actions/cache-backed
+ # --disk_cache instead). These configs carry only the policy bits.
+ #
+-# cache-rw: trusted in-cluster writers (omp-kata pods).
++# cache-rw: trusted in-cluster writers (zero2ai-kata pods).
+ build:cache-rw --remote_upload_local_results=true
+ build:cache-rw --remote_local_fallback
+ # cache-ro: read-only consumers (e.g. local dev via .bazelrc.user + VPN/tailnet).
+diff --git a/.dockerignore b/.dockerignore
+index a22a783a0e..36745f8201 100644
+--- a/.dockerignore
++++ b/.dockerignore
+@@ -29,7 +29,7 @@ packages/snapcompact/research/results/
+ .wt/
+ .opencode/
+ .pi_config/
+-.omp/plugins/
++.zero2ai/plugins/
+ 
+ # VCS, editors, IDEs.
+ .git/
+@@ -62,7 +62,7 @@ changes/
+ 
+ # Generated, regenerated in-image.
+ packages/ai/test/.temp-images/
+-python/omp-rpc/src/omp_rpc.egg-info/
++python/zero2ai-rpc/src/zero2ai_rpc.egg-info/
+ python/robomp/data/
+ python/robomp/.cache/
+ python/robomp/src/robomp/static/
+diff --git a/.github/ISSUE_TEMPLATE/bug_report.yml b/.github/ISSUE_TEMPLATE/bug_report.yml
+index 5ce78a5943..f756d2eba0 100644
+--- a/.github/ISSUE_TEMPLATE/bug_report.yml
++++ b/.github/ISSUE_TEMPLATE/bug_report.yml
+@@ -48,8 +48,8 @@ body:
+   - type: input
+     id: version
+     attributes:
+-      label: omp version
+-      description: Output of `omp --version`
++      label: zero2ai version
++      description: Output of `zero2ai --version`
+       placeholder: "e.g. 12.1.0"
+     validations:
+       required: true
+@@ -90,7 +90,7 @@ body:
+     id: area
+     attributes:
+       label: Area
+-      description: Which part of omp is affected?
++      description: Which part of zero2ai is affected?
+       options:
+         - TUI / Display
+         - Authentication / Login
+diff --git a/.github/ISSUE_TEMPLATE/feature_request.yml b/.github/ISSUE_TEMPLATE/feature_request.yml
+index c800119ccf..50a6f94eea 100644
+--- a/.github/ISSUE_TEMPLATE/feature_request.yml
++++ b/.github/ISSUE_TEMPLATE/feature_request.yml
+@@ -22,7 +22,7 @@ body:
+     id: area
+     attributes:
+       label: Area
+-      description: Which part of omp does this relate to?
++      description: Which part of zero2ai does this relate to?
+       options:
+         - Provider / Model support
+         - TUI / Display
+diff --git a/.github/actionlint.yaml b/.github/actionlint.yaml
+index 73bd0da5a8..7c3ee9df27 100644
+--- a/.github/actionlint.yaml
++++ b/.github/actionlint.yaml
+@@ -1,6 +1,6 @@
+ # actionlint only knows GitHub-hosted labels; register the self-hosted ARC
+-# runner scale set (infra/docs/04-arc-and-caching.md) so `runs-on: omp-kata`
++# runner scale set (infra/docs/04-arc-and-caching.md) so `runs-on: zero2ai-kata`
+ # lints clean.
+ self-hosted-runner:
+    labels:
+-      - omp-kata
++      - zero2ai-kata
+diff --git a/.github/actions/bazel-cache/action.yml b/.github/actions/bazel-cache/action.yml
+index 1fa3eff6f0..127817cb81 100644
+--- a/.github/actions/bazel-cache/action.yml
++++ b/.github/actions/bazel-cache/action.yml
+@@ -4,7 +4,7 @@ description: >
+    exposes the backend through step outputs before any action condition
+    uses it.
+ 
+-   omp-kata jobs use the cluster remote cache. GitHub-hosted jobs use an
++   zero2ai-kata jobs use the cluster remote cache. GitHub-hosted jobs use an
+    actions/cache-backed disk cache seeded by the bazel-cache-warm workflow
+    on the same runner image — cross-host action keys never hit, so the disk
+    cache is hosted-only and its key carries a schema version (v1 was
+@@ -83,8 +83,8 @@ runs:
+            # repo half, every hosted job re-downloaded and re-extracted the
+            # rust/LLVM/zig toolchains. Save sites must list the same paths.
+            path: |
+-              ~/.cache/omp-bazel-disk
+-              ~/.cache/omp-bazel-repo
++              ~/.cache/zero2ai-bazel-disk
++              ~/.cache/zero2ai-bazel-repo
+            key: ${{ steps.backend.outputs.cache-key }}
+            # Order matters: exact key, same-config prefix, then any archive for
+            # this scope+os+arch. The bare fallback is what keeps release version
+@@ -124,7 +124,7 @@ runs:
+                echo "startup --output_user_root=$RUNNER_TEMP/bazel-root"
+                echo "common --config=ci"
+                echo "common --repository_cache=/opt/bazel-repo-cache"
+-               echo "common --repo_env=OMP_XWIN_CACHE_DIR=/opt/bazel-repo-cache/xwin"
++               echo "common --repo_env=ZERO2AI_XWIN_CACHE_DIR=/opt/bazel-repo-cache/xwin"
+                echo "common --config=cache-rw"
+                echo "common --remote_cache=grpcs://bazel-remote.bazel-cache.svc.cluster.local:9092"
+                echo "common --tls_certificate=infra/bazel-remote/ca.crt"
+@@ -132,23 +132,23 @@ runs:
+                echo "common --remote_download_toplevel"
+              } > "$rc"
+            else
+-             mkdir -p "$HOME/.cache/omp-bazel-disk" "$HOME/.cache/omp-bazel-repo"
++             mkdir -p "$HOME/.cache/zero2ai-bazel-disk" "$HOME/.cache/zero2ai-bazel-repo"
+              # Seeding from stale archives means entries dead source
+              # generations wrote would otherwise ride along forever; drop
+              # anything untouched for 14 days (tar preserves mtimes across
+              # the actions/cache round trip, so age survives restores).
+-             # DISK CACHE ONLY: never prune omp-bazel-repo file-by-file —
++             # DISK CACHE ONLY: never prune zero2ai-bazel-repo file-by-file —
+              # extracted repo contents keep upstream-archive mtimes (often
+              # months old), so an mtime sweep guts contents-cache entries
+              # while bazel still trusts their recorded_inputs, materializing
+              # hollow external repos ("BUILD file not found" — v17.2.0
+              # release run 30519253683). The repo cache is bounded by the
+              # GitHub cache TTL/LRU at the archive level instead.
+-             find "$HOME/.cache/omp-bazel-disk" -type f -mtime +14 -delete 2>/dev/null || true
++             find "$HOME/.cache/zero2ai-bazel-disk" -type f -mtime +14 -delete 2>/dev/null || true
+              {
+                echo "common --config=ci"
+-               echo "common --disk_cache=$HOME/.cache/omp-bazel-disk"
+-               echo "common --repository_cache=$HOME/.cache/omp-bazel-repo"
++               echo "common --disk_cache=$HOME/.cache/zero2ai-bazel-disk"
++               echo "common --repository_cache=$HOME/.cache/zero2ai-bazel-repo"
+              } > "$rc"
+            fi
+ 
+diff --git a/.github/actions/bazel-natives/action.yml b/.github/actions/bazel-natives/action.yml
+index 408548d1e1..d813dbb664 100644
+--- a/.github/actions/bazel-natives/action.yml
++++ b/.github/actions/bazel-natives/action.yml
+@@ -2,7 +2,7 @@ name: "Build native addons (bazel)"
+ description: >
+    Build the requested //:natives-* targets with bazelisk and copy the .node
+    files into the destination directory. Cache wiring comes from the
+-   bazel-cache action: in-cluster read-write on omp-kata, actions/cache-backed
++   bazel-cache action: in-cluster read-write on zero2ai-kata, actions/cache-backed
+    disk cache on GitHub-hosted runners.
+ 
+ inputs:
+@@ -29,7 +29,7 @@ runs:
+       - name: Build native addons
+         shell: bash
+         env:
+-           OMP_BAZEL_RC: ${{ steps.cache.outputs.rc }}
++           ZERO2AI_BAZEL_RC: ${{ steps.cache.outputs.rc }}
+            NATIVE_TARGETS: ${{ inputs.targets }}
+            NATIVE_DEST: ${{ inputs.dest }}
+         run: |
+@@ -45,6 +45,6 @@ runs:
+         with:
+            # Must mirror the restore path list in the bazel-cache action.
+            path: |
+-              ~/.cache/omp-bazel-disk
+-              ~/.cache/omp-bazel-repo
++              ~/.cache/zero2ai-bazel-disk
++              ~/.cache/zero2ai-bazel-repo
+            key: ${{ steps.cache.outputs.cache-key }}
+\ No newline at end of file
+diff --git a/.github/actions/bun-install/action.yml b/.github/actions/bun-install/action.yml
+index c844e20f99..4873122f5c 100644
+--- a/.github/actions/bun-install/action.yml
++++ b/.github/actions/bun-install/action.yml
+@@ -2,8 +2,8 @@ name: "bun install (shared cache)"
+ description: >
+    Ensure bun is on PATH, then run `bun install --frozen-lockfile` with a shared
+    package store. bun setup is skipped when the runner image already ships it
+-   (the preloaded omp-kata image), and only fetched on runners that lack it
+-   (e.g. GitHub-hosted). Self-hosted omp-kata runners use the mounted Bun store
++   (the preloaded zero2ai-kata image), and only fetched on runners that lack it
++   (e.g. GitHub-hosted). Self-hosted zero2ai-kata runners use the mounted Bun store
+    PVC; GitHub-hosted runners use the stock actions/cache backend.
+ 
+ runs:
+@@ -13,7 +13,7 @@ runs:
+         id: env
+         shell: bash
+         run: |
+-           # bun is baked into the omp-kata runner image — reuse it only when it
++           # bun is baked into the zero2ai-kata runner image — reuse it only when it
+            # satisfies the repo pin (package.json "packageManager"). The pin is
+            # either exact ("bun@1.4.2") or a floor ("bun@>=1.4"): an exact pin
+            # installs that build on mismatch, a floor installs latest when the
+@@ -51,7 +51,7 @@ runs:
+              echo "bun on runner: ${have:-none}; does not satisfy $want, installing $install"
+            fi
+            # The repo keys "are we on can.internal infra?" off $BAZEL_REMOTE_USER
+-           # (the bazel-remote-ci secret is envFrom-injected into every omp-kata
++           # (the bazel-remote-ci secret is envFrom-injected into every zero2ai-kata
+            # runner pod). RUNNER_ENVIRONMENT is empty on ARC pods, so it is not a
+            # usable signal here. On infra, the ARC pod mounts the shared Bun
+            # store at the default cache path; off infra, actions/cache restores it.
+@@ -92,7 +92,7 @@ runs:
+            restore-keys: |
+               bun-${{ runner.os }}-
+ 
+-      # On-infra (omp-kata): the pod mounts a shared PVC at bun's store path.
++      # On-infra (zero2ai-kata): the pod mounts a shared PVC at bun's store path.
+       - name: Prepare mounted bun store
+         if: steps.env.outputs.cache == 'mounted'
+         shell: bash
+@@ -101,7 +101,7 @@ runs:
+       - name: Install dependencies
+         shell: bash
+         run: |
+-           # The shared bun store (mounted PVC on omp-kata, actions/cache
++           # The shared bun store (mounted PVC on zero2ai-kata, actions/cache
+            # elsewhere) can hand a job a corrupt or partially written tarball
+            # when parallel jobs touch the same cache entry, so `bun install`
+            # aborts with `Fail extracting tarball for "<pkg>"`. That blob is
+diff --git a/.github/actions/native-artifacts/action.yml b/.github/actions/native-artifacts/action.yml
+index df8c6e8c01..5b27e19cfe 100644
+--- a/.github/actions/native-artifacts/action.yml
++++ b/.github/actions/native-artifacts/action.yml
+@@ -19,7 +19,7 @@ runs:
+         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+         with:
+            name: native-addons
+-           path: ${{ runner.temp }}/omp-native-artifacts
++           path: ${{ runner.temp }}/zero2ai-native-artifacts
+ 
+       - name: Install native addon targets
+         shell: bash
+@@ -34,5 +34,5 @@ runs:
+              exit 1
+            fi
+            bun scripts/bazel-natives.ts "${targets[@]}" \
+-             --source "$RUNNER_TEMP/omp-native-artifacts" \
++             --source "$RUNNER_TEMP/zero2ai-native-artifacts" \
+              --dest "$NATIVE_DEST"
+diff --git a/.github/actions/setup-system-deps/action.yml b/.github/actions/setup-system-deps/action.yml
+index cdf1e36976..0e1d046dbb 100644
+--- a/.github/actions/setup-system-deps/action.yml
++++ b/.github/actions/setup-system-deps/action.yml
+@@ -1,7 +1,7 @@
+ name: Setup system deps
+ description: >-
+    Install the canvas/native runtime deps CI needs (cairo/pango stack, fd,
+-   ripgrep, imagemagick). No-op on the preloaded omp-kata runner image, which
++   ripgrep, imagemagick). No-op on the preloaded zero2ai-kata runner image, which
+    already ships them; self-heals on a stock runner by installing via apt.
+ 
+ runs:
+@@ -10,7 +10,7 @@ runs:
+       - name: Install system deps (skip when preloaded)
+         shell: bash
+         run: |
+-           # The preloaded omp-kata runner image bakes these in. Detect that
++           # The preloaded zero2ai-kata runner image bakes these in. Detect that
+            # and skip the apt round-trip; otherwise install the exact same set so
+            # stock runners (and any future host) still work.
+            if command -v fd >/dev/null 2>&1 \
+diff --git a/.github/workflows/bazel-cache-warm.yml b/.github/workflows/bazel-cache-warm.yml
+index 4a398e76a9..f78e4cd797 100644
+--- a/.github/workflows/bazel-cache-warm.yml
++++ b/.github/workflows/bazel-cache-warm.yml
+@@ -85,7 +85,7 @@ jobs:
+               cache-scope: ${{ matrix.scope }}
+ 
+    # Produces the shared bun store entry PR jobs restore. bun-install's save
+-   # half only runs on non-PR events, and main CI jobs run on omp-kata (PVC
++   # half only runs on non-PR events, and main CI jobs run on zero2ai-kata (PVC
+    # store, no GitHub cache), so this is the sole hosted-runner producer.
+    warm_bun:
+       name: Seed bun store cache
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index b44a94214a..fa32f07db4 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -94,7 +94,7 @@ jobs:
+    # ref (or from a tagged main HEAD) is also treated as a release.
+    release_metadata:
+       name: Resolve release metadata
+-      # Hosted, not omp-kata: this ~20 s git-tag probe gates the whole release
++      # Hosted, not zero2ai-kata: this ~20 s git-tag probe gates the whole release
+       # chain, and queueing it behind the 4-runner kata pool adds dead minutes
+       # to the darwin critical path.
+       runs-on: ubuntu-22.04
+@@ -145,7 +145,7 @@ jobs:
+ 
+    check:
+       name: Lint, type check & web build
+-      runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-22.04' || 'omp-kata' }}
++      runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-22.04' || 'zero2ai-kata' }}
+       steps:
+          - uses: actions/checkout@v4
+          - uses: ./.github/actions/bun-install
+@@ -156,7 +156,7 @@ jobs:
+               # cache. PR runs use a fresh GitHub-hosted runner (see runs-on
+               # above), where the only prior cargo work is the cargo-deny
+               # install, so nothing populates the index for our own graph and
+-              # resolution fails. Non-PR events land on omp-kata, whose Cargo
++              # resolution fails. Non-PR events land on zero2ai-kata, whose Cargo
+               # cache is warm, which is why main stayed green. Fetch first.
+               cargo fetch --locked
+               cargo deny --locked --offline check licenses sources
+@@ -173,7 +173,7 @@ jobs:
+    rust_validate:
+       name: Validate Rust workspace (bazel)
+       if: github.event_name != 'pull_request'
+-      runs-on: omp-kata
++      runs-on: zero2ai-kata
+       steps:
+          - uses: actions/checkout@v4
+          - uses: ./.github/actions/bun-install
+@@ -219,7 +219,7 @@ jobs:
+    # bazel. Job name says "bazel" for continuity with required checks.
+    native_addons:
+       name: Build native addons (bazel)
+-      runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-22.04' || 'omp-kata' }}
++      runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-22.04' || 'zero2ai-kata' }}
+       steps:
+          - uses: actions/checkout@v4
+ 
+@@ -327,7 +327,7 @@ jobs:
+ 
+    test_workspace:
+       name: Test TS workspace fast
+-      runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-22.04' || 'omp-kata' }}
++      runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-22.04' || 'zero2ai-kata' }}
+       needs: [native_addons]
+       if: ${{ !cancelled() && needs.native_addons.result == 'success' }}
+       timeout-minutes: 20
+@@ -340,7 +340,7 @@ jobs:
+               targets: linux-x64-baseline linux-x64-modern
+          - name: Test workspace packages and repo scripts (TS)
+            env:
+-              OMP_TEST_CONCURRENCY: "4"
++              ZERO2AI_TEST_CONCURRENCY: "4"
+            run: |
+               bun run ci:test:ts:workspace
+               # Not `test:scripts`: scripts/musl-release.test.ts fails on main
+@@ -350,7 +350,7 @@ jobs:
+ 
+    test_coding_agent_singleton:
+       name: Test coding-agent singleton/global-state (TS)
+-      runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-22.04' || 'omp-kata' }}
++      runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-22.04' || 'zero2ai-kata' }}
+       needs: [native_addons]
+       if: ${{ !cancelled() && needs.native_addons.result == 'success' }}
+       timeout-minutes: 20
+@@ -368,7 +368,7 @@ jobs:
+ 
+    test_ts_native:
+       name: Test TS native/integration packages
+-      runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-22.04' || 'omp-kata' }}
++      runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-22.04' || 'zero2ai-kata' }}
+       needs: [native_addons]
+       if: ${{ !cancelled() && needs.native_addons.result == 'success' }}
+       timeout-minutes: 25
+@@ -381,12 +381,12 @@ jobs:
+               targets: linux-x64-baseline linux-x64-modern
+          - name: Test native/TUI/browser-ish packages (TS)
+            env:
+-              OMP_TEST_CONCURRENCY: "4"
++              ZERO2AI_TEST_CONCURRENCY: "4"
+            run: bun run ci:test:ts:native
+ 
+    test_coding_agent_ui:
+       name: Test coding-agent UI/TUI (TS)
+-      runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-22.04' || 'omp-kata' }}
++      runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-22.04' || 'zero2ai-kata' }}
+       needs: [native_addons]
+       if: ${{ !cancelled() && needs.native_addons.result == 'success' }}
+       timeout-minutes: 25
+@@ -399,12 +399,12 @@ jobs:
+               targets: linux-x64-baseline linux-x64-modern
+          - name: Test coding-agent UI/TUI bucket
+            env:
+-              OMP_TEST_CONCURRENCY: "2"
++              ZERO2AI_TEST_CONCURRENCY: "2"
+            run: bun run ci:test:coding-agent:ui
+ 
+    test_coding_agent_runtime:
+       name: Test coding-agent runtime/session (TS)
+-      runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-22.04' || 'omp-kata' }}
++      runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-22.04' || 'zero2ai-kata' }}
+       needs: [native_addons]
+       if: ${{ !cancelled() && needs.native_addons.result == 'success' }}
+       timeout-minutes: 25
+@@ -419,12 +419,12 @@ jobs:
+            # Runtime/session tests import native-backed barrels too; keep this
+            # separate for concurrency, not as a native-free guardrail.
+            env:
+-              OMP_TEST_CONCURRENCY: "4"
++              ZERO2AI_TEST_CONCURRENCY: "4"
+            run: bun run ci:test:coding-agent:runtime
+ 
+    test_coding_agent_native:
+       name: Test coding-agent native/unit (TS)
+-      runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-22.04' || 'omp-kata' }}
++      runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-22.04' || 'zero2ai-kata' }}
+       needs: [native_addons]
+       if: ${{ !cancelled() && needs.native_addons.result == 'success' }}
+       timeout-minutes: 25
+@@ -437,12 +437,12 @@ jobs:
+               targets: linux-x64-baseline linux-x64-modern
+          - name: Test coding-agent native/unit bucket
+            env:
+-              OMP_TEST_CONCURRENCY: "4"
++              ZERO2AI_TEST_CONCURRENCY: "4"
+            run: bun run ci:test:coding-agent:native
+ 
+    test_smoke:
+       name: Test CLI smoke (TS)
+-      runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-22.04' || 'omp-kata' }}
++      runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-22.04' || 'zero2ai-kata' }}
+       needs: [native_addons]
+       if: ${{ !cancelled() && needs.native_addons.result == 'success' }}
+       timeout-minutes: 15
+@@ -458,7 +458,7 @@ jobs:
+ 
+    install_methods:
+       name: Install method smoke tests
+-      runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-22.04' || 'omp-kata' }}
++      runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-22.04' || 'zero2ai-kata' }}
+       needs: [native_addons]
+       if: ${{ !cancelled() && needs.native_addons.result == 'success' }}
+       steps:
+@@ -470,7 +470,7 @@ jobs:
+               targets: linux-x64-baseline linux-x64-modern
+          - name: Install method smoke tests
+            env:
+-              OMP_INSTALL_TEST_SKIP_NATIVE_BUILD: "1"
++              ZERO2AI_INSTALL_TEST_SKIP_NATIVE_BUILD: "1"
+            run: bun run ci:test:install-methods
+ 
+    # Aggregates every validation job so publish-side release jobs gate on one
+@@ -520,7 +520,7 @@ jobs:
+                     platform: linux,
+                     arch: x64,
+                     target_id: linux-x64,
+-                    binary_path: packages/coding-agent/binaries/omp-linux-x64,
++                    binary_path: packages/coding-agent/binaries/zero2ai-linux-x64,
+                     native_targets: linux-x64-baseline linux-x64-modern,
+                  }
+                - {
+@@ -529,7 +529,7 @@ jobs:
+                     libc: musl,
+                     arch: x64,
+                     target_id: linux-musl-x64,
+-                    binary_path: packages/coding-agent/binaries/omp-linux-musl-x64,
++                    binary_path: packages/coding-agent/binaries/zero2ai-linux-musl-x64,
+                     native_targets: linux-musl-x64-baseline,
+                  }
+                - {
+@@ -537,7 +537,7 @@ jobs:
+                     platform: linux,
+                     arch: arm64,
+                     target_id: linux-arm64,
+-                    binary_path: packages/coding-agent/binaries/omp-linux-arm64,
++                    binary_path: packages/coding-agent/binaries/zero2ai-linux-arm64,
+                     native_targets: linux-arm64,
+                  }
+                - {
+@@ -546,7 +546,7 @@ jobs:
+                     libc: musl,
+                     arch: arm64,
+                     target_id: linux-musl-arm64,
+-                    binary_path: packages/coding-agent/binaries/omp-linux-musl-arm64,
++                    binary_path: packages/coding-agent/binaries/zero2ai-linux-musl-arm64,
+                     native_targets: linux-musl-arm64,
+                  }
+                - {
+@@ -554,7 +554,7 @@ jobs:
+                     platform: win32,
+                     arch: x64,
+                     target_id: win32-x64,
+-                    binary_path: packages/coding-agent/binaries/omp-windows-x64.exe,
++                    binary_path: packages/coding-agent/binaries/zero2ai-windows-x64.exe,
+                     native_targets: win32-x64-baseline,
+                  }
+       runs-on: ${{ matrix.os }}
+@@ -594,16 +594,16 @@ jobs:
+               binary="$(realpath "${{ matrix.binary_path }}")"
+               # Bun's musl-target binaries link libstdc++/libgcc dynamically;
+               # Alpine users install them alongside the binary (same as bun itself).
+-              docker run --rm -v "$binary:/usr/local/bin/omp:ro" alpine:3.22 sh -ec '
++              docker run --rm -v "$binary:/usr/local/bin/zero2ai:ro" alpine:3.22 sh -ec '
+                 apk add --no-cache libstdc++ libgcc >/dev/null
+                 runtime_dir="$(mktemp -d)"
+-                HOME="$runtime_dir/home" XDG_DATA_HOME="$runtime_dir/xdg" omp --version
+-                HOME="$runtime_dir/home" XDG_DATA_HOME="$runtime_dir/xdg" omp --smoke-test
++                HOME="$runtime_dir/home" XDG_DATA_HOME="$runtime_dir/xdg" zero2ai --version
++                HOME="$runtime_dir/home" XDG_DATA_HOME="$runtime_dir/xdg" zero2ai --smoke-test
+               '
+          - name: Upload release binary artifact
+            uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+            with:
+-              name: omp-binary-${{ matrix.target_id }}
++              name: zero2ai-binary-${{ matrix.target_id }}
+               path: ${{ matrix.binary_path }}
+ 
+    # Native-host builds make addons that native_addons cannot provide: Darwin
+@@ -622,21 +622,21 @@ jobs:
+                     os: macos-15-intel,
+                     platform: darwin,
+                     target_id: darwin-x64,
+-                    binary_path: packages/coding-agent/binaries/omp-darwin-x64,
++                    binary_path: packages/coding-agent/binaries/zero2ai-darwin-x64,
+                     native_targets: darwin-x64-baseline,
+                  }
+                - {
+                     os: macos-14,
+                     platform: darwin,
+                     target_id: darwin-arm64,
+-                    binary_path: packages/coding-agent/binaries/omp-darwin-arm64,
++                    binary_path: packages/coding-agent/binaries/zero2ai-darwin-arm64,
+                     native_targets: darwin-arm64,
+                  }
+                - {
+                     os: windows-11-arm,
+                     platform: win32,
+                     target_id: win32-arm64,
+-                    binary_path: packages/coding-agent/binaries/omp-windows-arm64.exe,
++                    binary_path: packages/coding-agent/binaries/zero2ai-windows-arm64.exe,
+                  }
+       runs-on: ${{ matrix.os }}
+       permissions:
+@@ -666,7 +666,7 @@ jobs:
+          - name: Build native addon (cargo)
+            if: matrix.platform == 'win32'
+            env:
+-              OMP_NATIVE_CARGO_PROFILE: ci
++              ZERO2AI_NATIVE_CARGO_PROFILE: ci
+            run: bun scripts/bazel-natives.ts host --dest packages/natives/native
+          - name: Build release binary
+            env:
+@@ -674,7 +674,7 @@ jobs:
+            run: bun run ci:release:build-binaries
+          - name: Sign and notarize macOS binary (Developer ID)
+            # Replaces the ad-hoc signature with a Developer ID + hardened-runtime
+-           # one (+JIT/library-validation entitlements; omp dlopens its
++           # one (+JIT/library-validation entitlements; zero2ai dlopens its
+            # runtime-extracted native addon, which has a different Team ID) and
+            # notarizes. Auto-skips until the APPLE_* secrets are configured.
+            if: matrix.platform == 'darwin' && env.MACOS_SIGNING == 'true'
+@@ -695,7 +695,7 @@ jobs:
+            if: matrix.platform == 'win32'
+            shell: pwsh
+            run: |
+-              $runtimeDir = Join-Path $env:RUNNER_TEMP "omp-smoke"
++              $runtimeDir = Join-Path $env:RUNNER_TEMP "zero2ai-smoke"
+               $env:HOME = Join-Path $runtimeDir "home"
+               $env:USERPROFILE = $env:HOME
+               $env:LOCALAPPDATA = Join-Path $runtimeDir "local"
+@@ -718,7 +718,7 @@ jobs:
+          - name: Upload release binary artifact
+            uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+            with:
+-              name: omp-binary-${{ matrix.target_id }}
++              name: zero2ai-binary-${{ matrix.target_id }}
+               path: ${{ matrix.binary_path }}
+ 
+    # Publishes the six @oh-my-pi/pi-natives-<tag> leaf packages once
+@@ -807,7 +807,7 @@ jobs:
+          - name: Download release binaries
+            uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+            with:
+-              pattern: omp-binary-*
++              pattern: zero2ai-binary-*
+               path: packages/coding-agent/binaries
+               merge-multiple: true
+          # Dependency-free build (bun APIs + zip only), so no `bun install`
+@@ -820,8 +820,8 @@ jobs:
+          - name: Generate checksums
+            run: |
+               bun run ci:release:checksums SHA256SUMS.txt \
+-                packages/coding-agent/binaries/omp-* \
+-                packages/browser-relay/dist/omp-browser-relay-extension.zip \
++                packages/coding-agent/binaries/zero2ai-* \
++                packages/browser-relay/dist/zero2ai-browser-relay-extension.zip \
+                 LICENSE \
+                 THIRD-PARTY-NOTICES.txt
+          - name: Create GitHub Release
+@@ -830,8 +830,8 @@ jobs:
+               tag_name: ${{ needs.release_metadata.outputs.release-tag }}
+               prerelease: ${{ needs.release_metadata.outputs.channel == 'canary' }}
+               files: |
+-                 packages/coding-agent/binaries/omp-*
+-                 packages/browser-relay/dist/omp-browser-relay-extension.zip
++                 packages/coding-agent/binaries/zero2ai-*
++                 packages/browser-relay/dist/zero2ai-browser-relay-extension.zip
+                  LICENSE
+                  THIRD-PARTY-NOTICES.txt
+                  SHA256SUMS.txt
+@@ -851,26 +851,26 @@ jobs:
+       steps:
+          - name: Download published macOS arm64 binary
+            run: |
+-              curl -fsSL -o omp-darwin-arm64 "https://github.com/${{ github.repository }}/releases/download/${{ needs.release_metadata.outputs.release-tag }}/omp-darwin-arm64"
+-              chmod +x omp-darwin-arm64
++              curl -fsSL -o zero2ai-darwin-arm64 "https://github.com/${{ github.repository }}/releases/download/${{ needs.release_metadata.outputs.release-tag }}/zero2ai-darwin-arm64"
++              chmod +x zero2ai-darwin-arm64
+          - name: Verify published macOS arm64 binary
+            run: |
+-              codesign -dvvv ./omp-darwin-arm64
+-              codesign --verify --strict --verbose=4 ./omp-darwin-arm64
++              codesign -dvvv ./zero2ai-darwin-arm64
++              codesign --verify --strict --verbose=4 ./zero2ai-darwin-arm64
+               runtime_dir="$(mktemp -d)"
+-              HOME="$runtime_dir/home" XDG_DATA_HOME="$runtime_dir/xdg" ./omp-darwin-arm64 --version
+-              HOME="$runtime_dir/home" XDG_DATA_HOME="$runtime_dir/xdg" ./omp-darwin-arm64 --smoke-test
++              HOME="$runtime_dir/home" XDG_DATA_HOME="$runtime_dir/xdg" ./zero2ai-darwin-arm64 --version
++              HOME="$runtime_dir/home" XDG_DATA_HOME="$runtime_dir/xdg" ./zero2ai-darwin-arm64 --smoke-test
+          - name: Assert signed release is not ad-hoc
+            if: env.MACOS_SIGNING == 'true'
+            run: |
+-              if codesign -dvvv ./omp-darwin-arm64 2>&1 | grep -qE "flags=.*adhoc|Signature=adhoc"; then
++              if codesign -dvvv ./zero2ai-darwin-arm64 2>&1 | grep -qE "flags=.*adhoc|Signature=adhoc"; then
+                 echo "published binary is still ad-hoc signed (Developer ID signing did not run)" >&2
+                 exit 1
+               fi
+               # Gatekeeper assessment: a notarized Developer ID binary is accepted.
+               # Informational — a bare (unstapled) Mach-O relies on the online ticket
+               # lookup, so surface the result without gating the release on it.
+-              spctl -a -t exec -vv ./omp-darwin-arm64 || echo "spctl non-zero (expected for unstapled bare binary; ticket served online)"
++              spctl -a -t exec -vv ./zero2ai-darwin-arm64 || echo "spctl non-zero (expected for unstapled bare binary; ticket served online)"
+ 
+    release_npm:
+       name: Publish to npm
+@@ -954,13 +954,13 @@ jobs:
+            env:
+               GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            run: |
+-              bun scripts/ci-update-brew-formula.ts "${{ needs.release_metadata.outputs.release-tag }}" --out homebrew-tap/Formula/omp.rb
++              bun scripts/ci-update-brew-formula.ts "${{ needs.release_metadata.outputs.release-tag }}" --out homebrew-tap/Formula/zero2ai.rb
+               cd homebrew-tap
+-              if git diff --quiet -- Formula/omp.rb; then
++              if git diff --quiet -- Formula/zero2ai.rb; then
+                 echo "formula already up to date for ${{ needs.release_metadata.outputs.release-tag }}"
+                 exit 0
+               fi
+               git -c user.name="github-actions[bot]" \
+                   -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+-                  commit -m "omp ${{ needs.release_metadata.outputs.release-tag }}" -- Formula/omp.rb
++                  commit -m "zero2ai ${{ needs.release_metadata.outputs.release-tag }}" -- Formula/zero2ai.rb
+               git push origin HEAD:main
+diff --git a/.github/workflows/nix.yml b/.github/workflows/nix.yml
+index a3bdc54764..ff76c148f5 100644
+--- a/.github/workflows/nix.yml
++++ b/.github/workflows/nix.yml
+@@ -1,4 +1,4 @@
+-name: OMP Nix
++name: ZERO2AI Nix
+ 
+ on:
+   push:
+diff --git a/.gitignore b/.gitignore
+index 9b999e38cb..017bf55e3b 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -44,8 +44,8 @@ coverage/
+ packages/ai/test/.temp-images/
+ 
+ # Project specific
+-!.omp/
+-.omp/plugins/
++!.zero2ai/
++.zero2ai/plugins/
+ .pi_config/
+ .opencode/
+ .worktrees/
+@@ -65,8 +65,8 @@ pi-*.html
+ packages/coding-agent/src/export/html/tool-views.generated.js
+ packages/natives/npm/
+ /runs/
+-python/omp-rpc/src/omp_rpc.egg-info/
+-python/omp-rpc/build/
++python/zero2ai-rpc/src/zero2ai_rpc.egg-info/
++python/zero2ai-rpc/build/
+ # parallel-agent worktrees
+ .wt/
+ CPU*.md
+diff --git a/Dockerfile b/Dockerfile
+index 53706f9cad..0829d6528a 100644
+--- a/Dockerfile
++++ b/Dockerfile
+@@ -4,9 +4,9 @@
+ #
+ # Stages:
+ #   natives-builder — Rust + Bun → pi_natives.linux-<arch>.node
+-#   wheel-builder   — omp_rpc Python wheel
+-#   pi-base         — python + bun + rustup launcher + natives + omp_rpc
+-#                     + /usr/local/bin/omp shim
++#   wheel-builder   — zero2ai_rpc Python wheel
++#   pi-base         — python + bun + rustup launcher + natives + zero2ai_rpc
++#                     + /usr/local/bin/zero2ai shim
+ #   pi-runtime      — pi-base + pi source + bun install      (DEFAULT, runnable)
+ #
+ # Build:
+@@ -15,7 +15,7 @@
+ #
+ # Run:
+ #     docker run --rm oh-my-pi/pi:dev --help
+-#     docker run --rm -it -v "$PWD":/work oh-my-pi/pi:dev cli    # interactive omp
++#     docker run --rm -it -v "$PWD":/work oh-my-pi/pi:dev cli    # interactive zero2ai
+ #
+ # Consume as a base in another Dockerfile (see Dockerfile.robomp):
+ #     ARG PI_BASE=oh-my-pi/pi:dev
+@@ -39,7 +39,7 @@ ARG BUN_VERSION
+ ENV BUN_INSTALL=/opt/bun \
+     PATH=/opt/bun/bin:/usr/local/cargo/bin:/usr/local/bin:/usr/bin:/bin \
+     CARGO_TERM_COLOR=never \
+-    OMP_NATIVE_CARGO_PROFILE=ci
++    ZERO2AI_NATIVE_CARGO_PROFILE=ci
+ 
+ # clang/libclang-dev: bindgen for pipewire-sys/libspa-sys (Linux desktop capture);
+ # cmake/make/ninja-build: opusic-sys builds bundled libopus via CMake.
+@@ -93,7 +93,7 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry \
+     cp packages/natives/native/pi_natives.linux-*.node /out/
+ 
+ ############################
+-# 2) wheel-builder — omp-rpc wheel
++# 2) wheel-builder — zero2ai-rpc wheel
+ ############################
+ FROM python:3.12-slim-bookworm AS wheel-builder
+ 
+@@ -104,11 +104,11 @@ RUN apt-get update \
+ RUN pip install --upgrade pip build
+ 
+ WORKDIR /src
+-COPY python/omp-rpc /src
++COPY python/zero2ai-rpc /src
+ RUN python -m build --wheel --outdir /out
+ 
+ ############################
+-# 3) pi-base — python + bun + rustup + natives + omp_rpc + omp shim
++# 3) pi-base — python + bun + rustup + natives + zero2ai_rpc + zero2ai shim
+ #
+ # Sharable runtime base. Derived images (pi-runtime below, Dockerfile.robomp)
+ # extend this and overlay their own source tree. Default PI_ROOT=/work/pi is
+@@ -151,14 +151,14 @@ RUN curl -fsSL https://sh.rustup.rs -o /tmp/rustup-init.sh \
+ # pi-natives addon: pi's loader probes /opt/bun/bin as a fallback path.
+ COPY --from=natives-builder /out/pi_natives.linux-*.node /opt/bun/bin/
+ 
+-# omp-rpc Python wheel.
++# zero2ai-rpc Python wheel.
+ COPY --from=wheel-builder /out/*.whl /tmp/wheels/
+-RUN pip install /tmp/wheels/omp_rpc-*.whl && rm -rf /tmp/wheels
++RUN pip install /tmp/wheels/zero2ai_rpc-*.whl && rm -rf /tmp/wheels
+ 
+-# Legal payload for the reusable SDKs and the OMP product installed in this image.
+-COPY LICENSE  THIRD-PARTY-NOTICES.txt /usr/share/doc/omp/
++# Legal payload for the reusable SDKs and the ZERO2AI product installed in this image.
++COPY LICENSE  THIRD-PARTY-NOTICES.txt /usr/share/doc/zero2ai/
+ 
+-# `omp` shim — runs the coding-agent CLI against $PI_ROOT via Bun. Derived
++# `zero2ai` shim — runs the coding-agent CLI against $PI_ROOT via Bun. Derived
+ # images override PI_ROOT to point at wherever their pi source lives.
+ RUN printf '%s\n' \
+     '#!/usr/bin/env bash' \
+@@ -169,13 +169,13 @@ RUN printf '%s\n' \
+     '  exit 127' \
+     'fi' \
+     'exec bun "$PI_ROOT/packages/coding-agent/src/cli.ts" "$@"' \
+-    > /usr/local/bin/omp \
+-    && chmod +x /usr/local/bin/omp
++    > /usr/local/bin/zero2ai \
++    && chmod +x /usr/local/bin/zero2ai
+ 
+ ############################
+ # 4) pi-runtime — pi-base + pi source + bun install (DEFAULT)
+ #
+-# A self-contained, runnable omp image. `docker run oh-my-pi/pi:dev --help`
++# A self-contained, runnable zero2ai image. `docker run oh-my-pi/pi:dev --help`
+ # Just Works without a host checkout.
+ ############################
+ FROM pi-base AS pi-runtime
+@@ -205,5 +205,5 @@ COPY . /pi/
+ # package.json's `prepare` script normally handles these on a vanilla install.
+ RUN bun --cwd=packages/coding-agent run gen:tool-views
+ 
+-ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/omp"]
++ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/zero2ai"]
+ CMD ["--help"]
+diff --git a/Dockerfile.dockerignore b/Dockerfile.dockerignore
+index d8175d469a..d0173bfff7 100644
+--- a/Dockerfile.dockerignore
++++ b/Dockerfile.dockerignore
+@@ -24,7 +24,7 @@ packages/snapcompact/research/results/
+ .wt/
+ .opencode/
+ .pi_config/
+-.omp/plugins/
++.zero2ai/plugins/
+ 
+ # VCS, editors, IDEs — irrelevant to the build, churn on every IDE keystroke.
+ .git/
+@@ -63,7 +63,7 @@ packages/natives/native/.build/
+ # (Also drops the ~760 MB of dev addons a working checkout accumulates.)
+ **/*.node
+ packages/ai/test/.temp-images/
+-python/omp-rpc/src/omp_rpc.egg-info/
++python/zero2ai-rpc/src/zero2ai_rpc.egg-info/
+ python/robomp/data/
+ python/robomp/.cache/
+ python/robomp/src/robomp/static/
+diff --git a/Dockerfile.robomp b/Dockerfile.robomp
+index fb78570a8b..85554e2028 100644
+--- a/Dockerfile.robomp
++++ b/Dockerfile.robomp
+@@ -4,8 +4,8 @@
+ #
+ # Extends `pi-base` (from /Dockerfile, default target oh-my-pi/pi:dev) and adds
+ # the robomp Python package + a Vite-built SolidJS dashboard bundle. The pi
+-# toolchain (python + bun + rustup launcher + pi-natives + omp_rpc wheel +
+-# /usr/local/bin/omp shim) all comes from PI_BASE; this file only layers what's
++# toolchain (python + bun + rustup launcher + pi-natives + zero2ai_rpc wheel +
++# /usr/local/bin/zero2ai shim) all comes from PI_BASE; this file only layers what's
+ # robomp-specific.
+ #
+ # Build (from pi root):
+@@ -45,8 +45,8 @@ ENV PI_ROOT=/work/pi
+ 
+ WORKDIR /app
+ 
+-# robomp is an MIT product; OMP's dual-license payload remains available from
+-# the inherited base image under /usr/share/doc/omp.
++# robomp is an MIT product; ZERO2AI's dual-license payload remains available from
++# the inherited base image under /usr/share/doc/zero2ai.
+ COPY LICENSE THIRD-PARTY-NOTICES.txt /usr/share/doc/robomp/
+ 
+ # robomp itself. Drop the Vite-built dashboard into the package tree before
+@@ -65,10 +65,10 @@ RUN pip install --no-cache-dir \
+ # Host agent config is mounted read-only under /srv/agent-home-stage with
+ # host-controlled permissions. The entrypoint copies it into root-owned
+ # world-readable files under /srv/agent-home; the agent subprocess runs with
+-# HOME=/srv/agent-home, so ~/.omp and ~/.agent resolve there without exposing
++# HOME=/srv/agent-home, so ~/.zero2ai and ~/.agent resolve there without exposing
+ # mutable host mounts.
+-RUN mkdir -p /srv/agent-home/.agent /srv/agent-home/.omp/agent \
+-    && mkdir -p /srv/agent-home-stage/.agent /srv/agent-home-stage/.omp/agent \
++RUN mkdir -p /srv/agent-home/.agent /srv/agent-home/.zero2ai/agent \
++    && mkdir -p /srv/agent-home-stage/.agent /srv/agent-home-stage/.zero2ai/agent \
+     && printf '[install]\nbackend = "copyfile"\n' > /srv/agent-home/.bunfig.toml
+ 
+ COPY python/robomp/entrypoint.sh /usr/local/bin/robomp-entrypoint
+diff --git a/Dockerfile.robomp.dockerignore b/Dockerfile.robomp.dockerignore
+index 5b892fa2da..60233b366e 100644
+--- a/Dockerfile.robomp.dockerignore
++++ b/Dockerfile.robomp.dockerignore
+@@ -29,7 +29,7 @@ packages/snapcompact/research/results/
+ .wt/
+ .opencode/
+ .pi_config/
+-.omp/plugins/
++.zero2ai/plugins/
+ 
+ # VCS, editors, IDEs.
+ .git/
+@@ -66,7 +66,7 @@ packages/natives/native/.build/
+ packages/natives/native/pi_natives.darwin-*.node
+ packages/natives/native/pi_natives.dev.node
+ packages/ai/test/.temp-images/
+-python/omp-rpc/src/omp_rpc.egg-info/
++python/zero2ai-rpc/src/zero2ai_rpc.egg-info/
+ python/robomp/data/
+ python/robomp/.cache/
+ python/robomp/src/robomp/static/
+diff --git a/bazel/patches/hermetic_cc_toolchain-isolated-compile-cache.patch b/bazel/patches/hermetic_cc_toolchain-isolated-compile-cache.patch
+index 5b14de2125..f316533ea5 100644
+--- a/bazel/patches/hermetic_cc_toolchain-isolated-compile-cache.patch
++++ b/bazel/patches/hermetic_cc_toolchain-isolated-compile-cache.patch
+@@ -63,7 +63,7 @@ diff --git a/toolchain/defs.bzl b/toolchain/defs.bzl
+          )
+          repository_ctx.symlink("tools/zig-wrapper{}".format(exe), tool_path)
+  
+-+    # omp: opt into the repo contents cache — the fetch is deterministic
+++    # zero2ai: opt into the repo contents cache — the fetch is deterministic
+ +    # given the pinned zig archive and the wrapper source above.
+ +    if hasattr(repository_ctx, "repo_metadata"):
+ +        return repository_ctx.repo_metadata(reproducible = True)
+diff --git a/bazel/toolchains/msvc/sysroot.bzl b/bazel/toolchains/msvc/sysroot.bzl
+index 486ef1c39c..2178105098 100644
+--- a/bazel/toolchains/msvc/sysroot.bzl
++++ b/bazel/toolchains/msvc/sysroot.bzl
+@@ -104,11 +104,11 @@ def _xwin_sysroot_impl(rctx):
+     )
+     rctx.report_progress("Splatting MSVC CRT + Windows SDK via xwin (first fetch ~1 GiB from the Microsoft CDN)")
+ 
+-    # OMP_XWIN_CACHE_DIR points at a persistent location (CI: the runner-cache
++    # ZERO2AI_XWIN_CACHE_DIR points at a persistent location (CI: the runner-cache
+     # PVC via --repo_env) so ephemeral pods reuse the ~1 GiB CDN download the
+     # repository cache cannot hold. Unset (dev machines): a repo-local cache,
+     # deleted after the --copy splat.
+-    cache_dir = rctx.os.environ.get("OMP_XWIN_CACHE_DIR", "")
++    cache_dir = rctx.os.environ.get("ZERO2AI_XWIN_CACHE_DIR", "")
+     ephemeral_cache = cache_dir == ""
+     if ephemeral_cache:
+         cache_dir = ".xwin-cache"
+@@ -165,7 +165,7 @@ def _xwin_sysroot_impl(rctx):
+     # bit-reproducible forever (see the module docstring) — caching freezes a
+     # known-good splat, which also keeps remote action keys stable across
+     # pods until this file changes or the cache entry ages out (14 d GC).
+-    # OMP_XWIN_CACHE_DIR is a predeclared input (environ attr), so kata and
++    # ZERO2AI_XWIN_CACHE_DIR is a predeclared input (environ attr), so kata and
+     # dev fetches key separate entries.
+     return rctx.repo_metadata(reproducible = True)
+ 
+@@ -174,5 +174,5 @@ xwin_sysroot_repository = repository_rule(
+     doc = "MSVC CRT + Windows SDK sysroot splatted by a pinned xwin release.",
+     # Persistent splat cache location; changing it only changes where the CDN
+     # payload lands, not the splat contents, but Bazel still refetches.
+-    environ = ["OMP_XWIN_CACHE_DIR"],
++    environ = ["ZERO2AI_XWIN_CACHE_DIR"],
+ )
+diff --git a/flake.nix b/flake.nix
+index 684b47e3c8..341977d304 100644
+--- a/flake.nix
++++ b/flake.nix
+@@ -1,5 +1,5 @@
+ {
+-  description = "OMP coding agent and development environment";
++  description = "ZERO2AI coding agent and development environment";
+ 
+   nixConfig = {
+     extra-substituters = [ "https://nix-community.cachix.org" ];
+@@ -100,21 +100,21 @@
+       packages = forAllSystems (
+         system:
+         let
+-          omp = packageFor system;
++          zero2ai = packageFor system;
+         in
+         {
+-          inherit omp;
+-          default = omp;
++          inherit zero2ai;
++          default = zero2ai;
+         }
+       );
+ 
+       apps = forAllSystems (system: {
+         default = {
+           type = "app";
+-          program = "${self.packages.${system}.default}/bin/omp";
+-          meta.description = "Run OMP";
++          program = "${self.packages.${system}.default}/bin/zero2ai";
++          meta.description = "Run ZERO2AI";
+         };
+-        omp = self.apps.${system}.default;
++        zero2ai = self.apps.${system}.default;
+       });
+ 
+       devShells = forAllSystems (
+@@ -148,8 +148,8 @@
+               }
+               self.homeManagerModules.default
+               {
+-                programs.omp.enable = true;
+-                programs.omp.settings.startup.quiet = true;
++                programs.zero2ai.enable = true;
++                programs.zero2ai.settings.startup.quiet = true;
+               }
+             ];
+           };
+@@ -163,7 +163,7 @@
+                 };
+               }
+               self.nixosModules.default
+-              { programs.omp.enable = true; }
++              { programs.zero2ai.enable = true; }
+             ];
+           };
+           modulesEvaluate =
+@@ -171,10 +171,10 @@
+             assert homeManagerEvaluation.config.home.activation ? ompConfig;
+             assert builtins.elem self.packages.${system}.default
+               nixosEvaluation.config.environment.systemPackages;
+-            pkgs.runCommand "omp-module-evaluation" { } "touch $out";
++            pkgs.runCommand "zero2ai-module-evaluation" { } "touch $out";
+         in
+         {
+-          bun-lock = pkgs.runCommand "omp-bun-lock" { nativeBuildInputs = [ bun2nix ]; } ''
++          bun-lock = pkgs.runCommand "zero2ai-bun-lock" { nativeBuildInputs = [ bun2nix ]; } ''
+             cp -R ${self.outPath} source
+             chmod -R u+w source
+             cd source
+@@ -185,19 +185,19 @@
+             touch "$out"
+           '';
+           modules = modulesEvaluate;
+-          omp = self.packages.${system}.default;
++          zero2ai = self.packages.${system}.default;
+         }
+       );
+ 
+       formatter = forAllSystems (system: (pkgsFor system).nixfmt);
+ 
+       overlays.default = _final: previous: {
+-        omp = self.packages.${previous.stdenv.hostPlatform.system}.default;
++        zero2ai = self.packages.${previous.stdenv.hostPlatform.system}.default;
+       };
+ 
+       homeManagerModules.default = import ./nix/home-manager.nix { inherit self; };
+-      homeManagerModules.omp = self.homeManagerModules.default;
++      homeManagerModules.zero2ai = self.homeManagerModules.default;
+       nixosModules.default = import ./nix/nixos-module.nix { inherit self; };
+-      nixosModules.omp = self.nixosModules.default;
++      nixosModules.zero2ai = self.nixosModules.default;
+     };
+ }
+diff --git a/infra/bazel-remote/setup.sh b/infra/bazel-remote/setup.sh
+index 97b912a1f7..61c594b1b4 100755
+--- a/infra/bazel-remote/setup.sh
++++ b/infra/bazel-remote/setup.sh
+@@ -149,7 +149,7 @@ echo
+ echo "2. Runner pods need 'envFrom: [{secretRef: {name: bazel-remote-ci}}]'."
+ echo "   infra/reload-runner.sh now inserts this into the ARC values file on the"
+ echo "   next reload; to wire it without an image reload, add under"
+-echo "   template.spec.containers[0].envFrom in /root/arc-omp-values.yaml:"
++echo "   template.spec.containers[0].envFrom in /root/arc-zero2ai-values.yaml:"
+ echo "         - secretRef:"
+ echo "             name: bazel-remote-ci"
+ echo "   then re-run the helm upgrade from infra/docs/04-arc-and-caching.md §3."
+diff --git a/infra/docs/03-runner-image.md b/infra/docs/03-runner-image.md
+index 43609a9839..24cffd6be4 100644
+--- a/infra/docs/03-runner-image.md
++++ b/infra/docs/03-runner-image.md
+@@ -62,18 +62,18 @@ forgot to bake.
+ 
+ ## 2. The Dockerfile
+ 
+-Build context lives at `/root/omp-kata-runner-image/`. The Dockerfile below is
++Build context lives at `/root/zero2ai-kata-runner-image/`. The Dockerfile below is
+ reproduced verbatim (it contains no secrets or redactable host identifiers; the
+ `ARG` pins, the full apt set, and the toolchain steps are real).
+ 
+ > The canonical copy of this Dockerfile is version-controlled at
+ > [`infra/runner.Dockerfile`](../runner.Dockerfile);
+-> the `/root/omp-kata-runner-image/` copy is overwritten from it by the
++> the `/root/zero2ai-kata-runner-image/` copy is overwritten from it by the
+ > repo-driven reload script (see section 3 below).
+ 
+ ```dockerfile
+ # syntax=docker/dockerfile:1
+-# Preloaded omp-kata runner image.
++# Preloaded zero2ai-kata runner image.
+ #
+ # Stock GitHub Actions runner (Ubuntu 24.04) with the dependencies CI installs
+ # on every job baked in, so each ephemeral Kata microVM boots with them already
+@@ -87,7 +87,7 @@ reproduced verbatim (it contains no secrets or redactable host identifiers; the
+ #   - rust nightly (pinned) + clippy/rustfmt/rust-analyzer + the rust-toolchain.toml
+ #     targets (linux-x64, windows-msvc x64/arm64) and linux-arm64 for zigbuild
+ #
+-# Rebuild + reimport (see /root/omp-kata-runner.md) after bumping the ARGs below
++# Rebuild + reimport (see /root/zero2ai-kata-runner.md) after bumping the ARGs below
+ # or the apt set. Keep the apt set in sync with .github/actions/setup-system-deps.
+ FROM ghcr.io/actions/actions-runner:latest
+ 
+@@ -230,30 +230,30 @@ Rust setup steps in CI become no-ops - the warm-start payoff.
+ 
+ ## 3. Build, import, and roll out (`reload.sh`)
+ 
+-`/root/omp-kata-runner-image/reload.sh` does the whole cycle: build, in-image
++`/root/zero2ai-kata-runner-image/reload.sh` does the whole cycle: build, in-image
+ smoke test, import into k3s containerd, point ARC at the new tag, and verify the
+ rollout. It is idempotent and cache-fast on an unchanged rebuild. Reproduced
+ verbatim (no secrets; the `/root` and kubeconfig paths are the real host paths):
+ 
+ ```bash
+ #!/usr/bin/env bash
+-# Rebuild the preloaded omp-kata runner image, import it into k3s containerd,
++# Rebuild the preloaded zero2ai-kata runner image, import it into k3s containerd,
+ # point the ARC runner scale set at it, and roll it out. Idempotent: safe to
+ # re-run after editing ./Dockerfile. Docker layer cache makes an unchanged
+ # rebuild near-instant.
+ #
+-#   ./reload.sh              # build tag omp-kata-runner:YYYY-MM-DD-HHMMSS
+-#   ./reload.sh 2026-06-20   # build tag omp-kata-runner:2026-06-20
++#   ./reload.sh              # build tag zero2ai-kata-runner:YYYY-MM-DD-HHMMSS
++#   ./reload.sh 2026-06-20   # build tag zero2ai-kata-runner:2026-06-20
+ #   ./reload.sh foo:bar      # build an explicit repo:tag
+ set -euo pipefail
+ export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+ cd "$(dirname "$0")"
+ 
+ arg="${1:-$(date +%Y-%m-%d-%H%M%S)}"
+-case "$arg" in *:*) IMAGE="$arg";; *) IMAGE="omp-kata-runner:$arg";; esac
++case "$arg" in *:*) IMAGE="$arg";; *) IMAGE="zero2ai-kata-runner:$arg";; esac
+ 
+ echo "==> [1/5] building $IMAGE"
+-DOCKER_BUILDKIT=1 docker build -t "$IMAGE" -t omp-kata-runner:preloaded .
++DOCKER_BUILDKIT=1 docker build -t "$IMAGE" -t zero2ai-kata-runner:preloaded .
+ 
+ echo "==> [2/5] verifying baked tools"
+ docker run --rm --entrypoint bash "$IMAGE" -lc '
+@@ -268,13 +268,13 @@ echo "==> [3/5] importing into k3s containerd (k8s.io namespace)"
+ docker save "$IMAGE" | k3s ctr -n k8s.io images import --platform linux/amd64 -
+ 
+ echo "==> [4/5] pointing ARC runner scale set at $IMAGE"
+-sed -i "s#image: omp-kata-runner:.*#image: $IMAGE#" /root/arc-omp-values.yaml
+-helm upgrade omp-kata --namespace arc-runners --version 0.14.2 \
+-  -f /root/arc-omp-values.yaml \
++sed -i "s#image: zero2ai-kata-runner:.*#image: $IMAGE#" /root/arc-zero2ai-values.yaml
++helm upgrade zero2ai-kata --namespace arc-runners --version 0.14.2 \
++  -f /root/arc-zero2ai-values.yaml \
+   oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set >/dev/null
+ 
+ echo "==> [5/5] verifying rollout"
+-live="$(kubectl get autoscalingrunnerset omp-kata -n arc-runners -o jsonpath='{.spec.template.spec.containers[0].image}')"
++live="$(kubectl get autoscalingrunnerset zero2ai-kata -n arc-runners -o jsonpath='{.spec.template.spec.containers[0].image}')"
+ echo "ARC runner image is now: $live"
+ [ "$live" = "$IMAGE" ] && echo "OK: reloaded $IMAGE" || { echo "MISMATCH: expected $IMAGE"; exit 1; }
+ ```
+@@ -282,7 +282,7 @@ echo "ARC runner image is now: $live"
+ Run it with no argument for an auto-dated tag:
+ 
+ ```bash
+-cd /root/omp-kata-runner-image
++cd /root/zero2ai-kata-runner-image
+ ./reload.sh
+ ```
+ 
+@@ -290,12 +290,12 @@ cd /root/omp-kata-runner-image
+ 
+ **Preamble.** `set -euo pipefail` aborts on the first error; `KUBECONFIG` points
+ at the k3s admin config; `cd` into the build context. The tag is resolved from
+-`$1`: no arg gives a timestamped `omp-kata-runner:YYYY-MM-DD-HHMMSS`; an argument
++`$1`: no arg gives a timestamped `zero2ai-kata-runner:YYYY-MM-DD-HHMMSS`; an argument
+ containing a colon (`foo:bar`) is used as an explicit `repo:tag`; anything else
+-is treated as a tag suffix on `omp-kata-runner:`.
++is treated as a tag suffix on `zero2ai-kata-runner:`.
+ 
+ **[1/5] build.** `DOCKER_BUILDKIT=1 docker build` tags the result twice: the
+-immutable `$IMAGE` (dated) and the moving `omp-kata-runner:preloaded` alias.
++immutable `$IMAGE` (dated) and the moving `zero2ai-kata-runner:preloaded` alias.
+ BuildKit + the docker layer cache make an unchanged rebuild near-instant.
+ 
+ **[2/5] verify baked tools.** Runs the freshly built image with a bash entrypoint
+@@ -315,7 +315,7 @@ given only the dated `$IMAGE`, so **only the dated tag is imported**; the
+ referenced by ARC.
+ 
+ **[4/5] point ARC at the new tag.** `sed -i` rewrites the single
+-`image: omp-kata-runner:...` line in `/root/arc-omp-values.yaml` to the new tag,
++`image: zero2ai-kata-runner:...` line in `/root/arc-zero2ai-values.yaml` to the new tag,
+ then `helm upgrade` re-renders the runner scale set with the chart pinned to
+ `0.14.2`. (That values file is the runner pod template, documented in
+ [04-arc-and-caching.md](./04-arc-and-caching.md).)
+@@ -356,7 +356,7 @@ secure, and authenticate against, for zero benefit. Instead:
+ 
+ - `docker save | k3s ctr -n k8s.io images import` places the image directly into
+   the containerd instance k3s schedules from. containerd normalizes the short
+-  reference `omp-kata-runner:<tag>` to `docker.io/library/omp-kata-runner:<tag>`
++  reference `zero2ai-kata-runner:<tag>` to `docker.io/library/zero2ai-kata-runner:<tag>`
+   in its store (verified: the imported tags appear under that prefix).
+ - The ARC pod template sets `imagePullPolicy: IfNotPresent`. Because the image is
+   already present locally, the kubelet **uses the local copy and never attempts a
+@@ -374,8 +374,8 @@ next job's microVM starts cold but with warm dependencies from the local store.
+ 
+ | Tag | Mutability | Imported into containerd? | Referenced by ARC? | Purpose |
+ | --- | --- | --- | --- | --- |
+-| `omp-kata-runner:YYYY-MM-DD-HHMMSS` | immutable | yes | yes | the build of record; what runners actually boot |
+-| `omp-kata-runner:preloaded` | moving | no | no | docker-local alias to the most recent build |
++| `zero2ai-kata-runner:YYYY-MM-DD-HHMMSS` | immutable | yes | yes | the build of record; what runners actually boot |
++| `zero2ai-kata-runner:preloaded` | moving | no | no | docker-local alias to the most recent build |
+ 
+ - The default `reload.sh` tag is timestamped (`date +%Y-%m-%d-%H%M%S`). You can
+   also pass a date-only tag (`./reload.sh 2026-06-20`) or an explicit `repo:tag`.
+@@ -383,8 +383,8 @@ next job's microVM starts cold but with warm dependencies from the local store.
+   rollout reproducible and makes rollback trivial: `sed` the image line back to
+   the prior dated tag (it is still in the local store) and `helm upgrade`.
+ - Live example at time of writing: the scale set references
+-  `omp-kata-runner:2026-06-15-002621`, held in containerd as
+-  `docker.io/library/omp-kata-runner:2026-06-15-002621`.
++  `zero2ai-kata-runner:2026-06-15-002621`, held in containerd as
++  `docker.io/library/zero2ai-kata-runner:2026-06-15-002621`.
+ 
+ ---
+ 
+@@ -402,7 +402,7 @@ next job's microVM starts cold but with warm dependencies from the local store.
+ 4. Re-roll:
+ 
+    ```bash
+-   cd /root/omp-kata-runner-image
++   cd /root/zero2ai-kata-runner-image
+    ./reload.sh
+    ```
+ 
+@@ -420,7 +420,7 @@ next job's microVM starts cold but with warm dependencies from the local store.
+ standalone:
+ 
+ ```bash
+-docker run --rm --entrypoint bash omp-kata-runner:preloaded -lc '
++docker run --rm --entrypoint bash zero2ai-kata-runner:preloaded -lc '
+   set -e
+   for b in gh fd rg magick bun cargo rustc pkg-config clang lld sccache zig cargo-nextest cargo-zigbuild cargo-xwin; do
+     command -v "$b" >/dev/null || { echo "MISSING: $b"; exit 1; }
+@@ -434,9 +434,9 @@ Confirm the live ARC reference and that the tag exists in the k3s image store
+ 
+ ```bash
+ export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+-kubectl get autoscalingrunnerset omp-kata -n arc-runners \
++kubectl get autoscalingrunnerset zero2ai-kata -n arc-runners \
+   -o jsonpath='{.spec.template.spec.containers[0].image}{"\n"}'
+-k3s ctr -n k8s.io images ls | grep omp-kata-runner
++k3s ctr -n k8s.io images ls | grep zero2ai-kata-runner
+ ```
+ 
+ ### Kata microVM boot check
+@@ -450,7 +450,7 @@ throwaway pod with `runtimeClassName: kata-qemu` (the RuntimeClass set up in
+ ```bash
+ export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+ kubectl run preload-verify -n arc-runners --restart=Never \
+-  --image=omp-kata-runner:2026-06-15-002621 \
++  --image=zero2ai-kata-runner:2026-06-15-002621 \
+   --overrides='{"spec":{"runtimeClassName":"kata-qemu"}}' \
+   --command -- bash -lc 'uname -r; bun --version; rustc --version; magick -version | head -1'
+ 
+diff --git a/infra/docs/04-arc-and-caching.md b/infra/docs/04-arc-and-caching.md
+index 6c20776e0b..3d3e0b8619 100644
+--- a/infra/docs/04-arc-and-caching.md
++++ b/infra/docs/04-arc-and-caching.md
+@@ -21,7 +21,7 @@ ARC's `gha-runner-scale-set` flavour has three moving parts:
+   custom resources and reconciles them.
+ - **Listener** (one pod per scale set, ns `arc-systems`) - long-polls the GitHub
+   Actions service for jobs targeting the scale set's `runs-on` label.
+-- **Scale set** (`omp-kata` release, ns `arc-runners`) - the `AutoscalingRunnerSet`
++- **Scale set** (`zero2ai-kata` release, ns `arc-runners`) - the `AutoscalingRunnerSet`
+   plus the pod template; the controller turns assigned jobs into ephemeral runner
+   pods here.
+ 
+@@ -96,12 +96,12 @@ helm install arc \
+   oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller
+ ```
+ 
+-**Scale set** (`omp-kata`), using the runner cache PVC and values file from step 3:
++**Scale set** (`zero2ai-kata`), using the runner cache PVC and values file from step 3:
+ ```bash
+-helm install omp-kata \
++helm install zero2ai-kata \
+   --namespace arc-runners --create-namespace \
+   --version 0.14.2 \
+-  -f arc-omp-values.yaml \
++  -f arc-zero2ai-values.yaml \
+   oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
+ ```
+ 
+@@ -110,7 +110,7 @@ Confirm both releases and the running controller image:
+ ```bash
+ helm list -A
+ # arc       arc-systems   deployed  gha-runner-scale-set-controller-0.14.2  0.14.2
+-# omp-kata  arc-runners   deployed  gha-runner-scale-set-0.14.2             0.14.2
++# zero2ai-kata  arc-runners   deployed  gha-runner-scale-set-0.14.2             0.14.2
+ 
+ kubectl -n arc-systems get deploy arc-gha-rs-controller \
+   -o jsonpath='{.spec.template.spec.containers[0].image}{"\n"}'
+@@ -122,12 +122,12 @@ Within a few seconds the controller spawns the listener in `arc-systems`:
+ ```bash
+ kubectl -n arc-systems get pods
+ # arc-gha-rs-controller-xxxxxxxxxx-xxxxx   1/1   Running
+-# omp-kata-<hash>-listener                 1/1   Running
++# zero2ai-kata-<hash>-listener                 1/1   Running
+ ```
+ 
+ ---
+ 
+-## 3. Scale-set values (`arc-omp-values.yaml`)
++## 3. Scale-set values (`arc-zero2ai-values.yaml`)
+ 
+ Create the namespace-local PVC before installing or upgrading the scale set. This
+ is the shared mutable filesystem cache for data whose tools already validate
+@@ -153,13 +153,13 @@ Apply it once:
+ kubectl apply -f runner-cache-pvc.yaml
+ ```
+ 
+-This is the live `arc-omp-values.yaml` verbatim, with only the repo owner/name in
++This is the live `arc-zero2ai-values.yaml` verbatim, with only the repo owner/name in
+ `githubConfigUrl` redacted:
+ 
+ ```yaml
+ githubConfigUrl: "https://github.com/<OWNER>/<REPO>"
+ githubConfigSecret: arc-github
+-runnerScaleSetName: omp-kata
++runnerScaleSetName: zero2ai-kata
+ minRunners: 0
+ maxRunners: 8
+ # none: each job runs inside the runner container, which itself lives in a Kata microVM
+@@ -173,7 +173,7 @@ template:
+       fsGroupChangePolicy: OnRootMismatch
+     containers:
+       - name: runner
+-        image: omp-kata-runner:2026-07-27-072222
++        image: zero2ai-kata-runner:2026-07-27-072222
+         imagePullPolicy: IfNotPresent
+         command: ["/home/runner/run.sh"]
+         envFrom:
+@@ -219,9 +219,9 @@ template:
+ Field by field:
+ 
+ - **`githubConfigUrl`** - the repo (or org) the scale set serves. Jobs reach it
+-  with `runs-on: omp-kata`.
++  with `runs-on: zero2ai-kata`.
+ - **`githubConfigSecret: arc-github`** - the auth secret from [step 1](#1-github-app-and-the-arc-github-secret).
+-- **`runnerScaleSetName: omp-kata`** - the runner label. This is the string that
++- **`runnerScaleSetName: zero2ai-kata`** - the runner label. This is the string that
+   goes in a workflow's `runs-on:`.
+ - **`minRunners: 0` / `maxRunners: 8`** - **scale-to-zero**. With no queued jobs
+   there are zero runner microVMs. Runner pods are **burstable**: a small
+@@ -281,7 +281,7 @@ Field by field:
+ One job runs in one fresh microVM that is destroyed afterward:
+ 
+ 1. The **listener** (ns `arc-systems`) long-polls the GitHub Actions service for
+-   jobs whose `runs-on` matches `omp-kata`.
++   jobs whose `runs-on` matches `zero2ai-kata`.
+ 2. When jobs are assigned, the controller reconciles the `AutoscalingRunnerSet`
+    and creates an **`EphemeralRunnerSet`** sized to the demand (bounded by
+    `minRunners`/`maxRunners`).
+@@ -296,7 +296,7 @@ One job runs in one fresh microVM that is destroyed afterward:
+ Observe the chain live:
+ 
+ ```bash
+-kubectl -n arc-runners get autoscalingrunnerset omp-kata
++kubectl -n arc-runners get autoscalingrunnerset zero2ai-kata
+ kubectl -n arc-runners get ephemeralrunnerset
+ kubectl -n arc-runners get pods -o wide      # one pod per in-flight job; empty when idle
+ ```
+@@ -307,7 +307,7 @@ a ServiceAccount with no RBAC bindings:
+ ```bash
+ kubectl -n arc-runners get sa
+ # default
+-# omp-kata-gha-rs-no-permission
++# zero2ai-kata-gha-rs-no-permission
+ ```
+ 
+ Job code therefore has no Kubernetes API rights - it cannot read secrets, list
+@@ -384,7 +384,7 @@ One endpoint, one auth model — **reads are unauthenticated, writes require the
+ 
+ | Client | Endpoint | Writes |
+ | --- | --- | --- |
+-| omp-kata runner pods (trusted `push`/main + release) | `grpcs://bazel-remote.bazel-cache.svc.cluster.local:9092` | yes - `ci` credentials injected via the `bazel-remote-ci` secret |
++| zero2ai-kata runner pods (trusted `push`/main + release) | `grpcs://bazel-remote.bazel-cache.svc.cluster.local:9092` | yes - `ci` credentials injected via the `bazel-remote-ci` secret |
+ | GitHub-hosted runners (PRs, macOS, release) | — never touch this infrastructure; they persist a local `--disk_cache`/`--repository_cache` via `actions/cache` (`.github/actions/bazel-cache`) | n/a |
+ 
+ - **TLS.** The server certificate is signed by a self-signed CA committed at
+@@ -398,8 +398,8 @@ One endpoint, one auth model — **reads are unauthenticated, writes require the
+     `ci`, mounted at `/auth` (`--allow_unauthenticated_reads` keeps reads open);
+   - `arc-runners/bazel-remote-ci` - `BAZEL_REMOTE_USER` / `BAZEL_REMOTE_PASSWORD`,
+     injected into every runner pod via `envFrom`
+-    ([step 3](#3-scale-set-values-arc-omp-valuesyaml); `infra/reload-runner.sh`
+-    inserts the `envFrom` entry into `arc-omp-values.yaml` idempotently on the
++    ([step 3](#3-scale-set-values-arc-zero2ai-valuesyaml); `infra/reload-runner.sh`
++    inserts the `envFrom` entry into `arc-zero2ai-values.yaml` idempotently on the
+     next image reload).
+ - **No GitHub secrets.** Nothing outside the cluster holds cache credentials;
+   the public repo carries only the CA *certificate*.
+@@ -419,7 +419,7 @@ bazel build \
+   //:natives-linux-all
+ ```
+ 
+-On omp-kata the credentials come from the injected pod env
++On zero2ai-kata the credentials come from the injected pod env
+ (`bazel-remote-ci` secret) and `.github/actions/bazel-cache` composes the rc
+ fragment. GitHub-hosted jobs get the disk-cache branch of the same action —
+ no remote endpoint, no credentials, no infrastructure knowledge. The bridge
+@@ -429,7 +429,7 @@ GitHub Actions cache (once per lockfile change, `linux` scope). GitHub only
+ shares caches from the default branch across pull requests, so this export
+ is what keeps PR builds warm; kata jobs otherwise skip artifact downloads
+ entirely (`--remote_download_toplevel`), and the xwin MSVC splat persists on
+-the runner-cache PVC (`OMP_XWIN_CACHE_DIR`).
++the runner-cache PVC (`ZERO2AI_XWIN_CACHE_DIR`).
+ 
+ **(b) Cargo registry cache** - the scale-set pod template mounts only the
+ immutable download cache and sparse index at
+@@ -439,7 +439,7 @@ job-local; virtio-fs does not propagate Cargo's file locks safely across VMs.
+ 
+ **(c) Bun package store** -
+ [`.github/actions/bun-install`](../../.github/actions/bun-install/action.yml)
+-wraps `bun install --frozen-lockfile`. On omp-kata, the pod template mounts
++wraps `bun install --frozen-lockfile`. On zero2ai-kata, the pod template mounts
+ `runner-cache:/bun-store` at Bun's default store path
+ (`/home/runner/.bun/install/cache`), so the action only ensures the directory
+ exists before running Bun. Off-infra it still uses stock `actions/cache@v4` for
+@@ -457,7 +457,7 @@ credentials**, so the poisoning surface is exactly the set of jobs holding those
+ credentials. The primary defense is to keep untrusted code away from them:
+ 
+ - `ci.yml` routes every pull-request job to GitHub-hosted runners
+-  (`runs-on` resolves to `omp-kata` only for `push`/main, manual dispatch, and
++  (`runs-on` resolves to `zero2ai-kata` only for `push`/main, manual dispatch, and
+   release). That expression lives in the base workflow, which GitHub uses
+   verbatim for `pull_request` events, so a fork cannot override it. PR jobs
+   never talk to the cluster at all — they build against a local
+@@ -476,7 +476,7 @@ Pressure is mostly self-managing:
+ - `bazel-cache/bazel-remote-data` - bazel-remote evicts LRU at `--max_size 90`
+   GiB on its own; watch `CurrSize` on `/status` and grow the PVC/flag together
+   if hit rates drop.
+-- `arc-runners/runner-cache` - coarse manual cleanup: scale `omp-kata` to zero,
++- `arc-runners/runner-cache` - coarse manual cleanup: scale `zero2ai-kata` to zero,
+   delete `bun-store/` or `cargo-registry/` from the bound local-path volume,
+   let the next jobs repopulate it.
+ 
+@@ -492,7 +492,7 @@ kubectl -n arc-runners delete secret sccache-s3
+ kubectl delete namespace sccache        # removes RustFS and the rustfs-data PVC
+ # then: drop the sccache tcp/9000 rule from runner-egress-lockdown, and remove
+ # the sccache-s3 envFrom entry, the native-artifacts subPath mount, and
+-# OMP_NATIVE_CACHE_DIR from arc-omp-values.yaml (+ helm upgrade).
++# ZERO2AI_NATIVE_CACHE_DIR from arc-zero2ai-values.yaml (+ helm upgrade).
+ ```
+ 
+ ---
+@@ -608,7 +608,7 @@ Egress that survives rule 2 leaves the node via the host's firewalld masquerade
+ - **Kernel isolation.** Each job runs in a Kata microVM with its own guest kernel
+   (6.x), separate from the host kernel (7.0.x) - a kernel exploit hits a throwaway
+   VM, not the host. See [02-kata-runtime.md](02-kata-runtime.md).
+-- **No cluster rights.** Jobs run under `omp-kata-gha-rs-no-permission` with no
++- **No cluster rights.** Jobs run under `zero2ai-kata-gha-rs-no-permission` with no
+   RBAC ([step 4](#4-job-lifecycle-and-the-no-permission-serviceaccount)).
+ - **Constrained network.** The policy above blocks the host, LAN, tailnet, and
+   arbitrary cluster pods; only DNS, the public internet, and the shared caches
+@@ -631,7 +631,7 @@ export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+ **Status / scale**
+ 
+ ```bash
+-kubectl -n arc-runners get autoscalingrunnerset omp-kata   # min/max/current runners
++kubectl -n arc-runners get autoscalingrunnerset zero2ai-kata   # min/max/current runners
+ kubectl -n arc-runners get ephemeralrunnerset              # desired vs current replicas
+ kubectl -n arc-runners get pods -o wide                    # live runner VMs (empty when idle)
+ ```
+@@ -647,21 +647,21 @@ kubectl -n arc-systems logs deploy/arc-gha-rs-controller -f
+ kubectl -n arc-runners logs <runner-pod>
+ ```
+ 
+-**Verify the caches are being used.** A warm Bazel build on omp-kata logs
++**Verify the caches are being used.** A warm Bazel build on zero2ai-kata logs
+ `remote cache hit` counts in its build summary; `curl -sk https://<pod-ip>:8080/status`
+ shows `CurrSize`/`NumFiles` growing ([5a](#5a-deploy-bazel-remote)). A warm job
+ also logs `bun cache backend: mounted PVC (...)`. To inspect the mounted
+ runner cache, scale to zero and check the `runner-cache` local-path volume on
+ the host.
+ 
+-**Resize a job's VM** - edit the `resources` block in `arc-omp-values.yaml`
+-([step 3](#3-scale-set-values-arc-omp-valuesyaml); requests = guaranteed VM size,
++**Resize a job's VM** - edit the `resources` block in `arc-zero2ai-values.yaml`
++([step 3](#3-scale-set-values-arc-zero2ai-valuesyaml); requests = guaranteed VM size,
+ limits = hotplug ceiling) and roll out:
+ 
+ ```bash
+-helm upgrade omp-kata \
++helm upgrade zero2ai-kata \
+   --namespace arc-runners --version 0.14.2 \
+-  -f arc-omp-values.yaml \
++  -f arc-zero2ai-values.yaml \
+   oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
+ ```
+ 
+@@ -673,7 +673,7 @@ budget: each runner can hotplug up to its `limits`.)
+ tag, then `helm upgrade` as above; confirm with:
+ 
+ ```bash
+-kubectl -n arc-runners get autoscalingrunnerset omp-kata \
++kubectl -n arc-runners get autoscalingrunnerset zero2ai-kata \
+   -o jsonpath='{.spec.template.spec.containers[0].image}{"\n"}'
+ ```
+ 
+@@ -690,18 +690,18 @@ helm install <release> \
+   --set githubConfigUrl=https://github.com/<OWNER>/<OTHER_REPO> \
+   --set githubConfigSecret=arc-github \
+   --set runnerScaleSetName=<other-repo>-kata \
+-  -f arc-omp-values.yaml \
++  -f arc-zero2ai-values.yaml \
+   oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
+ ```
+ 
+ Jobs in the other repo then target `runs-on: <other-repo>-kata`. (On this host a
+-convenience wrapper, `omp-add-repo-runner <OWNER>/<REPO> [label]`, performs exactly
++convenience wrapper, `zero2ai-add-repo-runner <OWNER>/<REPO> [label]`, performs exactly
+ this install.)
+ 
+ **Uninstall** (leaves k3s/Kata in place):
+ 
+ ```bash
+-helm uninstall omp-kata -n arc-runners
++helm uninstall zero2ai-kata -n arc-runners
+ helm uninstall arc -n arc-systems
+ ```
+ 
+diff --git a/infra/docs/README.md b/infra/docs/README.md
+index 132fd99d51..f99b06fb03 100644
+--- a/infra/docs/README.md
++++ b/infra/docs/README.md
+@@ -1,6 +1,6 @@
+ # Self-hosted Kata CI
+ 
+-This is a self-hosted GitHub Actions setup where **every CI job on the self-hosted `omp-kata` label runs inside its own throwaway Kata Containers QEMU/KVM microVM**. A single bare-metal Linux host runs a one-node [k3s](https://k3s.io) cluster; [actions-runner-controller (ARC)](https://github.com/actions/actions-runner-controller) watches GitHub for queued jobs and, for each one, creates a just-in-time ephemeral runner pod that boots a fresh microVM (its own guest kernel, isolated from the host), runs exactly one job, and is then destroyed. Pull requests deliberately run on GitHub-hosted runners instead, so the self-hosted fleet only serves trusted `push`/main + release builds and untrusted PR code never reaches the shared caches (see [04-arc-and-caching.md](04-arc-and-caching.md)). Runners share an in-cluster **RustFS** (S3-compatible) object store for `sccache`, plus a namespace-local PVC mounted as the Bun package store and Cargo registry cache. Public internet egress goes through host NAT under a restrictive NetworkPolicy. The result is hardware-isolated, scale-to-zero CI on hardware you control.
++This is a self-hosted GitHub Actions setup where **every CI job on the self-hosted `zero2ai-kata` label runs inside its own throwaway Kata Containers QEMU/KVM microVM**. A single bare-metal Linux host runs a one-node [k3s](https://k3s.io) cluster; [actions-runner-controller (ARC)](https://github.com/actions/actions-runner-controller) watches GitHub for queued jobs and, for each one, creates a just-in-time ephemeral runner pod that boots a fresh microVM (its own guest kernel, isolated from the host), runs exactly one job, and is then destroyed. Pull requests deliberately run on GitHub-hosted runners instead, so the self-hosted fleet only serves trusted `push`/main + release builds and untrusted PR code never reaches the shared caches (see [04-arc-and-caching.md](04-arc-and-caching.md)). Runners share an in-cluster **RustFS** (S3-compatible) object store for `sccache`, plus a namespace-local PVC mounted as the Bun package store and Cargo registry cache. Public internet egress goes through host NAT under a restrictive NetworkPolicy. The result is hardware-isolated, scale-to-zero CI on hardware you control.
+ 
+ These docs are written as a **from-scratch setup guide**: read this overview first, then follow the numbered guides in order to reproduce the system on your own host.
+ 
+diff --git a/infra/reload-runner.sh b/infra/reload-runner.sh
+index 30dd66ce42..119dc53bc0 100755
+--- a/infra/reload-runner.sh
++++ b/infra/reload-runner.sh
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env bash
+-# Build + roll the preloaded omp-kata runner image onto the self-hosted CI host,
++# Build + roll the preloaded zero2ai-kata runner image onto the self-hosted CI host,
+ # driven over SSH from this repo. The Dockerfile next to this script is the
+ # source of truth: it is copied to the host, built there, and the ARC runner
+ # scale set is pointed at the new tag and rolled.
+@@ -16,15 +16,15 @@
+ # your ssh target; the remaining knobs default to the reference deployment.
+ #
+ # Usage:
+-#   CI_HOST=my-ci-host ./infra/reload-runner.sh                # tag: omp-kata-runner:YYYY-MM-DD-HHMMSS
+-#   CI_HOST=my-ci-host ./infra/reload-runner.sh 2026-06-20     # tag: omp-kata-runner:2026-06-20
++#   CI_HOST=my-ci-host ./infra/reload-runner.sh                # tag: zero2ai-kata-runner:YYYY-MM-DD-HHMMSS
++#   CI_HOST=my-ci-host ./infra/reload-runner.sh 2026-06-20     # tag: zero2ai-kata-runner:2026-06-20
+ #   CI_HOST=my-ci-host ./infra/reload-runner.sh my/repo:tag    # explicit repo:tag
+ #
+ # Env knobs (defaults match the reference deployment):
+ #   CI_HOST                  ssh target of the CI host                     (required)
+-#   REMOTE_CTX               remote build dir for the Dockerfile           [/root/omp-kata-runner-image]
+-#   ARC_VALUES               remote ARC scale-set helm values file         [/root/arc-omp-values.yaml]
+-#   ARC_RELEASE              helm release name of the runner scale set     [omp-kata]
++#   REMOTE_CTX               remote build dir for the Dockerfile           [/root/zero2ai-kata-runner-image]
++#   ARC_VALUES               remote ARC scale-set helm values file         [/root/arc-zero2ai-values.yaml]
++#   ARC_RELEASE              helm release name of the runner scale set     [zero2ai-kata]
+ #   ARC_NAMESPACE            namespace the runner scale set lives in       [arc-runners]
+ #   ARC_CHART_VERSION        gha-runner-scale-set chart version            [0.14.2]
+ #   KUBECONFIG_REMOTE        kubeconfig path on the host                   [/etc/rancher/k3s/k3s.yaml]
+@@ -49,9 +49,9 @@
+ set -euo pipefail
+ 
+ : "${CI_HOST:?set CI_HOST to the ssh target of your CI host, e.g. CI_HOST=my-ci-host}"
+-REMOTE_CTX="${REMOTE_CTX:-/root/omp-kata-runner-image}"
+-ARC_VALUES="${ARC_VALUES:-/root/arc-omp-values.yaml}"
+-ARC_RELEASE="${ARC_RELEASE:-omp-kata}"
++REMOTE_CTX="${REMOTE_CTX:-/root/zero2ai-kata-runner-image}"
++ARC_VALUES="${ARC_VALUES:-/root/arc-zero2ai-values.yaml}"
++ARC_RELEASE="${ARC_RELEASE:-zero2ai-kata}"
+ ARC_NAMESPACE="${ARC_NAMESPACE:-arc-runners}"
+ ARC_CHART_VERSION="${ARC_CHART_VERSION:-0.14.2}"
+ KUBECONFIG_REMOTE="${KUBECONFIG_REMOTE:-/etc/rancher/k3s/k3s.yaml}"
+@@ -66,7 +66,7 @@ RUNNER_MEMORY_REQUEST="${RUNNER_MEMORY_REQUEST:-10Gi}"
+ RUNNER_MEMORY_LIMIT="${RUNNER_MEMORY_LIMIT:-14Gi}"
+ 
+ arg="${1:-$(date +%Y-%m-%d-%H%M%S)}"
+-case "$arg" in *:*) IMAGE="$arg";; *) IMAGE="omp-kata-runner:$arg";; esac
++case "$arg" in *:*) IMAGE="$arg";; *) IMAGE="zero2ai-kata-runner:$arg";; esac
+ 
+ here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ [ -f "$here/runner.Dockerfile" ] || { echo "no runner.Dockerfile next to $0" >&2; exit 1; }
+@@ -204,7 +204,7 @@ build_with_containerd() {
+     --local dockerfile=. \
+     --opt filename=Dockerfile \
+     --output "type=image,name=$ref,store=true"
+-  k3s ctr -n k8s.io images tag --force "$ref" "$(qualify_ref omp-kata-runner:preloaded)" >/dev/null 2>&1 || true
++  k3s ctr -n k8s.io images tag --force "$ref" "$(qualify_ref zero2ai-kata-runner:preloaded)" >/dev/null 2>&1 || true
+ 
+   echo "==> [3/5] verifying baked tools from k3s containerd"
+   verify_baked_tools
+@@ -212,7 +212,7 @@ build_with_containerd() {
+ 
+ build_with_docker() {
+   echo "==> [1/5] building $IMAGE with docker"
+-  DOCKER_BUILDKIT=1 docker build -t "$IMAGE" -t omp-kata-runner:preloaded .
++  DOCKER_BUILDKIT=1 docker build -t "$IMAGE" -t zero2ai-kata-runner:preloaded .
+ 
+   echo "==> [2/5] verifying baked tools"
+   docker run --rm --entrypoint bash "$IMAGE" -lc '
+@@ -262,7 +262,7 @@ case "$selected_backend" in
+ esac
+ 
+ echo "==> [4/5] pointing ARC runner scale set at $IMAGE"
+-sed -i "s#image: omp-kata-runner:.*#image: $IMAGE#" "$ARC_VALUES"
++sed -i "s#image: zero2ai-kata-runner:.*#image: $IMAGE#" "$ARC_VALUES"
+ sed -i -E "s/^maxRunners:.*/maxRunners: $RUNNER_MAX_RUNNERS/" "$ARC_VALUES"
+ # Ensure the bazel-remote cache credentials reach every runner pod (idempotent;
+ # the secret is created by infra/bazel-remote/setup.sh).
+diff --git a/infra/runner.Dockerfile b/infra/runner.Dockerfile
+index 57eecb5af2..9839fe4399 100644
+--- a/infra/runner.Dockerfile
++++ b/infra/runner.Dockerfile
+@@ -1,5 +1,5 @@
+ # syntax=docker/dockerfile:1
+-# Preloaded omp-kata runner image.
++# Preloaded zero2ai-kata runner image.
+ #
+ # Stock GitHub Actions runner (Ubuntu 24.04) with the dependencies CI installs
+ # on every job baked in, so each ephemeral Kata microVM boots with them already
+@@ -14,7 +14,7 @@
+ #   - rust nightly (pinned) + clippy/rustfmt/rust-analyzer + the rust-toolchain.toml
+ #     targets (linux-x64, windows-msvc x64/arm64) and linux-arm64 for zigbuild
+ #
+-# Rebuild + reimport (see /root/omp-kata-runner.md) after bumping the ARGs below
++# Rebuild + reimport (see /root/zero2ai-kata-runner.md) after bumping the ARGs below
+ # or the apt set. Keep the apt set in sync with .github/actions/setup-system-deps.
+ FROM ghcr.io/actions/actions-runner:latest
+ 
+@@ -88,7 +88,7 @@ RUN arch="$(dpkg --print-architecture)" \
+ RUN chmod -R a+rX "$BAZELISK_HOME" \
+  && rm -rf /root/.cache/bazel /root/.bazelrc
+ # Pre-own ~/.cache for the runner user: kubelet otherwise creates it root-owned
+-# as the parent of the omp-bazel-repo subPath mountpoint, breaking sibling dirs
++# as the parent of the zero2ai-bazel-repo subPath mountpoint, breaking sibling dirs
+ # like bazel's default output_user_root.
+ RUN install -d -o 1001 -g 1001 -m 0755 /home/runner/.cache
+ 
+diff --git a/infra/tune-kata-runtime.sh b/infra/tune-kata-runtime.sh
+index 9eda821e28..dbefb7787e 100755
+--- a/infra/tune-kata-runtime.sh
++++ b/infra/tune-kata-runtime.sh
+@@ -16,7 +16,7 @@
+ #   CI_HOST                ssh target of the CI host                     (required)
+ #   KATA_CONFIG_REMOTE     remote Kata config file                       [/opt/kata/share/defaults/kata-containers/configuration-qemu.toml]
+ #   KUBECONFIG_REMOTE      kubeconfig path on the host                   [/etc/rancher/k3s/k3s.yaml]
+-#   ARC_RELEASE            runner scale set name                         [omp-kata]
++#   ARC_RELEASE            runner scale set name                         [zero2ai-kata]
+ #   ARC_NAMESPACE          runner namespace                              [arc-runners]
+ #   BOOT_VCPUS             Kata default_vcpus                            [2]
+ #   BOOT_MEMORY_MIB        Kata default_memory (MiB)                     [4096]
+@@ -27,7 +27,7 @@ set -euo pipefail
+ : "${CI_HOST:?set CI_HOST to the ssh target of your CI host, e.g. CI_HOST=my-ci-host}"
+ KATA_CONFIG_REMOTE="${KATA_CONFIG_REMOTE:-/opt/kata/share/defaults/kata-containers/configuration-qemu.toml}"
+ KUBECONFIG_REMOTE="${KUBECONFIG_REMOTE:-/etc/rancher/k3s/k3s.yaml}"
+-ARC_RELEASE="${ARC_RELEASE:-omp-kata}"
++ARC_RELEASE="${ARC_RELEASE:-zero2ai-kata}"
+ ARC_NAMESPACE="${ARC_NAMESPACE:-arc-runners}"
+ BOOT_VCPUS="${BOOT_VCPUS:-2}"
+ BOOT_MEMORY_MIB="${BOOT_MEMORY_MIB:-4096}"
+diff --git a/nix/bun.nix b/nix/bun.nix
+index b41d4b3c23..d85ebe4cd7 100644
+--- a/nix/bun.nix
++++ b/nix/bun.nix
+@@ -655,7 +655,7 @@
+   };
+   "@oh-my-pi/browser-relay" = copyPathToStore ../packages/browser-relay;
+   "@oh-my-pi/collab-web" = copyPathToStore ../packages/collab-web;
+-  "@oh-my-pi/omp-stats" = copyPathToStore ../packages/stats;
++  "@oh-my-pi/zero2ai-stats" = copyPathToStore ../packages/stats;
+   "@oh-my-pi/omptype" = copyPathToStore ../packages/omptype;
+   "@oh-my-pi/pi-agent-core" = copyPathToStore ../packages/agent;
+   "@oh-my-pi/pi-ai" = copyPathToStore ../packages/ai;
+diff --git a/nix/dev-shell.nix b/nix/dev-shell.nix
+index dd7a121790..35ba5dd13d 100644
+--- a/nix/dev-shell.nix
++++ b/nix/dev-shell.nix
+@@ -15,7 +15,7 @@ let
+ in
+ pkgs.mkShell (
+   {
+-    name = "omp-dev";
++    name = "zero2ai-dev";
+ 
+     packages =
+       [ bun bun2nix rustToolchain ]
+diff --git a/nix/home-manager.nix b/nix/home-manager.nix
+index e8f30d3ae5..6793c2c80c 100644
+--- a/nix/home-manager.nix
++++ b/nix/home-manager.nix
+@@ -6,29 +6,29 @@
+   ...
+ }:
+ let
+-  cfg = config.programs.omp;
++  cfg = config.programs.zero2ai;
+   yaml = pkgs.formats.yaml { };
+-  configFile = yaml.generate "omp-config.yml" cfg.settings;
++  configFile = yaml.generate "zero2ai-config.yml" cfg.settings;
+ in
+ {
+-  options.programs.omp = {
+-    enable = lib.mkEnableOption "OMP coding agent";
++  options.programs.zero2ai = {
++    enable = lib.mkEnableOption "ZERO2AI coding agent";
+ 
+     package = lib.mkOption {
+       type = lib.types.package;
+       default = self.packages.${pkgs.stdenv.hostPlatform.system}.default;
+-      defaultText = lib.literalExpression "inputs.omp.packages.${pkgs.stdenv.hostPlatform.system}.default";
+-      description = "OMP package to install.";
++      defaultText = lib.literalExpression "inputs.zero2ai.packages.${pkgs.stdenv.hostPlatform.system}.default";
++      description = "ZERO2AI package to install.";
+     };
+ 
+     settings = lib.mkOption {
+       type = lib.types.nullOr yaml.type;
+       default = null;
+       description = ''
+-        Settings written declaratively to {file}`~/.omp/agent/config.yml`.
++        Settings written declaratively to {file}`~/.zero2ai/agent/config.yml`.
+         On each `home-manager switch` the declared settings are copied into
+         place as a writable regular file (not a read-only store symlink), so
+-        OMP can acquire its config lock and rewrite the file when persisting
++        ZERO2AI can acquire its config lock and rewrite the file when persisting
+         runtime changes (`/settings`, onboarding). Those runtime changes are
+         overwritten by the declared values again on the next
+         `home-manager switch`.
+@@ -43,7 +43,7 @@ in
+   config = lib.mkIf cfg.enable {
+     home.packages = [ cfg.package ];
+ 
+-    # OMP rewrites its config at runtime and acquires an advisory lock on it
++    # ZERO2AI rewrites its config at runtime and acquires an advisory lock on it
+     # first; on macOS the lock backend creates an flock sidecar next to the
+     # target file. A `home.file` store symlink is read-only and lives under
+     # /nix/store, so both the lock and the atomic rewrite fail with EACCES and
+@@ -54,8 +54,8 @@ in
+       before = [ ];
+       after = [ "writeBoundary" ];
+       data = ''
+-        run mkdir -p "$HOME/.omp/agent"
+-        run install -m 600 ${configFile} "$HOME/.omp/agent/config.yml"
++        run mkdir -p "$HOME/.zero2ai/agent"
++        run install -m 600 ${configFile} "$HOME/.zero2ai/agent/config.yml"
+       '';
+     };
+   };
+diff --git a/nix/nixos-module.nix b/nix/nixos-module.nix
+index bd30f3e5a6..b810b804f3 100644
+--- a/nix/nixos-module.nix
++++ b/nix/nixos-module.nix
+@@ -6,17 +6,17 @@
+   ...
+ }:
+ let
+-  cfg = config.programs.omp;
++  cfg = config.programs.zero2ai;
+ in
+ {
+-  options.programs.omp = {
+-    enable = lib.mkEnableOption "OMP coding agent";
++  options.programs.zero2ai = {
++    enable = lib.mkEnableOption "ZERO2AI coding agent";
+ 
+     package = lib.mkOption {
+       type = lib.types.package;
+       default = self.packages.${pkgs.stdenv.hostPlatform.system}.default;
+-      defaultText = lib.literalExpression "inputs.omp.packages.${pkgs.stdenv.hostPlatform.system}.default";
+-      description = "OMP package to install system-wide.";
++      defaultText = lib.literalExpression "inputs.zero2ai.packages.${pkgs.stdenv.hostPlatform.system}.default";
++      description = "ZERO2AI package to install system-wide.";
+     };
+   };
+ 
+diff --git a/nix/package.nix b/nix/package.nix
+index 806eab586b..ea762547aa 100644
+--- a/nix/package.nix
++++ b/nix/package.nix
+@@ -47,7 +47,7 @@ let
+         rustFlags = "-C target-cpu=x86-64-v2";
+       };
+     }
+-    .${stdenv.hostPlatform.system} or (throw "Unsupported OMP platform: ${stdenv.hostPlatform.system}");
++    .${stdenv.hostPlatform.system} or (throw "Unsupported ZERO2AI platform: ${stdenv.hostPlatform.system}");
+   patchedDependencies = lib.mapAttrs (
+     _: patch: source + "/${patch}"
+   ) rootPackageJson.patchedDependencies;
+@@ -56,7 +56,7 @@ let
+     [ stdenv.cc.cc.lib ] ++ lib.optional (stdenv.cc.cc ? libgcc) stdenv.cc.cc.libgcc
+   );
+   bunRuntimeTemplate = stdenvNoCC.mkDerivation {
+-    pname = "omp-bun-runtime-template";
++    pname = "zero2ai-bun-runtime-template";
+     inherit (bun) version;
+     src = bun.src;
+ 
+@@ -73,7 +73,7 @@ let
+   };
+ in
+ stdenv.mkDerivation {
+-  pname = "omp";
++  pname = "zero2ai";
+   inherit (packageJson) version;
+   src = source;
+ 
+@@ -156,7 +156,7 @@ stdenv.mkDerivation {
+       signIfRequired "packages/natives/native/${platform.addon}"
+     ''}
+ 
+-    echo "Compiling OMP"
++    echo "Compiling ZERO2AI"
+     BUN_COMPILE_EXECUTABLE_PATH="${bunRuntimeTemplate}/libexec/bun" \
+       bun --cwd="$PWD/packages/coding-agent" run build
+ 
+@@ -166,9 +166,9 @@ stdenv.mkDerivation {
+   installPhase = ''
+     runHook preInstall
+ 
+-    install -Dm755 packages/coding-agent/dist/omp "$out/bin/omp"
+-    install -Dm644 LICENSE "$out/share/doc/omp/LICENSE"
+-    install -Dm644 THIRD-PARTY-NOTICES.txt "$out/share/doc/omp/THIRD-PARTY-NOTICES.txt"
++    install -Dm755 packages/coding-agent/dist/zero2ai "$out/bin/zero2ai"
++    install -Dm644 LICENSE "$out/share/doc/zero2ai/LICENSE"
++    install -Dm644 THIRD-PARTY-NOTICES.txt "$out/share/doc/zero2ai/THIRD-PARTY-NOTICES.txt"
+ 
+     ${lib.optionalString stdenv.hostPlatform.isLinux ''
+       # The addon is gzip-compressed inside the compiled binary, so its linked
+@@ -185,10 +185,10 @@ stdenv.mkDerivation {
+   # inert shebang. Remove its hash before Nix scans output references; this
+   # runs before Darwin's binary-signing fixup hook.
+   preFixup = ''
+-    remove-references-to -t ${bun} "$out/bin/omp"
++    remove-references-to -t ${bun} "$out/bin/zero2ai"
+   '';
+ 
+-  # Prebuilt addons that omp bun-installs into its cache at first use
++  # Prebuilt addons that zero2ai bun-installs into its cache at first use
+   # (onnxruntime-node, sherpa-onnx-node, sharp, fastembed) are process.dlopen'd and
+   # need libstdc++.so.6 / libgcc_s.so.1, which nix glibc's default loader path lacks;
+   # their own DT_RUNPATH means this executable's RPATH is never consulted for their
+@@ -202,12 +202,12 @@ stdenv.mkDerivation {
+   # soname from the already-loaded set, regardless of the addon's own DT_RUNPATH.
+   # stdenv.cc.cc.lib is already in buildInputs, so the autoPatchelfHook pass that
+   # follows resolves the new dependency and sets the RPATH. patchelf must run before
+-  # wrapProgram: the wrapper replaces $out/bin/omp with a script and moves the ELF
+-  # to $out/bin/.omp-wrapped.
++  # wrapProgram: the wrapper replaces $out/bin/zero2ai with a script and moves the ELF
++  # to $out/bin/.zero2ai-wrapped.
+   postFixup = lib.optionalString stdenv.hostPlatform.isLinux ''
+-    patchelf --add-needed libstdc++.so.6 "$out/bin/omp"
+-    wrapProgram "$out/bin/omp" \
+-      --set-default OMP_NATIVE_LIBRARY_PATH "${lib.makeLibraryPath runtimeNativeLibraries}"
++    patchelf --add-needed libstdc++.so.6 "$out/bin/zero2ai"
++    wrapProgram "$out/bin/zero2ai" \
++      --set-default ZERO2AI_NATIVE_LIBRARY_PATH "${lib.makeLibraryPath runtimeNativeLibraries}"
+   '';
+ 
+   disallowedReferences = [ bun ];
+@@ -221,31 +221,31 @@ stdenv.mkDerivation {
+   # section address. preInstallCheck runs after every fixupPhase hook, including
+   # the autoPatchelfHook pass that follows postFixup, so it is the last point at
+   # which the field can be corrected; wrapProgram moved the real ELF to
+-  # `.omp-wrapped`.
++  # `.zero2ai-wrapped`.
+   preInstallCheck = lib.optionalString stdenv.hostPlatform.isLinux ''
+-    bun ${../scripts/fix-dt-verdef.ts} "$out/bin/.omp-wrapped"
++    bun ${../scripts/fix-dt-verdef.ts} "$out/bin/.zero2ai-wrapped"
+   '';
+ 
+   doInstallCheck = true;
+   installCheckPhase = ''
+     runHook preInstallCheck
+-    # Capture rather than pipe into grep: piping masks a signal death of omp
++    # Capture rather than pipe into grep: piping masks a signal death of zero2ai
+     # under `set -o pipefail` (grep -q's exit status wins), which hid the
+-    # loader SIGSEGV in issue #9881. With a variable, errexit surfaces omp's
++    # loader SIGSEGV in issue #9881. With a variable, errexit surfaces zero2ai's
+     # real exit status and stderr in the build log.
+-    smokeOutput="$(HOME="$TMPDIR" "$out/bin/omp" --smoke-test)"
++    smokeOutput="$(HOME="$TMPDIR" "$out/bin/zero2ai" --smoke-test)"
+     grep -q "smoke-test: ok" <<<"$smokeOutput"
+-    BUN_BE_BUN=1 "$out/bin/omp" -e \
++    BUN_BE_BUN=1 "$out/bin/zero2ai" -e \
+       'if (Bun.version !== "${bun.version}" || typeof Bun.Image !== "function") process.exit(1)'
+     ${lib.optionalString stdenv.hostPlatform.isLinux ''
+       # The addons are dlopen'd, so prove the advertised directories actually
+       # resolve the libraries rather than merely carrying a plausible string.
+-      env -u LD_LIBRARY_PATH BUN_BE_BUN=1 "$out/bin/omp" -e \
+-        'const {dlopen}=require("bun:ffi");const dirs=(process.env.OMP_NATIVE_LIBRARY_PATH||"").split(":").filter(Boolean);const need={"libstdc++.so.6":{__cxa_demangle:{args:["ptr","ptr","ptr","ptr"],returns:"ptr"}},"libgcc_s.so.1":{_Unwind_Backtrace:{args:["ptr","ptr"],returns:"i32"}}};for(const lib of Object.keys(need)){let ok=false;for(const d of dirs){try{dlopen(d+"/"+lib,need[lib]);ok=true;break}catch(e){}}if(!ok){console.error("unresolved: "+lib);process.exit(1)}}'
++      env -u LD_LIBRARY_PATH BUN_BE_BUN=1 "$out/bin/zero2ai" -e \
++        'const {dlopen}=require("bun:ffi");const dirs=(process.env.ZERO2AI_NATIVE_LIBRARY_PATH||"").split(":").filter(Boolean);const need={"libstdc++.so.6":{__cxa_demangle:{args:["ptr","ptr","ptr","ptr"],returns:"ptr"}},"libgcc_s.so.1":{_Unwind_Backtrace:{args:["ptr","ptr"],returns:"i32"}}};for(const lib of Object.keys(need)){let ok=false;for(const d of dirs){try{dlopen(d+"/"+lib,need[lib]);ok=true;break}catch(e){}}if(!ok){console.error("unresolved: "+lib);process.exit(1)}}'
+       # The libstdc++ preload (see postFixup) must survive: without it addons the
+       # main process dlopen's directly fail to resolve libstdc++.so.6 on NixOS.
+-      # wrapProgram moved the real ELF to .omp-wrapped.
+-      patchelf --print-needed "$out/bin/.omp-wrapped" | grep -q '^libstdc++\.so\.6$'
++      # wrapProgram moved the real ELF to .zero2ai-wrapped.
++      patchelf --print-needed "$out/bin/.zero2ai-wrapped" | grep -q '^libstdc++\.so\.6$'
+     ''}
+     runHook postInstallCheck
+   '';
+@@ -255,7 +255,7 @@ stdenv.mkDerivation {
+     homepage = "https://omp.sh";
+     changelog = "https://github.com/can1357/oh-my-pi/releases/tag/v${packageJson.version}";
+     license = lib.licenses.mit;
+-    mainProgram = "omp";
++    mainProgram = "zero2ai";
+     platforms = [
+       "aarch64-darwin"
+       "aarch64-linux"

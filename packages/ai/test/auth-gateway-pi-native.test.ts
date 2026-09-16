@@ -2,19 +2,19 @@ import { describe, expect, it, vi } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { clearCustomApis } from "@oh-my-pi/pi-ai/api-registry";
-import { startAuthGateway } from "@oh-my-pi/pi-ai/auth-gateway";
-import { AuthStorage } from "@oh-my-pi/pi-ai/auth-storage";
-import { createMockModel, registerMockApi } from "@oh-my-pi/pi-ai/providers/mock";
-import { encodeStream, formatError, parseRequest } from "@oh-my-pi/pi-ai/providers/pi-native-server";
+import { clearCustomApis } from "@zero2ai/ai/api-registry";
+import { startAuthGateway } from "@zero2ai/ai/auth-gateway";
+import { AuthStorage } from "@zero2ai/ai/auth-storage";
+import { createMockModel, registerMockApi } from "@zero2ai/ai/providers/mock";
+import { encodeStream, formatError, parseRequest } from "@zero2ai/ai/providers/zero2ai-native-server";
 import type {
 	AssistantMessage,
 	AssistantMessageEvent,
 	AssistantMessageEventStream,
 	Context,
 	Usage,
-} from "@oh-my-pi/pi-ai/types";
-import { Effort } from "@oh-my-pi/pi-catalog/effort";
+} from "@zero2ai/ai/types";
+import { Effort } from "@zero2ai/catalog/effort";
 
 function makeEventStream(events: AssistantMessageEvent[], final: AssistantMessage): AssistantMessageEventStream {
 	async function* iter() {
@@ -72,7 +72,7 @@ const baseContext: Context = {
 	messages: [{ role: "user", content: "hi", timestamp: 0 }],
 };
 
-describe("pi-native parseRequest", () => {
+describe("zero2ai-native parseRequest", () => {
 	it("accepts modelId + context and returns canonical shape", () => {
 		const parsed = parseRequest({
 			modelId: "claude-sonnet-4-5",
@@ -268,13 +268,13 @@ describe("pi-native parseRequest", () => {
 	});
 });
 
-describe("pi-native gateway cache controls", () => {
+describe("zero2ai-native gateway cache controls", () => {
 	it("delivers statefulResponses false to the provider stream", async () => {
 		registerMockApi();
-		const dir = await fs.mkdtemp(path.join(os.tmpdir(), "gw-pi-native-cache-"));
+		const dir = await fs.mkdtemp(path.join(os.tmpdir(), "gw-zero2ai-native-cache-"));
 		const storage = await AuthStorage.create(path.join(dir, "auth.db"));
 		storage.setRuntimeApiKey("openrouter", "test-key");
-		const mock = createMockModel({ provider: "openrouter", id: "pi-native-cache" });
+		const mock = createMockModel({ provider: "openrouter", id: "zero2ai-native-cache" });
 		const handle = startAuthGateway({
 			bind: "127.0.0.1:0",
 			bearerTokens: ["test-token"],
@@ -289,7 +289,7 @@ describe("pi-native gateway cache controls", () => {
 				method: "POST",
 				headers: { Authorization: "Bearer test-token", "Content-Type": "application/json" },
 				body: JSON.stringify({
-					modelId: "pi-native-cache",
+					modelId: "zero2ai-native-cache",
 					context: baseContext,
 					options: { promptCacheKey: "bench-cache-pair", statefulResponses: false },
 					stream: false,
@@ -312,10 +312,10 @@ describe("pi-native gateway cache controls", () => {
 	});
 });
 
-describe("pi-native gateway usage attribution", () => {
-	it("records observed usage under the caller's x-omp-* identity, host-fallback when absent", async () => {
+describe("zero2ai-native gateway usage attribution", () => {
+	it("records observed usage under the caller's x-zero2ai-* identity, host-fallback when absent", async () => {
 		registerMockApi();
-		const dir = await fs.mkdtemp(path.join(os.tmpdir(), "gw-pi-native-usage-"));
+		const dir = await fs.mkdtemp(path.join(os.tmpdir(), "gw-zero2ai-native-usage-"));
 		const storage = await AuthStorage.create(path.join(dir, "auth.db"));
 		storage.setRuntimeApiKey("openrouter", "test-key");
 		const recorded: Array<{
@@ -328,7 +328,7 @@ describe("pi-native gateway usage attribution", () => {
 		const spy = vi.spyOn(storage, "recordObservedUsage").mockImplementation(entry => {
 			recorded.push(entry);
 		});
-		const mock = createMockModel({ provider: "openrouter", id: "pi-native-usage" });
+		const mock = createMockModel({ provider: "openrouter", id: "zero2ai-native-usage" });
 		const handle = startAuthGateway({
 			bind: "127.0.0.1:0",
 			bearerTokens: ["test-token"],
@@ -345,18 +345,18 @@ describe("pi-native gateway usage attribution", () => {
 				headers: {
 					Authorization: "Bearer test-token",
 					"Content-Type": "application/json",
-					"x-omp-install-id": "robomp-install",
-					"x-omp-hostname": "robomp-box",
-					"x-omp-app": "robomp",
+					"x-zero2ai-install-id": "robomp-install",
+					"x-zero2ai-hostname": "robomp-box",
+					"x-zero2ai-app": "robomp",
 				},
-				body: JSON.stringify({ modelId: "pi-native-usage", context: baseContext, stream: false }),
+				body: JSON.stringify({ modelId: "zero2ai-native-usage", context: baseContext, stream: false }),
 			});
 			expect(attributed.status).toBe(200);
 			await attributed.json();
 			expect(recorded).toHaveLength(1);
 			expect(recorded[0]).toMatchObject({
 				provider: "openrouter",
-				model: "pi-native-usage",
+				model: "zero2ai-native-usage",
 				usage: { input: 100, output: 20, cacheRead: 5, cacheWrite: 2 },
 				costUsd: 0.75,
 				client: { installId: "robomp-install", hostname: "robomp-box", app: "robomp" },
@@ -368,7 +368,7 @@ describe("pi-native gateway usage attribution", () => {
 			const anonymous = await fetch(`${handle.url}/v1/pi/stream`, {
 				method: "POST",
 				headers: { Authorization: "Bearer test-token", "Content-Type": "application/json" },
-				body: JSON.stringify({ modelId: "pi-native-usage", context: baseContext, stream: false }),
+				body: JSON.stringify({ modelId: "zero2ai-native-usage", context: baseContext, stream: false }),
 			});
 			expect(anonymous.status).toBe(200);
 			await anonymous.json();
@@ -381,7 +381,7 @@ describe("pi-native gateway usage attribution", () => {
 			const zeroUsage = await fetch(`${handle.url}/v1/pi/stream`, {
 				method: "POST",
 				headers: { Authorization: "Bearer test-token", "Content-Type": "application/json" },
-				body: JSON.stringify({ modelId: "pi-native-usage", context: baseContext, stream: false }),
+				body: JSON.stringify({ modelId: "zero2ai-native-usage", context: baseContext, stream: false }),
 			});
 			expect(zeroUsage.status).toBe(200);
 			await zeroUsage.json();
@@ -396,9 +396,9 @@ describe("pi-native gateway usage attribution", () => {
 	});
 });
 
-describe("pi-native encodeStream", () => {
+describe("zero2ai-native encodeStream", () => {
 	it("ships every AssistantMessageEvent verbatim, terminated by [DONE]", async () => {
-		// Pi-native is omp-talks-to-omp: the client feeds parsed events directly
+		// Pi-native is zero2ai-talks-to-zero2ai: the client feeds parsed events directly
 		// into `AssistantMessageEventStream.push()`, so the wire IS the canonical
 		// event type. No partial-stripping, no per-event re-shaping.
 		const finalMessage = baseAssistant({
@@ -485,7 +485,7 @@ describe("pi-native encodeStream", () => {
 	});
 });
 
-describe("pi-native formatError", () => {
+describe("zero2ai-native formatError", () => {
 	it("emits { error: { type, message } } with the given status", async () => {
 		const res = formatError(401, "authentication_error", "no credential");
 		expect(res.status).toBe(401);

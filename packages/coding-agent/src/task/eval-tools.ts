@@ -1,5 +1,5 @@
-import type { AgentToolResult } from "@oh-my-pi/pi-agent-core";
-import { INTENT_FIELD } from "@oh-my-pi/pi-wire";
+import type { AgentToolResult } from "@zero2ai/agent-core";
+import { INTENT_FIELD } from "@zero2ai/wire";
 import { EvalKernelNotRunningError } from "../eval/executor-base";
 import { invokeJsTool } from "../eval/js/context-manager";
 import { resolveJsKernelIdentity } from "../eval/js";

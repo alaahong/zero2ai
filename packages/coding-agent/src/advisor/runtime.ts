@@ -1,8 +1,8 @@
-import type { AgentMessage } from "@oh-my-pi/pi-agent-core";
-import type { AssistantMessage, ImageContent, TextContent } from "@oh-my-pi/pi-ai";
-import * as AIError from "@oh-my-pi/pi-ai/error";
-import { raceWithSignal } from "@oh-my-pi/pi-ai/utils/abort";
-import { logger } from "@oh-my-pi/pi-utils";
+import type { AgentMessage } from "@zero2ai/agent-core";
+import type { AssistantMessage, ImageContent, TextContent } from "@zero2ai/ai";
+import * as AIError from "@zero2ai/ai/error";
+import { raceWithSignal } from "@zero2ai/ai/utils/abort";
+import { logger } from "@zero2ai/utils";
 import {
 	collectNativeReplayRegexSecretValues,
 	obfuscateNativeReplay,
@@ -18,7 +18,7 @@ import { ADVISOR_RENDER_OPTIONS, renderAdvisorDeltaChunks } from "./delta-split"
 import { fingerprintMessage } from "./message-fingerprint";
 
 /**
- * Minimal slice of `Agent` the runtime drives — satisfied by pi-agent-core
+ * Minimal slice of `Agent` the runtime drives — satisfied by zero2ai-agent-core
  * `Agent`. `state.error` mirrors `Agent.state.error`: provider/stream failures
  * the loop catches internally never reject `prompt()`, so the runtime reads
  * this field after every prompt to detect a failed turn.

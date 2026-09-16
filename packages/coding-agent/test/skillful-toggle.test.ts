@@ -2,17 +2,17 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { UserMessage } from "@oh-my-pi/pi-ai";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import type { Skill } from "@oh-my-pi/pi-coding-agent/extensibility/skills";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { createAgentSession } from "@oh-my-pi/pi-coding-agent/sdk";
-import type { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { BUILTIN_MODE_SLASH_COMMANDS } from "@oh-my-pi/pi-coding-agent/slash-commands/builtin-modes";
-import type { SlashCommandRuntime } from "@oh-my-pi/pi-coding-agent/slash-commands/types";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { removeSyncWithRetries } from "@oh-my-pi/pi-utils";
+import type { UserMessage } from "@zero2ai/ai";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import type { Skill } from "@zero2ai/coding-agent/extensibility/skills";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { createAgentSession } from "@zero2ai/coding-agent/sdk";
+import type { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { BUILTIN_MODE_SLASH_COMMANDS } from "@zero2ai/coding-agent/slash-commands/builtin-modes";
+import type { SlashCommandRuntime } from "@zero2ai/coding-agent/slash-commands/types";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { removeSyncWithRetries } from "@zero2ai/utils";
 import { cleanupTempHome } from "./helpers/temp-home-cleanup";
 
 function createUserMessage(content: string): UserMessage {
@@ -41,7 +41,7 @@ describe("skillful setting and /skillful session toggle", () => {
 	let session: AgentSession | undefined;
 
 	beforeAll(async () => {
-		sharedDir = fs.mkdtempSync(path.join(os.tmpdir(), "pi-skillful-shared-"));
+		sharedDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-skillful-shared-"));
 		sharedAuthStorage = await AuthStorage.create(path.join(sharedDir, "auth.db"));
 		sharedModelRegistry = new ModelRegistry(sharedAuthStorage, path.join(sharedDir, "models.yml"));
 	});
@@ -52,13 +52,13 @@ describe("skillful setting and /skillful session toggle", () => {
 	});
 
 	beforeEach(() => {
-		tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "pi-skillful-"));
+		tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-skillful-"));
 		originalHome = process.env.HOME;
-		tempHomeDir = fs.mkdtempSync(path.join(os.tmpdir(), "pi-skillful-home-"));
+		tempHomeDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-skillful-home-"));
 		process.env.HOME = tempHomeDir;
-		fs.mkdirSync(path.join(tempDir, ".omp", "skills", "test-skill"), { recursive: true });
+		fs.mkdirSync(path.join(tempDir, ".zero2ai", "skills", "test-skill"), { recursive: true });
 		fs.writeFileSync(
-			path.join(tempDir, ".omp", "skills", "test-skill", "SKILL.md"),
+			path.join(tempDir, ".zero2ai", "skills", "test-skill", "SKILL.md"),
 			`---\nname: test-skill\ndescription: A test skill for the skillful toggle.\n---\n# Test Skill\n`,
 		);
 	});
@@ -134,7 +134,7 @@ describe("skillful setting and /skillful session toggle", () => {
 	});
 
 	it("announces URI syntax without catalog rows for hidden-only skills mid-session", async () => {
-		const skillDir = path.join(tempDir, ".omp", "skills", "test-skill");
+		const skillDir = path.join(tempDir, ".zero2ai", "skills", "test-skill");
 		const skillFile = path.join(skillDir, "SKILL.md");
 		await Bun.write(
 			skillFile,

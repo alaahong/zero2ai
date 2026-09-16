@@ -1,14 +1,14 @@
 import { afterEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { Agent } from "@oh-my-pi/pi-agent-core";
-import type { AssistantMessage } from "@oh-my-pi/pi-ai";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { createSessionTeardown } from "@oh-my-pi/pi-coding-agent/modes/session-teardown";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
+import { Agent } from "@zero2ai/agent-core";
+import type { AssistantMessage } from "@zero2ai/ai";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { createSessionTeardown } from "@zero2ai/coding-agent/modes/session-teardown";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
 import {
 	collectPendingToolCalls,
 	createInterruptedTurnAbortMessage,
@@ -16,10 +16,10 @@ import {
 	SESSION_EXIT_CUSTOM_TYPE,
 	TOOL_EXECUTION_START_CUSTOM_TYPE,
 	type ToolExecutionStartData,
-} from "@oh-my-pi/pi-coding-agent/session/exit-diagnostics";
-import { convertToLlm } from "@oh-my-pi/pi-coding-agent/session/messages";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { postmortem, TempDir } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/session/exit-diagnostics";
+import { convertToLlm } from "@zero2ai/coding-agent/session/messages";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { postmortem, TempDir } from "@zero2ai/utils";
 
 const pendingAssistant: AssistantMessage = {
 	role: "assistant",
@@ -61,7 +61,7 @@ describe("session exit diagnostics", () => {
 	});
 
 	it("records a durable tool start marker and shutdown diagnostic before a pending result exists", async () => {
-		tempDir = TempDir.createSync("@pi-session-exit-");
+		tempDir = TempDir.createSync("@zero2ai-session-exit-");
 		authStorage = await AuthStorage.create(path.join(tempDir.path(), "auth.db"));
 		authStorage.setRuntimeApiKey("anthropic", "test-key");
 		const modelRegistry = new ModelRegistry(authStorage);
@@ -140,7 +140,7 @@ describe("session exit diagnostics", () => {
 	});
 
 	it("signal teardown persists the postmortem reason, not the generic dispose", async () => {
-		tempDir = TempDir.createSync("@pi-session-exit-signal-");
+		tempDir = TempDir.createSync("@zero2ai-session-exit-signal-");
 		authStorage = await AuthStorage.create(path.join(tempDir.path(), "auth.db"));
 		authStorage.setRuntimeApiKey("anthropic", "test-key");
 		const modelRegistry = new ModelRegistry(authStorage);
@@ -208,7 +208,7 @@ describe("session exit diagnostics", () => {
 	});
 
 	it("does not materialize an empty session just to write an exit marker", async () => {
-		tempDir = TempDir.createSync("@pi-empty-session-exit-");
+		tempDir = TempDir.createSync("@zero2ai-empty-session-exit-");
 		authStorage = await AuthStorage.create(path.join(tempDir.path(), "auth.db"));
 		const modelRegistry = new ModelRegistry(authStorage);
 		const model = getBundledModel("anthropic", "claude-sonnet-4-5");

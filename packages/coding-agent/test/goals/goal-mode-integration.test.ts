@@ -1,23 +1,23 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as path from "node:path";
-import { Agent } from "@oh-my-pi/pi-agent-core";
-import type { ImageContent, Model } from "@oh-my-pi/pi-ai";
-import { AssistantMessageEventStream } from "@oh-my-pi/pi-ai/utils/event-stream";
-import * as vcs from "@oh-my-pi/pi-natives/vcs";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { GoalTool } from "@oh-my-pi/pi-coding-agent/goals/tools/goal-tool";
-import { InteractiveMode } from "@oh-my-pi/pi-coding-agent/modes/interactive-mode";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import type { SubmittedUserInput } from "@oh-my-pi/pi-coding-agent/modes/types";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { normalizeCustomMessagePayload } from "@oh-my-pi/pi-coding-agent/session/messages";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { executeBuiltinSlashCommand } from "@oh-my-pi/pi-coding-agent/slash-commands/builtin-registry";
-import { createTools, type Tool, type ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import type { TodoPhase } from "@oh-my-pi/pi-coding-agent/tools/todo";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { Agent } from "@zero2ai/agent-core";
+import type { ImageContent, Model } from "@zero2ai/ai";
+import { AssistantMessageEventStream } from "@zero2ai/ai/utils/event-stream";
+import * as vcs from "@zero2ai/natives/vcs";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
+import { GoalTool } from "@zero2ai/coding-agent/goals/tools/goal-tool";
+import { InteractiveMode } from "@zero2ai/coding-agent/modes/interactive-mode";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import type { SubmittedUserInput } from "@zero2ai/coding-agent/modes/types";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { normalizeCustomMessagePayload } from "@zero2ai/coding-agent/session/messages";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { executeBuiltinSlashCommand } from "@zero2ai/coding-agent/slash-commands/builtin-registry";
+import { createTools, type Tool, type ToolSession } from "@zero2ai/coding-agent/tools";
+import type { TodoPhase } from "@zero2ai/coding-agent/tools/todo";
+import { TempDir } from "@zero2ai/utils";
 
 function createToolSession(cwd: string, settings: Settings, overrides: Partial<ToolSession> = {}): ToolSession {
 	return {
@@ -54,7 +54,7 @@ type SharedFixture = {
 };
 
 async function createSharedFixture(): Promise<SharedFixture> {
-	const baseDir = TempDir.createSync("@pi-goal-mode-shared-");
+	const baseDir = TempDir.createSync("@zero2ai-goal-mode-shared-");
 	const authStorage = await AuthStorage.create(path.join(baseDir.path(), "testauth.db"));
 	// The real prompt path gates on a resolvable key; never rely on ambient env.
 	authStorage.setRuntimeApiKey("anthropic", "test-key");
@@ -68,7 +68,7 @@ async function createSharedFixture(): Promise<SharedFixture> {
 
 async function createGoalHarness(shared: SharedFixture): Promise<GoalHarness> {
 	resetSettingsForTest();
-	const tempDir = TempDir.createSync("@pi-goal-mode-");
+	const tempDir = TempDir.createSync("@zero2ai-goal-mode-");
 	await Settings.init({ inMemory: true, cwd: tempDir.path() });
 	const { modelRegistry, model } = shared;
 

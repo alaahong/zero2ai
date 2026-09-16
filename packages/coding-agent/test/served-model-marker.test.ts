@@ -1,9 +1,9 @@
 import { describe, expect, it } from "bun:test";
-import type { AssistantMessage } from "@oh-my-pi/pi-ai/types";
+import type { AssistantMessage } from "@zero2ai/ai/types";
 import {
 	detectServedModelMismatch,
 	ServedModelTracker,
-} from "@oh-my-pi/pi-coding-agent/modes/components/served-model-marker";
+} from "@zero2ai/coding-agent/modes/components/served-model-marker";
 
 function turn(parts: {
 	model: string;

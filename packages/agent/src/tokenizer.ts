@@ -1,13 +1,13 @@
-import type { Model } from "@oh-my-pi/pi-ai";
-import type { ModelTokenizer } from "@oh-my-pi/pi-catalog/types";
-import * as natives from "@oh-my-pi/pi-natives";
-import { stringifyJson } from "@oh-my-pi/pi-utils";
-import * as snapcompact from "@oh-my-pi/snapcompact";
+import type { Model } from "@zero2ai/ai";
+import type { ModelTokenizer } from "@zero2ai/catalog/types";
+import * as natives from "@zero2ai/natives";
+import { stringifyJson } from "@zero2ai/utils";
+import * as snapcompact from "@zero2ai/snapcompact";
 import { isEstimateCacheable, messageEstimateVersion } from "./compaction/message-cache";
 import type { AgentMessage } from "./types";
 
 const testEnv = Bun.env.NODE_ENV === "test";
-const accurate = process.env.PI_TOKENIZER_ACCURATE === "1" && !testEnv;
+const accurate = process.env.ZERO2AI_TOKENIZER_ACCURATE === "1" && !testEnv;
 
 const NATIVE_ENCODING: Record<ModelTokenizer, natives.Encoding> = {
 	"claude-v3": natives.Encoding.ClaudeV3,
@@ -30,7 +30,7 @@ export function tokenizerEncodingForModel(model: Pick<Model, "tokenizer"> | null
  * when known, o200k_base otherwise), falling back to the byte upper bound when
  * the loaded addon does not recognize that encoding. `approximate` and
  * `upperbound` prefer the same exact count for known tokenizer families or
- * when `PI_TOKENIZER_ACCURATE=1` is set; otherwise they use a cheap heuristic:
+ * when `ZERO2AI_TOKENIZER_ACCURATE=1` is set; otherwise they use a cheap heuristic:
  * `approximate` a bytes/4 guess, `upperbound` the raw byte length (never
  * undercounts).
  */
@@ -126,7 +126,7 @@ interface MessageEstimate {
  * when the model's encoding changes); one-shot flows construct their own for
  * the model that will be billed. Known tokenizer families use exact native
  * counts; unknown models keep the fast byte estimate (or o200k when
- * `PI_TOKENIZER_ACCURATE=1`).
+ * `ZERO2AI_TOKENIZER_ACCURATE=1`).
  */
 export class Tokenizer {
 	readonly #encoding: natives.Encoding | null;

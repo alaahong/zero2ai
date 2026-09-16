@@ -1,13 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
-import { type RenderResultOptions, ThinkingLevel } from "@oh-my-pi/pi-agent-core";
-import type { SettingPath, SettingValue } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { getThemeByName, setThemeInstance } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { taskToolRenderer } from "@oh-my-pi/pi-coding-agent/task/renderer";
-import { subprocessToolRegistry } from "@oh-my-pi/pi-coding-agent/task/subprocess-tool-registry";
-import type { AgentProgress, SingleResult, TaskToolDetails } from "@oh-my-pi/pi-coding-agent/task/types";
-import { FEED_MODEL_BADGE_WIDTH } from "@oh-my-pi/pi-coding-agent/tools/render-utils";
-import { visibleWidth } from "@oh-my-pi/pi-tui";
+import { type RenderResultOptions, ThinkingLevel } from "@zero2ai/agent-core";
+import type { SettingPath, SettingValue } from "@zero2ai/coding-agent/config/settings";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
+import { getThemeByName, setThemeInstance } from "@zero2ai/coding-agent/modes/theme/theme";
+import { taskToolRenderer } from "@zero2ai/coding-agent/task/renderer";
+import { subprocessToolRegistry } from "@zero2ai/coding-agent/task/subprocess-tool-registry";
+import type { AgentProgress, SingleResult, TaskToolDetails } from "@zero2ai/coding-agent/task/types";
+import { FEED_MODEL_BADGE_WIDTH } from "@zero2ai/coding-agent/tools/render-utils";
+import { visibleWidth } from "@zero2ai/tui";
 
 function runningProgress(overrides: Partial<AgentProgress> = {}): AgentProgress {
 	return {

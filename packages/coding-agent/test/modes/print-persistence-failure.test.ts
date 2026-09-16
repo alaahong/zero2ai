@@ -5,8 +5,8 @@
  */
 import { afterEach, describe, expect, it, spyOn } from "bun:test";
 import * as fs from "node:fs";
-import type { AssistantMessage } from "@oh-my-pi/pi-ai";
-import { isRecord, TempDir } from "@oh-my-pi/pi-utils";
+import type { AssistantMessage } from "@zero2ai/ai";
+import { isRecord, TempDir } from "@zero2ai/utils";
 import { disposeSessionQuietly } from "../../src/main";
 import { runPrintMode } from "../../src/modes/print-mode";
 import { formatPersistenceFailure } from "../../src/modes/persistence-failure";
@@ -17,7 +17,7 @@ import { SessionManager } from "../../src/session/session-manager";
 const tempDirs: TempDir[] = [];
 
 function makeSessionManager(): SessionManager {
-	const dir = TempDir.createSync("@pi-persistence-surface-");
+	const dir = TempDir.createSync("@zero2ai-persistence-surface-");
 	tempDirs.push(dir);
 	const manager = SessionManager.create(dir.path(), `${dir.path()}/sessions`);
 	return manager;

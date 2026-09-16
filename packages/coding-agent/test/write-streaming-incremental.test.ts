@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "bun:test";
-import * as themeModule from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { writeToolRenderer } from "@oh-my-pi/pi-coding-agent/tools/write";
-import type { HighlightStream } from "@oh-my-pi/pi-natives";
+import * as themeModule from "@zero2ai/coding-agent/modes/theme/theme";
+import { writeToolRenderer } from "@zero2ai/coding-agent/tools/write";
+import type { HighlightStream } from "@zero2ai/natives";
 
 const stripAnsi = (s: string): string => s.replace(/\[[0-9;]*m/g, "");
 const hasLine = (lines: readonly string[], n: number): boolean =>

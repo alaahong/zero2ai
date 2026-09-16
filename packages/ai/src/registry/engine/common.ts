@@ -9,8 +9,8 @@ import type {
 	CompiledCredentialMap,
 	CompiledOAuthRequest,
 	CompiledUserinfo,
-} from "@oh-my-pi/pi-catalog/compat/types";
-import { $env } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/catalog/compat/types";
+import { $env } from "@zero2ai/utils";
 import * as AIError from "../../error";
 import type { FetchImpl } from "../../types";
 import { HOOKS } from "../hooks";

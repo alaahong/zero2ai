@@ -6,9 +6,9 @@
  */
 import * as fsSync from "node:fs";
 import * as os from "node:os";
-import type { ThinkingLevel } from "@oh-my-pi/pi-agent-core/thinking";
-import { EventLoopKeepalive } from "@oh-my-pi/pi-agent-core/utils/yield";
-import type { ImageContent, Model } from "@oh-my-pi/pi-ai";
+import type { ThinkingLevel } from "@zero2ai/agent-core/thinking";
+import { EventLoopKeepalive } from "@zero2ai/agent-core/utils/yield";
+import type { ImageContent, Model } from "@zero2ai/ai";
 import {
 	directoryIsMissing,
 	getLogPath,
@@ -16,11 +16,11 @@ import {
 	normalizePathForComparison,
 	setProjectDir,
 	VERSION,
-} from "@oh-my-pi/pi-utils/dirs";
-import { $env, isBunTestRuntime, setInteractiveHost } from "@oh-my-pi/pi-utils/env";
-import * as logger from "@oh-my-pi/pi-utils/logger";
-import * as postmortem from "@oh-my-pi/pi-utils/postmortem";
-import chalk from "@oh-my-pi/pi-utils/chalk";
+} from "@zero2ai/utils/dirs";
+import { $env, isBunTestRuntime, setInteractiveHost } from "@zero2ai/utils/env";
+import * as logger from "@zero2ai/utils/logger";
+import * as postmortem from "@zero2ai/utils/postmortem";
+import chalk from "@zero2ai/utils/chalk";
 import { reset as resetCapabilities } from "./capability";
 import { type Args, reportUnrecognizedFlags, validateToolNames } from "./cli/args";
 import { applyExtensionFlags, type ExtensionFlagSink } from "./cli/extension-flags";
@@ -52,7 +52,7 @@ import {
 	preloadPluginRoots,
 	resolveActiveProjectRegistryPath,
 } from "./discovery/helpers";
-import { injectOmpExtensionCliRoots } from "./discovery/omp-extension-roots";
+import { injectOmpExtensionCliRoots } from "./discovery/zero2ai-extension-roots";
 import { formatExtensionLoadNotifications } from "./extensibility/extensions/load-errors";
 import { loadExtensions } from "./extensibility/extensions/loader";
 import { ExtensionRunner } from "./extensibility/extensions/runner";
@@ -198,7 +198,7 @@ const RPC_BACKGROUND_DEFAULTED_SETTING_PATHS: SettingPath[] = [
 ];
 
 // Protocol-mode hosts opt into a small set of paths whose host-default we
-// re-apply at startup so embedders inherit OMP's neutral defaults instead of
+// re-apply at startup so embedders inherit ZERO2AI's neutral defaults instead of
 // the local user's globally-persisted preferences for interactive use. The
 // guard preserves any explicit configuration — caller `Settings.isolated`
 // overrides, project `.claude/settings.yml`, `--config` overlays, or global
@@ -251,7 +251,7 @@ export async function readPipedInput(): Promise<string | undefined> {
 // stderr line every 10s naming the deepest in-flight startup phase. Turns
 // zero-output indefinite hangs (stuck discovery read, network wait, stdin
 // pipe) into self-diagnosing reports instead of "it just hangs" (see the
-// PI_DEBUG_STARTUP markers for the synchronous-hang counterpart).
+// ZERO2AI_DEBUG_STARTUP markers for the synchronous-hang counterpart).
 
 const STARTUP_WATCHDOG_INTERVAL_MS = 10_000;
 let startupWatchdogTimer: NodeJS.Timeout | undefined;
@@ -266,7 +266,7 @@ function armStartupWatchdog(): void {
 		const phase = logger.openSpanPath().join(" > ") || "module load / pre-phase work";
 		process.stderr.write(
 			`${chalk.yellow(`Still starting after ${elapsed}s`)}${chalk.dim(` — phase: ${phase}`)}\n` +
-				`${chalk.dim(`  logs: ${getLogPath()} · re-run with PI_DEBUG_STARTUP=1 for streaming phase markers`)}\n`,
+				`${chalk.dim(`  logs: ${getLogPath()} · re-run with ZERO2AI_DEBUG_STARTUP=1 for streaming phase markers`)}\n`,
 		);
 	}, STARTUP_WATCHDOG_INTERVAL_MS);
 	startupWatchdogTimer.unref?.();
@@ -664,7 +664,7 @@ async function runInteractiveMode(
 			}
 		}
 
-		// `omp join <link>`: dispatch through the same builtin path as a typed
+		// `zero2ai join <link>`: dispatch through the same builtin path as a typed
 		// `/join` so collab guards and error rendering stay in one place.
 		if (joinLink !== undefined) {
 			const executeBuiltinSlashCommand = await loadBuiltinSlashCommandExecutor();
@@ -966,7 +966,7 @@ export interface ScopedModelSink {
  * whose model first materializes through runtime discovery (e.g.
  * `opencode-go/ox-alpha-free` on a fresh launch with no cache row) is absent from
  * the frozen scoped `/models` list even though it is in `enabledModels`, invokable
- * via `--model`, and listed by `omp models find`. Once the initial refresh settles,
+ * via `--model`, and listed by `zero2ai models find`. Once the initial refresh settles,
  * re-resolve the scope and, when the set changed, push the fuller list into the
  * session so the scoped picker and Ctrl+P cycle include it. A scope that resolved
  * to zero models may become active here when the startup discovery pass returned
@@ -1030,7 +1030,7 @@ export function normalizeContinueSessionArgs(parsed: Args, rawArgs?: readonly st
 	parsed.messages.splice(messageIndex, 1);
 }
 const FORK_NOT_FOUND_HINT =
-	"Run `omp --resume` without an argument to pick from recent sessions, or `omp` to start a new one.";
+	"Run `zero2ai --resume` without an argument to pick from recent sessions, or `zero2ai` to start a new one.";
 
 function validateSessionPersistenceArgs(parsed: Pick<Args, "continue" | "noSession" | "resume">): void {
 	if (!parsed.noSession) return;
@@ -1101,7 +1101,7 @@ export async function createSessionManager(
 		if (!match) {
 			throw new SessionResolutionError(
 				`Session "${sessionArg}" not found.`,
-				"Run `omp --resume` without an argument to pick from recent sessions, or `omp` to start a new one.",
+				"Run `zero2ai --resume` without an argument to pick from recent sessions, or `zero2ai` to start a new one.",
 			);
 		}
 		if (match.scope === "local") {
@@ -1161,7 +1161,7 @@ export async function createSessionManager(
 
 /** Discover SYSTEM.md file if no CLI system prompt was provided */
 function discoverSystemPromptFile(): string | undefined {
-	// Check project-local first (.omp/SYSTEM.md, .pi/SYSTEM.md legacy)
+	// Check project-local first (.zero2ai/SYSTEM.md, .pi/SYSTEM.md legacy)
 	const projectPath = findConfigFile("SYSTEM.md", { user: false });
 	if (projectPath) {
 		return projectPath;
@@ -1610,7 +1610,7 @@ export async function runRootCommand(
 		// sibling hooks/tools/commands/MCP content could be discovered implicitly.
 		if (!parsedArgs.trustedExtensions?.length) {
 			// Register CLI-provided extension package paths (`--extension`, `--hook`) so
-			// the `omp-plugins` discovery provider can surface their `skills/`, `hooks/`,
+			// the `zero2ai-plugins` discovery provider can surface their `skills/`, `hooks/`,
 			// `tools/`, `commands/`, `rules/`, `prompts/`, and `.mcp.json` sub-trees.
 			// Explicit roots remain authorized under `--no-extensions`; only ambient
 			// extension discovery is disabled.
@@ -1679,7 +1679,7 @@ export async function runRootCommand(
 			() => new ModelRegistry(authStorage, undefined, { settings: settingsInstance }),
 		);
 		if (parsedArgs.noPty || parsedArgs.mode === "rpc-ui") {
-			Bun.env.PI_NO_PTY = "1";
+			Bun.env.ZERO2AI_NO_PTY = "1";
 		}
 		if (
 			parsedArgs.noTitle ||
@@ -1687,16 +1687,16 @@ export async function runRootCommand(
 			parsedArgs.mode === "rpc-ui" ||
 			parsedArgs.mode === "acp"
 		) {
-			Bun.env.PI_NO_TITLE = "1";
+			Bun.env.ZERO2AI_NO_TITLE = "1";
 		}
 
 		// Initialize discovery system with settings for provider persistence
 		logger.time("initializeWithSettings", initializeWithSettings, settingsInstance);
 
 		// Apply model role overrides from CLI args or env vars (ephemeral, not persisted)
-		const smolModel = parsedArgs.smol ?? $env.PI_SMOL_MODEL;
-		const slowModel = parsedArgs.slow ?? $env.PI_SLOW_MODEL;
-		const planModel = parsedArgs.plan ?? $env.PI_PLAN_MODEL;
+		const smolModel = parsedArgs.smol ?? $env.ZERO2AI_SMOL_MODEL;
+		const slowModel = parsedArgs.slow ?? $env.ZERO2AI_SLOW_MODEL;
+		const planModel = parsedArgs.plan ?? $env.ZERO2AI_PLAN_MODEL;
 		if (smolModel || slowModel || planModel) {
 			settingsInstance.overrideModelRoles({
 				smol: smolModel,
@@ -1769,7 +1769,7 @@ export async function runRootCommand(
 		normalizeContinueSessionArgs(parsedArgs, rawArgs);
 
 		// Resolve native resume/fork flags or import one foreign transcript into a
-		// fresh persisted OMP session before constructing the AgentSession.
+		// fresh persisted ZERO2AI session before constructing the AgentSession.
 		let sessionManager: SessionManager | undefined;
 		let foreignSource: ForeignSessionSource | undefined;
 		try {
@@ -2070,7 +2070,7 @@ export async function runRootCommand(
 					process.stderr.write(`${chalk.yellow(`${message}\n`)}`);
 				}
 			}
-			// Fail fast on stale/typo flags (e.g. `omp --list-models`) now that we
+			// Fail fast on stale/typo flags (e.g. `zero2ai --list-models`) now that we
 			// know the real extension flag set. Without this check the unrecognized
 			// token gets silently consumed and any following positional leaks as the
 			// initial prompt — kicking off a real LLM session, MCP connection, and
@@ -2099,7 +2099,7 @@ export async function runRootCommand(
 				isInteractive,
 				resuming: Boolean(parsedArgs.continue || parsedArgs.resume || parsedArgs.fork || foreignSource),
 				quiet: settingsInstance.get("startup.quiet"),
-				timing: Boolean($env.PI_TIMING),
+				timing: Boolean($env.ZERO2AI_TIMING),
 				stdinIsTTY: process.stdin.isTTY,
 				stdoutIsTTY: process.stdout.isTTY,
 			});
@@ -2217,7 +2217,7 @@ export async function runRootCommand(
 					notifs.push(modelScopeNotification);
 				}
 
-				if ($env.PI_TIMING) {
+				if ($env.ZERO2AI_TIMING) {
 					logger.printTimings();
 					if (logger.shouldExitAfterTimings()) {
 						process.exit(0);
@@ -2263,7 +2263,7 @@ export async function runRootCommand(
 					printThoughts: initialArgs.printThoughts,
 					planYolo: parsedArgs.planYolo,
 				});
-				if ($env.PI_TIMING) {
+				if ($env.ZERO2AI_TIMING) {
 					logger.printTimings();
 				}
 				await disposeSessionQuietly(session);

@@ -1,5 +1,5 @@
-import { type } from "@oh-my-pi/omptype";
-import * as vcs from "@oh-my-pi/pi-natives/vcs";
+import { type } from "@zero2ai/schema";
+import * as vcs from "@zero2ai/natives/vcs";
 import { parseDiffHunks } from "../../../commit/git/diff";
 import type { DiffHunk, FileHunks } from "../../../commit/types";
 import type { CustomTool } from "../../../extensibility/custom-tools/types";

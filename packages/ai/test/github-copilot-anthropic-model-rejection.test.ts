@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "bun:test";
-import * as AIError from "@oh-my-pi/pi-ai/error";
-import { streamAnthropic } from "@oh-my-pi/pi-ai/providers/anthropic";
-import type { Context, Model } from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { COPILOT_GITHUB_HEADERS } from "@oh-my-pi/pi-catalog/wire/github-copilot";
+import * as AIError from "@zero2ai/ai/error";
+import { streamAnthropic } from "@zero2ai/ai/providers/anthropic";
+import type { Context, Model } from "@zero2ai/ai/types";
+import { buildModel } from "@zero2ai/catalog/build";
+import { COPILOT_GITHUB_HEADERS } from "@zero2ai/catalog/wire/github-copilot";
 
 afterEach(() => {
 	vi.restoreAllMocks();

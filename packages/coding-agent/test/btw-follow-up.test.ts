@@ -2,16 +2,16 @@ import { afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { AssistantMessage, Message, Usage } from "@oh-my-pi/pi-ai";
-import { BtwHistoryPanel } from "@oh-my-pi/pi-coding-agent/modes/components/btw-history-panel";
-import { BtwController } from "@oh-my-pi/pi-coding-agent/modes/controllers/btw-controller";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import type { InteractiveModeContext } from "@oh-my-pi/pi-coding-agent/modes/types";
-import { type BtwHistoryRecord, BtwHistoryStore, getBtwTurns } from "@oh-my-pi/pi-coding-agent/session/btw-history";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TRUNCATE_LENGTHS } from "@oh-my-pi/pi-coding-agent/tools/render-utils";
-import * as clipboard from "@oh-my-pi/pi-coding-agent/utils/clipboard";
-import { Container, type TUI } from "@oh-my-pi/pi-tui";
+import type { AssistantMessage, Message, Usage } from "@zero2ai/ai";
+import { BtwHistoryPanel } from "@zero2ai/coding-agent/modes/components/btw-history-panel";
+import { BtwController } from "@zero2ai/coding-agent/modes/controllers/btw-controller";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import type { InteractiveModeContext } from "@zero2ai/coding-agent/modes/types";
+import { type BtwHistoryRecord, BtwHistoryStore, getBtwTurns } from "@zero2ai/coding-agent/session/btw-history";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { TRUNCATE_LENGTHS } from "@zero2ai/coding-agent/tools/render-utils";
+import * as clipboard from "@zero2ai/coding-agent/utils/clipboard";
+import { Container, type TUI } from "@zero2ai/tui";
 
 interface TurnArgs {
 	promptText: string;
@@ -80,7 +80,7 @@ async function records(manager: SessionManager): Promise<readonly BtwHistoryReco
 }
 
 async function harness() {
-	const directory = await fs.mkdtemp(path.join(os.tmpdir(), "omp-btw-follow-up-"));
+	const directory = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-btw-follow-up-"));
 	const manager = SessionManager.create(directory, directory);
 	const managers = [manager];
 	const requests: PendingTurn[] = [];

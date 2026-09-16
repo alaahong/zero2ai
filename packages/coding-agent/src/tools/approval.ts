@@ -6,9 +6,10 @@
  * - compare a tool capability tier against the active approval mode,
  * - format the generic approval prompt body.
  */
-import type { AgentTool, ToolApprovalDecision, ToolTier } from "@oh-my-pi/pi-agent-core";
+import type { AgentTool, ToolApprovalDecision, ToolTier } from "@zero2ai/agent-core";
+import { getManagedPolicy, lookupManagedApproval } from "../config/managed-policy";
 
-export type { ToolApproval, ToolApprovalDecision, ToolTier } from "@oh-my-pi/pi-agent-core";
+export type { ToolApproval, ToolApprovalDecision, ToolTier } from "@zero2ai/agent-core";
 
 export type ApprovalPolicy = "allow" | "deny" | "prompt";
 export type ApprovalMode = "always-ask" | "write" | "yolo";
@@ -89,7 +90,7 @@ export interface ResolvedApproval {
 	tier: ToolTier;
 	reason?: string;
 	override: boolean;
-	source?: "tool" | "user" | "mode";
+	source?: "tool" | "user" | "mode" | "managed";
 	/** User-policy key that produced `source: "user"` (defaults to the tool name). */
 	policyKey?: string;
 }
@@ -194,6 +195,15 @@ export function resolveApproval(
 ): ResolvedApproval {
 	const decision = getToolDecision(tool, args);
 	const policyKey = decision.policyKey ?? tool.name;
+	const managed = getManagedPolicy();
+	// Administrator policy cannot be lifted by `--yolo`, ACP permission gates, or
+	// subagent defaults: both the mode ceiling and the per-tool directive are
+	// applied here, on the single path every caller funnels through.
+	const effectiveMode: ApprovalMode =
+		managed?.approvalMode && TIER_RANK[APPROVAL_MODE_MAX_TIER[managed.approvalMode]] < TIER_RANK[APPROVAL_MODE_MAX_TIER[mode]]
+			? managed.approvalMode
+			: mode;
+	const managedPolicy = lookupManagedApproval(managed, policyKey, tool.name);
 	const userPolicy = Object.hasOwn(userConfig, policyKey) ? normalizePolicy(userConfig[policyKey]) : undefined;
 	const fallbackPolicy =
 		policyKey !== tool.name && userPolicy === undefined && Object.hasOwn(userConfig, tool.name)
@@ -238,7 +248,26 @@ export function resolveApproval(
 		};
 	}
 
-	if (mode === "yolo") {
+	if (managedPolicy === "deny") {
+		return {
+			policy: "deny",
+			tier: decision.tier,
+			override: decision.override,
+			source: "managed",
+			...(decision.policyKey ? { policyKey: decision.policyKey } : {}),
+		};
+	}
+	if (managedPolicy === "prompt") {
+		return {
+			policy: "prompt",
+			tier: decision.tier,
+			override: false,
+			source: "managed",
+			...(decision.policyKey ? { policyKey: decision.policyKey } : {}),
+		};
+	}
+
+	if (effectiveMode === "yolo") {
 		if (decision.policy) {
 			return {
 				policy: decision.policy,
@@ -290,7 +319,7 @@ export function resolveApproval(
 		};
 	}
 
-	if (modeApprovesTier(mode, decision.tier)) {
+	if (modeApprovesTier(effectiveMode, decision.tier)) {
 		return { policy: "allow", tier: decision.tier, override: false, source: "mode" };
 	}
 
@@ -310,6 +339,12 @@ export function denyError(resolved: ResolvedApproval, toolName: string): Error {
 	const { source, reason, policyKey } = resolved;
 	if (source === "tool") {
 		return new Error(`Tool "${toolName}" is blocked by tool policy.${reason ? `\nReason: ${reason}` : ""}`);
+	}
+	if (source === "managed") {
+		return new Error(
+			`Tool "${policyKey ?? toolName}" is blocked by administrator policy (managed-policy).\n` +
+				`This restriction is enforced centrally and cannot be overridden by user or runtime settings.`,
+		);
 	}
 	return new Error(
 		`Tool "${policyKey ?? toolName}" is blocked by user policy.\n` +

@@ -1,13 +1,13 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { KeybindingsManager } from "@oh-my-pi/pi-coding-agent/config/keybindings";
-import type { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { ModelHubComponent } from "@oh-my-pi/pi-coding-agent/modes/components/model-hub";
-import { SessionSelectorComponent } from "@oh-my-pi/pi-coding-agent/modes/components/session-selector";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import type { SessionInfo } from "@oh-my-pi/pi-coding-agent/session/session-listing";
-import { setKeybindings, type TUI } from "@oh-my-pi/pi-tui";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { KeybindingsManager } from "@zero2ai/coding-agent/config/keybindings";
+import type { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { ModelHubComponent } from "@zero2ai/coding-agent/modes/components/model-hub";
+import { SessionSelectorComponent } from "@zero2ai/coding-agent/modes/components/session-selector";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import type { SessionInfo } from "@zero2ai/coding-agent/session/session-listing";
+import { setKeybindings, type TUI } from "@zero2ai/tui";
 
 beforeAll(() => {
 	initTheme();

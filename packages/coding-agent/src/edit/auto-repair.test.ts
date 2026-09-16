@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { summarizeCode } from "@oh-my-pi/pi-natives";
+import { summarizeCode } from "@zero2ai/natives";
 import { computeRepairRegion, repairParseRegression } from "./auto-repair";
 
 const PATH = "/repo/src/sample.ts";

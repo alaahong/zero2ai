@@ -1,17 +1,17 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "bun:test";
-import { Agent } from "@oh-my-pi/pi-agent-core";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { ReadToolGroupComponent } from "@oh-my-pi/pi-coding-agent/modes/components/read-tool-group";
-import { ToolExecutionComponent } from "@oh-my-pi/pi-coding-agent/modes/components/tool-execution";
-import { InteractiveMode } from "@oh-my-pi/pi-coding-agent/modes/interactive-mode";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { buildSessionContext } from "@oh-my-pi/pi-coding-agent/session/session-context";
-import type { SessionEntry } from "@oh-my-pi/pi-coding-agent/session/session-entries";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { Agent } from "@zero2ai/agent-core";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
+import { ReadToolGroupComponent } from "@zero2ai/coding-agent/modes/components/read-tool-group";
+import { ToolExecutionComponent } from "@zero2ai/coding-agent/modes/components/tool-execution";
+import { InteractiveMode } from "@zero2ai/coding-agent/modes/interactive-mode";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { buildSessionContext } from "@zero2ai/coding-agent/session/session-context";
+import type { SessionEntry } from "@zero2ai/coding-agent/session/session-entries";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { TempDir } from "@zero2ai/utils";
 
 /**
  * Regression for issue #6516 — a tool call renders twice in the transcript.
@@ -59,7 +59,7 @@ describe("issue #6516 — tool output appears twice", () => {
 	beforeAll(async () => {
 		initTheme();
 		resetSettingsForTest();
-		settingsDir = TempDir.createSync("@pi-issue-6516-settings-");
+		settingsDir = TempDir.createSync("@zero2ai-issue-6516-settings-");
 		await Settings.init({ inMemory: true, cwd: settingsDir.path() });
 		authStorage = await AuthStorage.create(":memory:");
 		modelRegistry = new ModelRegistry(authStorage);
@@ -74,7 +74,7 @@ describe("issue #6516 — tool output appears twice", () => {
 			vi.spyOn(process.stdin, "setRawMode").mockReturnValue(process.stdin);
 		}
 
-		tempDir = TempDir.createSync("@pi-issue-6516-");
+		tempDir = TempDir.createSync("@zero2ai-issue-6516-");
 		const model = modelRegistry.find("anthropic", "claude-sonnet-4-5");
 		if (!model) throw new Error("Expected claude-sonnet-4-5 test model");
 

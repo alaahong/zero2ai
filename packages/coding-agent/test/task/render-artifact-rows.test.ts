@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { getThemeByName, setThemeInstance } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import type { SingleResult, TaskToolDetails } from "@oh-my-pi/pi-coding-agent/task";
-import { taskToolRenderer } from "@oh-my-pi/pi-coding-agent/task/renderer";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
+import { getThemeByName, setThemeInstance } from "@zero2ai/coding-agent/modes/theme/theme";
+import type { SingleResult, TaskToolDetails } from "@zero2ai/coding-agent/task";
+import { taskToolRenderer } from "@zero2ai/coding-agent/task/renderer";
 
 // Regression for PR #11343 review: sanitizing the isolation artifact rows
 // (shortenPath + width bound) dropped the `Patch:` / `Branch:` /
@@ -59,8 +59,8 @@ describe("task renderer: isolation artifact row labels", () => {
 	it("keeps the Patch and Nested patch labels on sanitized artifact rows", async () => {
 		const text = await renderResultText(
 			makeResult({
-				patchPath: "/home/user/.omp/artifacts/Worker.patch",
-				nestedPatchPaths: ["/home/user/.omp/artifacts/Worker.nested-0-inner.patch"],
+				patchPath: "/home/user/.zero2ai/artifacts/Worker.patch",
+				nestedPatchPaths: ["/home/user/.zero2ai/artifacts/Worker.nested-0-inner.patch"],
 			}),
 		);
 		expect(text).toContain("Patch:");
@@ -68,16 +68,16 @@ describe("task renderer: isolation artifact row labels", () => {
 	});
 
 	it("keeps the Branch label on sanitized artifact rows", async () => {
-		const text = await renderResultText(makeResult({ branchName: "omp/task/Worker" }));
+		const text = await renderResultText(makeResult({ branchName: "zero2ai/task/Worker" }));
 		expect(text).toContain("Branch:");
 	});
 
 	it("hides the empty root Patch row for nested-only work", async () => {
 		const text = await renderResultText(
 			makeResult({
-				patchPath: "/home/user/.omp/artifacts/Worker.patch",
+				patchPath: "/home/user/.zero2ai/artifacts/Worker.patch",
 				hasRootChanges: false,
-				nestedPatchPaths: ["/home/user/.omp/artifacts/Worker.nested-0-inner.patch"],
+				nestedPatchPaths: ["/home/user/.zero2ai/artifacts/Worker.nested-0-inner.patch"],
 			}),
 		);
 		expect(text).not.toContain("Patch:");

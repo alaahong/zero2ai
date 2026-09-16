@@ -2,14 +2,14 @@ import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { AuthStorage } from "@oh-my-pi/pi-ai";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { createAgentSession } from "@oh-my-pi/pi-coding-agent/sdk";
-import type { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { removeSyncWithRetries, Snowflake } from "@oh-my-pi/pi-utils";
+import { AuthStorage } from "@zero2ai/ai";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { createAgentSession } from "@zero2ai/coding-agent/sdk";
+import type { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { removeSyncWithRetries, Snowflake } from "@zero2ai/utils";
 
 // Guards the auto-learn tool ACTIVATION wiring in createAgentSession: createTools
 // force-includes manage_skill into the built registry for an enabled top-level
@@ -37,7 +37,7 @@ describe("createAgentSession auto-learn tool activation", () => {
 	}
 
 	beforeAll(async () => {
-		registryDir = path.join(os.tmpdir(), `pi-autolearn-active-${Snowflake.next()}`);
+		registryDir = path.join(os.tmpdir(), `zero2ai-autolearn-active-${Snowflake.next()}`);
 		fs.mkdirSync(registryDir, { recursive: true });
 		authStorage = await AuthStorage.create(path.join(registryDir, "auth.db"));
 		modelRegistry = new ModelRegistry(authStorage);

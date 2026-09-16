@@ -2,10 +2,10 @@ import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from "bu
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { SourceMeta } from "@oh-my-pi/pi-coding-agent/capability/types";
-import type { MCPServerConfig } from "@oh-my-pi/pi-coding-agent/mcp/types";
-import { MCPCommandController } from "@oh-my-pi/pi-coding-agent/modes/controllers/mcp-command-controller";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
+import type { SourceMeta } from "@zero2ai/coding-agent/capability/types";
+import type { MCPServerConfig } from "@zero2ai/coding-agent/mcp/types";
+import { MCPCommandController } from "@zero2ai/coding-agent/modes/controllers/mcp-command-controller";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
 import {
 	getConfigRootDir,
 	getMCPConfigPath,
@@ -13,23 +13,23 @@ import {
 	removeWithRetries,
 	setAgentDir,
 	setProjectDir,
-} from "@oh-my-pi/pi-utils";
+} from "@zero2ai/utils";
 import { createInteractiveModeContext, createMcpManagerStub } from "./helpers/interactive-mode-context";
 
 const originalProjectDir = getProjectDir();
-const originalAgentDir = process.env.PI_CODING_AGENT_DIR;
+const originalAgentDir = process.env.ZERO2AI_CODING_AGENT_DIR;
 const fallbackAgentDir = path.join(getConfigRootDir(), "agent");
 
 function restoreAgentDir(): void {
 	if (originalAgentDir) {
 		setAgentDir(originalAgentDir);
-		process.env.PI_CODING_AGENT_DIR = originalAgentDir;
-		Bun.env.PI_CODING_AGENT_DIR = originalAgentDir;
+		process.env.ZERO2AI_CODING_AGENT_DIR = originalAgentDir;
+		Bun.env.ZERO2AI_CODING_AGENT_DIR = originalAgentDir;
 		return;
 	}
 	setAgentDir(fallbackAgentDir);
-	delete process.env.PI_CODING_AGENT_DIR;
-	delete Bun.env.PI_CODING_AGENT_DIR;
+	delete process.env.ZERO2AI_CODING_AGENT_DIR;
+	delete Bun.env.ZERO2AI_CODING_AGENT_DIR;
 }
 
 function createController() {
@@ -74,8 +74,8 @@ describe("/mcp enable and disable", () => {
 	});
 
 	beforeEach(async () => {
-		projectDir = await fs.mkdtemp(path.join(os.tmpdir(), "omp-mcp-toggle-project-"));
-		agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "omp-mcp-toggle-agent-"));
+		projectDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-mcp-toggle-project-"));
+		agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-mcp-toggle-agent-"));
 		setProjectDir(projectDir);
 		setAgentDir(agentDir);
 	});

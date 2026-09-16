@@ -1,5 +1,5 @@
-import type { ThinkingLevel } from "@oh-my-pi/pi-agent-core";
-import type { Model } from "@oh-my-pi/pi-ai";
+import type { ThinkingLevel } from "@zero2ai/agent-core";
+import type { Model } from "@zero2ai/ai";
 import type { ModelRegistry } from "../config/model-registry";
 import {
 	formatModelSelectorValue,
@@ -162,7 +162,7 @@ export function getRetryFallbackChains(settings: Settings): RetryFallbackChains 
  *
  * `options.isDiscoveryPending` suppresses "unknown model" warnings for
  * selectors whose config-declared discovery provider has not yet populated the
- * registry (a cold discovery cache after `omp update` bumps the cache
+ * registry (a cold discovery cache after `zero2ai update` bumps the cache
  * namespace, #10048). Such selectors are re-checked once background discovery
  * settles. Logging is the caller's responsibility so a post-discovery re-run
  * does not double-log persistent warnings.

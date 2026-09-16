@@ -8,7 +8,7 @@
  * Reactions are derived from the persisted assistant text, never stored, so a
  * rebuilt transcript reproduces them exactly.
  */
-import type { Component } from "@oh-my-pi/pi-tui";
+import type { Component } from "@zero2ai/tui";
 
 /** A transcript block that can display an agent reaction badge. */
 export interface ReactionTarget {

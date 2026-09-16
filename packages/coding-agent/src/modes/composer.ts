@@ -1,7 +1,7 @@
-import type { EditorTopBorder } from "@oh-my-pi/pi-tui/components/composer/types";
-import { Spacer } from "@oh-my-pi/pi-tui/components/spacer";
-import { isInsideTerminalMultiplexer } from "@oh-my-pi/pi-tui/terminal-multiplexer";
-import { ProcessTerminal, type Terminal } from "@oh-my-pi/pi-tui/terminal";
+import type { EditorTopBorder } from "@zero2ai/tui/components/composer/types";
+import { Spacer } from "@zero2ai/tui/components/spacer";
+import { isInsideTerminalMultiplexer } from "@zero2ai/tui/terminal-multiplexer";
+import { ProcessTerminal, type Terminal } from "@zero2ai/tui/terminal";
 import {
 	type Component,
 	Container,
@@ -11,9 +11,9 @@ import {
 	TUI,
 	type TUIOptions,
 	type ViewportSize,
-} from "@oh-my-pi/pi-tui/tui";
-import { sliceWithWidth, truncateToWidth, visibleWidth } from "@oh-my-pi/pi-tui/utils";
-import { postmortem } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/tui/tui";
+import { sliceWithWidth, truncateToWidth, visibleWidth } from "@zero2ai/tui/utils";
+import { postmortem } from "@zero2ai/utils";
 import { CustomEditor } from "./components/custom-editor";
 import { type AnimationFrame, TranscriptContainer } from "./components/transcript-container";
 import { type LspServerInfo, type RecentSession, WelcomeComponent } from "./components/welcome";
@@ -82,7 +82,7 @@ export interface ComposerStatusSnapshot {
 /** Optional dependencies and initial state for a standalone composer. */
 export interface ComposerOptions {
 	readonly terminal?: Terminal;
-	/** Extra TUI construction options (render scheduler injection for tests and `omp render`). */
+	/** Extra TUI construction options (render scheduler injection for tests and `zero2ai render`). */
 	readonly tuiOptions?: TUIOptions;
 	readonly preferences?: Partial<ComposerPreferences>;
 	readonly welcome?: ComposerWelcomeUpdate;
@@ -166,7 +166,7 @@ export function routeViewportClick(spans: readonly ViewportClickSpan[], index: n
  * any registry lookup: its `@…:…` charset cannot collide with generated agent
  * ids (word names, numeric and `-N` suffixes, dotted nesting).
  */
-export const PINNED_HUD_TOGGLE_ID = "@omp:toggle-pinned-hud";
+export const PINNED_HUD_TOGGLE_ID = "@zero2ai:toggle-pinned-hud";
 
 /**
  * Nested background opens inside a hovered row. The band wraps the line, so a

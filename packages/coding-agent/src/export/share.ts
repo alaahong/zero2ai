@@ -19,10 +19,10 @@
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { AgentMessage, AgentState } from "@oh-my-pi/pi-agent-core";
-import type { AssistantMessage, ImageContent, TextContent } from "@oh-my-pi/pi-ai";
-import { $which, logger } from "@oh-my-pi/pi-utils";
-import { DEFAULT_SHARE_URL } from "@oh-my-pi/pi-wire";
+import type { AgentMessage, AgentState } from "@zero2ai/agent-core";
+import type { AssistantMessage, ImageContent, TextContent } from "@zero2ai/ai";
+import { $which, logger } from "@zero2ai/utils";
+import { DEFAULT_SHARE_URL } from "@zero2ai/wire";
 import { $ } from "bun";
 import { obfuscateToolArguments } from "../secrets/message-transform";
 import type { SecretObfuscator } from "../secrets/obfuscator";
@@ -41,7 +41,7 @@ const GIST_MAX_SEALED_BYTES = 5_000_000;
 const IV_LENGTH = 12;
 const SHARE_KEY_BYTES = 32;
 /** The viewer picks the gist file by this suffix. */
-const GIST_FILENAME = "session.ompshare.txt";
+const GIST_FILENAME = "session.zero2aishare.txt";
 /** Gist ids are hex; the relay never issues pure-hex ids, so the viewer can route on shape. */
 const GIST_ID_RE = /^[0-9a-f]{20,64}$/;
 
@@ -618,7 +618,7 @@ async function tryCreateGist(sealed: Uint8Array): Promise<{ id: string; url: str
 		return null;
 	}
 
-	const dir = await fs.mkdtemp(path.join(os.tmpdir(), "omp-share-"));
+	const dir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-share-"));
 	try {
 		const file = path.join(dir, GIST_FILENAME);
 		await Bun.write(file, Buffer.from(sealed).toString("base64"));

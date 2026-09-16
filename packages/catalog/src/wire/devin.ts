@@ -1,5 +1,5 @@
 /**
- * Devin (Codeium Cascade) wire constants shared by catalog discovery, the pi-ai
+ * Devin (Codeium Cascade) wire constants shared by catalog discovery, the zero2ai-ai
  * provider, and account usage. This module deliberately stays free of the
  * generated protobuf runtime so the synchronous model seed can import it
  * without pulling devin-gen into the boot path.

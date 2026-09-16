@@ -1,24 +1,24 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
-import { ASYNC_JOB_MANAGER_SHUTDOWN_REASON, AsyncJobManager } from "@oh-my-pi/pi-coding-agent/async";
-import type { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { LoadExtensionsResult } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/types";
-import { IrcBus } from "@oh-my-pi/pi-coding-agent/irc/bus";
-import { RpcSubagentRegistry } from "@oh-my-pi/pi-coding-agent/modes/rpc/rpc-subagents";
-import type { RpcSubagentFrame } from "@oh-my-pi/pi-coding-agent/modes/rpc/rpc-types";
-import { AgentLifecycleManager } from "@oh-my-pi/pi-coding-agent/registry/agent-lifecycle";
-import { AgentRegistry } from "@oh-my-pi/pi-coding-agent/registry/agent-registry";
-import { registerPersistedSubagents } from "@oh-my-pi/pi-coding-agent/registry/persisted-agents";
-import type { CreateAgentSessionResult } from "@oh-my-pi/pi-coding-agent/sdk";
-import * as sdkModule from "@oh-my-pi/pi-coding-agent/sdk";
-import type { AgentSession, AgentSessionEvent, PromptOptions } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import type { CustomMessage } from "@oh-my-pi/pi-coding-agent/session/messages";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { buildBudgetNotice, resolveSoftRequestBudget, runSubprocess } from "@oh-my-pi/pi-coding-agent/task/executor";
-import type { AgentDefinition } from "@oh-my-pi/pi-coding-agent/task/types";
-import { TASK_SUBAGENT_LIFECYCLE_CHANNEL } from "@oh-my-pi/pi-coding-agent/task/types";
-import { EventBus } from "@oh-my-pi/pi-coding-agent/utils/event-bus";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { ASYNC_JOB_MANAGER_SHUTDOWN_REASON, AsyncJobManager } from "@zero2ai/coding-agent/async";
+import type { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import type { LoadExtensionsResult } from "@zero2ai/coding-agent/extensibility/extensions/types";
+import { IrcBus } from "@zero2ai/coding-agent/irc/bus";
+import { RpcSubagentRegistry } from "@zero2ai/coding-agent/modes/rpc/rpc-subagents";
+import type { RpcSubagentFrame } from "@zero2ai/coding-agent/modes/rpc/rpc-types";
+import { AgentLifecycleManager } from "@zero2ai/coding-agent/registry/agent-lifecycle";
+import { AgentRegistry } from "@zero2ai/coding-agent/registry/agent-registry";
+import { registerPersistedSubagents } from "@zero2ai/coding-agent/registry/persisted-agents";
+import type { CreateAgentSessionResult } from "@zero2ai/coding-agent/sdk";
+import * as sdkModule from "@zero2ai/coding-agent/sdk";
+import type { AgentSession, AgentSessionEvent, PromptOptions } from "@zero2ai/coding-agent/session/agent-session";
+import type { CustomMessage } from "@zero2ai/coding-agent/session/messages";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { buildBudgetNotice, resolveSoftRequestBudget, runSubprocess } from "@zero2ai/coding-agent/task/executor";
+import type { AgentDefinition } from "@zero2ai/coding-agent/task/types";
+import { TASK_SUBAGENT_LIFECYCLE_CHANNEL } from "@zero2ai/coding-agent/task/types";
+import { EventBus } from "@zero2ai/coding-agent/utils/event-bus";
+import { TempDir } from "@zero2ai/utils";
 import { createSessionDefaults } from "../helpers/session-defaults";
 
 /**
@@ -186,7 +186,7 @@ describe("runSubprocess soft request budget", () => {
 		AgentRegistry.resetGlobalForTests();
 		AgentLifecycleManager.resetGlobalForTests();
 		AsyncJobManager.resetForTests();
-		tempDir = TempDir.createSync("@pi-soft-budget-");
+		tempDir = TempDir.createSync("@zero2ai-soft-budget-");
 	});
 	afterEach(() => {
 		vi.restoreAllMocks();

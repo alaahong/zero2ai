@@ -1,15 +1,15 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "bun:test";
-import { type } from "@oh-my-pi/omptype";
-import { Agent, type AgentMessage, type AgentTool, type AgentTurnEndContext } from "@oh-my-pi/pi-agent-core";
-import type { AssistantMessage, Context, ToolResultMessage } from "@oh-my-pi/pi-ai";
-import { createMockModel } from "@oh-my-pi/pi-ai/providers/mock";
-import { AssistantMessageEventStream } from "@oh-my-pi/pi-ai/utils/event-stream";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import type { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { type } from "@zero2ai/schema";
+import { Agent, type AgentMessage, type AgentTool, type AgentTurnEndContext } from "@zero2ai/agent-core";
+import type { AssistantMessage, Context, ToolResultMessage } from "@zero2ai/ai";
+import { createMockModel } from "@zero2ai/ai/providers/mock";
+import { AssistantMessageEventStream } from "@zero2ai/ai/utils/event-stream";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import type { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { TempDir } from "@zero2ai/utils";
 import { AdvisorLoopGuard } from "../src/advisor/loop-guard";
 import { createInMemoryAuthStorage } from "./helpers/agent-session-setup";
 
@@ -40,7 +40,7 @@ describe("advisor tool-call loop guard", () => {
 	let session: AgentSession | undefined;
 
 	beforeAll(() => {
-		tempDir = TempDir.createSync("@pi-advisor-tool-call-loop-guard-");
+		tempDir = TempDir.createSync("@zero2ai-advisor-tool-call-loop-guard-");
 		authStorage = createInMemoryAuthStorage();
 		authStorage.setRuntimeApiKey("anthropic", "test-key");
 	});

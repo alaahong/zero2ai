@@ -1,6 +1,6 @@
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { apiRouteFor } from "@oh-my-pi/pi-catalog/compat/behavior";
-import { getGitLabDuoModels, resolveGitLabDuoModelIdentity } from "@oh-my-pi/pi-catalog/provider-models";
+import { buildModel } from "@zero2ai/catalog/build";
+import { apiRouteFor } from "@zero2ai/catalog/compat/behavior";
+import { getGitLabDuoModels, resolveGitLabDuoModelIdentity } from "@zero2ai/catalog/provider-models";
 import * as AIError from "../error";
 import { ANTHROPIC_THINKING, mapAnthropicToolChoice } from "../stream";
 import type { Api, Context, FetchImpl, Model, ModelSpec, SimpleStreamOptions } from "../types";

@@ -2,24 +2,24 @@ import { describe, expect, test } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { sendsImageInputOnWire } from "@oh-my-pi/pi-ai/providers/vision-guard";
-import { resolveModelPolicy } from "@oh-my-pi/pi-catalog/compat/resolve";
-import { Effort } from "@oh-my-pi/pi-catalog/effort";
-import { readModelCache, writeModelCache } from "@oh-my-pi/pi-catalog/model-cache";
-import { resolveProviderModels } from "@oh-my-pi/pi-catalog/model-manager";
-import { getSupportedEfforts } from "@oh-my-pi/pi-catalog/model-thinking";
-import { getBundledModels } from "@oh-my-pi/pi-catalog/models";
-import { PROVIDER_DESCRIPTORS } from "@oh-my-pi/pi-catalog/provider-models/descriptors";
+import { buildModel } from "@zero2ai/catalog/build";
+import { sendsImageInputOnWire } from "@zero2ai/ai/providers/vision-guard";
+import { resolveModelPolicy } from "@zero2ai/catalog/compat/resolve";
+import { Effort } from "@zero2ai/catalog/effort";
+import { readModelCache, writeModelCache } from "@zero2ai/catalog/model-cache";
+import { resolveProviderModels } from "@zero2ai/catalog/model-manager";
+import { getSupportedEfforts } from "@zero2ai/catalog/model-thinking";
+import { getBundledModels } from "@zero2ai/catalog/models";
+import { PROVIDER_DESCRIPTORS } from "@zero2ai/catalog/provider-models/descriptors";
 import {
 	fetchWellKnownModels,
 	MODELS_DEV_PROVIDER_DESCRIPTORS,
 	modelsDevCatalogFallback,
 	opencodeGoModelManagerOptions,
 	opencodeZenModelManagerOptions,
-} from "@oh-my-pi/pi-catalog/provider-models/openai-compat";
-import type { ModelSpec } from "@oh-my-pi/pi-catalog/types";
-import { USER_AGENT, type FetchImpl } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/catalog/provider-models/openai-compat";
+import type { ModelSpec } from "@zero2ai/catalog/types";
+import { USER_AGENT, type FetchImpl } from "@zero2ai/utils";
 import { mergePreviousSnapshotModels } from "../scripts/generate-models";
 
 const LIVE_FREE_MODEL_IDS = [
@@ -41,7 +41,7 @@ function modelListResponse(ids: readonly string[]): Response {
 
 describe("Shared models.dev catalog fallback", () => {
 	test("adds newly published models for a bundled provider and reuses the cached snapshot", async () => {
-		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-catalog-models-dev-fallback-"));
+		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-catalog-models-dev-fallback-"));
 		try {
 			const bundledModels = getBundledModels("zai");
 			const bundledModel = bundledModels[0];
@@ -143,7 +143,7 @@ describe("Shared models.dev catalog fallback", () => {
 	});
 
 	test("filters generation-rejected rows before runtime resolution and caching", async () => {
-		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-catalog-runtime-policy-"));
+		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-catalog-runtime-policy-"));
 		const rawModel = (id: string, npm: string) => ({
 			id,
 			name: id,
@@ -202,7 +202,7 @@ describe("Shared models.dev catalog fallback", () => {
 	});
 
 	test("keeps upgraded bundled metadata authoritative over an older same-id cache row", async () => {
-		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-catalog-additive-cache-upgrade-"));
+		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-catalog-additive-cache-upgrade-"));
 		try {
 			const bundledModel = getBundledModels("zai")[0];
 			if (!bundledModel) throw new Error("ZAI bundled catalog is empty");
@@ -267,7 +267,7 @@ describe("Shared models.dev catalog fallback", () => {
 	});
 
 	test("sanitizes a fresh matching cache when additive mode is enabled", async () => {
-		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-catalog-additive-fresh-cache-"));
+		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-catalog-additive-fresh-cache-"));
 		try {
 			const bundledModel = getBundledModels("zai")[0];
 			if (!bundledModel) throw new Error("ZAI bundled catalog is empty");
@@ -324,7 +324,7 @@ describe("Shared models.dev catalog fallback", () => {
 	});
 
 	test("retains one source's cached slice when the other source refreshes", async () => {
-		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-catalog-partial-source-refresh-"));
+		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-catalog-partial-source-refresh-"));
 		try {
 			const existingModel = getBundledModels("zai")[0];
 			if (!existingModel) throw new Error("ZAI bundled catalog is empty");
@@ -402,7 +402,7 @@ describe("Shared models.dev catalog fallback", () => {
 	});
 
 	test("reports a stale cache when conditional catalog revalidation fails", async () => {
-		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-catalog-revalidation-fallback-"));
+		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-catalog-revalidation-fallback-"));
 		try {
 			const bundledModels = getBundledModels("zai");
 			let catalogAvailable = true;
@@ -502,7 +502,7 @@ describe("OpenCode provider discovery", () => {
 	});
 
 	test("invalidates cached GLM-5.3 Flash effort metadata on upgrade (issue #9960)", async () => {
-		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-catalog-opencode-glm53-flash-cache-"));
+		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-catalog-opencode-glm53-flash-cache-"));
 		const cacheDbPath = path.join(tempDir, "models.db");
 		const discoveredFlash: ModelSpec<"openai-completions"> = {
 			id: "glm-5.3-flash",
@@ -586,7 +586,7 @@ describe("OpenCode provider discovery", () => {
 	});
 
 	test("drops cached Gemini 3.7 Flash effort metadata when refresh fails (#10543)", async () => {
-		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-catalog-opencode-gemini37-cache-"));
+		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-catalog-opencode-gemini37-cache-"));
 		const cacheDbPath = path.join(tempDir, "models.db");
 		try {
 			const options = opencodeZenModelManagerOptions({ apiKey: "zen-account-key" });
@@ -718,7 +718,7 @@ describe("OpenCode provider discovery", () => {
 
 	test("sends attribution headers on live gateway discovery", async () => {
 		// The gateway requires x-opencode-session from 09/06 and uses it for
-		// optimization; without omp's UA the request arrives as "Bun fetch".
+		// optimization; without zero2ai's UA the request arrives as "Bun fetch".
 		for (const makeOptions of [opencodeGoModelManagerOptions, opencodeZenModelManagerOptions]) {
 			const seen: Array<Record<string, string>> = [];
 			const options = makeOptions({
@@ -787,7 +787,7 @@ describe("OpenCode provider discovery", () => {
 	});
 
 	test("enriches gateway-first ids from stencil without changing their route", async () => {
-		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-catalog-opencode-zen-gateway-first-"));
+		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-catalog-opencode-zen-gateway-first-"));
 		try {
 			const options = opencodeZenModelManagerOptions({
 				apiKey: "zen-account-key",
@@ -847,7 +847,7 @@ describe("OpenCode provider discovery", () => {
 	});
 
 	test("recovers muse-spark thinking levels from live OpenCode Go discovery", async () => {
-		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-catalog-opencode-go-muse-"));
+		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-catalog-opencode-go-muse-"));
 		try {
 			const options = opencodeGoModelManagerOptions({
 				apiKey: "go-account-key",
@@ -871,7 +871,7 @@ describe("OpenCode provider discovery", () => {
 	});
 
 	test("replaces stale bundled Zen models with each credential's live endpoint list", async () => {
-		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-catalog-opencode-zen-"));
+		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-catalog-opencode-zen-"));
 		try {
 			let freeFetches = 0;
 			const freeOptions = opencodeZenModelManagerOptions({

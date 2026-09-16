@@ -2,16 +2,16 @@ import { beforeAll, describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { AgentTool } from "@oh-my-pi/pi-agent-core";
-import { editDiffString } from "@oh-my-pi/pi-natives";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { editToolRenderer, renderStreamingFallback } from "@oh-my-pi/pi-coding-agent/edit/renderer";
-import { renderDiff } from "@oh-my-pi/pi-coding-agent/modes/components/diff";
-import { ToolExecutionComponent } from "@oh-my-pi/pi-coding-agent/modes/components/tool-execution";
-import * as themeModule from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { type TUI, visibleWidth } from "@oh-my-pi/pi-tui";
-import { removeWithRetries } from "@oh-my-pi/pi-utils";
-import chalk from "@oh-my-pi/pi-utils/chalk";
+import type { AgentTool } from "@zero2ai/agent-core";
+import { editDiffString } from "@zero2ai/natives";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
+import { editToolRenderer, renderStreamingFallback } from "@zero2ai/coding-agent/edit/renderer";
+import { renderDiff } from "@zero2ai/coding-agent/modes/components/diff";
+import { ToolExecutionComponent } from "@zero2ai/coding-agent/modes/components/tool-execution";
+import * as themeModule from "@zero2ai/coding-agent/modes/theme/theme";
+import { type TUI, visibleWidth } from "@zero2ai/tui";
+import { removeWithRetries } from "@zero2ai/utils";
+import chalk from "@zero2ai/utils/chalk";
 
 beforeAll(async () => {
 	resetSettingsForTest();
@@ -206,7 +206,7 @@ describe("editToolRenderer", () => {
 			{
 				input: [
 					"*** Begin Patch",
-					"[crates/pi-natives/src/shell.rs]",
+					"[crates/zero2ai-natives/src/shell.rs]",
 					"PUT >$:",
 					"+pub fn streaming_preview() {",
 				].join("\n"),
@@ -217,7 +217,7 @@ describe("editToolRenderer", () => {
 		);
 
 		const rendered = Bun.stripANSI(component.render(160).join("\n"));
-		expect(rendered).toContain("crates/pi-natives/src/shell.rs");
+		expect(rendered).toContain("crates/zero2ai-natives/src/shell.rs");
 		expect(rendered).not.toContain("PUT >$:");
 		expect(rendered).not.toContain("+pub fn streaming_preview() {");
 		expect(rendered).not.toContain("*** Begin Patch");

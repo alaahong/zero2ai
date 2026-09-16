@@ -14,14 +14,14 @@
  * asserting `#onBranchChange` never fires post-dispose.
  */
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "bun:test";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { StatusLineSettings } from "@oh-my-pi/pi-coding-agent/modes/components/status-line";
-import { StatusLineComponent } from "@oh-my-pi/pi-coding-agent/modes/components/status-line";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { github } from "@oh-my-pi/pi-coding-agent/utils/github";
-import type { VcsGitRepo, VcsGitRepoInfo, VcsHeadState, VcsRepo } from "@oh-my-pi/pi-natives";
-import * as vcs from "@oh-my-pi/pi-natives/vcs";
-import { getProjectDir, setProjectDir } from "@oh-my-pi/pi-utils";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
+import type { StatusLineSettings } from "@zero2ai/coding-agent/modes/components/status-line";
+import { StatusLineComponent } from "@zero2ai/coding-agent/modes/components/status-line";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import { github } from "@zero2ai/coding-agent/utils/github";
+import type { VcsGitRepo, VcsGitRepoInfo, VcsHeadState, VcsRepo } from "@zero2ai/natives";
+import * as vcs from "@zero2ai/natives/vcs";
+import { getProjectDir, setProjectDir } from "@zero2ai/utils";
 import { StatusLineTestComponents } from "./helpers/status-line";
 
 const originalProjectDir = getProjectDir();

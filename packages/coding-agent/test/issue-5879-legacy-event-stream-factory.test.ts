@@ -1,18 +1,17 @@
 import { describe, expect, it } from "bun:test";
 import * as path from "node:path";
-import { loadExtensions } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/loader";
-import { __resetDirsFromEnvForTests, setAgentDir, TempDir } from "@oh-my-pi/pi-utils";
+import { loadExtensions } from "@zero2ai/coding-agent/extensibility/extensions/loader";
+import { __resetDirsFromEnvForTests, setAgentDir, TempDir } from "@zero2ai/utils";
 
 describe("issue #5879: legacy provider compatibility", () => {
 	it("creates a fresh agent database while loading historical auth exports", async () => {
 		const projectDir = TempDir.createSync("@issue-5879-");
 		const freshAgentDir = projectDir.join("fresh", "agent");
 		const originalDirEnv: Record<string, string | undefined> = {
-			PI_CODING_AGENT_DIR: process.env.PI_CODING_AGENT_DIR,
-			OMP_PROFILE: process.env.OMP_PROFILE,
-			PI_PROFILE: process.env.PI_PROFILE,
+			ZERO2AI_CODING_AGENT_DIR: process.env.ZERO2AI_CODING_AGENT_DIR,
+			ZERO2AI_PROFILE: process.env.ZERO2AI_PROFILE,
 		};
-		const extensionPath = path.join(projectDir.path(), "pi-provider-like-plugin", "index.ts");
+		const extensionPath = path.join(projectDir.path(), "zero2ai-provider-like-plugin", "index.ts");
 		await Bun.write(
 			extensionPath,
 			[

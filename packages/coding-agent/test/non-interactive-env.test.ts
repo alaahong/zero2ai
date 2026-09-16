@@ -2,7 +2,7 @@ import { describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { buildNonInteractiveEnv, NON_INTERACTIVE_ENV } from "@oh-my-pi/pi-coding-agent/exec/non-interactive-env";
+import { buildNonInteractiveEnv, NON_INTERACTIVE_ENV } from "@zero2ai/coding-agent/exec/non-interactive-env";
 
 describe("buildNonInteractiveEnv", () => {
 	it("defaults Windows child-process encoding to UTF-8 when inherited env is unset", () => {
@@ -75,24 +75,24 @@ describe("buildNonInteractiveEnv", () => {
 		expect(buildNonInteractiveEnv(undefined, {}, "win32").CI).toBe("true");
 	});
 
-	it("drops CI when PI_BASH_NO_CI or its legacy alias is set", () => {
-		expect(buildNonInteractiveEnv(undefined, { PI_BASH_NO_CI: "1" }, "linux")).not.toHaveProperty("CI");
+	it("drops CI when ZERO2AI_BASH_NO_CI or its legacy alias is set", () => {
+		expect(buildNonInteractiveEnv(undefined, { ZERO2AI_BASH_NO_CI: "1" }, "linux")).not.toHaveProperty("CI");
 		expect(buildNonInteractiveEnv(undefined, { CLAUDE_BASH_NO_CI: "1" }, "linux")).not.toHaveProperty("CI");
-		expect(buildNonInteractiveEnv(undefined, { PI_BASH_NO_CI: "1" }, "win32")).not.toHaveProperty("CI");
+		expect(buildNonInteractiveEnv(undefined, { ZERO2AI_BASH_NO_CI: "1" }, "win32")).not.toHaveProperty("CI");
 	});
 
 	it("lets a per-command CI override win over the opt-out", () => {
-		expect(buildNonInteractiveEnv({ CI: "0" }, { PI_BASH_NO_CI: "1" }, "linux").CI).toBe("0");
+		expect(buildNonInteractiveEnv({ CI: "0" }, { ZERO2AI_BASH_NO_CI: "1" }, "linux").CI).toBe("0");
 	});
 });
 
 it("filters expanded dotenv values while preserving matching and empty launcher values", async () => {
-	const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "omp-env-"));
+	const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-env-"));
 	try {
 		await Bun.write(
 			path.join(tmp, ".env"),
 			[
-				"BASE=loaded-by-omp",
+				"BASE=loaded-by-zero2ai",
 				"EMPTY_PARENT_VAR=project-secret",
 				"TEST_ENV_FROM_DOTENV=$BASE-suffix",
 				"NODE_ENV=development",
@@ -113,7 +113,7 @@ it("filters expanded dotenv values while preserving matching and empty launcher 
 			"	project: env.TEST_ENV_FROM_DOTENV ?? null,",
 			"	deployment: env.CONVEX_DEPLOYMENT ?? null,",
 			"	url: env.CONVEX_URL ?? null,",
-			"	inherited: env.OMP_TEST_INHERITED_MARKER ?? null,",
+			"	inherited: env.ZERO2AI_TEST_INHERITED_MARKER ?? null,",
 			"	empty: env.EMPTY_PARENT_VAR ?? null,",
 			"	matching: env.NODE_ENV ?? null,",
 			"	exported: env.EXPORTED_SECRET ?? null,",
@@ -127,7 +127,7 @@ it("filters expanded dotenv values while preserving matching and empty launcher 
 				env: {
 					HOME: process.env.HOME ?? "",
 					EMPTY_PARENT_VAR: "",
-					OMP_TEST_INHERITED_MARKER: "keep-me",
+					ZERO2AI_TEST_INHERITED_MARKER: "keep-me",
 					NODE_ENV: "development",
 					PATH: process.env.PATH ?? "",
 					SHELL: process.env.SHELL ?? "/bin/bash",

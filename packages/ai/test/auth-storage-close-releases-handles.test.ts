@@ -17,13 +17,13 @@ import { afterEach, beforeEach, expect, test } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { SqliteAuthCredentialStore } from "@oh-my-pi/pi-ai/auth-storage";
+import { SqliteAuthCredentialStore } from "@zero2ai/ai/auth-storage";
 import { removeWithRetries } from "../../utils/src/temp";
 
 let tempDir = "";
 
 beforeEach(async () => {
-	tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-ai-close-handles-"));
+	tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-ai-close-handles-"));
 });
 
 afterEach(async () => {

@@ -2,9 +2,9 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { removeWithRetries } from "@oh-my-pi/pi-utils";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import type { ToolSession } from "@zero2ai/coding-agent/tools";
+import { removeWithRetries } from "@zero2ai/utils";
 import { GlobTool } from "../../src/tools/glob";
 import { GrepTool } from "../../src/tools/grep";
 
@@ -37,7 +37,7 @@ describe("multi-path tools tolerate missing entries", () => {
 	let tempDir: string;
 
 	beforeEach(async () => {
-		tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-multi-path-missing-"));
+		tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-multi-path-missing-"));
 		await fs.mkdir(path.join(tempDir, "src"), { recursive: true });
 		await Bun.write(path.join(tempDir, "src", "alpha.ts"), "shared-needle alpha\n");
 		await Bun.write(path.join(tempDir, "src", "beta.ts"), "shared-needle beta\n");

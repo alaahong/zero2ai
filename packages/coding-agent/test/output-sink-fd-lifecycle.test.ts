@@ -2,11 +2,11 @@ import { afterEach, describe, expect, test, vi } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { getThemeByName } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { OutputSink } from "@oh-my-pi/pi-coding-agent/session/streaming-output";
-import { bashToolRenderer } from "@oh-my-pi/pi-coding-agent/tools/bash";
-import { formatOutputNotice, outputMeta } from "@oh-my-pi/pi-coding-agent/tools/output-meta";
-import { removeWithRetries, sanitizeText } from "@oh-my-pi/pi-utils";
+import { getThemeByName } from "@zero2ai/coding-agent/modes/theme/theme";
+import { OutputSink } from "@zero2ai/coding-agent/session/streaming-output";
+import { bashToolRenderer } from "@zero2ai/coding-agent/tools/bash";
+import { formatOutputNotice, outputMeta } from "@zero2ai/coding-agent/tools/output-meta";
+import { removeWithRetries, sanitizeText } from "@zero2ai/utils";
 
 const createdTempDirs: string[] = [];
 

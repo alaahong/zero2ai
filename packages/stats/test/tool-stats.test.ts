@@ -1,13 +1,13 @@
 import { describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import { getToolDashboardStats, syncAllSessions } from "@oh-my-pi/omp-stats/aggregator";
-import { getToolStats, getToolStatsByModel } from "@oh-my-pi/omp-stats/db";
-import type { ToolUsageStats } from "@oh-my-pi/omp-stats/types";
-import { getSessionsDir } from "@oh-my-pi/pi-utils";
+import { getToolDashboardStats, syncAllSessions } from "@zero2ai/stats/aggregator";
+import { getToolStats, getToolStatsByModel } from "@zero2ai/stats/db";
+import type { ToolUsageStats } from "@zero2ai/stats/types";
+import { getSessionsDir } from "@zero2ai/utils";
 import { installStatsTestIsolation } from "./helpers/temp-agent";
 
-installStatsTestIsolation("@pi-stats-tool-stats-");
+installStatsTestIsolation("@zero2ai-stats-tool-stats-");
 
 const FOLDER_SLUG = "--tmp--tool-stats";
 const MODEL = "gpt-5.4";

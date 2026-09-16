@@ -1,6 +1,6 @@
-import { type } from "@oh-my-pi/omptype";
-import type { AgentToolResult } from "@oh-my-pi/pi-agent-core";
-import { isRecord, logger, untilAborted } from "@oh-my-pi/pi-utils";
+import { type } from "@zero2ai/schema";
+import type { AgentToolResult } from "@zero2ai/agent-core";
+import { isRecord, logger, untilAborted } from "@zero2ai/utils";
 import type { EvalPreludeContext, EvalPreludeDefinition } from "../eval/preludes";
 import type { ToolSession } from "../sdk";
 import { enforceInlineByteCap } from "../session/streaming-output";
@@ -62,7 +62,7 @@ const BROWSER_RUN_SCOPE: readonly string[] = ["tab", "page", "browser", "wait", 
 const appSchema = type({
 	"path?": type("string").describe("binary path to spawn"),
 	"cdp_url?": type("string").describe("existing cdp endpoint"),
-	"relay?": type("boolean").describe("drive the user's own tabs via the omp browser relay"),
+	"relay?": type("boolean").describe("drive the user's own tabs via the zero2ai browser relay"),
 	"args?": type("string[]").describe("extra cli args"),
 	"target?": type("string").describe("substring to pick a window"),
 });
@@ -119,7 +119,7 @@ function resolveBrowserKind(params: BrowserParams, session: ToolSession): Browse
 		return { kind: "spawned", path: exe, args: resolveSpawnArgs(exe, app.args, session.cwd) };
 	}
 	const relayUrl = session.settings.get("browser.relayUrl");
-	// Explicit app.relay wins over every setting; PI_BROWSER_RELAY stays the
+	// Explicit app.relay wins over every setting; ZERO2AI_BROWSER_RELAY stays the
 	// final kill switch (a relay that is down would otherwise brick the tool).
 	if (app?.relay) {
 		const relayKind = resolveRelayKind({ settingEnabled: true, url: relayUrl });

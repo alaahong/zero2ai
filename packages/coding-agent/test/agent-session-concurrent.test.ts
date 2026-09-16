@@ -7,31 +7,31 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { scheduler } from "node:timers/promises";
-import { type } from "@oh-my-pi/omptype";
-import { Agent, type AgentMessage, type AgentTool } from "@oh-my-pi/pi-agent-core";
-import type { AssistantMessage, AssistantMessageEvent, ToolCall } from "@oh-my-pi/pi-ai";
+import { type } from "@zero2ai/schema";
+import { Agent, type AgentMessage, type AgentTool } from "@zero2ai/agent-core";
+import type { AssistantMessage, AssistantMessageEvent, ToolCall } from "@zero2ai/ai";
 import {
 	accumulateToolCallArgumentsDelta,
 	finalizeToolCallArgumentsDone,
-} from "@oh-my-pi/pi-ai/providers/openai-shared";
-import { createMockModel } from "@oh-my-pi/pi-ai/providers/mock";
-import { kStreamingPartialJson } from "@oh-my-pi/pi-ai/utils/block-symbols";
-import { AssistantMessageEventStream } from "@oh-my-pi/pi-ai/utils/event-stream";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { AsyncJobManager } from "@oh-my-pi/pi-coding-agent/async";
-import type { Rule } from "@oh-my-pi/pi-coding-agent/capability/rule";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { TtsrManager } from "@oh-my-pi/pi-coding-agent/export/ttsr";
-import { ExtensionRuntime, loadExtensionFromFactory } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/loader";
-import { ExtensionRunner } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/runner";
-import { GoalRuntime } from "@oh-my-pi/pi-coding-agent/goals/runtime";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { convertToLlm, shouldRenderAbortReason } from "@oh-my-pi/pi-coding-agent/session/messages";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { EventBus } from "@oh-my-pi/pi-coding-agent/utils/event-bus";
-import { removeSyncWithRetries, Snowflake } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/ai/providers/openai-shared";
+import { createMockModel } from "@zero2ai/ai/providers/mock";
+import { kStreamingPartialJson } from "@zero2ai/ai/utils/block-symbols";
+import { AssistantMessageEventStream } from "@zero2ai/ai/utils/event-stream";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { AsyncJobManager } from "@zero2ai/coding-agent/async";
+import type { Rule } from "@zero2ai/coding-agent/capability/rule";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { TtsrManager } from "@zero2ai/coding-agent/export/ttsr";
+import { ExtensionRuntime, loadExtensionFromFactory } from "@zero2ai/coding-agent/extensibility/extensions/loader";
+import { ExtensionRunner } from "@zero2ai/coding-agent/extensibility/extensions/runner";
+import { GoalRuntime } from "@zero2ai/coding-agent/goals/runtime";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { convertToLlm, shouldRenderAbortReason } from "@zero2ai/coding-agent/session/messages";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { EventBus } from "@zero2ai/coding-agent/utils/event-bus";
+import { removeSyncWithRetries, Snowflake } from "@zero2ai/utils";
 
 // Mock stream that mimics AssistantMessageEventStream
 
@@ -52,7 +52,7 @@ let sharedAuthStorage: AuthStorage;
 let sharedModelRegistry: ModelRegistry;
 
 beforeAll(async () => {
-	sharedDir = path.join(os.tmpdir(), `pi-concurrent-shared-${Snowflake.next()}`);
+	sharedDir = path.join(os.tmpdir(), `zero2ai-concurrent-shared-${Snowflake.next()}`);
 	fs.mkdirSync(sharedDir, { recursive: true });
 	sharedAuthStorage = await AuthStorage.create(path.join(sharedDir, "auth.db"));
 	sharedAuthStorage.setRuntimeApiKey("anthropic", "test-key");
@@ -73,7 +73,7 @@ describe("AgentSession concurrent prompt guard", () => {
 		// Collapse scheduler settle delays so the post-abort auto-continue and
 		// dispose teardown are deterministic instead of racing the wall clock.
 		collapseSchedulerSettleDelays();
-		tempDir = path.join(os.tmpdir(), `pi-concurrent-test-${Snowflake.next()}`);
+		tempDir = path.join(os.tmpdir(), `zero2ai-concurrent-test-${Snowflake.next()}`);
 		fs.mkdirSync(tempDir, { recursive: true });
 	});
 
@@ -667,7 +667,7 @@ describe("AgentSession concurrent prompt guard", () => {
 	// agent's own `isStreaming` had flipped, but #promptWithMessage's finally had
 	// not yet decremented the prompt-in-flight counter), and the next prompt
 	// threw AgentBusyError. Surfaced as `RpcCommandError: prompt: Agent is
-	// already processing` from omp-rpc clients (robomp triage reminder path).
+	// already processing` from zero2ai-rpc clients (robomp triage reminder path).
 
 	it("does not let extension notifications block public agent_end", async () => {
 		const model = getBundledModel("anthropic", "claude-sonnet-4-5")!;
@@ -771,7 +771,7 @@ describe("AgentSession TTSR resume gate", () => {
 	let tempDir: string;
 
 	beforeEach(() => {
-		tempDir = path.join(os.tmpdir(), `pi-ttsr-gate-test-${Snowflake.next()}`);
+		tempDir = path.join(os.tmpdir(), `zero2ai-ttsr-gate-test-${Snowflake.next()}`);
 		fs.mkdirSync(tempDir, { recursive: true });
 	});
 
@@ -1513,7 +1513,7 @@ describe("AgentSession TTSR resume gate", () => {
 
 		const sessionManager = SessionManager.inMemory();
 		const cwd = sessionManager.getCwd();
-		const ruleAbsPath = path.join(cwd, ".omp", "rules", "no-unwrap.md");
+		const ruleAbsPath = path.join(cwd, ".zero2ai", "rules", "no-unwrap.md");
 		const expectedRel = path.relative(cwd, ruleAbsPath);
 		const rule: Rule = {
 			name: "no-unwrap",

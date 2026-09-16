@@ -1,19 +1,19 @@
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
-import type { AgentMessage, SyntheticToolResultDetails } from "@oh-my-pi/pi-agent-core";
-import type { AssistantMessage, ToolResultMessage } from "@oh-my-pi/pi-ai";
-import * as AIError from "@oh-my-pi/pi-ai/error";
-import { kCursorExecResolved } from "@oh-my-pi/pi-ai/utils/block-symbols";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import type { Model, Usage } from "@oh-my-pi/pi-catalog/types";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
+import type { AgentMessage, SyntheticToolResultDetails } from "@zero2ai/agent-core";
+import type { AssistantMessage, ToolResultMessage } from "@zero2ai/ai";
+import * as AIError from "@zero2ai/ai/error";
+import { kCursorExecResolved } from "@zero2ai/ai/utils/block-symbols";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import type { Model, Usage } from "@zero2ai/catalog/types";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
 import {
 	type RecoveryCompactionResult,
 	TurnRecovery,
 	type TurnRecoveryHost,
-} from "@oh-my-pi/pi-coding-agent/session/turn-recovery";
-import { TempDir } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/session/turn-recovery";
+import { TempDir } from "@zero2ai/utils";
 import { createProviderErrorMessage } from "../../ai/src/providers/error-message";
 
 const USAGE: Usage = {
@@ -115,7 +115,7 @@ describe("TurnRecovery replay-unsafe output classification", () => {
 	let modelRegistry: ModelRegistry;
 
 	beforeAll(async () => {
-		tempDir = TempDir.createSync("@pi-turn-recovery-replay-");
+		tempDir = TempDir.createSync("@zero2ai-turn-recovery-replay-");
 		authStorage = await AuthStorage.create(tempDir.join("testauth.db"));
 		// Live-role resolution (#liveRetryRoleHint) filters by provider auth;
 		// pin a runtime key so the test does not depend on host env credentials.
@@ -548,7 +548,7 @@ describe("TurnRecovery replay-unsafe output classification", () => {
 	});
 
 	// Anthropic's request classifier can refuse AFTER the model streamed a tool
-	// call. Production shape (omp.2026-08-07 log): `stopDetails.type === "refusal"`,
+	// call. Production shape (zero2ai.2026-08-07 log): `stopDetails.type === "refusal"`,
 	// `errorId: 0` (no AIError flag, so `AIError.retriable` cannot rescue it), and
 	// the agent loop appends a synthetic `executed: false` result AFTER the refused
 	// assistant message, so state ends with `lastRole: "toolResult"`.

@@ -1,4 +1,4 @@
-import { isRetryableError, isUnexpectedSocketCloseMessage } from "@oh-my-pi/pi-utils";
+import { isRetryableError, isUnexpectedSocketCloseMessage } from "@zero2ai/utils";
 import {
 	CODEX_HTTP_BODY_READ_ERROR_PATTERN,
 	isRetryableStreamEnvelopeError,

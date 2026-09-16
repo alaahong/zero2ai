@@ -2,20 +2,20 @@ import { describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { Effort } from "@oh-my-pi/pi-catalog/effort";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { writeModelCache } from "@oh-my-pi/pi-catalog/model-cache";
-import { resolveProviderModels } from "@oh-my-pi/pi-catalog/model-manager";
-import { getBundledModels } from "@oh-my-pi/pi-catalog/models";
+import { Effort } from "@zero2ai/catalog/effort";
+import { buildModel } from "@zero2ai/catalog/build";
+import { writeModelCache } from "@zero2ai/catalog/model-cache";
+import { resolveProviderModels } from "@zero2ai/catalog/model-manager";
+import { getBundledModels } from "@zero2ai/catalog/models";
 import {
 	googleModelManagerOptions,
 	googleVertexModelManagerOptions,
-} from "@oh-my-pi/pi-catalog/provider-models/google";
+} from "@zero2ai/catalog/provider-models/google";
 import {
 	MODELS_DEV_PROVIDER_DESCRIPTORS,
 	mapModelsDevToModels,
-} from "@oh-my-pi/pi-catalog/provider-models/openai-compat";
-import type { Api, ModelSpec } from "@oh-my-pi/pi-catalog/types";
+} from "@zero2ai/catalog/provider-models/openai-compat";
+import type { Api, ModelSpec } from "@zero2ai/catalog/types";
 
 const googleVertexModelsDevPayload = {
 	"google-vertex": {
@@ -122,7 +122,7 @@ describe("google-vertex model catalog", () => {
 	});
 
 	it("invalidates cached Gemini 3.7/3.8 Flash effort metadata on upgrade (#10543)", async () => {
-		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-catalog-google-flash37-cache-"));
+		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-catalog-google-flash37-cache-"));
 		try {
 			for (const [providerId, options] of [
 				["google", googleModelManagerOptions()],
@@ -176,7 +176,7 @@ describe("google-vertex model catalog", () => {
 		expect(buildModel(geminiSpec("google", "google-generative-ai", "gemini-2.5-flash-lite")).maxTokens).toBe(65_536);
 
 		// Rows cached before the clamp must not resurrect the rejected 65536.
-		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-catalog-google-lite25-cap-"));
+		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-catalog-google-lite25-cap-"));
 		try {
 			const bundled = getBundledModels("google-vertex");
 			const lite = bundled.find(model => model.id === "gemini-2.5-flash-lite");

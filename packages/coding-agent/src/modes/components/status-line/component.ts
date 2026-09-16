@@ -1,14 +1,14 @@
 import * as path from "node:path";
-import type { AgentMessage } from "@oh-my-pi/pi-agent-core";
-import type { AssistantMessage, UsageLimit, UsageReport } from "@oh-my-pi/pi-ai";
+import type { AgentMessage } from "@zero2ai/agent-core";
+import type { AssistantMessage, UsageLimit, UsageReport } from "@zero2ai/ai";
 import {
 	getAntigravityCounterKeyForModel,
 	scopeAntigravityLimitsForModel,
-} from "@oh-my-pi/pi-ai/usage/google-antigravity";
-import { getNextTimeBasedPricingTransition } from "@oh-my-pi/pi-catalog/models";
-import type { Model, ModelCost } from "@oh-my-pi/pi-catalog/types";
-import type { VcsRepo } from "@oh-my-pi/pi-natives";
-import * as vcs from "@oh-my-pi/pi-natives/vcs";
+} from "@zero2ai/ai/usage/google-antigravity";
+import { getNextTimeBasedPricingTransition } from "@zero2ai/catalog/models";
+import type { Model, ModelCost } from "@zero2ai/catalog/types";
+import type { VcsRepo } from "@zero2ai/natives";
+import * as vcs from "@zero2ai/natives/vcs";
 import {
 	type Component,
 	type ComposerStyle,
@@ -17,8 +17,8 @@ import {
 	SPINNER_ADVANCE_MS,
 	truncateToWidth,
 	visibleWidth,
-} from "@oh-my-pi/pi-tui";
-import { adjustHsv, formatNumber, getProjectDir, hexToRgb, rgbToHex } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/tui";
+import { adjustHsv, formatNumber, getProjectDir, hexToRgb, rgbToHex } from "@zero2ai/utils";
 import { settings } from "../../../config/settings";
 import type { AgentSession } from "../../../session/agent-session";
 import type { OAuthAccountIdentity } from "../../../session/auth-storage";
@@ -55,9 +55,9 @@ import type {
 const JJ_REFRESH_TTL_MS = 5000;
 const JJ_COMMAND_TIMEOUT_MS = 5_000;
 const WATCHER_FAILURE_POLL_TTL_MS = 5000;
-/** Brand-color fade duration across working-state edges (rust omp's `BRAND_FADE`). */
+/** Brand-color fade duration across working-state edges (rust zero2ai's `BRAND_FADE`). */
 const BRAND_FADE_MS = 450;
-/** Repaint cadence while the brand fade is in flight (rust omp's `FADE_FRAME`). */
+/** Repaint cadence while the brand fade is in flight (rust zero2ai's `FADE_FRAME`). */
 const BRAND_FADE_FRAME_MS = 40;
 
 /** A displayable limit after provider, account, model, and window filtering. */
@@ -1035,7 +1035,7 @@ export class StatusLineComponent implements Component {
 	/**
 	 * Foreground ANSI for the `pi` brand segment: dim gray while idle, fading
 	 * to the accent (session accent when enabled, else theme accent) while a
-	 * turn runs — a port of rust omp's status-band brand fade (450ms cubic
+	 * turn runs — a port of rust zero2ai's status-band brand fade (450ms cubic
 	 * ease-in-out). A working-state edge retargets the tween from the color
 	 * currently on screen, so interrupting a running fade never jumps, and arms
 	 * a 40ms frame timer so the fade keeps animating after the working loader
@@ -1075,7 +1075,7 @@ export class StatusLineComponent implements Component {
 			this.#brandFade = null;
 			return settledHex;
 		}
-		// Cubic ease-in-out, matching rust omp's Easing::EaseInOut.
+		// Cubic ease-in-out, matching rust zero2ai's Easing::EaseInOut.
 		const eased = t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
 		const from = hexToRgb(fade.fromHex);
 		const to = hexToRgb(fade.toHex);
@@ -2591,7 +2591,7 @@ export class StatusLineComponent implements Component {
 		const leftCapWidth = separatorDef.endCaps && !transparentBg ? visibleWidth(separatorDef.endCaps.right) : 0;
 		const rightCapWidth = separatorDef.endCaps && !transparentBg ? visibleWidth(separatorDef.endCaps.left) : 0;
 		// The band layout opens flush against the terminal edge with a soft cap
-		// (rust omp's status band). Like the other caps it needs an opaque
+		// (rust zero2ai's status band). Like the other caps it needs an opaque
 		// background to bridge, and only powerline separator styles carry caps.
 		const bandCap = layout === "band" && separatorDef.endCaps && !transparentBg ? theme.sep.powerlineCapLeft : "";
 		const bandCapWidth = visibleWidth(bandCap);

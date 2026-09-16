@@ -2,17 +2,17 @@ import { afterEach, beforeEach, describe, expect, it, spyOn } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { type } from "@oh-my-pi/omptype";
-import { getManagedSkillsDir } from "@oh-my-pi/pi-coding-agent/autolearn/managed-skills";
-import { type SettingPath, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { resetActiveSkillsForTests, type Skill, setActiveSkills } from "@oh-my-pi/pi-coding-agent/extensibility/skills";
-import type { HindsightSessionState } from "@oh-my-pi/pi-coding-agent/hindsight/state";
-import type { MnemopiSessionState } from "@oh-my-pi/pi-coding-agent/mnemopi/state";
-import { createTools, type ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { LearnTool } from "@oh-my-pi/pi-coding-agent/tools/learn";
-import { ManageSkillTool } from "@oh-my-pi/pi-coding-agent/tools/manage-skill";
-import { removeWithRetries } from "@oh-my-pi/pi-utils";
-import { getAgentDir, setAgentDir } from "@oh-my-pi/pi-utils/dirs";
+import { type } from "@zero2ai/schema";
+import { getManagedSkillsDir } from "@zero2ai/coding-agent/autolearn/managed-skills";
+import { type SettingPath, Settings } from "@zero2ai/coding-agent/config/settings";
+import { resetActiveSkillsForTests, type Skill, setActiveSkills } from "@zero2ai/coding-agent/extensibility/skills";
+import type { HindsightSessionState } from "@zero2ai/coding-agent/hindsight/state";
+import type { MnemopiSessionState } from "@zero2ai/coding-agent/mnemopi/state";
+import { createTools, type ToolSession } from "@zero2ai/coding-agent/tools";
+import { LearnTool } from "@zero2ai/coding-agent/tools/learn";
+import { ManageSkillTool } from "@zero2ai/coding-agent/tools/manage-skill";
+import { removeWithRetries } from "@zero2ai/utils";
+import { getAgentDir, setAgentDir } from "@zero2ai/utils/dirs";
 
 function makeSession(
 	settingsOverrides: Partial<Record<SettingPath, unknown>> = {},
@@ -123,9 +123,9 @@ describe("manage_skill execute", () => {
 
 	beforeEach(async () => {
 		originalAgentDir = getAgentDir();
-		tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "omp-manage-skill-"));
+		tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-manage-skill-"));
 		spyOn(os, "homedir").mockReturnValue(tempHome);
-		setAgentDir(path.join(tempHome, ".omp", "agent"));
+		setAgentDir(path.join(tempHome, ".zero2ai", "agent"));
 	});
 
 	afterEach(async () => {
@@ -216,9 +216,9 @@ describe("learn execute", () => {
 
 	beforeEach(async () => {
 		originalAgentDir = getAgentDir();
-		tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "omp-learn-"));
+		tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-learn-"));
 		spyOn(os, "homedir").mockReturnValue(tempHome);
-		setAgentDir(path.join(tempHome, ".omp", "agent"));
+		setAgentDir(path.join(tempHome, ".zero2ai", "agent"));
 		remembered = [];
 	});
 

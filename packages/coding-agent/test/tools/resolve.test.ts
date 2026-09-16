@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { getThemeByName } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { getThemeByName } from "@zero2ai/coding-agent/modes/theme/theme";
+import type { ToolSession } from "@zero2ai/coding-agent/tools";
 import {
 	dispatchResolutionDevice,
 	isPreviewResolutionToolCall,
@@ -16,8 +16,8 @@ import {
 	resolutionDeviceUsage,
 	resolveRenderer,
 	writeDeviceDispatch,
-} from "@oh-my-pi/pi-coding-agent/tools/resolve";
-import { sanitizeText } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/tools/resolve";
+import { sanitizeText } from "@zero2ai/utils";
 
 function createSession(
 	options: {

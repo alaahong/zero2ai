@@ -1,6 +1,6 @@
 import * as os from "node:os";
-import { replaceTabs, truncateToWidth, wrapTextWithAnsi } from "@oh-my-pi/pi-tui";
-import { sanitizeText } from "@oh-my-pi/pi-utils";
+import { replaceTabs, truncateToWidth, wrapTextWithAnsi } from "@zero2ai/tui";
+import { sanitizeText } from "@zero2ai/utils";
 import { expandKeyHint, shortenPath, TRUNCATE_LENGTHS } from "../../tools/render-utils";
 import { theme } from "../theme/theme";
 

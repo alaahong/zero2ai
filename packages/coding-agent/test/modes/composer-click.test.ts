@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, it } from "bun:test";
 import { COMPOSER_DEFAULTS, Composer } from "../../src/modes/composer";
 import { TranscriptContainer } from "../../src/modes/components/transcript-container";
 import { initTheme } from "../../src/modes/theme/theme";
-import { Container, type Component } from "@oh-my-pi/pi-tui";
+import { Container, type Component } from "@zero2ai/tui";
 import { VirtualTerminal } from "../../../tui/test/virtual-terminal";
 import { routeViewportClick, type ViewportClickSpan } from "../../src/modes/composer";
 

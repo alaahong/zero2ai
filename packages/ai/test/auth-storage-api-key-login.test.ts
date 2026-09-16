@@ -4,9 +4,9 @@ import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
 
-import { AuthStorage, SqliteAuthCredentialStore } from "@oh-my-pi/pi-ai/auth-storage";
-import * as aiStream from "@oh-my-pi/pi-ai/stream";
-import { serializeAlibabaTokenPlanCredential } from "@oh-my-pi/pi-catalog/wire/alibaba-token-plan";
+import { AuthStorage, SqliteAuthCredentialStore } from "@zero2ai/ai/auth-storage";
+import * as aiStream from "@zero2ai/ai/stream";
+import { serializeAlibabaTokenPlanCredential } from "@zero2ai/catalog/wire/alibaba-token-plan";
 import { removeWithRetries } from "../../utils/src/temp";
 
 function countCredentialRows(dbPath: string, provider: string): number {
@@ -48,7 +48,7 @@ describe("AuthStorage api-key login upsert", () => {
 
 	beforeEach(async () => {
 		getEnvApiKeySpy = vi.spyOn(aiStream, "getEnvApiKey").mockReturnValue(undefined);
-		tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-ai-auth-api-key-login-"));
+		tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-ai-auth-api-key-login-"));
 		dbPath = path.join(tempDir, "agent.db");
 		store = await SqliteAuthCredentialStore.open(dbPath);
 		authStorage = new AuthStorage(store);

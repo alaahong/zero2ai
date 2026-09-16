@@ -3,14 +3,14 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it } from "bun:test
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { AgentToolResult } from "@oh-my-pi/pi-agent-core";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { getThemeByName, initTheme, type Theme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { DEFAULT_MAX_BYTES, DEFAULT_MAX_LINES } from "@oh-my-pi/pi-coding-agent/session/streaming-output";
-import type { ReadToolDetails, ReadTruncationStats, ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { formatTruncationMetaNotice } from "@oh-my-pi/pi-coding-agent/tools/output-meta";
-import { ReadTool, readToolRenderer } from "@oh-my-pi/pi-coding-agent/tools/read";
-import { writeArchive } from "@oh-my-pi/pi-utils/ar";
+import type { AgentToolResult } from "@zero2ai/agent-core";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { getThemeByName, initTheme, type Theme } from "@zero2ai/coding-agent/modes/theme/theme";
+import { DEFAULT_MAX_BYTES, DEFAULT_MAX_LINES } from "@zero2ai/coding-agent/session/streaming-output";
+import type { ReadToolDetails, ReadTruncationStats, ToolSession } from "@zero2ai/coding-agent/tools";
+import { formatTruncationMetaNotice } from "@zero2ai/coding-agent/tools/output-meta";
+import { ReadTool, readToolRenderer } from "@zero2ai/coding-agent/tools/read";
+import { writeArchive } from "@zero2ai/utils/ar";
 
 function textOutput(result: AgentToolResult<ReadToolDetails>): string {
 	return result.content

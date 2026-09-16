@@ -9,10 +9,10 @@
 
 import { Database } from "bun:sqlite";
 import { describe, expect, test } from "bun:test";
-import type { BeamMemoryState } from "@oh-my-pi/pi-mnemopi/core/beam";
-import { ftsSearch, ftsSearchWorking } from "@oh-my-pi/pi-mnemopi/core/beam/helpers";
-import { recall } from "@oh-my-pi/pi-mnemopi/core/beam/recall";
-import { initBeam } from "@oh-my-pi/pi-mnemopi/core/beam/schema";
+import type { BeamMemoryState } from "@zero2ai/mnemopi/core/beam";
+import { ftsSearch, ftsSearchWorking } from "@zero2ai/mnemopi/core/beam/helpers";
+import { recall } from "@zero2ai/mnemopi/core/beam/recall";
+import { initBeam } from "@zero2ai/mnemopi/core/beam/schema";
 
 function makeBeam(db: Database): BeamMemoryState {
 	return {

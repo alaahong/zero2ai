@@ -8,16 +8,16 @@ import type {
 	AgentToolContext,
 	AgentToolResult,
 	AgentToolUpdateCallback,
-} from "@oh-my-pi/pi-agent-core";
-import type { CredentialDisabledEvent, ImageContent, Model, ProviderResponseMetadata } from "@oh-my-pi/pi-ai";
+} from "@zero2ai/agent-core";
+import type { CredentialDisabledEvent, ImageContent, Model, ProviderResponseMetadata } from "@zero2ai/ai";
 import {
 	clearContextHistoryIndex,
 	getContextHistoryIndex,
 	markPerCallContextMessage,
 	setContextHistoryIndex,
-} from "@oh-my-pi/pi-ai/utils/block-symbols";
-import type { KeyId } from "@oh-my-pi/pi-tui";
-import { logger } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/ai/utils/block-symbols";
+import type { KeyId } from "@zero2ai/tui";
+import { logger } from "@zero2ai/utils";
 import type { ModelRegistry } from "../../config/model-registry";
 import { type Settings, withActiveSettings } from "../../config/settings";
 import type { LocalProtocolOptions } from "../../internal-urls/local-protocol";
@@ -787,7 +787,7 @@ export class ExtensionRunner {
 		}
 
 		// Drain events buffered by emitCredentialDisabled() before initialize ran. The
-		// spread adds the `type` discriminator — `event` is the pi-ai shape (no `type`).
+		// spread adds the `type` discriminator — `event` is the zero2ai-ai shape (no `type`).
 		// Deferred by one microtask so callers that register an onError listener
 		// synchronously after initialize() see handler errors routed through it.
 		const pending = this.#pendingCredentialDisabled.splice(0);

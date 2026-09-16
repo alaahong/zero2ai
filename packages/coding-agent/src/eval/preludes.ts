@@ -1,5 +1,5 @@
-import type { AgentToolContext, AgentToolResult, AgentToolUpdateCallback, ToolApproval } from "@oh-my-pi/pi-agent-core";
-import { untilAborted } from "@oh-my-pi/pi-utils";
+import type { AgentToolContext, AgentToolResult, AgentToolUpdateCallback, ToolApproval } from "@zero2ai/agent-core";
+import { untilAborted } from "@zero2ai/utils";
 import type { ToolSession } from "../tools";
 import { denyError, formatApprovalPrompt, resolveApproval, resolveApprovalFromContext } from "../tools/approval";
 

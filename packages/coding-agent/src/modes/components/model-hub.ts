@@ -9,11 +9,11 @@
  * Fully mouse-navigable (hover, wheel, click). Session-only switching lives
  * in the compact alt+p picker ({@link ./model-picker}).
  */
-import { ThinkingLevel } from "@oh-my-pi/pi-agent-core";
-import type { Model } from "@oh-my-pi/pi-ai";
-import { getOAuthProviders } from "@oh-my-pi/pi-ai/oauth";
-import { getSupportedEfforts } from "@oh-my-pi/pi-catalog/model-thinking";
-import { providerEntry } from "@oh-my-pi/pi-catalog/compat/providers";
+import { ThinkingLevel } from "@zero2ai/agent-core";
+import type { Model } from "@zero2ai/ai";
+import { getOAuthProviders } from "@zero2ai/ai/oauth";
+import { getSupportedEfforts } from "@zero2ai/catalog/model-thinking";
+import { providerEntry } from "@zero2ai/catalog/compat/providers";
 import {
 	type Component,
 	extractPrintableText,
@@ -26,7 +26,7 @@ import {
 	type TUI,
 	truncateToWidth,
 	visibleWidth,
-} from "@oh-my-pi/pi-tui";
+} from "@zero2ai/tui";
 import type { ModelRegistry } from "../../config/model-registry";
 import {
 	formatModelSelectorValue,

@@ -5,7 +5,7 @@
  */
 import * as fs from "node:fs/promises";
 import * as url from "node:url";
-import { getWorkProfile } from "@oh-my-pi/pi-natives";
+import { getWorkProfile } from "@zero2ai/natives";
 import {
 	isNotificationSuppressed,
 	Loader,
@@ -16,8 +16,8 @@ import {
 	TERMINAL,
 	type TerminalNotification,
 	Text,
-} from "@oh-my-pi/pi-tui";
-import { getSessionsDir } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/tui";
+import { getSessionsDir } from "@zero2ai/utils";
 import { DynamicBorder } from "../modes/components/dynamic-border";
 import { OverlayPanel } from "../modes/components/overlay-box";
 import { TranscriptBlock } from "../modes/components/transcript-container";

@@ -1,9 +1,9 @@
 import { describe, expect, it } from "bun:test";
-import type { AgentMessage } from "@oh-my-pi/pi-agent-core";
-import { convertToLlm, normalizeCustomMessagePayload } from "@oh-my-pi/pi-coding-agent/session/messages";
-import { buildSessionContext } from "@oh-my-pi/pi-coding-agent/session/session-context";
-import type { CustomMessageEntry, SessionEntry } from "@oh-my-pi/pi-coding-agent/session/session-entries";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
+import type { AgentMessage } from "@zero2ai/agent-core";
+import { convertToLlm, normalizeCustomMessagePayload } from "@zero2ai/coding-agent/session/messages";
+import { buildSessionContext } from "@zero2ai/coding-agent/session/session-context";
+import type { CustomMessageEntry, SessionEntry } from "@zero2ai/coding-agent/session/session-entries";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
 
 describe("bare custom_message recovery", () => {
 	it("drops poisoned custom messages before LLM conversion", () => {

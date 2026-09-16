@@ -8,7 +8,7 @@ import {
 	renderPlaceholders,
 	shiftImageMarkers,
 	skillChipLabel,
-} from "@oh-my-pi/pi-coding-agent/modes/composer-attachments";
+} from "@zero2ai/coding-agent/modes/composer-attachments";
 
 function capture(text: string): {
 	out: string;

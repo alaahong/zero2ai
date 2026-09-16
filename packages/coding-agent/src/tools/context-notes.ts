@@ -1,11 +1,11 @@
-import { type } from "@oh-my-pi/omptype";
+import { type } from "@zero2ai/schema";
 import type {
 	AgentTool,
 	AgentToolContext,
 	AgentToolResult,
 	AgentToolUpdateCallback,
 	ToolApprovalDecision,
-} from "@oh-my-pi/pi-agent-core";
+} from "@zero2ai/agent-core";
 import {
 	CONTEXT_NOTES_ENTRY_TYPE,
 	getContextNotes,

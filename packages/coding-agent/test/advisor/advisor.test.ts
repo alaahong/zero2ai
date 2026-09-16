@@ -1,22 +1,22 @@
 import { describe, expect, it, vi } from "bun:test";
-import { type } from "@oh-my-pi/omptype";
-import { type AgentMessage, type AgentTelemetryConfig, Tokenizer } from "@oh-my-pi/pi-agent-core";
+import { type } from "@zero2ai/schema";
+import { type AgentMessage, type AgentTelemetryConfig, Tokenizer } from "@zero2ai/agent-core";
 import {
 	buildOpenAiNativeHistory,
 	createCompactionSummaryMessage,
 	defaultConvertToLlm,
-} from "@oh-my-pi/pi-agent-core/compaction";
-import type { AssistantMessage } from "@oh-my-pi/pi-ai";
+} from "@zero2ai/agent-core/compaction";
+import type { AssistantMessage } from "@zero2ai/ai";
 import type {
 	ResponseFileSearchToolCall,
 	ResponseFunctionWebSearch,
 	ResponseInput,
 	ResponseToolSearchOutputItemParam,
-} from "@oh-my-pi/pi-ai/providers/openai-responses-wire";
-import { buildResponsesInput } from "@oh-my-pi/pi-ai/providers/openai-shared";
-import * as AIError from "@oh-my-pi/pi-ai/error";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import type { TUI } from "@oh-my-pi/pi-tui";
+} from "@zero2ai/ai/providers/openai-responses-wire";
+import { buildResponsesInput } from "@zero2ai/ai/providers/openai-shared";
+import * as AIError from "@zero2ai/ai/error";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import type { TUI } from "@zero2ai/tui";
 import {
 	AdviseTool,
 	type AdvisorAgent,

@@ -1,11 +1,11 @@
 import { describe, expect, it, spyOn } from "bun:test";
-import { renderDemotedThinking } from "@oh-my-pi/pi-ai/dialect";
+import { renderDemotedThinking } from "@zero2ai/ai/dialect";
 import {
 	applyOpenRouterRoutingVariant,
 	convertMessages,
 	parseChunkUsage,
 	streamOpenAICompletions,
-} from "@oh-my-pi/pi-ai/providers/openai-completions";
+} from "@zero2ai/ai/providers/openai-completions";
 import type {
 	AssistantMessage,
 	Context,
@@ -15,13 +15,13 @@ import type {
 	OpenAICompat,
 	Tool,
 	ToolResultMessage,
-} from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { Effort } from "@oh-my-pi/pi-catalog/effort";
-import { clampThinkingLevelForModel, getSupportedEfforts } from "@oh-my-pi/pi-catalog/model-thinking";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import type { ResolvedOpenAICompat } from "@oh-my-pi/pi-catalog/types";
-import { serializeAlibabaTokenPlanCredential } from "@oh-my-pi/pi-catalog/wire/alibaba-token-plan";
+} from "@zero2ai/ai/types";
+import { buildModel } from "@zero2ai/catalog/build";
+import { Effort } from "@zero2ai/catalog/effort";
+import { clampThinkingLevelForModel, getSupportedEfforts } from "@zero2ai/catalog/model-thinking";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import type { ResolvedOpenAICompat } from "@zero2ai/catalog/types";
+import { serializeAlibabaTokenPlanCredential } from "@zero2ai/catalog/wire/alibaba-token-plan";
 
 const gpt4oMiniSpec: ModelSpec<"openai-completions"> = (() => {
 	const {

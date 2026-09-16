@@ -3,20 +3,20 @@ import { $ } from "bun";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { type } from "@oh-my-pi/omptype";
-import { type AssistantMessage, createAssistantMessageEventStream, getCustomApi, type ToolCall } from "@oh-my-pi/pi-ai";
-import { runCommitAgentSession } from "@oh-my-pi/pi-coding-agent/commit/agentic/agent";
-import * as commitTools from "@oh-my-pi/pi-coding-agent/commit/agentic/tools";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
+import { type } from "@zero2ai/schema";
+import { type AssistantMessage, createAssistantMessageEventStream, getCustomApi, type ToolCall } from "@zero2ai/ai";
+import { runCommitAgentSession } from "@zero2ai/coding-agent/commit/agentic/agent";
+import * as commitTools from "@zero2ai/coding-agent/commit/agentic/tools";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
 import {
 	type CreateAgentSessionOptions,
 	createAgentSession,
 	type ExtensionFactory,
-} from "@oh-my-pi/pi-coding-agent/sdk";
-import type { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { removeSyncWithRetries, Snowflake } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/sdk";
+import type { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { removeSyncWithRetries, Snowflake } from "@zero2ai/utils";
 import { createAssistantMessage, createInMemoryAuthStorage } from "./helpers/agent-session-setup";
 
 const providerName = "restricted-session-provider";
@@ -32,7 +32,7 @@ describe("restricted sessions sharing extension providers", () => {
 	let settings: Settings;
 
 	beforeEach(() => {
-		tempDir = path.join(os.tmpdir(), `pi-sdk-restricted-provider-${Snowflake.next()}`);
+		tempDir = path.join(os.tmpdir(), `zero2ai-sdk-restricted-provider-${Snowflake.next()}`);
 		fs.mkdirSync(tempDir, { recursive: true });
 		authStorage = createInMemoryAuthStorage();
 		modelRegistry = new ModelRegistry(authStorage, path.join(tempDir, "models.yml"));

@@ -1,4 +1,4 @@
-import { getReadToolPath, type ProtectedToolContext } from "@oh-my-pi/pi-agent-core/compaction/tool-protection";
+import { getReadToolPath, type ProtectedToolContext } from "@zero2ai/agent-core/compaction/tool-protection";
 import { normalizeLocalScheme } from "../tools/path-utils";
 
 /** Canonical plan alias every session's `local://` root resolves. */

@@ -2,7 +2,7 @@
  * Module-load timing preload.
  *
  * `bun --preload .../module-timer.ts <entry>` installs Bun plugin hooks (only
- * when `PI_TIMING` is set) that record an inclusive module window plus resolved
+ * when `ZERO2AI_TIMING` is set) that record an inclusive module window plus resolved
  * static child edges:
  *
  *   onLoad start → appended end marker after the module's top-level body
@@ -18,7 +18,7 @@
  * dominates startup.
  *
  * Kept dependency-free on purpose: the sole import is Bun's `plugin`, so this is
- * cheap to preload before pi-utils (and winston) exist. The buffer is shared with
+ * cheap to preload before zero2ai-utils (and winston) exist. The buffer is shared with
  * the logger via a registry Symbol so neither side needs to import the other.
  *
  * **What is measured:** an inclusive per-module window. `onLoad` stamps the
@@ -37,7 +37,7 @@
  * **Coverage limits:**
  * - TS/TSX only — intercepting `node_modules` CJS `.js`/`.cjs` and forcing ESM
  *   breaks their default-export detection, so they are left to Bun's default path.
- * - **Dev runs only.** In the compiled `omp` binary every module is pre-bundled
+ * - **Dev runs only.** In the compiled `zero2ai` binary every module is pre-bundled
  *   into bunfs, so `onLoad` never fires; profile with a `bun --preload` dev run.
  */
 import { plugin } from "bun";
@@ -50,19 +50,19 @@ import { moduleLoadBuffer } from "./timing-buffer";
 // timing lives) is uniformly TypeScript, so a TS-only filter is both safe and
 // sufficient.
 const MODULE_LOADER_FILTER = /\.[mc]?tsx?$/;
-const MODULE_COMPLETE_KEY: symbol = Symbol.for("omp.moduleLoadComplete");
-const MODULE_BODY_START_KEY: symbol = Symbol.for("omp.moduleBodyStart");
+const MODULE_COMPLETE_KEY: symbol = Symbol.for("zero2ai.moduleLoadComplete");
+const MODULE_BODY_START_KEY: symbol = Symbol.for("zero2ai.moduleBodyStart");
 const STATIC_IMPORT_PATTERN =
 	/\b(?:import|export)\s+(?:type\s+)?(?:[^"']*?\s+from\s+)?["']([^"']+)["']|\bimport\s*\(\s*["']([^"']+)["']\s*\)/g;
 
 type CompleteStore = Record<symbol, ((path: string) => void) | undefined>;
 
 function bodyStartMarker(path: string): string {
-	return `;globalThis[Symbol.for("omp.moduleBodyStart")]?.(${JSON.stringify(path)});\n`;
+	return `;globalThis[Symbol.for("zero2ai.moduleBodyStart")]?.(${JSON.stringify(path)});\n`;
 }
 
 function completionMarker(path: string): string {
-	return `\n;globalThis[Symbol.for("omp.moduleLoadComplete")]?.(${JSON.stringify(path)});\n`;
+	return `\n;globalThis[Symbol.for("zero2ai.moduleLoadComplete")]?.(${JSON.stringify(path)});\n`;
 }
 
 function instrumentContents(path: string, contents: string): string {
@@ -104,7 +104,7 @@ function addImportEdges(importsByPath: Map<string, Set<string>>, importer: strin
 	}
 }
 
-if (process.env.PI_TIMING) {
+if (process.env.ZERO2AI_TIMING) {
 	const buffer = moduleLoadBuffer();
 	const starts = new Map<string, number>();
 	const bodyStarts = new Map<string, number>();
@@ -131,7 +131,7 @@ if (process.env.PI_TIMING) {
 	};
 
 	plugin({
-		name: "pi-module-load-timer",
+		name: "zero2ai-module-load-timer",
 		setup(build) {
 			build.onLoad({ filter: MODULE_LOADER_FILTER }, async args => {
 				starts.set(args.path, performance.now());

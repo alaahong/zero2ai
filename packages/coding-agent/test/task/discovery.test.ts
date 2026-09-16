@@ -2,26 +2,26 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { disableProvider, enableProvider } from "@oh-my-pi/pi-coding-agent/capability";
-import { clearCache as clearFsCache } from "@oh-my-pi/pi-coding-agent/capability/fs";
-import { clearAgentPluginRootCache } from "@oh-my-pi/pi-coding-agent/discovery/agent-plugin-format";
+import { disableProvider, enableProvider } from "@zero2ai/coding-agent/capability";
+import { clearCache as clearFsCache } from "@zero2ai/coding-agent/capability/fs";
+import { clearAgentPluginRootCache } from "@zero2ai/coding-agent/discovery/agent-plugin-format";
 import {
 	clearOmpExtensionCliRoots,
 	injectOmpExtensionCliRoots,
-} from "@oh-my-pi/pi-coding-agent/discovery/omp-extension-roots";
-import { clearClaudePluginRootsCache, injectPluginDirRoots } from "@oh-my-pi/pi-coding-agent/discovery/helpers";
-import { discoverAgents } from "@oh-my-pi/pi-coding-agent/task/discovery";
-import { removeWithRetries } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/discovery/zero2ai-extension-roots";
+import { clearClaudePluginRootsCache, injectPluginDirRoots } from "@zero2ai/coding-agent/discovery/helpers";
+import { discoverAgents } from "@zero2ai/coding-agent/task/discovery";
+import { removeWithRetries } from "@zero2ai/utils";
 
-const OMP_AGENT_MD = [
+const ZERO2AI_AGENT_MD = [
 	"---",
-	"name: omp-test-agent",
-	"description: OMP-native test agent.",
+	"name: zero2ai-test-agent",
+	"description: ZERO2AI-native test agent.",
 	"---",
-	"You are an OMP task agent.",
+	"You are an ZERO2AI task agent.",
 ].join("\n");
 
-const OMP_PLUGIN_AGENT_MD = [
+const ZERO2AI_PLUGIN_AGENT_MD = [
 	"---",
 	"name: loom-verify-spec",
 	"description: Plugin-shipped verification agent.",
@@ -41,40 +41,40 @@ const CLAUDE_AGENT_MD = [
 ].join("\n");
 
 async function writeOmpPluginAgent(home: string): Promise<void> {
-	const userPluginsRoot = path.join(home, ".omp", "plugins");
+	const userPluginsRoot = path.join(home, ".zero2ai", "plugins");
 	const pluginRoot = path.join(userPluginsRoot, "node_modules", "loom");
 	await fs.mkdir(path.join(pluginRoot, "agents"), { recursive: true });
 	await fs.writeFile(
 		path.join(pluginRoot, "package.json"),
-		JSON.stringify({ name: "loom", version: "1.0.0", omp: { version: "1.0.0" } }),
+		JSON.stringify({ name: "loom", version: "1.0.0", zero2ai: { version: "1.0.0" } }),
 	);
 	await fs.writeFile(
 		path.join(userPluginsRoot, "package.json"),
 		JSON.stringify({
-			name: "omp-plugins-root",
+			name: "zero2ai-plugins-root",
 			version: "0.0.0",
 			dependencies: { loom: "1.0.0" },
 		}),
 	);
-	await fs.writeFile(path.join(pluginRoot, "agents", "loom-verify-spec.md"), OMP_PLUGIN_AGENT_MD);
+	await fs.writeFile(path.join(pluginRoot, "agents", "loom-verify-spec.md"), ZERO2AI_PLUGIN_AGENT_MD);
 }
 
 function agentMd(name: string, model: string): string {
 	return ["---", `name: ${name}`, `description: ${name} probe.`, `model: ${model}`, "---", `body ${name}`].join("\n");
 }
 
-// Register an omp-installed marketplace plugin via the OMP plugin registry
-// (`~/.omp/plugins/installed_plugins.json`), the path listClaudePluginRoots
-// reads as origin "omp" — distinct from the node_modules path above. `manifest`
-// controls the declared plugin dialect: `.omp-plugin/plugin.json` (OMP-native),
-// `.claude-plugin/plugin.json` (Claude Code), `both` (OMP wins by precedence),
+// Register an zero2ai-installed marketplace plugin via the ZERO2AI plugin registry
+// (`~/.zero2ai/plugins/installed_plugins.json`), the path listClaudePluginRoots
+// reads as origin "zero2ai" — distinct from the node_modules path above. `manifest`
+// controls the declared plugin dialect: `.zero2ai-plugin/plugin.json` (ZERO2AI-native),
+// `.claude-plugin/plugin.json` (Claude Code), `both` (ZERO2AI wins by precedence),
 // or `none` (bare directory).
 async function writeOmpMarketplacePlugin(
 	home: string,
 	options: {
 		agentName: string;
 		model: string;
-		manifest: "omp" | "claude" | "both" | "none";
+		manifest: "zero2ai" | "claude" | "both" | "none";
 	},
 ): Promise<void> {
 	const pluginRoot = path.join(home, "marketplace-cache", options.agentName);
@@ -84,12 +84,12 @@ async function writeOmpMarketplacePlugin(
 		agentMd(options.agentName, options.model),
 	);
 
-	const wantsOmp = options.manifest === "omp" || options.manifest === "both";
+	const wantsOmp = options.manifest === "zero2ai" || options.manifest === "both";
 	const wantsClaude = options.manifest === "claude" || options.manifest === "both";
 	if (wantsOmp) {
-		await fs.mkdir(path.join(pluginRoot, ".omp-plugin"), { recursive: true });
+		await fs.mkdir(path.join(pluginRoot, ".zero2ai-plugin"), { recursive: true });
 		await fs.writeFile(
-			path.join(pluginRoot, ".omp-plugin", "plugin.json"),
+			path.join(pluginRoot, ".zero2ai-plugin", "plugin.json"),
 			JSON.stringify({ name: options.agentName }),
 		);
 	}
@@ -101,7 +101,7 @@ async function writeOmpMarketplacePlugin(
 		);
 	}
 
-	const registryDir = path.join(home, ".omp", "plugins");
+	const registryDir = path.join(home, ".zero2ai", "plugins");
 	await fs.mkdir(registryDir, { recursive: true });
 	await fs.writeFile(
 		path.join(registryDir, "installed_plugins.json"),
@@ -121,13 +121,13 @@ describe("discoverAgents", () => {
 	let projectDir: string;
 
 	beforeEach(async () => {
-		tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "omp-task-agent-discovery-"));
+		tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-task-agent-discovery-"));
 		projectDir = path.join(tempHome, "project");
 		await fs.mkdir(projectDir, { recursive: true });
 	});
 
 	afterEach(async () => {
-		enableProvider("omp-plugins");
+		enableProvider("zero2ai-plugins");
 		clearOmpExtensionCliRoots();
 		await injectPluginDirRoots(tempHome, []);
 		clearClaudePluginRootsCache();
@@ -136,9 +136,9 @@ describe("discoverAgents", () => {
 		await removeWithRetries(tempHome);
 	});
 
-	test("loads OMP agents but skips Claude Code custom agents", async () => {
-		await fs.mkdir(path.join(projectDir, ".omp", "agents"), { recursive: true });
-		await fs.writeFile(path.join(projectDir, ".omp", "agents", "omp-test-agent.md"), OMP_AGENT_MD);
+	test("loads ZERO2AI agents but skips Claude Code custom agents", async () => {
+		await fs.mkdir(path.join(projectDir, ".zero2ai", "agents"), { recursive: true });
+		await fs.writeFile(path.join(projectDir, ".zero2ai", "agents", "zero2ai-test-agent.md"), ZERO2AI_AGENT_MD);
 
 		await fs.mkdir(path.join(tempHome, ".claude", "agents"), { recursive: true });
 		await fs.writeFile(path.join(tempHome, ".claude", "agents", "user-cc-test-agent.md"), CLAUDE_AGENT_MD);
@@ -148,12 +148,12 @@ describe("discoverAgents", () => {
 		const { agents, projectAgentsDir } = await discoverAgents(projectDir, tempHome);
 		const names = agents.map(agent => agent.name);
 
-		expect(names).toContain("omp-test-agent");
+		expect(names).toContain("zero2ai-test-agent");
 		expect(names).not.toContain("cc-test-agent");
-		expect(projectAgentsDir).toBe(path.join(projectDir, ".omp", "agents"));
+		expect(projectAgentsDir).toBe(path.join(projectDir, ".zero2ai", "agents"));
 	});
 
-	test("loads agents from OMP npm plugins under <home>/.omp/plugins/node_modules", async () => {
+	test("loads agents from ZERO2AI npm plugins under <home>/.zero2ai/plugins/node_modules", async () => {
 		await writeOmpPluginAgent(tempHome);
 
 		const { agents } = await discoverAgents(projectDir, tempHome);
@@ -162,9 +162,9 @@ describe("discoverAgents", () => {
 		expect(names).toContain("loom-verify-spec");
 	});
 
-	test("excludes OMP npm plugin agents when omp-plugins is disabled", async () => {
+	test("excludes ZERO2AI npm plugin agents when zero2ai-plugins is disabled", async () => {
 		await writeOmpPluginAgent(tempHome);
-		disableProvider("omp-plugins");
+		disableProvider("zero2ai-plugins");
 
 		const { agents } = await discoverAgents(projectDir, tempHome);
 		const names = agents.map(agent => agent.name);
@@ -176,7 +176,7 @@ describe("discoverAgents", () => {
 		// listOmpExtensionRoots returns roots in source-precedence order
 		// (CLI > project settings > user settings > installed plugins). Agents
 		// must honor that order so the `task` surface dedups identically to
-		// the skills/hooks/tools surface in discovery/omp-plugins.ts.
+		// the skills/hooks/tools surface in discovery/zero2ai-plugins.ts.
 		const cliExt = path.join(tempHome, "cli-ext");
 		const projectExt = path.join(tempHome, "project-ext");
 		await fs.mkdir(path.join(cliExt, "agents"), { recursive: true });
@@ -190,8 +190,8 @@ describe("discoverAgents", () => {
 			["---", "name: collide", "description: from-project-settings", "---", "project body"].join("\n"),
 		);
 
-		await fs.mkdir(path.join(projectDir, ".omp"), { recursive: true });
-		await fs.writeFile(path.join(projectDir, ".omp", "settings.json"), JSON.stringify({ extensions: [projectExt] }));
+		await fs.mkdir(path.join(projectDir, ".zero2ai"), { recursive: true });
+		await fs.writeFile(path.join(projectDir, ".zero2ai", "settings.json"), JSON.stringify({ extensions: [projectExt] }));
 		injectOmpExtensionCliRoots([cliExt], tempHome, projectDir);
 
 		const { agents } = await discoverAgents(projectDir, tempHome);
@@ -217,8 +217,8 @@ describe("discoverAgents", () => {
 				["---", `name: ${name}`, `description: ${name}`, "---", `${name} body`].join("\n"),
 			);
 		}
-		await fs.mkdir(path.join(projectDir, ".omp"), { recursive: true });
-		await fs.writeFile(path.join(projectDir, ".omp", "settings.json"), JSON.stringify({ extensions: [settingsExt] }));
+		await fs.mkdir(path.join(projectDir, ".zero2ai"), { recursive: true });
+		await fs.writeFile(path.join(projectDir, ".zero2ai", "settings.json"), JSON.stringify({ extensions: [settingsExt] }));
 		await writeOmpPluginAgent(tempHome);
 
 		injectOmpExtensionCliRoots([staleExt], tempHome, projectDir);
@@ -254,27 +254,27 @@ describe("discoverAgents", () => {
 		expect(names).toContain("plugin-dir-agent");
 	});
 
-	test("honors model frontmatter of OMP-native omp-installed marketplace plugin agents (#12028)", async () => {
-		// omp-installed marketplace plugins ride the shared plugin registry as
-		// origin "omp" roots. An OMP-native package (no Claude manifest) uses OMP
+	test("honors model frontmatter of ZERO2AI-native zero2ai-installed marketplace plugin agents (#12028)", async () => {
+		// zero2ai-installed marketplace plugins ride the shared plugin registry as
+		// origin "zero2ai" roots. An ZERO2AI-native package (no Claude manifest) uses ZERO2AI
 		// model selectors, so `model:` must survive discovery.
 		enableProvider("claude-plugins");
 		await writeOmpMarketplacePlugin(tempHome, {
-			agentName: "omp-probe",
+			agentName: "zero2ai-probe",
 			model: '["@advisor", "@smol"]',
 			manifest: "none",
 		});
 
 		const { agents } = await discoverAgents(projectDir, tempHome);
-		const agent = agents.find(candidate => candidate.name === "omp-probe");
+		const agent = agents.find(candidate => candidate.name === "zero2ai-probe");
 
 		expect(agent).toBeDefined();
 		expect(agent?.model).toEqual(["@advisor", "@smol"]);
 	});
 
-	test("drops model frontmatter of a Claude-format plugin installed via the OMP registry (#12031 review)", async () => {
-		// origin "omp" but a `.claude-plugin` package: its `model: sonnet` is a
-		// Claude alias, not an OMP selector, so it must still be stripped.
+	test("drops model frontmatter of a Claude-format plugin installed via the ZERO2AI registry (#12031 review)", async () => {
+		// origin "zero2ai" but a `.claude-plugin` package: its `model: sonnet` is a
+		// Claude alias, not an ZERO2AI selector, so it must still be stripped.
 		enableProvider("claude-plugins");
 		await writeOmpMarketplacePlugin(tempHome, {
 			agentName: "claude-probe",
@@ -289,9 +289,9 @@ describe("discoverAgents", () => {
 		expect(agent?.model).toBeUndefined();
 	});
 
-	test("honors model frontmatter when a plugin declares both OMP and Claude manifests (#12031 review)", async () => {
-		// `.omp-plugin/plugin.json` wins over a sibling `.claude-plugin/plugin.json`,
-		// mirroring the MCP-config precedence, so OMP selectors survive.
+	test("honors model frontmatter when a plugin declares both ZERO2AI and Claude manifests (#12031 review)", async () => {
+		// `.zero2ai-plugin/plugin.json` wins over a sibling `.claude-plugin/plugin.json`,
+		// mirroring the MCP-config precedence, so ZERO2AI selectors survive.
 		enableProvider("claude-plugins");
 		await writeOmpMarketplacePlugin(tempHome, {
 			agentName: "hybrid-probe",

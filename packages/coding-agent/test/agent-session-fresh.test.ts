@@ -1,13 +1,13 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "bun:test";
 import * as path from "node:path";
-import { Agent, AppendOnlyContextManager } from "@oh-my-pi/pi-agent-core";
-import type { ProviderSessionState } from "@oh-my-pi/pi-ai";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { Agent, AppendOnlyContextManager } from "@zero2ai/agent-core";
+import type { ProviderSessionState } from "@zero2ai/ai";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { TempDir } from "@zero2ai/utils";
 
 interface FreshHarness {
 	agent: Agent;
@@ -21,7 +21,7 @@ let authStorage: AuthStorage;
 let modelRegistry: ModelRegistry;
 
 beforeAll(async () => {
-	sharedDir = TempDir.createSync("@pi-agent-session-fresh-shared-");
+	sharedDir = TempDir.createSync("@zero2ai-agent-session-fresh-shared-");
 	authStorage = await AuthStorage.create(path.join(sharedDir.path(), "auth.db"));
 	modelRegistry = new ModelRegistry(authStorage, path.join(sharedDir.path(), "models.yml"));
 });
@@ -39,7 +39,7 @@ afterEach(async () => {
 });
 
 async function createFreshHarness(): Promise<FreshHarness> {
-	const tempDir = TempDir.createSync("@pi-agent-session-fresh-");
+	const tempDir = TempDir.createSync("@zero2ai-agent-session-fresh-");
 	const sessionManager = SessionManager.create(tempDir.path(), path.join(tempDir.path(), "sessions"));
 	const agent = new Agent({
 		initialState: {

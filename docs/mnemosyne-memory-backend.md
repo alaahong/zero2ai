@@ -1,6 +1,6 @@
 # Mnemopi memory backend
 
-Oh My Pi can use `@oh-my-pi/pi-mnemopi` as a local long-term memory backend.
+Oh My Pi can use `@zero2ai/mnemopi` as a local long-term memory backend.
 
 Set:
 
@@ -63,7 +63,7 @@ Read the full content and metadata for a recalled result with `read memory://<me
 | `mnemopi.embeddingModel`      | variant default    | Explicit embedding model id; overrides `mnemopi.embeddingVariant`. Precedence: this setting > `MNEMOPI_EMBEDDING_MODEL` env > variant default.                                                                                                                                         |
 | `mnemopi.embeddingApiUrl`     | env/default        | OpenAI-compatible embedding endpoint passed to `Mnemopi`.                                                                                                                                                                                                                              |
 | `mnemopi.embeddingApiKey`     | env/default        | Embedding API key passed to `Mnemopi`.                                                                                                                                                                                                                                                 |
-| `mnemopi.llmMode`             | `smol`             | `smol` resolves the configured pi-ai `tiny` role then `smol`; `remote` uses the settings below; `none` disables LLM calls.                                                                                                                                                             |
+| `mnemopi.llmMode`             | `smol`             | `smol` resolves the configured zero2ai-ai `tiny` role then `smol`; `remote` uses the settings below; `none` disables LLM calls.                                                                                                                                                             |
 | `mnemopi.llmBaseUrl`          | env/default        | OpenAI-compatible LLM endpoint for `llmMode: remote`.                                                                                                                                                                                                                                  |
 | `mnemopi.llmApiKey`           | env/default        | LLM API key for `llmMode: remote`.                                                                                                                                                                                                                                                     |
 | `mnemopi.llmModel`            | env/default        | LLM model id for `llmMode: remote`.                                                                                                                                                                                                                                                    |
@@ -76,7 +76,7 @@ The coding-agent wrapper applies scoping on top of the underlying `Mnemopi` pack
 - `per-project` writes to and recalls from a bank derived from the current working directory alone — its basename plus a stable hash of its absolute path, independent of the surrounding git layout.
 - `per-project-tagged` writes to the project-local bank and recalls from both the project-local bank and the shared global bank, with duplicate recall results merged.
 
-The combined project-plus-global behavior lives in the wrapper. The `@oh-my-pi/pi-mnemopi` package itself still exposes banks and constructor options directly, including `bank` for selecting a bank name. Project-local banks other than the shared bank are stored as sibling bank databases managed by Mnemopi's `BankManager`.
+The combined project-plus-global behavior lives in the wrapper. The `@zero2ai/mnemopi` package itself still exposes banks and constructor options directly, including `bank` for selecting a bank name. Project-local banks other than the shared bank are stored as sibling bank databases managed by Mnemopi's `BankManager`.
 
 ## Recall previews and full-row reads
 
@@ -156,7 +156,7 @@ new Mnemopi({
 });
 ```
 
-pi-ai tiny/smol role LLM:
+zero2ai-ai tiny/smol role LLM:
 
 ```yaml
 mnemopi:

@@ -1,17 +1,17 @@
 /**
- * CLI handler for `omp ps` — inspect and control processes supervised by the
+ * CLI handler for `zero2ai ps` — inspect and control processes supervised by the
  * daemon broker from outside the harness.
  *
- * A bare `omp ps` on a TTY opens the interactive alt-screen monitor
+ * A bare `zero2ai ps` on a TTY opens the interactive alt-screen monitor
  * (`ps-tui.ts`); `--plain`, `--json`, and non-TTY outputs use the static
  * listing. Actions (`stop`, `kill`, `restart`, `logs`, `info`) connect through
  * the regular client, which revives a dead broker so it can re-adopt detached
  * daemons before acting on them.
  */
 
-import { truncateToWidth } from "@oh-my-pi/pi-tui";
-import { formatDuration, getProjectDir } from "@oh-my-pi/pi-utils";
-import chalk from "@oh-my-pi/pi-utils/chalk";
+import { truncateToWidth } from "@zero2ai/tui";
+import { formatDuration, getProjectDir } from "@zero2ai/utils";
+import chalk from "@zero2ai/utils/chalk";
 import {
 	closeDaemonClients,
 	type DaemonBrokerClient,
@@ -71,7 +71,7 @@ export async function runPsCommand(cmd: PsCommandArgs): Promise<void> {
 			return;
 		}
 		if (!cmd.name) {
-			console.error(chalk.red(`${cmd.action} requires a process name. Run \`omp ps\` to list processes.`));
+			console.error(chalk.red(`${cmd.action} requires a process name. Run \`zero2ai ps\` to list processes.`));
 			process.exitCode = 1;
 			return;
 		}

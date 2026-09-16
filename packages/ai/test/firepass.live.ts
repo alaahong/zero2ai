@@ -10,9 +10,9 @@
  *   4. Invalid efforts are rejected with 400 by the router.
  */
 
-import { streamOpenAICompletions } from "@oh-my-pi/pi-ai/providers/openai-completions";
-import type { Context, FetchImpl, Model } from "@oh-my-pi/pi-ai/types";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
+import { streamOpenAICompletions } from "@zero2ai/ai/providers/openai-completions";
+import type { Context, FetchImpl, Model } from "@zero2ai/ai/types";
+import { getBundledModel } from "@zero2ai/catalog/models";
 
 const apiKey = process.env.FIREPASS_API_KEY;
 if (!apiKey) {

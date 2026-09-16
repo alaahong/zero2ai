@@ -1,8 +1,8 @@
 /**
  * Update CLI command handler.
  *
- * Handles `omp update` to check for and install updates.
- * Uses the installer that owns the active omp executable when it can be detected.
+ * Handles `zero2ai update` to check for and install updates.
+ * Uses the installer that owns the active zero2ai executable when it can be detected.
  */
 import { createHash } from "node:crypto";
 import * as fs from "node:fs";
@@ -10,9 +10,9 @@ import * as os from "node:os";
 import * as path from "node:path";
 import { Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
-import { $env, $which, APP_NAME, compareVersions, isEnoent, VERSION } from "@oh-my-pi/pi-utils";
-import chalk from "@oh-my-pi/pi-utils/chalk";
-import { withFileLock } from "@oh-my-pi/pi-utils/file-lock";
+import { $env, $which, APP_NAME, compareVersions, isEnoent, VERSION } from "@zero2ai/utils";
+import chalk from "@zero2ai/utils/chalk";
+import { withFileLock } from "@zero2ai/utils/file-lock";
 import { $ } from "bun";
 import { settings } from "../config/settings";
 import { theme } from "../modes/theme/theme";
@@ -23,9 +23,9 @@ import {
 	withTimeoutSignal,
 } from "../utils/fetch-timeout";
 
-const REPO = "can1357/oh-my-pi";
-const PACKAGE = "@oh-my-pi/pi-coding-agent";
-const HOMEBREW_FORMULA = "can1357/tap/omp";
+const REPO = process.env.ZERO2AI_UPDATE_GITHUB_REPO?.trim() || "can1357/oh-my-pi";
+const PACKAGE = "@zero2ai/coding-agent";
+const HOMEBREW_FORMULA = "can1357/tap/zero2ai";
 const MISE_TOOL = "github:can1357/oh-my-pi";
 const NIX_STORE_DIR = "/nix/store";
 /**
@@ -39,8 +39,8 @@ const NIX_STORE_DIR = "/nix/store";
  * `No version matching "X" found for specifier "<pkg>" (but package exists)`.
  * See #1686.
  */
-const NPM_REGISTRY = "https://registry.npmjs.org/";
-const GITHUB_API = "https://api.github.com";
+const NPM_REGISTRY = process.env.ZERO2AI_UPDATE_NPM_REGISTRY?.trim() || "https://registry.npmjs.org/";
+const GITHUB_API = process.env.ZERO2AI_UPDATE_GITHUB_API?.trim() || "https://api.github.com";
 const RELEASE_METADATA_TIMEOUT_MS = 30_000;
 const BINARY_DOWNLOAD_TIMEOUT_MS = 15 * 60_000;
 
@@ -50,7 +50,7 @@ const BINARY_DOWNLOAD_TIMEOUT_MS = 15 * 60_000;
  * disk; see {@link buildBunInstallArgs} for why this must be installed
  * explicitly rather than inherited as a transitive dependency.
  */
-const NATIVES_PACKAGE = "@oh-my-pi/pi-natives";
+const NATIVES_PACKAGE = "@zero2ai/natives";
 
 /**
  * Platform tags the release pipeline publishes as
@@ -82,7 +82,7 @@ export interface ReleasePackages {
 	natives: string;
 }
 
-/** Parsed `omp.rename` pointer: the new agent package name and optional new natives name. */
+/** Parsed `zero2ai.rename` pointer: the new agent package name and optional new natives name. */
 export interface ReleaseRename {
 	pkg: string;
 	natives?: string;
@@ -93,9 +93,9 @@ const CURRENT_PACKAGES: ReleasePackages = { pkg: PACKAGE, natives: NATIVES_PACKA
 export interface ReleaseInfo {
 	tag: string;
 	version: string;
-	/** Parsed `omp.dist` from the registry manifest; undefined when absent. */
+	/** Parsed `zero2ai.dist` from the registry manifest; undefined when absent. */
 	dist?: ReleaseDist;
-	/** npm names to install, resolved after following any `omp.rename` pointers. */
+	/** npm names to install, resolved after following any `zero2ai.rename` pointers. */
 	packages: ReleasePackages;
 }
 
@@ -152,28 +152,28 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 /**
- * Parse the `omp.dist` field from a published package manifest.
+ * Parse the `zero2ai.dist` field from a published package manifest.
  *
  * Forward-compatibility contract with future releases: a release that is not
  * installable as an npm package (e.g. a native rewrite) publishes
- * `"omp": { "dist": "binary" }` in its package.json. Any value other than
+ * `"zero2ai": { "dist": "binary" }` in its package.json. Any value other than
  * "npm" — including values this updater does not know yet — maps to "binary"
  * so already-deployed updaters never run a package-manager install against a
  * release that no longer supports it.
  */
 export function resolveReleaseDist(manifest: unknown): ReleaseDist | undefined {
-	if (!isRecord(manifest) || !isRecord(manifest.omp)) return undefined;
-	const dist = manifest.omp.dist;
+	if (!isRecord(manifest) || !isRecord(manifest.zero2ai)) return undefined;
+	const dist = manifest.zero2ai.dist;
 	if (dist === undefined) return undefined;
 	return dist === "npm" ? "npm" : "binary";
 }
 
 /**
- * Parse the `omp.rename` pointer from a published package manifest.
+ * Parse the `zero2ai.rename` pointer from a published package manifest.
  *
  * Forward-compatibility contract for renaming the npm package: the final
  * version published under an old name is a stub whose manifest carries
- * `"omp": { "rename": { "package": "<new-agent-pkg>", "natives": "<new-natives-pkg>" }, "dist": "binary" }`.
+ * `"zero2ai": { "rename": { "package": "<new-agent-pkg>", "natives": "<new-natives-pkg>" }, "dist": "binary" }`.
  * Updaters that understand `rename` follow the pointer and resolve the
  * release from the renamed package instead ({@link getLatestRelease});
  * older deployed updaters ignore it and take the `dist: "binary"` escape
@@ -186,8 +186,8 @@ export function resolveReleaseDist(manifest: unknown): ReleaseDist | undefined {
  * "already up to date" against the running build).
  */
 export function resolveReleaseRename(manifest: unknown): ReleaseRename | undefined {
-	if (!isRecord(manifest) || !isRecord(manifest.omp)) return undefined;
-	const rename = manifest.omp.rename;
+	if (!isRecord(manifest) || !isRecord(manifest.zero2ai)) return undefined;
+	const rename = manifest.zero2ai.rename;
 	if (!isRecord(rename) || typeof rename.package !== "string" || rename.package.length === 0) return undefined;
 	const natives = rename.natives;
 	return {
@@ -204,10 +204,10 @@ function majorVersion(version: string): number {
 /**
  * Whether the update must bypass bun/npm and install the release binary.
  *
- * An explicit `omp.dist` wins in both directions. Without one, a release with
+ * An explicit `zero2ai.dist` wins in both directions. Without one, a release with
  * a higher major than the running build is assumed not npm-installable: the
  * runtime may have changed out from under the package layout, and the pinned
- * `@oh-my-pi/pi-natives*` companions ({@link buildBunInstallArgs}) may not
+ * `@zero2ai/natives*` companions ({@link buildBunInstallArgs}) may not
  * exist at that version, which would strand bun/npm-managed installs behind a
  * hard install failure. Homebrew and mise installs are unaffected — both
  * already pull GitHub release binaries.
@@ -544,10 +544,10 @@ function isPathInDirectory(filePath: string, directoryPath: string): boolean {
 	if (isPathInDirectoryLexical(filePath, directoryPath)) return true;
 	// Layer realpath resolution on top of the lexical guard. On Windows, ~/.bun
 	// is a junction when Bun is installed via Scoop, so `bun pm bin -g` and the
-	// PATH-resolved omp path can refer to the same directory through different
+	// PATH-resolved zero2ai path can refer to the same directory through different
 	// strings. path.resolve does not traverse junctions/symlinks; realpath does.
 	// Resolve both the file and its parent directory: the file catches manager
-	// links like Homebrew's `bin/omp -> Cellar/.../bin/omp`; the parent fallback
+	// links like Homebrew's `bin/zero2ai -> Cellar/.../bin/zero2ai`; the parent fallback
 	// still tolerates fresh install paths where the file does not exist yet.
 	const dirReal = tryRealpath(path.resolve(directoryPath));
 	if (!dirReal) return false;
@@ -590,17 +590,17 @@ interface UpdateMethodResolutionOptions {
 	/** Bun's configured global package directory, independent of its bin directory. */
 	bunGlobalDir?: string;
 	/**
-	 * Whether the resolved omp path is a plain file (the standalone binary)
+	 * Whether the resolved zero2ai path is a plain file (the standalone binary)
 	 * rather than a package-manager symlink. Stops a binary install from being
 	 * misrouted to npm/bun when the global bin dir overlaps the installer's
 	 * target directory.
 	 */
-	ompIsRegularFile?: boolean;
+	zero2aiIsRegularFile?: boolean;
 	/**
 	 * Absolute path named by the bin entry's first symlink hop. This deliberately
 	 * preserves a global package symlink instead of resolving into its checkout.
 	 */
-	ompLinkTarget?: string;
+	zero2aiLinkTarget?: string;
 	/**
 	 * Whether bun's launcher metadata (`<name>.bunx`) sits beside the resolved
 	 * launcher. Bun writes that sidecar next to every `.exe` shim it installs, so
@@ -627,7 +627,7 @@ type UpdateTarget =
 	| { method: "binary"; path: string; replacesSymlink: boolean; validateExistingTarget: boolean };
 
 function resolveUpdateMethod(
-	ompPath: string,
+	zero2aiPath: string,
 	bunBinDir: string | undefined,
 	options: UpdateMethodResolutionOptions = {},
 ): UpdateMethod {
@@ -639,15 +639,15 @@ function resolveUpdateMethod(
 		miseBinDirs = [],
 		miseDataDir,
 		npmBinDir,
-		ompIsRegularFile = false,
-		ompLinkTarget,
+		zero2aiIsRegularFile = false,
+		zero2aiLinkTarget,
 	} = options;
-	const launcherExtension = path.extname(ompPath).toLowerCase();
-	const isWindowsScriptLauncher = isWindowsScriptLauncherPath(ompPath);
-	if (isPathInDirectory(ompPath, NIX_STORE_DIR)) return "nix";
-	if (homebrewPrefix && isPathInDirectory(ompPath, path.join(homebrewPrefix, "bin"))) return "brew";
-	if (miseBinDirs.some(dir => isPathInDirectory(ompPath, dir))) return "mise";
-	if (miseDataDir && isPathInDirectory(ompPath, path.join(miseDataDir, "shims"))) return "mise";
+	const launcherExtension = path.extname(zero2aiPath).toLowerCase();
+	const isWindowsScriptLauncher = isWindowsScriptLauncherPath(zero2aiPath);
+	if (isPathInDirectory(zero2aiPath, NIX_STORE_DIR)) return "nix";
+	if (homebrewPrefix && isPathInDirectory(zero2aiPath, path.join(homebrewPrefix, "bin"))) return "brew";
+	if (miseBinDirs.some(dir => isPathInDirectory(zero2aiPath, dir))) return "mise";
+	if (miseDataDir && isPathInDirectory(zero2aiPath, path.join(miseDataDir, "shims"))) return "mise";
 	// A plain executable file in a package-manager bin dir is the standalone
 	// binary the installer placed there, not an npm/bun-managed install (those
 	// symlink into node_modules on POSIX). When the global bin dir overlaps the
@@ -655,15 +655,15 @@ function resolveUpdateMethod(
 	// a binary install through npm/bun, whose reinstall then collides with the
 	// existing file (npm EEXIST). Fall through to binary replacement instead.
 	// On Windows every launcher is a regular file, so ownership keys off the
-	// manager's own artifacts instead: npm's script shims (`omp`, `omp.cmd`,
-	// `omp.ps1`) and bun's `omp.bunx` sidecar. A bare `.exe` with neither is the
+	// manager's own artifacts instead: npm's script shims (`zero2ai`, `zero2ai.cmd`,
+	// `zero2ai.ps1`) and bun's `zero2ai.bunx` sidecar. A bare `.exe` with neither is the
 	// standalone binary a binary-only release installed over the launcher —
 	// routing that back through bun reinstalls a package which no longer owns
 	// the launcher, and bun silently tolerates failing to overwrite the running
 	// `.exe` (EBUSY), so the install would stay pinned to the old version.
 	const isWindowsManagedLauncher =
 		process.platform === "win32" && (isWindowsScriptLauncher || launcherExtension === "" || bunShimMarker);
-	const isStandaloneRegularFile = ompIsRegularFile && !isWindowsManagedLauncher;
+	const isStandaloneRegularFile = zero2aiIsRegularFile && !isWindowsManagedLauncher;
 	const bunNodeModulesDir = resolveBunGlobalNodeModulesDirFromLocations({
 		globalDir: bunGlobalDir,
 		globalBinDir: bunBinDir,
@@ -671,9 +671,9 @@ function resolveUpdateMethod(
 	if (
 		allowPackageManagers &&
 		bunBinDir &&
-		isPathInDirectory(ompPath, bunBinDir) &&
+		isPathInDirectory(zero2aiPath, bunBinDir) &&
 		!isStandaloneRegularFile &&
-		isManagerOwnedBinEntry(ompLinkTarget, bunNodeModulesDir)
+		isManagerOwnedBinEntry(zero2aiLinkTarget, bunNodeModulesDir)
 	) {
 		return "bun";
 	}
@@ -681,9 +681,9 @@ function resolveUpdateMethod(
 	if (
 		allowPackageManagers &&
 		npmBinDir &&
-		isPathInDirectory(ompPath, npmBinDir) &&
+		isPathInDirectory(zero2aiPath, npmBinDir) &&
 		!isStandaloneRegularFile &&
-		isManagerOwnedBinEntry(ompLinkTarget, npmNodeModulesDir)
+		isManagerOwnedBinEntry(zero2aiLinkTarget, npmNodeModulesDir)
 	) {
 		return "npm";
 	}
@@ -692,41 +692,41 @@ function resolveUpdateMethod(
 }
 
 export function resolveUpdateMethodForTest(
-	ompPath: string,
+	zero2aiPath: string,
 	bunBinDir: string | undefined,
 	options: UpdateMethodResolutionOptions = {},
 ): UpdateMethod {
-	return resolveUpdateMethod(ompPath, bunBinDir, options);
+	return resolveUpdateMethod(zero2aiPath, bunBinDir, options);
 }
 
 /** Resolve an update target from the concrete PATH entry selected by the shell. */
 export function resolveUpdateTargetFromPath(
-	ompPath: string,
+	zero2aiPath: string,
 	bunBinDir: string | undefined,
 	options: UpdateMethodResolutionOptions & { allowPackageManagers: boolean },
 ): UpdateTarget {
-	let ompIsRegularFile = false;
-	let ompIsSymlink = false;
-	let ompLinkTarget: string | undefined;
-	let ompRealpath: string | undefined;
-	const bunShimMarker = process.platform === "win32" && fs.existsSync(bunShimMarkerPath(ompPath));
+	let zero2aiIsRegularFile = false;
+	let zero2aiIsSymlink = false;
+	let zero2aiLinkTarget: string | undefined;
+	let zero2aiRealpath: string | undefined;
+	const bunShimMarker = process.platform === "win32" && fs.existsSync(bunShimMarkerPath(zero2aiPath));
 	try {
-		const stat = fs.lstatSync(ompPath);
-		ompIsRegularFile = stat.isFile() && !stat.isSymbolicLink();
-		ompIsSymlink = stat.isSymbolicLink();
-		if (ompIsSymlink) {
-			const rawTarget = fs.readlinkSync(ompPath);
-			const linkDir = path.dirname(ompPath);
-			ompLinkTarget = path.resolve(tryRealpath(linkDir) ?? linkDir, rawTarget);
-			ompRealpath = tryRealpath(ompPath);
+		const stat = fs.lstatSync(zero2aiPath);
+		zero2aiIsRegularFile = stat.isFile() && !stat.isSymbolicLink();
+		zero2aiIsSymlink = stat.isSymbolicLink();
+		if (zero2aiIsSymlink) {
+			const rawTarget = fs.readlinkSync(zero2aiPath);
+			const linkDir = path.dirname(zero2aiPath);
+			zero2aiLinkTarget = path.resolve(tryRealpath(linkDir) ?? linkDir, rawTarget);
+			zero2aiRealpath = tryRealpath(zero2aiPath);
 		}
 	} catch {}
 
-	const method = resolveUpdateMethod(ompPath, bunBinDir, {
+	const method = resolveUpdateMethod(zero2aiPath, bunBinDir, {
 		...options,
 		bunShimMarker,
-		ompIsRegularFile,
-		ompLinkTarget,
+		zero2aiIsRegularFile,
+		zero2aiLinkTarget,
 	});
 	if (method === "binary") {
 		// A symlinked launcher created by bun/npm is taken over in place on a
@@ -739,24 +739,24 @@ export function resolveUpdateTargetFromPath(
 		// releases (EACCES on a root-owned link dir, or a stale split-brain copy
 		// of the binary shadowing the shared install).
 		const managerLauncher =
-			ompIsSymlink &&
+			zero2aiIsSymlink &&
 			!options.allowPackageManagers &&
-			resolveUpdateMethod(ompPath, bunBinDir, {
+			resolveUpdateMethod(zero2aiPath, bunBinDir, {
 				...options,
 				allowPackageManagers: true,
 				bunShimMarker,
-				ompIsRegularFile,
-				ompLinkTarget,
+				zero2aiIsRegularFile,
+				zero2aiLinkTarget,
 			}) !== "binary";
-		const binaryPath = ompIsSymlink && !managerLauncher ? (ompRealpath ?? ompPath) : ompPath;
+		const binaryPath = zero2aiIsSymlink && !managerLauncher ? (zero2aiRealpath ?? zero2aiPath) : zero2aiPath;
 		return {
 			method,
 			path: binaryPath,
-			replacesSymlink: ompIsSymlink && binaryPath === ompPath,
-			validateExistingTarget: ompIsSymlink && !managerLauncher,
+			replacesSymlink: zero2aiIsSymlink && binaryPath === zero2aiPath,
+			validateExistingTarget: zero2aiIsSymlink && !managerLauncher,
 		};
 	}
-	if (method === "bun" || method === "npm") return { method, path: ompPath };
+	if (method === "bun" || method === "npm") return { method, path: zero2aiPath };
 	return { method };
 }
 /**
@@ -775,19 +775,19 @@ async function resolveUpdateTarget(options: { allowPackageManagers: boolean }): 
 	const miseAvailable = $which("mise") !== undefined;
 	const miseBinDirs = miseAvailable ? await getMiseBinDirs() : [];
 	const miseDataDir = miseAvailable ? getMiseDataDir() : undefined;
-	const ompPath = resolveOmpPath();
+	const zero2aiPath = resolveOmpPath();
 
 	// Binary-only releases skip package-manager routing, but a symlinked
 	// launcher still needs the manager bin dirs to tell a bun/npm launcher
 	// (taken over in place) from a foreign symlink (resolved to its real
 	// binary). A plain-file install never needs the distinction, so the common
 	// case stays probe-free.
-	const probeManagers = options.allowPackageManagers || (ompPath !== undefined && isSymlinkPath(ompPath));
+	const probeManagers = options.allowPackageManagers || (zero2aiPath !== undefined && isSymlinkPath(zero2aiPath));
 	const bunBinDir = probeManagers ? await getBunGlobalBinDir() : undefined;
 	const npmBinDir = probeManagers ? await getNpmGlobalBinDir() : undefined;
 
-	if (ompPath) {
-		return resolveUpdateTargetFromPath(ompPath, bunBinDir, {
+	if (zero2aiPath) {
+		return resolveUpdateTargetFromPath(zero2aiPath, bunBinDir, {
 			allowPackageManagers: options.allowPackageManagers,
 			bunGlobalDir: probeManagers ? process.env.BUN_INSTALL_GLOBAL_DIR : undefined,
 			homebrewPrefix,
@@ -802,7 +802,7 @@ async function resolveUpdateTarget(options: { allowPackageManagers: boolean }): 
 	throw new Error(`Could not resolve ${APP_NAME} binary path in PATH`);
 }
 
-/** Bound on `omp.rename` hops so a broken pointer chain cannot loop forever. */
+/** Bound on `zero2ai.rename` hops so a broken pointer chain cannot loop forever. */
 const MAX_RENAME_HOPS = 3;
 
 async function fetchLatestManifest(
@@ -839,7 +839,7 @@ async function fetchLatestManifest(
 }
 
 /**
- * Get the latest release info from the npm registry, following `omp.rename`
+ * Get the latest release info from the npm registry, following `zero2ai.rename`
  * pointers ({@link resolveReleaseRename}) when the package has moved to a new
  * npm name. Version, dist, and install names all come from the final manifest
  * in the chain. Uses npm instead of GitHub API to avoid unauthenticated rate
@@ -991,7 +991,7 @@ async function removeCacheEntries(paths: string[]): Promise<number> {
  *
  * Bun stores package cache entries as both a package marker directory
  * (`react/19.2.6@@@1`) and a materialized package directory
- * (`react@19.2.6@@@1`). Global `omp` updates can leave one full copy per
+ * (`react@19.2.6@@@1`). Global `zero2ai` updates can leave one full copy per
  * release. The marker and materialized entries are removed together so the
  * cache stays internally consistent.
  */
@@ -1092,7 +1092,7 @@ async function pruneBunCacheAfterGlobalInstall(): Promise<BunInstallCachePruneRe
 	const packageNames = globalNodeModulesDir
 		? await collectInstalledPackageNames(globalNodeModulesDir)
 		: new Set<string>();
-	if (packageNames.size === 0 && !path.basename(cacheDir).toLowerCase().includes("omp")) return undefined;
+	if (packageNames.size === 0 && !path.basename(cacheDir).toLowerCase().includes("zero2ai")) return undefined;
 	return await pruneBunInstallCache(cacheDir, packageNames.size === 0 ? undefined : packageNames);
 }
 
@@ -1169,15 +1169,15 @@ function getBinaryName(): string {
 }
 
 /**
- * Resolve the path that `omp` maps to in the user's PATH.
+ * Resolve the path that `zero2ai` maps to in the user's PATH.
  */
 function resolveOmpPath(): string | undefined {
 	return $which(APP_NAME) ?? undefined;
 }
 
 /**
- * Parse the version a launcher reports from `omp --version` output
- * (`omp/X.Y.Z`, or a prerelease such as `omp/X.Y.Z-canary.1`).
+ * Parse the version a launcher reports from `zero2ai --version` output
+ * (`zero2ai/X.Y.Z`, or a prerelease such as `zero2ai/X.Y.Z-canary.1`).
  *
  * The prerelease suffix is preserved so a correctly installed canary build
  * verifies as up to date instead of appearing to report a stale `X.Y.Z` and
@@ -1215,20 +1215,20 @@ async function validateExistingUpdateTarget(targetPath: string): Promise<void> {
 	if (!hasShebang && (await reportedVersionAtPath(targetPath)) !== undefined) return;
 
 	const reason = hasShebang
-		? "is a shebang script, not an OMP binary"
-		: "does not report an OMP version when run directly";
+		? "is a shebang script, not an ZERO2AI binary"
+		: "does not report an ZERO2AI version when run directly";
 	throw new Error(
-		`Refusing to replace ${targetPath}: the resolved foreign symlink target ${reason}. Point PATH directly at the OMP binary you want to update, or reinstall with: ${installerHint()}`,
+		`Refusing to replace ${targetPath}: the resolved foreign symlink target ${reason}. Point PATH directly at the ZERO2AI binary you want to update, or reinstall with: ${installerHint()}`,
 	);
 }
 
 /**
- * Run the PATH-resolved omp binary and check if it reports the expected version.
+ * Run the PATH-resolved zero2ai binary and check if it reports the expected version.
  */
 async function verifyInstalledVersion(expectedVersion: string): Promise<InstalledVersionVerification> {
-	const ompPath = resolveOmpPath();
-	if (!ompPath) return { ok: false };
-	const binaryPath = tryRealpath(ompPath) ?? ompPath;
+	const zero2aiPath = resolveOmpPath();
+	if (!zero2aiPath) return { ok: false };
+	const binaryPath = tryRealpath(zero2aiPath) ?? zero2aiPath;
 	return await verifyBinaryAtPath(binaryPath, expectedVersion);
 }
 
@@ -1423,7 +1423,7 @@ function buildVersionedPackageInstallArgs(
 }
 
 /**
- * Build the bun argv used to globally install a specific omp version.
+ * Build the bun argv used to globally install a specific zero2ai version.
  *
  * The version is selected by hitting {@link NPM_REGISTRY} directly in
  * {@link getLatestRelease}, so the install MUST observe the same catalog:
@@ -1435,7 +1435,7 @@ function buildVersionedPackageInstallArgs(
  * - `--no-cache` tells bun to ignore its on-disk manifest snapshot so it
  *   re-fetches metadata from that registry on every invocation.
  *
- * Together these two flags make `omp update` produce exactly the registry
+ * Together these two flags make `zero2ai update` produce exactly the registry
  * lookup the version check just performed. See #1686.
  *
  * Also pins {@link NATIVES_PACKAGE} and the platform-specific
@@ -1443,7 +1443,7 @@ function buildVersionedPackageInstallArgs(
  * does not reliably refresh transitive `optionalDependencies` when the
  * top-level package is the only one bumped, so the native addon and its
  * version sentinel can drift out of sync with the freshly installed
- * `@oh-my-pi/pi-coding-agent` and the loader aborts at
+ * `@zero2ai/coding-agent` and the loader aborts at
  * `validateLoadedBindings` on the next launch
  * (`The .node file on disk is from a different release than this loader`).
  * Listing the natives explicitly forces bun to replace them in lock-step.
@@ -1469,10 +1469,10 @@ export function buildBunInstallArgs(
 /**
  * Build the npm argv used to update npm-managed global installs.
  *
- * `force` is set only for rename migrations: npm refuses to write the `omp`
+ * `force` is set only for rename migrations: npm refuses to write the `zero2ai`
  * bin while the old package still owns it (`EEXIST`), and the migration
  * installs the new package BEFORE removing the old one so a failed install
- * never leaves the user without a working `omp`.
+ * never leaves the user without a working `zero2ai`.
  */
 export function buildNpmInstallArgs(
 	expectedVersion: string,
@@ -1540,11 +1540,11 @@ export function buildRenameCleanupPackages(
 
 /** Injectable shell steps for {@link migrateRenamedInstall}; commands return process exit codes. */
 export interface RenameMigrationSteps {
-	/** Globally install the new package names. MUST be idempotent: re-running re-links the `omp` bin. */
+	/** Globally install the new package names. MUST be idempotent: re-running re-links the `zero2ai` bin. */
 	install(): Promise<number>;
 	/** Remove the old-name globals. */
 	removeOld(): Promise<number>;
-	/** Check the PATH-resolved `omp` against the expected version. */
+	/** Check the PATH-resolved `zero2ai` against the expected version. */
 	verify(): Promise<InstalledVersionVerification>;
 }
 
@@ -1579,14 +1579,14 @@ function packageManagerMigrationSteps(manager: "bun" | "npm", release: ReleaseIn
 }
 
 /**
- * Migrate a package-manager install across an `omp.rename` hop without a
- * window where no working `omp` exists:
+ * Migrate a package-manager install across an `zero2ai.rename` hop without a
+ * window where no working `zero2ai` exists:
  *
  * 1. Install the new package FIRST. Nothing has been removed yet, so a
  *    failure here leaves the old install fully functional.
  * 2. Remove the old-name globals. Failure is non-fatal: a stale package
  *    wastes disk, but the bin already points at the new install.
- * 3. Verify the PATH-resolved `omp`. If the removal deleted the shared bin
+ * 3. Verify the PATH-resolved `zero2ai`. If the removal deleted the shared bin
  *    link (manager-dependent), re-run the idempotent install to restore it
  *    and verify again; only a repeated failure aborts, with a recovery hint.
  */
@@ -1821,14 +1821,14 @@ export async function updateViaBinaryAt(
 		fetchImpl?: Fetch;
 		githubToken?: string;
 		allowPrerelease?: boolean;
-		/** Refuse replacement unless the existing path is a non-script OMP executable. */
+		/** Refuse replacement unless the existing path is a non-script ZERO2AI executable. */
 		validateExistingTarget?: boolean;
 		verifyInstalledVersion?: typeof verifyInstalledVersion;
 	} = {},
 ): Promise<void> {
 	if (options.validateExistingTarget) await validateExistingUpdateTarget(targetPath);
 	const binaryName = options.binaryName ?? getBinaryName();
-	// Unique per attempt so two overlapping `omp update` runs never share a temp
+	// Unique per attempt so two overlapping `zero2ai update` runs never share a temp
 	// or backup path. A fixed temp name (`<binary>.new`) let the second run's
 	// pre-download unlink delete the first run's still-downloading temp file; the
 	// first kept writing to its open fd (size + digest still passed), then chmod
@@ -1858,7 +1858,7 @@ export async function updateViaBinaryAt(
 	console.log(chalk.dim(`Verified ${asset.digest}`));
 
 	// Serialize the target swap and stale-artifact sweep per target so two
-	// overlapping `omp update` runs never replace the same binary concurrently
+	// overlapping `zero2ai update` runs never replace the same binary concurrently
 	// or reclaim each other's live backup/temp files. The download above writes
 	// to a unique temp path and is safe to overlap; only the swap is shared.
 	const verification = await withFileLock(targetPath, async () => {
@@ -1891,7 +1891,7 @@ export async function updateViaBinaryAt(
 /**
  * In-place forwarder bodies, by shim extension, for launchers that cannot be
  * renamed aside during a script-shim takeover; each execs the sibling
- * `omp.exe`. Rewriting matters for the shims that outrank `.exe` at command
+ * `zero2ai.exe`. Rewriting matters for the shims that outrank `.exe` at command
  * resolution: PowerShell prefers `.ps1` and Git Bash resolves the
  * extensionless sh shim first, so leaving the old body behind would keep
  * launching the replaced install.
@@ -1907,8 +1907,8 @@ const SHIM_FORWARDERS: Record<string, string> = {
  * Take over a Windows script-launcher install for a binary-only release.
  *
  * npm-managed Windows installs are launched through script shims
- * (`omp`/`omp.cmd`/`omp.ps1`) that cannot be overwritten with a native
- * executable. The release binary is installed as `omp.exe` beside them and
+ * (`zero2ai`/`zero2ai.cmd`/`zero2ai.ps1`) that cannot be overwritten with a native
+ * executable. The release binary is installed as `zero2ai.exe` beside them and
  * the shims are then renamed aside: cmd.exe would already prefer `.exe` via
  * PATHEXT, but PowerShell resolves `.ps1` first, so the takeover only sticks
  * once the shims are out of the way. A working launcher exists at every
@@ -2108,7 +2108,7 @@ export async function runUpdateCommand(opts: {
 		return;
 	}
 
-	// Choose update method based on the prioritized omp binary in PATH. For
+	// Choose update method based on the prioritized zero2ai binary in PATH. For
 	// binary-only releases the package managers are never consulted: a bun/npm
 	// symlink resolves to method "binary" and is replaced in place, keeping the
 	// same PATH entry live.
@@ -2122,7 +2122,7 @@ export async function runUpdateCommand(opts: {
 		}
 		if (target.method === "nix") {
 			console.log(chalk.yellow("This installation is managed by Nix and cannot update itself."));
-			console.log(chalk.dim("Update the flake input or profile that provides omp, then rebuild."));
+			console.log(chalk.dim("Update the flake input or profile that provides zero2ai, then rebuild."));
 			return;
 		} else if (target.method === "brew") {
 			await updateViaHomebrew(release.version, opts.force);

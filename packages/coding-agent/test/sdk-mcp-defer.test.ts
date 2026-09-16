@@ -2,14 +2,14 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { type } from "@oh-my-pi/omptype";
-import type { AuthStorage } from "@oh-my-pi/pi-ai";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { type CustomTool, createAgentSession } from "@oh-my-pi/pi-coding-agent/sdk";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { removeSyncWithRetries, Snowflake } from "@oh-my-pi/pi-utils";
+import { type } from "@zero2ai/schema";
+import type { AuthStorage } from "@zero2ai/ai";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { type CustomTool, createAgentSession } from "@zero2ai/coding-agent/sdk";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { removeSyncWithRetries, Snowflake } from "@zero2ai/utils";
 import { createInMemoryAuthStorage } from "./helpers/agent-session-setup";
 
 // Contract for B1 (interactive MCP deferral): when `hasUI` is true, MCP
@@ -52,7 +52,7 @@ describe("createAgentSession MCP deferral (B1)", () => {
 		authStorage = createInMemoryAuthStorage();
 		modelRegistry = new ModelRegistry(
 			authStorage,
-			path.join(os.tmpdir(), `pi-sdk-mcp-defer-models-${Snowflake.next()}.yml`),
+			path.join(os.tmpdir(), `zero2ai-sdk-mcp-defer-models-${Snowflake.next()}.yml`),
 		);
 	});
 
@@ -61,7 +61,7 @@ describe("createAgentSession MCP deferral (B1)", () => {
 	});
 
 	beforeEach(() => {
-		tempDir = path.join(os.tmpdir(), `pi-sdk-mcp-defer-${Snowflake.next()}`);
+		tempDir = path.join(os.tmpdir(), `zero2ai-sdk-mcp-defer-${Snowflake.next()}`);
 		fs.mkdirSync(tempDir, { recursive: true });
 	});
 

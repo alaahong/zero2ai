@@ -3,9 +3,9 @@ import {
 	embed,
 	resetEmbeddingProviderForTests,
 	setLocalModelInitializerForTests,
-} from "@oh-my-pi/pi-mnemopi/core/embeddings";
-import { withMnemopiRuntimeOptions } from "@oh-my-pi/pi-mnemopi/core/runtime-options";
-import { logger } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/mnemopi/core/embeddings";
+import { withMnemopiRuntimeOptions } from "@zero2ai/mnemopi/core/runtime-options";
+import { logger } from "@zero2ai/utils";
 
 const ENV_KEYS = [
 	"NODE_ENV",

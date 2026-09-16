@@ -1,16 +1,16 @@
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import * as path from "node:path";
 import * as url from "node:url";
-import type { AgentMessage } from "@oh-my-pi/pi-agent-core";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { CustomEditor } from "@oh-my-pi/pi-coding-agent/modes/components/custom-editor";
-import { UserMessageComponent } from "@oh-my-pi/pi-coding-agent/modes/components/user-message";
-import { chipLabel } from "@oh-my-pi/pi-coding-agent/modes/composer-attachments";
-import { imageReferenceHyperlink } from "@oh-my-pi/pi-coding-agent/modes/image-references";
-import { getEditorTheme, initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import type { InteractiveModeContext } from "@oh-my-pi/pi-coding-agent/modes/types";
-import { UiHelpers } from "@oh-my-pi/pi-coding-agent/modes/utils/ui-helpers";
-import { Container } from "@oh-my-pi/pi-tui";
+import type { AgentMessage } from "@zero2ai/agent-core";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
+import { CustomEditor } from "@zero2ai/coding-agent/modes/components/custom-editor";
+import { UserMessageComponent } from "@zero2ai/coding-agent/modes/components/user-message";
+import { chipLabel } from "@zero2ai/coding-agent/modes/composer-attachments";
+import { imageReferenceHyperlink } from "@zero2ai/coding-agent/modes/image-references";
+import { getEditorTheme, initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import type { InteractiveModeContext } from "@zero2ai/coding-agent/modes/types";
+import { UiHelpers } from "@zero2ai/coding-agent/modes/utils/ui-helpers";
+import { Container } from "@zero2ai/tui";
 
 beforeAll(async () => {
 	resetSettingsForTest();
@@ -90,7 +90,7 @@ describe("UserMessageComponent magic-keyword highlighting", () => {
 	});
 
 	it("wraps image references in file hyperlinks when a blob path is available", () => {
-		const imagePath = path.resolve("/tmp/omp-image.png");
+		const imagePath = path.resolve("/tmp/zero2ai-image.png");
 		const imageUri = url.pathToFileURL(path.resolve(imagePath)).href;
 		const raw = new UserMessageComponent("please inspect [Image #1]", { imageLinks: [imagePath] })
 			.render(80)
@@ -101,7 +101,7 @@ describe("UserMessageComponent magic-keyword highlighting", () => {
 	});
 
 	it("renders a video marker as a video chip linked to its source", () => {
-		const videoPath = path.resolve("/tmp/omp-video.mp4");
+		const videoPath = path.resolve("/tmp/zero2ai-video.mp4");
 		const videoUri = url.pathToFileURL(videoPath).href;
 		const raw = new UserMessageComponent("please inspect [Video #1, 960x480]", { imageLinks: [videoPath] })
 			.render(80)
@@ -115,7 +115,7 @@ describe("UserMessageComponent magic-keyword highlighting", () => {
 	it("wraps draft editor image references in file hyperlinks when a blob path is available", () => {
 		const editor = new CustomEditor(getEditorTheme());
 		editor.imageReferenceHyperlink = imageReferenceHyperlink;
-		const imagePath = path.resolve("/tmp/omp-image.png");
+		const imagePath = path.resolve("/tmp/zero2ai-image.png");
 		const imageUri = url.pathToFileURL(path.resolve(imagePath)).href;
 		editor.imageLinks = [imagePath];
 		editor.setText("please inspect [Image #1]");
@@ -179,7 +179,7 @@ describe("UserMessageComponent magic-keyword highlighting", () => {
 	it("hyperlinks the metadata-bearing image marker format", () => {
 		const editor = new CustomEditor(getEditorTheme());
 		editor.imageReferenceHyperlink = imageReferenceHyperlink;
-		const imagePath = path.resolve("/tmp/omp-image.png");
+		const imagePath = path.resolve("/tmp/zero2ai-image.png");
 		const imageUri = url.pathToFileURL(path.resolve(imagePath)).href;
 		editor.imageLinks = [imagePath];
 		editor.setText("see [Image #1, 800x600] now");

@@ -1,26 +1,26 @@
 # Natives Shell, PTY, Process, and Key Internals
 
-This document covers execution/process/terminal primitives in `@oh-my-pi/pi-natives`: `shell`, `pty`, `ps`, and `keys`, using the architecture terms from `docs/natives-architecture.md`.
+This document covers execution/process/terminal primitives in `@zero2ai/natives`: `shell`, `pty`, `ps`, and `keys`, using the architecture terms from `docs/natives-architecture.md`.
 
 ## Implementation files
 
-- `crates/pi-natives/src/shell.rs`
-- `crates/pi-shell/src/shell.rs`
-- `crates/pi-shell/src/cancel.rs`
-- `crates/pi-builtins` (embedded-shell builtins: bash builtins plus in-process utility/process commands)
-- `crates/pi-shell/src/windows.rs` (Windows-only PATH enrichment)
-- `crates/pi-shell/src/process.rs`
-- `crates/pi-natives/src/pty.rs`
-- `crates/pi-natives/src/ps.rs`
-- `crates/pi-natives/src/keys.rs`
-- `crates/pi-natives/src/task.rs`
+- `crates/zero2ai-natives/src/shell.rs`
+- `crates/zero2ai-shell/src/shell.rs`
+- `crates/zero2ai-shell/src/cancel.rs`
+- `crates/zero2ai-builtins` (embedded-shell builtins: bash builtins plus in-process utility/process commands)
+- `crates/zero2ai-shell/src/windows.rs` (Windows-only PATH enrichment)
+- `crates/zero2ai-shell/src/process.rs`
+- `crates/zero2ai-natives/src/pty.rs`
+- `crates/zero2ai-natives/src/ps.rs`
+- `crates/zero2ai-natives/src/keys.rs`
+- `crates/zero2ai-natives/src/task.rs`
 - `packages/natives/native/index.d.ts`
 
 ## Layer ownership
 
 - **Package entrypoint** (`packages/natives/native/index.js`): loads the `.node` addon and exports generated N-API bindings.
-- **Rust N-API module layer** (`crates/pi-natives/src/*`): JS-facing shell/PTY/process/key exports and callback bridging.
-- **Runtime core** (`crates/pi-shell/src/*`): brush shell execution, cancellation cleanup, minimizer integration, command fixups, and cross-platform process references.
+- **Rust N-API module layer** (`crates/zero2ai-natives/src/*`): JS-facing shell/PTY/process/key exports and callback bridging.
+- **Runtime core** (`crates/zero2ai-shell/src/*`): brush shell execution, cancellation cleanup, minimizer integration, command fixups, and cross-platform process references.
 - **Consumers** (`packages/coding-agent`, `packages/tui`): higher-level session policy, output artifact/minimizer handling, render policy, and UI key handling.
 
 ## Shell subsystem (`shell`)
@@ -45,8 +45,8 @@ Rust creates `brush_core::Shell` with:
 - inherited environment disabled (`do_not_inherit_env: true`), followed by explicit environment reconstruction from host env,
 - profile and rc loading skipped,
 - bash-mode builtins, with `exec` and `suspend` disabled,
-- process builtins registered unconditionally from `pi_builtins::process_builtins()` — `nohup`, `pgrep`, `pkill`, `pidwait`, `ps`, `sleep`, `timeout`, and `top` (`nohup` is withheld when `PI_DISABLE_NOHUP_BUILTIN` is set; `kill` comes from the default bash-mode set, where `pi-builtins`' richer implementation replaces brush's original),
-- in-process utility builtins registered from `pi_builtins::utility_builtins()` (see the next section),
+- process builtins registered unconditionally from `zero2ai_builtins::process_builtins()` — `nohup`, `pgrep`, `pkill`, `pidwait`, `ps`, `sleep`, `timeout`, and `top` (`nohup` is withheld when `ZERO2AI_DISABLE_NOHUP_BUILTIN` is set; `kill` comes from the default bash-mode set, where `zero2ai-builtins`' richer implementation replaces brush's original),
+- in-process utility builtins registered from `zero2ai_builtins::utility_builtins()` (see the next section),
 - skip-list for shell-sensitive vars (`PS1`, `PWD`, `SHLVL`, bash function exports, etc.),
 - a non-exported `env="$env"` fallback so PowerShell-style `$env:NAME` survives brush parameter expansion unless the user shadows `env`.
 
@@ -55,24 +55,24 @@ Session env behavior:
 - `ShellOptions.sessionEnv` / one-shot `sessionEnv` is applied at session creation.
 - `ShellRunOptions.env` / one-shot `env` is command-scoped (`EnvironmentScope::Command`) and popped after the command.
 - `PATH` is merged specially on Windows with case-insensitive dedupe.
-- Windows-only path enrichment (`pi-shell/src/windows.rs`) appends discovered Git-for-Windows paths when present and not already included.
+- Windows-only path enrichment (`zero2ai-shell/src/windows.rs`) appends discovered Git-for-Windows paths when present and not already included.
 - `snapshotPath`, when present, is sourced during session creation with stdout/stderr/stdin wired to null files.
 
 ### In-process utility builtins (uutils-derived)
 
-Beyond the bash builtins, session creation registers the in-process command-line utility builtins implemented in the `pi-builtins` crate (`crates/pi-builtins`) — in-house ports of uutils coreutils/findutils/sed and jaq built on `uucore` 0.8.0. The set includes `cat`, `head`, `tail`, `wc`, `sort`, `uniq`, `ls`, `find`, `grep`, `mkdir`, `rm`, `mv`, `ln`, `sed`, `jq`, `fd`, `diff`, the checksum/`tr`/`cut`/`date` families, and more; `pi_builtins::utility_builtins()` is the authoritative list.
+Beyond the bash builtins, session creation registers the in-process command-line utility builtins implemented in the `zero2ai-builtins` crate (`crates/zero2ai-builtins`) — in-house ports of uutils coreutils/findutils/sed and jaq built on `uucore` 0.8.0. The set includes `cat`, `head`, `tail`, `wc`, `sort`, `uniq`, `ls`, `find`, `grep`, `mkdir`, `rm`, `mv`, `ln`, `sed`, `jq`, `fd`, `diff`, the checksum/`tr`/`cut`/`date` families, and more; `zero2ai_builtins::utility_builtins()` is the authoritative list.
 
 Three search-related builtins are worth calling out:
 
-- `grep` is implemented on the ripgrep libraries (`grep-regex`/`grep-searcher`), with recursive directory walks served by `pi-walker`.
+- `grep` is implemented on the ripgrep libraries (`grep-regex`/`grep-searcher`), with recursive directory walks served by `zero2ai-walker`.
 - `rg` is a sibling builtin with ripgrep defaults (recursive search, ignore/hidden filtering, binary suppression) — a separate module and argument model, not an alias of `grep`.
-- `fd` is backed by `pi-walker`, `globset`, and `regex`.
+- `fd` is backed by `zero2ai-walker`, `globset`, and `regex`.
 
-Each builtin runs inside the shell process (no `fork`/`exec`) against the `pi-builtins` `Host` view of the shell (`src/host.rs`): stdio routes through the command's (possibly piped/redirected) file descriptors, path operands resolve against the shell working directory, the shell's exported environment is visible, and abort/timeout cancellation is honored. Because these builtins shadow system binaries, registration is gated in `crates/pi-shell/src/shell.rs`:
+Each builtin runs inside the shell process (no `fork`/`exec`) against the `zero2ai-builtins` `Host` view of the shell (`src/host.rs`): stdio routes through the command's (possibly piped/redirected) file descriptors, path operands resolve against the shell working directory, the shell's exported environment is visible, and abort/timeout cancellation is honored. Because these builtins shadow system binaries, registration is gated in `crates/zero2ai-shell/src/shell.rs`:
 
-- `PI_DISABLE_UUTILS_BUILTINS` disables the whole utility set (bare names resolve to system binaries again),
-- `PI_DISABLE_UUTILS_DESTRUCTIVE` disables the destructive shadows (`rm`, `mv`, and `ln`, which can clobber via `-f`) together,
-- `PI_DISABLE_RM_BUILTIN` / `PI_DISABLE_MV_BUILTIN` disable `rm`/`mv` individually.
+- `ZERO2AI_DISABLE_UUTILS_BUILTINS` disables the whole utility set (bare names resolve to system binaries again),
+- `ZERO2AI_DISABLE_UUTILS_DESTRUCTIVE` disables the destructive shadows (`rm`, `mv`, and `ln`, which can clobber via `-f`) together,
+- `ZERO2AI_DISABLE_RM_BUILTIN` / `ZERO2AI_DISABLE_MV_BUILTIN` disable `rm`/`mv` individually.
 
 ### Runtime lifecycle and state transitions
 
@@ -99,7 +99,7 @@ One-shot shell (`executeShell`) always creates and drops a fresh session per cal
 
 ### Cancellation, timeout, and abort
 
-- `CancelToken` is constructed from `timeoutMs` and optional `AbortSignal`, then converted into the shared `pi_shell::cancel::CancelToken`.
+- `CancelToken` is constructed from `timeoutMs` and optional `AbortSignal`, then converted into the shared `zero2ai_shell::cancel::CancelToken`.
 - On cancellation/timeout, shell cancellation token is triggered, descendant cleanup runs, then the task gets a 2-second graceful window before forced abort.
 - Structured result flags are used:
   - timeout -> `exitCode` omitted, `timedOut: true`.
@@ -219,7 +219,7 @@ Current JS surface is the `Process` class:
 - `terminate(options?)` is async. By default it uses a 1000ms graceful phase and a 5000ms post-hard-kill wait. Passing `gracefulMs < 0` skips the graceful phase. `group: true` also targets the process group where supported; aborting its signal rejects the promise.
 - `waitForExit(options?)` resolves `true` when the process exits and `false` on timeout; aborting its signal rejects the promise.
 
-The platform-specific implementation lives in `pi_shell::process`; `crates/pi-natives/src/ps.rs` is a N-API shim plus re-exports used by PTY termination.
+The platform-specific implementation lives in `zero2ai_shell::process`; `crates/zero2ai-natives/src/ps.rs` is a N-API shim plus re-exports used by PTY termination.
 
 ## Key parsing subsystem (`keys`)
 

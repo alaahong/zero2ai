@@ -1,7 +1,7 @@
 import { ADVISOR_DEFAULT_BUDGET_PER_UPDATE } from "../advisor/emission-guard";
-import { THINKING_EFFORTS } from "@oh-my-pi/pi-catalog/effort";
-import { DEFAULT_SHARE_URL } from "@oh-my-pi/pi-wire";
-import { SHAPE_VARIANT_NAMES } from "@oh-my-pi/snapcompact";
+import { THINKING_EFFORTS } from "@zero2ai/catalog/effort";
+import { DEFAULT_SHARE_URL } from "@zero2ai/wire";
+import { SHAPE_VARIANT_NAMES } from "@zero2ai/snapcompact";
 import {
 	type BlobDestinationId,
 	type BlobDestinationMetadata,
@@ -476,7 +476,7 @@ export const DEFAULT_BASH_INTERCEPTOR_RULES: BashInterceptorRule[] = [
 			"^\\s*(?:(?:bun|npm|pnpm|yarn)\\s+(?:run\\s+)?(?:dev|start)(?:\\s|$)|(?:vite|next\\s+dev|nuxt\\s+dev|nodemon|lldb|gdb|tail\\s+-f)(?:\\s|$)|docker\\s+compose\\s+up(?!.*(?:\\s-d(?:\\s|$)|--detach))(?:\\s|$))",
 		tool: "hub",
 		message:
-			'Use the `hub` tool (`op:"start"`) for services, watchers, and debuggers so other omp instances can observe and control them.',
+			'Use the `hub` tool (`op:"start"`) for services, watchers, and debuggers so other zero2ai instances can observe and control them.',
 	},
 	{
 		pattern:
@@ -494,9 +494,9 @@ export const SETTINGS_SCHEMA = {
 	// ────────────────────────────────────────────────────────────────────────
 	setupVersion: { type: "number", default: 0 },
 
-	// Auth broker — credentials proxied through a remote `omp auth-broker serve`
+	// Auth broker — credentials proxied through a remote `zero2ai auth-broker serve`
 	// host. Hidden from the UI; populate via env vars or hand-edited config.yml.
-	// Env (`OMP_AUTH_BROKER_URL` / `OMP_AUTH_BROKER_TOKEN`) takes precedence so
+	// Env (`ZERO2AI_AUTH_BROKER_URL` / `ZERO2AI_AUTH_BROKER_TOKEN`) takes precedence so
 	// per-machine overrides remain trivial.
 	"auth.broker.url": { type: "string", default: undefined },
 	"auth.broker.token": { type: "string", default: undefined, credential: true },
@@ -650,7 +650,7 @@ export const SETTINGS_SCHEMA = {
 			group: "Services",
 			label: "Max In-Flight Requests",
 			description:
-				'Maximum concurrent LLM requests per provider id (for example "openai" or "anthropic"), shared across local OMP processes with this config root. Omitted providers are unlimited.',
+				'Maximum concurrent LLM requests per provider id (for example "openai" or "anthropic"), shared across local ZERO2AI processes with this config root. Omitted providers are unlimited.',
 		},
 	},
 
@@ -699,7 +699,7 @@ export const SETTINGS_SCHEMA = {
 				{
 					value: "project",
 					label: "Per-project",
-					description: "Save project role models in .omp/config.yml; missing project roles use global defaults",
+					description: "Save project role models in .zero2ai/config.yml; missing project roles use global defaults",
 				},
 			],
 		},
@@ -2319,7 +2319,7 @@ export const SETTINGS_SCHEMA = {
 			tab: "interaction",
 			group: "Startup & Updates",
 			label: "Check for Updates",
-			description: "Check for omp updates on startup",
+			description: "Check for zero2ai updates on startup",
 		},
 	},
 	"update.channel": {
@@ -2330,7 +2330,7 @@ export const SETTINGS_SCHEMA = {
 			tab: "interaction",
 			group: "Startup & Updates",
 			label: "Update Channel",
-			description: "Update channel used by omp update and the startup update check",
+			description: "Update channel used by zero2ai update and the startup update check",
 			options: [
 				{ value: "stable", label: "Stable" },
 				{ value: "canary", label: "Canary" },
@@ -2556,13 +2556,13 @@ export const SETTINGS_SCHEMA = {
 			group: "Collab",
 			label: "Auto Start",
 			description:
-				"Host every interactive session via collab.relayUrl as it starts and publish it to the local registry (omp collab list); rooms rotate on session switch",
+				"Host every interactive session via collab.relayUrl as it starts and publish it to the local registry (zero2ai collab list); rooms rotate on session switch",
 			options: [
 				{ value: "off", label: "Off", description: "Share only when /collab is run" },
 				{
 					value: "view",
 					label: "View",
-					description: "Auto-host; the registry hands out view-only links (omp collab link --view)",
+					description: "Auto-host; the registry hands out view-only links (zero2ai collab link --view)",
 				},
 				{
 					value: "control",
@@ -3203,7 +3203,7 @@ export const SETTINGS_SCHEMA = {
 	"sharpshooter.injectionTokenLimit": { type: "number", default: 15000 },
 
 	// Auto-Learn (experimental): post-stop nudge to capture lessons to memory
-	// and mint/enhance isolated managed skills under ~/.omp/agent/managed-skills.
+	// and mint/enhance isolated managed skills under ~/.zero2ai/agent/managed-skills.
 	// Master flag is default-off → zero footprint; sub-flags gate behaviour.
 	"autolearn.enabled": {
 		type: "boolean",
@@ -3592,7 +3592,7 @@ export const SETTINGS_SCHEMA = {
 	},
 	"hindsight.retainEveryNTurns": { type: "number", default: 3 },
 	"hindsight.retainOverlapTurns": { type: "number", default: 2 },
-	"hindsight.retainContext": { type: "string", default: "omp" },
+	"hindsight.retainContext": { type: "string", default: "zero2ai" },
 
 	"hindsight.recallBudget": {
 		type: "enum",
@@ -4003,7 +4003,7 @@ export const SETTINGS_SCHEMA = {
 			group: "LSP",
 			label: "Shared Language Servers",
 			description:
-				"Share one language server per project across omp instances via the daemon broker (falls back to private servers when unavailable)",
+				"Share one language server per project across zero2ai instances via the daemon broker (falls back to private servers when unavailable)",
 		},
 	},
 
@@ -4615,7 +4615,7 @@ export const SETTINGS_SCHEMA = {
 			tab: "tools",
 			group: "GitHub",
 			label: "GitHub View Cache",
-			description: "Cache rendered issue/PR view output in ~/.omp/cache/github-cache.db so repeated reads are free",
+			description: "Cache rendered issue/PR view output in ~/.zero2ai/cache/github-cache.db so repeated reads are free",
 		},
 	},
 
@@ -4662,7 +4662,7 @@ export const SETTINGS_SCHEMA = {
 			group: "Available Tools",
 			label: "Security",
 			description:
-				"Enable OMP-native security scan planning, execution, and the read-only security:// resource namespace",
+				"Enable ZERO2AI-native security scan planning, execution, and the read-only security:// resource namespace",
 		},
 	},
 
@@ -4708,7 +4708,7 @@ export const SETTINGS_SCHEMA = {
 			group: "Grep & Browser",
 			label: "Browser Relay",
 			description:
-				"Drive your own Chrome tabs through the omp browser relay. Install the extension once (`omp browser-relay install`); the relay server auto-starts when the browser prelude needs it. Takes precedence over Browser CDP URL; set PI_BROWSER_RELAY=0 or PI_BROWSER_RELAY=1 to override.",
+				"Drive your own Chrome tabs through the zero2ai browser relay. Install the extension once (`zero2ai browser-relay install`); the relay server auto-starts when the browser prelude needs it. Takes precedence over Browser CDP URL; set ZERO2AI_BROWSER_RELAY=0 or ZERO2AI_BROWSER_RELAY=1 to override.",
 		},
 	},
 
@@ -4719,7 +4719,7 @@ export const SETTINGS_SCHEMA = {
 			tab: "tools",
 			group: "Grep & Browser",
 			label: "Browser Relay URL",
-			description: "omp browser relay endpoint (default http://127.0.0.1:9224).",
+			description: "zero2ai browser relay endpoint (default http://127.0.0.1:9224).",
 		},
 	},
 
@@ -4742,7 +4742,7 @@ export const SETTINGS_SCHEMA = {
 			group: "Grep & Browser",
 			label: "cmux Browser",
 			description:
-				"Use cmux WKWebView surfaces for browser automation when a cmux socket is available. Set PI_BROWSER_CMUX=0 or PI_BROWSER_CMUX=1 to override.",
+				"Use cmux WKWebView surfaces for browser automation when a cmux socket is available. Set ZERO2AI_BROWSER_CMUX=0 or ZERO2AI_BROWSER_CMUX=1 to override.",
 		},
 	},
 	"browser.freezeOnTurnEnd": {
@@ -4753,7 +4753,7 @@ export const SETTINGS_SCHEMA = {
 			group: "Grep & Browser",
 			label: "Freeze Browser Tabs On Turn End",
 			description:
-				"Freeze OMP-owned headless browser tabs when a turn settles so animated pages stop burning CPU/GPU while idle. Tabs unfreeze automatically on next use; pass persist:true on open to opt a tab out.",
+				"Freeze ZERO2AI-owned headless browser tabs when a turn settles so animated pages stop burning CPU/GPU while idle. Tabs unfreeze automatically on next use; pass persist:true on open to opt a tab out.",
 		},
 	},
 	"browser.idleCloseSec": {
@@ -4764,7 +4764,7 @@ export const SETTINGS_SCHEMA = {
 			group: "Grep & Browser",
 			label: "Browser Idle Close Timeout",
 			description:
-				"Close OMP-owned headless browser tabs idle longer than this many seconds (0 = never; session dispose still reaps). Applies only to OMP-launched headless tabs, never relay/CDP/spawned browsers or other sessions' tabs.",
+				"Close ZERO2AI-owned headless browser tabs idle longer than this many seconds (0 = never; session dispose still reaps). Applies only to ZERO2AI-launched headless tabs, never relay/CDP/spawned browsers or other sessions' tabs.",
 			options: [
 				{ value: "0", label: "Never" },
 				{ value: "900", label: "15 minutes" },
@@ -5036,7 +5036,7 @@ export const SETTINGS_SCHEMA = {
 			group: "Modes",
 			label: "Autosave Directory",
 			description:
-				"Directory for autosaved plans. Supports ~, absolute, and cwd-relative paths. Empty uses <project>/.omp/plans/.",
+				"Directory for autosaved plans. Supports ~, absolute, and cwd-relative paths. Empty uses <project>/.zero2ai/plans/.",
 			condition: "planAutosaveEnabled",
 		},
 	},
@@ -5208,7 +5208,7 @@ export const SETTINGS_SCHEMA = {
 			group: "Isolation",
 			label: "Worktree Base Directory",
 			description:
-				"Base directory for agent-managed worktrees — task-isolation copies, `github` PR checkouts, and `omp worktree` cleanup all live here. Unset uses ~/.omp/wt. Must be an absolute or ~-relative path; relative paths are ignored. The OMP_WORKTREE_DIR env var overrides this.",
+				"Base directory for agent-managed worktrees — task-isolation copies, `github` PR checkouts, and `zero2ai worktree` cleanup all live here. Unset uses ~/.zero2ai/wt. Must be an absolute or ~-relative path; relative paths are ignored. The ZERO2AI_WORKTREE_DIR env var overrides this.",
 		},
 	},
 
@@ -5804,7 +5804,7 @@ export const SETTINGS_SCHEMA = {
 			group: "Tiny Model",
 			label: "Tiny Model Device",
 			description:
-				"Inference backend for local tiny models (titles + memory): an ONNX execution provider, or `mlx` to download MLX weights and run them through mlx-lm on Apple silicon. Default uses CPU-only ONNX. The PI_TINY_DEVICE env var overrides this.",
+				"Inference backend for local tiny models (titles + memory): an ONNX execution provider, or `mlx` to download MLX weights and run them through mlx-lm on Apple silicon. Default uses CPU-only ONNX. The ZERO2AI_TINY_DEVICE env var overrides this.",
 			options: TINY_MODEL_DEVICE_SETTING_OPTIONS,
 		},
 	},
@@ -5817,7 +5817,7 @@ export const SETTINGS_SCHEMA = {
 			group: "Tiny Model",
 			label: "Tiny Model Precision",
 			description:
-				"ONNX quantization/precision for local tiny models. Default uses each model's shipped dtype (q4); lower precision is faster, higher is more faithful. Ignored by the MLX backend (its repos are pre-quantized 4-bit). The PI_TINY_DTYPE env var overrides this.",
+				"ONNX quantization/precision for local tiny models. Default uses each model's shipped dtype (q4); lower precision is faster, higher is more faithful. Ignored by the MLX backend (its repos are pre-quantized 4-bit). The ZERO2AI_TINY_DTYPE env var overrides this.",
 			options: TINY_MODEL_DTYPE_SETTING_OPTIONS,
 		},
 	},
@@ -5956,7 +5956,7 @@ export const SETTINGS_SCHEMA = {
 					value: "auto",
 					label: "Auto",
 					description:
-						"Provider default — Anthropic OAuth subscriber sessions default to 1h, API keys use 5m kept warm by idle keep-alive refreshes; PI_CACHE_RETENTION still applies",
+						"Provider default — Anthropic OAuth subscriber sessions default to 1h, API keys use 5m kept warm by idle keep-alive refreshes; ZERO2AI_CACHE_RETENTION still applies",
 				},
 				{
 					value: "short",
@@ -6224,7 +6224,7 @@ export const SETTINGS_SCHEMA = {
 			group: "Extensions",
 			label: "Tool Call Handler Timeout (ms)",
 			description:
-				"Positive finite active-work timeout for extension tool_call handlers; invalid values use 30000ms, and time awaiting OMP-owned dialogs does not count",
+				"Positive finite active-work timeout for extension tool_call handlers; invalid values use 30000ms, and time awaiting ZERO2AI-owned dialogs does not count",
 		},
 	},
 

@@ -1,5 +1,5 @@
 import { scheduler } from "node:timers/promises";
-import type { AgentToolResult, AgentToolUpdateCallback } from "@oh-my-pi/pi-agent-core";
+import type { AgentToolResult, AgentToolUpdateCallback } from "@zero2ai/agent-core";
 import { github } from "../utils/github";
 import type { ToolSession } from ".";
 import type {

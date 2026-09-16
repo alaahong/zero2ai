@@ -1,5 +1,5 @@
 /**
- * Live status board for `omp cleanse`.
+ * Live status board for `zero2ai cleanse`.
  *
  * Interactive terminals get a transient board repainted in place: a phase
  * spinner (model resolution, checker discovery), one row per running checker,
@@ -10,8 +10,8 @@
  * Non-TTY output keeps the original plain-line protocol
  * (`[start]`/`[done]`/`[fail]`), so scripted callers see unchanged output.
  */
-import { formatDuration, formatNumber, sanitizeText } from "@oh-my-pi/pi-utils";
-import chalk from "@oh-my-pi/pi-utils/chalk";
+import { formatDuration, formatNumber, sanitizeText } from "@zero2ai/utils";
+import chalk from "@zero2ai/utils/chalk";
 import { createLiveBoard, type LiveBoardOutput } from "../cli/live-board";
 import type { AgentProgress } from "../task/types";
 import type { CleanseCheckerDescriptor } from "./checkers";
@@ -21,7 +21,7 @@ const BAR_WIDTH = 16;
 const ACTIVITY_WIDTH = 96;
 const ERROR_WIDTH = 300;
 
-/** Rendering surface for one `omp cleanse` run. */
+/** Rendering surface for one `zero2ai cleanse` run. */
 export interface CleanseStatusBoard {
 	readonly interactive: boolean;
 	/** Print a permanent line above the live area (plain write when non-TTY). */

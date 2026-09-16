@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "bun:test";
-import { INTENT_FIELD } from "@oh-my-pi/pi-wire";
+import { INTENT_FIELD } from "@zero2ai/wire";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
@@ -109,7 +109,7 @@ describe("Skill URI reader capability", () => {
 			{ createContext: () => ({}) } as unknown as ExtensionRunner,
 		);
 		const tools = projectSystemPromptToolMetadata(new Map([[definition.name, adapter]]), { mode: "full" });
-		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-custom-reader-bridge-"));
+		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-custom-reader-bridge-"));
 		try {
 			const skillDir = path.join(tempDir, "skills", "bridge-skill");
 			await fs.mkdir(skillDir, { recursive: true });

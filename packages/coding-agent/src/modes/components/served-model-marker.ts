@@ -1,6 +1,6 @@
-import type { AssistantMessage } from "@oh-my-pi/pi-ai";
-import { classifyModel } from "@oh-my-pi/pi-catalog/identity";
-import { type Component, truncateToWidth } from "@oh-my-pi/pi-tui";
+import type { AssistantMessage } from "@zero2ai/ai";
+import { classifyModel } from "@zero2ai/catalog/identity";
+import { type Component, truncateToWidth } from "@zero2ai/tui";
 import { theme } from "../../modes/theme/theme";
 
 /** A turn whose response provably came from a different model than was requested. */

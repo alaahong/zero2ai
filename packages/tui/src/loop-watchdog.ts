@@ -1,5 +1,5 @@
 import { performance } from "node:perf_hooks";
-import { logger, takeRecentLoopPhase } from "@oh-my-pi/pi-utils";
+import { logger, takeRecentLoopPhase } from "@zero2ai/utils";
 
 export interface LoopWatchdogOptions {
 	/** How far ahead each probe tick is scheduled, in ms. Default 250. */

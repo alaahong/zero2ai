@@ -17,8 +17,8 @@
  * - history://<agentId> - Concise markdown transcript of that agent
  * - history://current/full - Full, caller-bound current branch history (experimental)
  */
-import type { AgentMessage } from "@oh-my-pi/pi-agent-core";
-import type { AssistantMessage } from "@oh-my-pi/pi-ai";
+import type { AgentMessage } from "@zero2ai/agent-core";
+import type { AssistantMessage } from "@zero2ai/ai";
 import type { AgentRef } from "../registry/agent-registry";
 import { AgentRegistry } from "../registry/agent-registry";
 import { ensurePersistedRoster } from "../registry/persisted-agents";

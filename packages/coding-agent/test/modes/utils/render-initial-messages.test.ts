@@ -5,26 +5,26 @@
  * `sessionManager.buildSessionContext()` — the LLM-context builder — must not be
  * consulted for display.
  *
- * Also guards the cold-launch terminal cleanup: `omp` / `omp -c` leave the
+ * Also guards the cold-launch terminal cleanup: `zero2ai` / `zero2ai -c` leave the
  * previous run's transcript in native scrollback because the TUI's initial
  * paint preserves it, so the cold-launch render must request a
  * scrollback-clearing repaint (`clearTerminalHistory`).
  */
 
 import { afterEach, beforeAll, beforeEach, describe, expect, it, type Mock, vi } from "bun:test";
-import type { AgentMessage } from "@oh-my-pi/pi-agent-core";
-import type { AssistantMessage, ImageContent, Message, Usage } from "@oh-my-pi/pi-ai";
-import { kStreamingPartialJson } from "@oh-my-pi/pi-ai/utils/block-symbols";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AssistantMessageComponent } from "@oh-my-pi/pi-coding-agent/modes/components/assistant-message";
-import { TranscriptContainer } from "@oh-my-pi/pi-coding-agent/modes/components/transcript-container";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import type { InteractiveModeContext, RenderSessionContextOptions } from "@oh-my-pi/pi-coding-agent/modes/types";
-import { UiHelpers } from "@oh-my-pi/pi-coding-agent/modes/utils/ui-helpers";
-import type { SessionContext, StrippedToolCallsMarker } from "@oh-my-pi/pi-coding-agent/session/session-context";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { type Component, Container, Image, ImageProtocol, setTerminalImageProtocol, TERMINAL } from "@oh-my-pi/pi-tui";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import type { AgentMessage } from "@zero2ai/agent-core";
+import type { AssistantMessage, ImageContent, Message, Usage } from "@zero2ai/ai";
+import { kStreamingPartialJson } from "@zero2ai/ai/utils/block-symbols";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
+import { AssistantMessageComponent } from "@zero2ai/coding-agent/modes/components/assistant-message";
+import { TranscriptContainer } from "@zero2ai/coding-agent/modes/components/transcript-container";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import type { InteractiveModeContext, RenderSessionContextOptions } from "@zero2ai/coding-agent/modes/types";
+import { UiHelpers } from "@zero2ai/coding-agent/modes/utils/ui-helpers";
+import type { SessionContext, StrippedToolCallsMarker } from "@zero2ai/coding-agent/session/session-context";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { type Component, Container, Image, ImageProtocol, setTerminalImageProtocol, TERMINAL } from "@zero2ai/tui";
+import { TempDir } from "@zero2ai/utils";
 
 beforeAll(() => {
 	initTheme();
@@ -490,7 +490,7 @@ describe("UiHelpers.renderInitialMessages — image replay", () => {
 	it("replays reopened session image blocks through the cold-start rebuild path", async () => {
 		await Settings.init({ inMemory: true, overrides: { "terminal.showImages": true } });
 		setTerminalImageProtocol(ImageProtocol.Sixel);
-		using tempDir = TempDir.createSync("@pi-render-initial-image-replay-");
+		using tempDir = TempDir.createSync("@zero2ai-render-initial-image-replay-");
 		const session = SessionManager.create(tempDir.path(), tempDir.path());
 		session.appendMessage(assistantToolCall("read-reopened", "read", { path: "reopened.png" }));
 		session.appendMessage({

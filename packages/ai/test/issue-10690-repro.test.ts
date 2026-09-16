@@ -1,12 +1,12 @@
 import { describe, expect, it } from "bun:test";
-import { streamOpenAIResponses } from "@oh-my-pi/pi-ai/providers/openai-responses";
+import { streamOpenAIResponses } from "@zero2ai/ai/providers/openai-responses";
 import {
 	convertResponsesAssistantMessage,
 	SYNTHETIC_REASONING_REPLAY_PLACEHOLDER,
-} from "@oh-my-pi/pi-ai/providers/openai-shared";
-import type { AssistantMessage, Context, Model } from "@oh-my-pi/pi-ai/types";
-import { Effort } from "@oh-my-pi/pi-catalog/effort";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
+} from "@zero2ai/ai/providers/openai-shared";
+import type { AssistantMessage, Context, Model } from "@zero2ai/ai/types";
+import { Effort } from "@zero2ai/catalog/effort";
+import { getBundledModel } from "@zero2ai/catalog/models";
 
 // Issue #10690: follow-up to #8248. The Responses reasoning synthesizer replays a
 // reasoning item for each assistant turn a DeepSeek-family target requires. When

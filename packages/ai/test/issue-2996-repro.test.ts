@@ -16,10 +16,10 @@
  * See issue #2996 for the reported (non-reproducing) scenario this defends.
  */
 import { describe, expect, it } from "bun:test";
-import { streamOpenAICompletions } from "@oh-my-pi/pi-ai/providers/openai-completions";
-import type { Context, FetchImpl, Model, ModelSpec } from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
+import { streamOpenAICompletions } from "@zero2ai/ai/providers/openai-completions";
+import type { Context, FetchImpl, Model, ModelSpec } from "@zero2ai/ai/types";
+import { buildModel } from "@zero2ai/catalog/build";
+import { getBundledModel } from "@zero2ai/catalog/models";
 
 function createSseResponse(events: unknown[]): Response {
 	const payload = `${events

@@ -1,5 +1,5 @@
-import { type } from "@oh-my-pi/omptype";
-import { once } from "@oh-my-pi/pi-utils";
+import { type } from "@zero2ai/schema";
+import { once } from "@zero2ai/utils";
 
 export const getModelsConfigSchemaBundle = once(() => {
 	const OpenRouterRoutingSchema = type({
@@ -327,13 +327,13 @@ export const getModelsConfigSchemaBundle = once(() => {
 		 */
 		"requestMetadata?": { "[string]": "string" },
 		/**
-		 * Streaming transport override. When set to `"pi-native"`, omp dispatches
+		 * Streaming transport override. When set to `"zero2ai-native"`, zero2ai dispatches
 		 * every model under this provider via the auth-gateway's
 		 * `POST /v1/pi/stream` endpoint instead of the per-provider SDK. The
-		 * provider's `baseUrl` must point at a compatible `omp auth-gateway`
+		 * provider's `baseUrl` must point at a compatible `zero2ai auth-gateway`
 		 * and `apiKey` must carry the gateway bearer.
 		 */
-		"transport?": '"pi-native"',
+		"transport?": '"zero2ai-native"',
 	}).narrow((value, ctx) => {
 		if (value.baseUrl !== undefined && typeof value.baseUrl === "string" && value.baseUrl.length === 0) {
 			return ctx.mustBe("baseUrl a non-empty string");

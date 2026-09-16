@@ -19,16 +19,16 @@ import * as fs from "node:fs";
 import * as fsp from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { InternalUrlRouter } from "@oh-my-pi/pi-coding-agent/internal-urls";
-import { resetRegisteredArtifactDirsForTests } from "@oh-my-pi/pi-coding-agent/internal-urls/registry-helpers";
-import { AgentRegistry, MAIN_AGENT_ID } from "@oh-my-pi/pi-coding-agent/registry/agent-registry";
-import { ensurePersistedRoster } from "@oh-my-pi/pi-coding-agent/registry/persisted-agents";
-import { CURRENT_SESSION_VERSION } from "@oh-my-pi/pi-coding-agent/session/session-entries";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { expandInternalUrls } from "@oh-my-pi/pi-coding-agent/tools/bash-skill-urls";
-import { GlobTool } from "@oh-my-pi/pi-coding-agent/tools/glob";
-import { GrepTool } from "@oh-my-pi/pi-coding-agent/tools/grep";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { InternalUrlRouter } from "@zero2ai/coding-agent/internal-urls";
+import { resetRegisteredArtifactDirsForTests } from "@zero2ai/coding-agent/internal-urls/registry-helpers";
+import { AgentRegistry, MAIN_AGENT_ID } from "@zero2ai/coding-agent/registry/agent-registry";
+import { ensurePersistedRoster } from "@zero2ai/coding-agent/registry/persisted-agents";
+import { CURRENT_SESSION_VERSION } from "@zero2ai/coding-agent/session/session-entries";
+import type { ToolSession } from "@zero2ai/coding-agent/tools";
+import { expandInternalUrls } from "@zero2ai/coding-agent/tools/bash-skill-urls";
+import { GlobTool } from "@zero2ai/coding-agent/tools/glob";
+import { GrepTool } from "@zero2ai/coding-agent/tools/grep";
 
 function sessionHeader(id: string): string {
 	return JSON.stringify({

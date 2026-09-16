@@ -63,8 +63,8 @@ import {
 	StopRequestResponseSchema,
 	SubagentStartRequestResponseSchema,
 	SubagentStopRequestResponseSchema,
-} from "@oh-my-pi/pi-catalog/discovery/cursor-proto";
-import { create } from "@oh-my-pi/pi-catalog/discovery/protobuf";
+} from "@zero2ai/catalog/discovery/cursor-proto";
+import { create } from "@zero2ai/catalog/discovery/protobuf";
 import type { ToolResultMessage } from "../../types";
 
 /**
@@ -126,7 +126,7 @@ function positiveCount(value: unknown): number | undefined {
  * The entry cap a listing hit, from either shape a local tool records it in.
  *
  * `glob` sets a flat `details.resultLimitReached` alongside the structured
- * meta; `read` — which serves `pi_ls` — records the cap only through
+ * meta; `read` — which serves `zero2ai_ls` — records the cap only through
  * `OutputMeta` at `details.meta.limits.resultLimit.reached`. Reading just the
  * flat field dropped `entry_limit_reached` for every real listing, so Cursor
  * received clipped output with no incompleteness signal.
@@ -382,7 +382,7 @@ export function buildPiLsError(error: string): PiLsExecResult {
  * `RequestContext.tools`.
  *
  * This client hosts no MCP servers of its own: every forwarded tool is a local
- * pi-agent tool published under a synthetic `providerIdentifier`. Regrouping
+ * zero2ai-agent tool published under a synthetic `providerIdentifier`. Regrouping
  * the same list keeps the server's view of "which servers exist and what do
  * they expose" consistent with what it was told at context time, instead of
  * claiming zero servers while tool calls for them keep arriving.

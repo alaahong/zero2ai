@@ -3,11 +3,11 @@
  *
  * Converts MCP tool definitions to CustomTool format for the agent.
  */
-import type { AgentToolUpdateCallback } from "@oh-my-pi/pi-agent-core";
-import type { ImageContent, TextContent, TSchema } from "@oh-my-pi/pi-ai";
-import { normalizeSchemaForMCP } from "@oh-my-pi/pi-ai/utils/schema";
-import { logger, untilAborted } from "@oh-my-pi/pi-utils";
-import { INTENT_FIELD } from "@oh-my-pi/pi-wire";
+import type { AgentToolUpdateCallback } from "@zero2ai/agent-core";
+import type { ImageContent, TextContent, TSchema } from "@zero2ai/ai";
+import { normalizeSchemaForMCP } from "@zero2ai/ai/utils/schema";
+import { logger, untilAborted } from "@zero2ai/utils";
+import { INTENT_FIELD } from "@zero2ai/wire";
 import type { SourceMeta } from "../capability/types";
 import type {
 	CustomTool,
@@ -485,7 +485,7 @@ export function createMCPToolName(serverName: string, toolName: string): string 
  * order. Empty when the name is not `mcp__`-prefixed or is already canonical.
  *
  * {@link createMCPToolName} joins the sanitized server and tool with a SINGLE
- * underscore, but OMP presents itself as Claude Code, whose convention is
+ * underscore, but ZERO2AI presents itself as Claude Code, whose convention is
  * `mcp__<server>__<tool>` — so a primed model reliably emits the doubled
  * separator, often keeping the raw unsanitized server spelling as well
  * (`mcp__seedpatch-client__bank` for a server named `seedpatch-client`). Those

@@ -1,18 +1,18 @@
 import { afterEach, describe, expect, it, vi } from "bun:test";
-import type { OAuthCredential } from "@oh-my-pi/pi-ai";
-import { resolveApiKeyOnce } from "@oh-my-pi/pi-ai/auth-retry";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AgentLifecycleManager } from "@oh-my-pi/pi-coding-agent/registry/agent-lifecycle";
-import { AgentRegistry } from "@oh-my-pi/pi-coding-agent/registry/agent-registry";
-import { createAgentSession } from "@oh-my-pi/pi-coding-agent/sdk";
-import type { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import * as discoveryModule from "@oh-my-pi/pi-coding-agent/task/discovery";
-import * as executorModule from "@oh-my-pi/pi-coding-agent/task/executor";
-import type { AgentDefinition, SingleResult } from "@oh-my-pi/pi-coding-agent/task/types";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import type { OAuthCredential } from "@zero2ai/ai";
+import { resolveApiKeyOnce } from "@zero2ai/ai/auth-retry";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { AgentLifecycleManager } from "@zero2ai/coding-agent/registry/agent-lifecycle";
+import { AgentRegistry } from "@zero2ai/coding-agent/registry/agent-registry";
+import { createAgentSession } from "@zero2ai/coding-agent/sdk";
+import type { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import * as discoveryModule from "@zero2ai/coding-agent/task/discovery";
+import * as executorModule from "@zero2ai/coding-agent/task/executor";
+import type { AgentDefinition, SingleResult } from "@zero2ai/coding-agent/task/types";
+import { TempDir } from "@zero2ai/utils";
 import { createInMemoryAuthStorage } from "./helpers/agent-session-setup";
 
 const taskAgent: AgentDefinition = {
@@ -75,7 +75,7 @@ afterEach(() => {
 
 describe("task subagent OAuth pin inheritance", () => {
 	it("keeps inherited credentials and metadata on the parent's account affinity", async () => {
-		const tempDir = TempDir.createSync("@pi-subagent-auth-pin-");
+		const tempDir = TempDir.createSync("@zero2ai-subagent-auth-pin-");
 		const authStorage = createInMemoryAuthStorage();
 		const sessions: AgentSession[] = [];
 		try {

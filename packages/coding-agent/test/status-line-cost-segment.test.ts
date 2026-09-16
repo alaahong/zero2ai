@@ -1,10 +1,10 @@
 import { beforeAll, describe, expect, it } from "bun:test";
 import { stripVTControlCharacters } from "node:util";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import type { Model } from "@oh-my-pi/pi-catalog/types";
-import { renderSegment } from "@oh-my-pi/pi-coding-agent/modes/components/status-line/segments";
-import type { SegmentContext } from "@oh-my-pi/pi-coding-agent/modes/components/status-line/types";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import type { Model } from "@zero2ai/catalog/types";
+import { renderSegment } from "@zero2ai/coding-agent/modes/components/status-line/segments";
+import type { SegmentContext } from "@zero2ai/coding-agent/modes/components/status-line/types";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
 
 beforeAll(async () => {
 	await initTheme();

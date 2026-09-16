@@ -19,9 +19,9 @@ import type {
 	ToolResultMessage,
 	ToolResultProviderMetadata,
 	TSchema,
-} from "@oh-my-pi/pi-ai";
-import type { Dialect } from "@oh-my-pi/pi-ai/dialect";
-import type { HarmonyAuditEvent } from "@oh-my-pi/pi-ai/utils/harmony-leak";
+} from "@zero2ai/ai";
+import type { Dialect } from "@zero2ai/ai/dialect";
+import type { HarmonyAuditEvent } from "@zero2ai/ai/utils/harmony-leak";
 import type { AppendOnlyContextManager } from "./append-only-context";
 import type { AgentRunCoverage, AgentRunSummary } from "./run-collector";
 import type { AgentTelemetryConfig } from "./telemetry";
@@ -409,7 +409,7 @@ export interface AgentLoopConfig extends SimpleStreamOptions {
 	 * - `false`: let the request finish and silently discard everything past the
 	 *   fabrication boundary (keeps the connection alive but pays for the tokens
 	 *   the model spends on the discarded tail).
-	 * Only meaningful when {@link dialect} (or `PI_DIALECT`) selects an
+	 * Only meaningful when {@link dialect} (or `ZERO2AI_DIALECT`) selects an
 	 * owned dialect; native tool calling never fabricates results in text.
 	 */
 	abortOnFabricatedToolResult?: boolean;
@@ -862,7 +862,7 @@ export interface AfterToolCallContext {
  *
  * @example
  * ```typescript
- * declare module "@oh-my-pi/agent" {
+ * declare module "@zero2ai/agent" {
  *   interface CustomAgentMessages {
  *     artifact: ArtifactMessage;
  *     notification: NotificationMessage;

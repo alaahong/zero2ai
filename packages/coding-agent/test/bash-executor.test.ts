@@ -2,21 +2,21 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { ImageContent } from "@oh-my-pi/pi-ai";
-import { resetSettingsForTest, Settings, type ShellMinimizerSettings } from "@oh-my-pi/pi-coding-agent/config/settings";
+import type { ImageContent } from "@zero2ai/ai";
+import { resetSettingsForTest, Settings, type ShellMinimizerSettings } from "@zero2ai/coding-agent/config/settings";
 import {
 	applyDirenvPreflight,
 	buildMinimizerOptions,
 	executeBash,
 	isPersistentShellCdCommand,
-} from "@oh-my-pi/pi-coding-agent/exec/bash-executor";
-import * as direnvModule from "@oh-my-pi/pi-coding-agent/exec/direnv";
-import { DEFAULT_MAX_BYTES } from "@oh-my-pi/pi-coding-agent/session/streaming-output";
-import * as shellSnapshot from "@oh-my-pi/pi-coding-agent/utils/shell-snapshot";
-import { encodeTerminalImage } from "@oh-my-pi/pi-coding-agent/utils/terminal-graphics";
-import type { Shell, ShellRunResult } from "@oh-my-pi/pi-natives";
-import * as piNatives from "@oh-my-pi/pi-natives";
-import { removeSyncWithRetries } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/exec/bash-executor";
+import * as direnvModule from "@zero2ai/coding-agent/exec/direnv";
+import { DEFAULT_MAX_BYTES } from "@zero2ai/coding-agent/session/streaming-output";
+import * as shellSnapshot from "@zero2ai/coding-agent/utils/shell-snapshot";
+import { encodeTerminalImage } from "@zero2ai/coding-agent/utils/terminal-graphics";
+import type { Shell, ShellRunResult } from "@zero2ai/natives";
+import * as piNatives from "@zero2ai/natives";
+import { removeSyncWithRetries } from "@zero2ai/utils";
 
 // Matches the schema default for `tools.artifactHeadBytes` (20 KB) used by
 // OutputSink when bash-executor pulls settings via resolveOutputSinkHeadBytes.
@@ -32,7 +32,7 @@ const KILL_SETTLE_MS = 25; // let the kill signal land before we touch `release`
 const KILL_REACT_MS = 50; // > one poll interval: a survivor would write its marker
 
 function makeTempDir(): string {
-	return fs.mkdtempSync(path.join(os.tmpdir(), "omp-bash-exec-"));
+	return fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-bash-exec-"));
 }
 
 function shellQuote(value: string): string {
@@ -253,19 +253,19 @@ describe("executeBash", () => {
 	});
 
 	it("passes env vars", async () => {
-		const result = await executeBash("echo $PI_TEST_ENV", {
+		const result = await executeBash("echo $ZERO2AI_TEST_ENV", {
 			cwd: tempDir,
 			timeout: 5000,
-			env: { PI_TEST_ENV: "hello" },
+			env: { ZERO2AI_TEST_ENV: "hello" },
 		});
 		expect(result.output.trim()).toBe("hello");
 	});
 
 	it("applies non-interactive environment defaults", async () => {
-		const result = await executeBash('echo "$AGENT:$GIT_TERMINAL_PROMPT:$PI_TEST_ENV"', {
+		const result = await executeBash('echo "$AGENT:$GIT_TERMINAL_PROMPT:$ZERO2AI_TEST_ENV"', {
 			cwd: tempDir,
 			timeout: 5000,
-			env: { PI_TEST_ENV: "hello" },
+			env: { ZERO2AI_TEST_ENV: "hello" },
 		});
 		expect(result.output.trim()).toBe("1:0:hello");
 	});
@@ -275,7 +275,7 @@ describe("executeBash", () => {
 			return;
 		}
 
-		const shellDir = fs.mkdtempSync(path.join(os.tmpdir(), "omp-shellpath-"));
+		const shellDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-shellpath-"));
 		const marker = path.join(shellDir, "fake-shell-ran");
 		const markerEscaped = marker.replace(/'/g, "'\\''");
 		const fakeShell = path.join(shellDir, "fake-shell");
@@ -326,7 +326,7 @@ exit 64
 	it("persists cd, bare cd, and cd - when shortcut commands use a non-bash user shell", async () => {
 		if (process.platform === "win32") return;
 
-		const shellDir = fs.mkdtempSync(path.join(os.tmpdir(), "omp-cd-shellpath-"));
+		const shellDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-cd-shellpath-"));
 		const marker = path.join(shellDir, "fake-shell-ran");
 		const fakeShell = path.join(shellDir, "fake-shell");
 		const childDir = path.join(tempDir, "child");
@@ -411,7 +411,7 @@ exit 64
 		}
 
 		const originalShell = Bun.env.SHELL;
-		const shellDir = fs.mkdtempSync(path.join(os.tmpdir(), "omp-env-shell-"));
+		const shellDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-env-shell-"));
 		const marker = path.join(shellDir, "env-shell-ran");
 		const markerEscaped = marker.replace(/'/g, "'\\''");
 		const fakeShell = path.join(shellDir, "fish");
@@ -480,8 +480,8 @@ exit 64
 			return;
 		}
 
-		const shellDir = fs.mkdtempSync(path.join(os.tmpdir(), "omp-zsh-shellpath-"));
-		fs.writeFileSync(path.join(shellDir, ".zshrc"), "alias pi_shell_alias='printf zsh-alias-ok\\\\n'\n");
+		const shellDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-zsh-shellpath-"));
+		fs.writeFileSync(path.join(shellDir, ".zshrc"), "alias zero2ai_shell_alias='printf zsh-alias-ok\\\\n'\n");
 		Settings.instance.set("shellPath", zshPath);
 
 		vi.spyOn(Settings.prototype, "getShellConfig").mockReturnValue({
@@ -502,7 +502,7 @@ exit 64
 		});
 
 		try {
-			const result = await executeBash("pi_shell_alias", {
+			const result = await executeBash("zero2ai_shell_alias", {
 				cwd: tempDir,
 				timeout: 5000,
 				sessionKey: "zsh-shell-path",
@@ -529,13 +529,13 @@ exit 64
 			return;
 		}
 
-		const shellDir = fs.mkdtempSync(path.join(os.tmpdir(), "omp-fish-shellpath-"));
+		const shellDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-fish-shellpath-"));
 		const configDir = path.join(shellDir, ".config", "fish");
 		fs.mkdirSync(path.join(configDir, "conf.d"), { recursive: true });
-		fs.writeFileSync(path.join(configDir, "config.fish"), "function pi_fish_fn; echo fish-fn-ok; end\n");
+		fs.writeFileSync(path.join(configDir, "config.fish"), "function zero2ai_fish_fn; echo fish-fn-ok; end\n");
 		// Login-gated snippet: fires only when the spawned fish is a login shell.
 		fs.writeFileSync(
-			path.join(configDir, "conf.d", "pi-login.fish"),
+			path.join(configDir, "conf.d", "zero2ai-login.fish"),
 			"if status is-login; echo fish-login-side-effect; end\n",
 		);
 		Settings.instance.set("shellPath", fishPath);
@@ -551,7 +551,7 @@ exit 64
 		});
 
 		try {
-			const result = await executeBash("pi_fish_fn", {
+			const result = await executeBash("zero2ai_fish_fn", {
 				cwd: tempDir,
 				timeout: 5000,
 				sessionKey: "fish-shell-path",
@@ -570,7 +570,7 @@ exit 64
 	});
 
 	it("runs zsh shortcut commands on a headless PTY with a color-capable TTY", async () => {
-		if (process.platform === "win32" || Bun.env.PI_NO_PTY === "1") {
+		if (process.platform === "win32" || Bun.env.ZERO2AI_NO_PTY === "1") {
 			return;
 		}
 		const zshPath = ["/bin/zsh", "/usr/bin/zsh", "/usr/local/bin/zsh", "/opt/homebrew/bin/zsh"].find(candidate =>
@@ -580,8 +580,8 @@ exit 64
 			return;
 		}
 
-		const shellDir = fs.mkdtempSync(path.join(os.tmpdir(), "omp-zsh-pty-"));
-		fs.writeFileSync(path.join(shellDir, ".zshrc"), "alias pi_pty_alias='printf pty-alias-ok'\n");
+		const shellDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-zsh-pty-"));
+		fs.writeFileSync(path.join(shellDir, ".zshrc"), "alias zero2ai_pty_alias='printf pty-alias-ok'\n");
 		Settings.instance.set("shellPath", zshPath);
 
 		vi.spyOn(Settings.prototype, "getShellConfig").mockReturnValue({
@@ -598,7 +598,7 @@ exit 64
 		const rawChunks: string[] = [];
 		try {
 			const result = await executeBash(
-				"pi_pty_alias; [ -t 1 ] && printf ' is-tty'; printf ' \\033[31mred\\033[0m'",
+				"zero2ai_pty_alias; [ -t 1 ] && printf ' is-tty'; printf ' \\033[31mred\\033[0m'",
 				{
 					cwd: tempDir,
 					timeout: 15000,
@@ -794,12 +794,12 @@ exit 64
 		await Bun.sleep(0);
 		vi.restoreAllMocks();
 
-		await executeBash("export PI_AFTER_ABORT=still_persistent", {
+		await executeBash("export ZERO2AI_AFTER_ABORT=still_persistent", {
 			cwd: tempDir,
 			timeout: 5000,
 			sessionKey: "settled-native-abort",
 		});
-		const next = await executeBash("printf '%s\n' \"$PI_AFTER_ABORT\"", {
+		const next = await executeBash("printf '%s\n' \"$ZERO2AI_AFTER_ABORT\"", {
 			cwd: tempDir,
 			timeout: 5000,
 			sessionKey: "settled-native-abort",
@@ -917,8 +917,8 @@ exit 64
 		}
 
 		const sessionKey = "reset-on-abort";
-		await executeBash("export PI_RESET_VAR=alive", { cwd: tempDir, timeout: 5000, sessionKey });
-		const beforeAbort = await executeBash("echo $PI_RESET_VAR", { cwd: tempDir, timeout: 5000, sessionKey });
+		await executeBash("export ZERO2AI_RESET_VAR=alive", { cwd: tempDir, timeout: 5000, sessionKey });
+		const beforeAbort = await executeBash("echo $ZERO2AI_RESET_VAR", { cwd: tempDir, timeout: 5000, sessionKey });
 		expect(beforeAbort.output.trim()).toBe("alive");
 
 		const controller = new AbortController();
@@ -943,7 +943,7 @@ exit 64
 		expect(aborted.cancelled).toBe(true);
 
 		// oxlint-disable-next-line no-template-curly-in-string -- this is a bash variable expansion
-		const afterAbort = await executeBash("echo ${PI_RESET_VAR:-unset}", {
+		const afterAbort = await executeBash("echo ${ZERO2AI_RESET_VAR:-unset}", {
 			cwd: tempDir,
 			timeout: 5000,
 			sessionKey,
@@ -1131,7 +1131,7 @@ exit 64
 			return;
 		}
 		const snapshotPath = path.join(tempDir, "snapshot.sh");
-		fs.writeFileSync(snapshotPath, "export PI_SNAPSHOT_TEST=from_snapshot\n");
+		fs.writeFileSync(snapshotPath, "export ZERO2AI_SNAPSHOT_TEST=from_snapshot\n");
 		vi.spyOn(Settings.prototype, "getShellConfig").mockReturnValue({
 			shell: bashPath,
 			args: ["-l", "-c"],
@@ -1144,7 +1144,7 @@ exit 64
 		vi.spyOn(shellSnapshot, "getOrCreateSnapshot").mockResolvedValue(snapshotPath);
 		const sessionKey = "snapshot-test";
 		await executeBash("true", { cwd: tempDir, timeout: 5000, sessionKey });
-		const result = await executeBash("echo $PI_SNAPSHOT_TEST", { cwd: tempDir, timeout: 5000, sessionKey });
+		const result = await executeBash("echo $ZERO2AI_SNAPSHOT_TEST", { cwd: tempDir, timeout: 5000, sessionKey });
 		expect(result.output.trim()).toBe("from_snapshot");
 	});
 
@@ -1160,7 +1160,7 @@ exit 64
 		const bashPath = path.join(tempDir, "test-bash");
 		fs.symlinkSync(realBashPath, bashPath);
 		const largeBody = Array.from({ length: 200 }, (_, index) => `    echo "snapshot ${index}"`).join("\n");
-		fs.writeFileSync(path.join(tempDir, ".bashrc"), `pi_snapshot_large_function ()\n{\n${largeBody}\n}\n`);
+		fs.writeFileSync(path.join(tempDir, ".bashrc"), `zero2ai_snapshot_large_function ()\n{\n${largeBody}\n}\n`);
 
 		vi.spyOn(os, "homedir").mockReturnValue(tempDir);
 		vi.spyOn(Settings.prototype, "getShellConfig").mockReturnValue({
@@ -1178,7 +1178,7 @@ exit 64
 			HOME: tempDir,
 		});
 		const snapshot = fs.readFileSync(snapshotPath!, "utf8");
-		expect(snapshot).toContain("pi_snapshot_large_function");
+		expect(snapshot).toContain("zero2ai_snapshot_large_function");
 		expect(snapshot).not.toContain("base64 -d");
 
 		const result = await executeBash("printf 'snapshot_ok\\n'", {

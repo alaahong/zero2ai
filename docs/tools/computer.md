@@ -14,7 +14,7 @@ User setup, permissions, safety guidance, examples, and platform limitations: [S
 - Prelude registration/gate: `packages/coding-agent/src/tools/index.ts`
 - Exposure policy: `packages/coding-agent/src/tools/computer/exposure.ts`
 - Persistent worker: `packages/coding-agent/src/tools/computer/{supervisor,protocol,worker,worker-entry}.ts`
-- Native implementation: `crates/pi-natives/src/desktop/`
+- Native implementation: `crates/zero2ai-natives/src/desktop/`
 - Native public types: `packages/natives/native/index.d.ts`
 
 ## Availability and declaration
@@ -159,7 +159,7 @@ Recover by refreshing the exact target screenshot after coordinate-frame errors,
 
 ## Platform constraints
 
-Current native backends support macOS, Linux X11, Linux Wayland portal capture/input where available, and Windows; other targets depend on native-addon support. Capabilities and permission state are runtime facts—inspect `desktop.capabilities()` rather than assuming them. Wayland compositors do not permit omp to activate arbitrary windows, so per-window native input and `raise()` are unavailable; use AX actions, or desktop input after focusing the target yourself. See [Scriptable computer use: Platforms](../computer-use.md#platforms) for prerequisites and permission details.
+Current native backends support macOS, Linux X11, Linux Wayland portal capture/input where available, and Windows; other targets depend on native-addon support. Capabilities and permission state are runtime facts—inspect `desktop.capabilities()` rather than assuming them. Wayland compositors do not permit zero2ai to activate arbitrary windows, so per-window native input and `raise()` are unavailable; use AX actions, or desktop input after focusing the target yourself. See [Scriptable computer use: Platforms](../computer-use.md#platforms) for prerequisites and permission details.
 
 ## Critical constraints
 

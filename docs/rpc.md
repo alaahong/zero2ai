@@ -16,7 +16,7 @@ Primary implementation:
 ## Startup
 
 ```bash
-omp --mode rpc [regular CLI options]
+zero2ai --mode rpc [regular CLI options]
 ```
 
 Behavior notes:
@@ -64,7 +64,7 @@ After the success response, oversized stdout objects are emitted losslessly as a
 }
 ```
 
-Clients MUST validate `chunkId`, `index`, `count`, and `byteLength`, reject interleaved or interrupted sequences, enforce the advertised reassembly limit, concatenate decoded bytes in index order, decode them as strict UTF-8, and parse the result as one JSON object. The TypeScript `RpcFrameDecoder`, exported from `@oh-my-pi/pi-coding-agent/modes/rpc/rpc-frame`, implements this validation. The bundled TypeScript and Python `RpcClient` implementations negotiate v2 automatically when the ready frame advertises it.
+Clients MUST validate `chunkId`, `index`, `count`, and `byteLength`, reject interleaved or interrupted sequences, enforce the advertised reassembly limit, concatenate decoded bytes in index order, decode them as strict UTF-8, and parse the result as one JSON object. The TypeScript `RpcFrameDecoder`, exported from `@zero2ai/coding-agent/modes/rpc/rpc-frame`, implements this validation. The bundled TypeScript and Python `RpcClient` implementations negotiate v2 automatically when the ready frame advertises it.
 
 Legacy clients may ignore the added ready fields and remain on v1. V1 retains its bounded fallback behavior for oversized output. Frames above the v2 reassembly ceiling still fail explicitly; large history APIs should use pagination rather than depending on arbitrarily large logical frames.
 
@@ -469,7 +469,7 @@ Schemes are case-insensitive on the wire and normalized to lowercase before
 the response is sent. Re-sending `set_host_uri_schemes` replaces the entire
 previous set — schemes missing from the new list are unregistered.
 
-`security://` is reserved for OMP's producer-neutral software-security resource
+`security://` is reserved for ZERO2AI's producer-neutral software-security resource
 store. RPC hosts cannot register or shadow that scheme.
 
 ## Event Stream Schema
@@ -604,7 +604,7 @@ Runtime note:
 
 - Automatic session title generation is disabled in RPC mode, and `setTitle` UI
   requests are also suppressed by default because most hosts do not have a
-  meaningful terminal-title surface. Set `PI_RPC_EMIT_TITLE=1` to opt back in to
+  meaningful terminal-title surface. Set `ZERO2AI_RPC_EMIT_TITLE=1` to opt back in to
   the UI event only.
 
 Example:
@@ -869,10 +869,10 @@ Current helper characteristics:
 
 ### Python package
 
-The bundled [`omp-rpc`](../python/omp-rpc/pyproject.toml) distribution provides the process-backed Python client. Its import package is `omp_rpc`; the package API, typed commands and events, host-tool/host-URI helpers, and orchestration examples are maintained in the [`omp-rpc` README](../python/omp-rpc/README.md).
+The bundled [`zero2ai-rpc`](../python/zero2ai-rpc/pyproject.toml) distribution provides the process-backed Python client. Its import package is `zero2ai_rpc`; the package API, typed commands and events, host-tool/host-URI helpers, and orchestration examples are maintained in the [`zero2ai-rpc` README](../python/zero2ai-rpc/README.md).
 
 ```python
-from omp_rpc import RpcClient
+from zero2ai_rpc import RpcClient
 
 with RpcClient(provider="anthropic", model="claude-sonnet-4-5") as client:
     state = client.get_state()
@@ -880,4 +880,4 @@ with RpcClient(provider="anthropic", model="claude-sonnet-4-5") as client:
     print(turn.require_assistant_text())
 ```
 
-By default, `RpcClient` starts `omp --mode rpc`; pass `command=[...]` to own the exact child command. It handles request correlation, typed notifications, v2 negotiation and chunk reassembly, message pagination, extension UI, and host-owned tools and URI schemes. The Python package owns that client API and process lifecycle; this document and `rpc-types.ts` remain the canonical wire contract. Use raw protocol frames when a client library does not wrap the surface you need.
+By default, `RpcClient` starts `zero2ai --mode rpc`; pass `command=[...]` to own the exact child command. It handles request correlation, typed notifications, v2 negotiation and chunk reassembly, message pagination, extension UI, and host-owned tools and URI schemes. The Python package owns that client API and process lifecycle; this document and `rpc-types.ts` remain the canonical wire contract. Use raw protocol frames when a client library does not wrap the surface you need.

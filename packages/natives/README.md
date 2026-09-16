@@ -1,4 +1,4 @@
-# @oh-my-pi/pi-natives
+# @zero2ai/natives
 
 Native Rust functionality via N-API.
 
@@ -20,7 +20,7 @@ that terminal protocol.
 ## Usage
 
 ```typescript
-import { encodeSixel, grep, pdfToMarkdown } from "@oh-my-pi/pi-natives";
+import { encodeSixel, grep, pdfToMarkdown } from "@zero2ai/natives";
 
 // Grep for a pattern
 const results = await grep({
@@ -57,11 +57,11 @@ bun run check
 
 ## Architecture
 
-`@oh-my-pi/pi-natives` publishes a small core package plus generated
+`@zero2ai/natives` publishes a small core package plus generated
 platform-specific optional dependency packages:
 
 ```
-crates/pi-natives/       # Rust source (workspace member)
+crates/zero2ai-natives/       # Rust source (workspace member)
   src/lib.rs             # N-API exports
   src/sixel.rs           # SIXEL terminal-image encoding
   Cargo.toml             # Rust dependencies

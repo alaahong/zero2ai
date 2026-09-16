@@ -1,21 +1,21 @@
 import { afterEach, describe, expect, it, vi } from "bun:test";
-import { AsyncJobManager } from "@oh-my-pi/pi-coding-agent/async";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
+import { AsyncJobManager } from "@zero2ai/coding-agent/async";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
 import {
 	runEvalAgent,
 	type EvalAgentBridgeOptions,
 	type EvalAgentResult,
-} from "@oh-my-pi/pi-coding-agent/eval/agent-bridge";
-import { runEvalWait } from "@oh-my-pi/pi-coding-agent/eval/handle-bridge";
-import type { LocalProtocolOptions } from "@oh-my-pi/pi-coding-agent/internal-urls";
-import type { MCPManager } from "@oh-my-pi/pi-coding-agent/mcp";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import * as taskDiscovery from "@oh-my-pi/pi-coding-agent/task/discovery";
-import * as taskExecutor from "@oh-my-pi/pi-coding-agent/task/executor";
-import * as isolationRunner from "@oh-my-pi/pi-coding-agent/task/isolation-runner";
-import { runStructuredSubagent } from "@oh-my-pi/pi-coding-agent/task/structured-subagent";
-import type { AgentDefinition, SingleResult, StructuredSubagentOutput } from "@oh-my-pi/pi-coding-agent/task/types";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
+} from "@zero2ai/coding-agent/eval/agent-bridge";
+import { runEvalWait } from "@zero2ai/coding-agent/eval/handle-bridge";
+import type { LocalProtocolOptions } from "@zero2ai/coding-agent/internal-urls";
+import type { MCPManager } from "@zero2ai/coding-agent/mcp";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import * as taskDiscovery from "@zero2ai/coding-agent/task/discovery";
+import * as taskExecutor from "@zero2ai/coding-agent/task/executor";
+import * as isolationRunner from "@zero2ai/coding-agent/task/isolation-runner";
+import { runStructuredSubagent } from "@zero2ai/coding-agent/task/structured-subagent";
+import type { AgentDefinition, SingleResult, StructuredSubagentOutput } from "@zero2ai/coding-agent/task/types";
+import type { ToolSession } from "@zero2ai/coding-agent/tools";
 
 const jobManagers = new Set<AsyncJobManager>();
 

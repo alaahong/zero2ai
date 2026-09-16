@@ -1,11 +1,11 @@
 import { describe, expect, it } from "bun:test";
-import { getDashboardStats, getFolderStats } from "@oh-my-pi/omp-stats/aggregator";
-import { initDb, insertMessageStats } from "@oh-my-pi/omp-stats/db";
-import type { FolderStats, MessageStats } from "@oh-my-pi/omp-stats/types";
+import { getDashboardStats, getFolderStats } from "@zero2ai/stats/aggregator";
+import { initDb, insertMessageStats } from "@zero2ai/stats/db";
+import type { FolderStats, MessageStats } from "@zero2ai/stats/types";
 import { handleApi } from "../src/server";
 import { installStatsTestIsolation } from "./helpers/temp-agent";
 
-installStatsTestIsolation("@pi-stats-db-range-");
+installStatsTestIsolation("@zero2ai-stats-db-range-");
 
 function makeMessage(timestamp: number, entryId: string, folder = "/tmp/project"): MessageStats {
 	return {

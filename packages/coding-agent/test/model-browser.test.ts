@@ -1,16 +1,16 @@
 import { beforeAll, describe, expect, test } from "bun:test";
-import { ThinkingLevel } from "@oh-my-pi/pi-agent-core";
-import type { Model } from "@oh-my-pi/pi-ai";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
+import { ThinkingLevel } from "@zero2ai/agent-core";
+import type { Model } from "@zero2ai/ai";
+import { buildModel } from "@zero2ai/catalog/build";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
 import {
 	buildBrowserItems,
 	ModelBrowser,
 	type RoleAssignments,
 	resolveRoleAssignments,
 	sortModelItems,
-} from "@oh-my-pi/pi-coding-agent/modes/components/model-browser";
-import { initTheme, theme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
+} from "@zero2ai/coding-agent/modes/components/model-browser";
+import { initTheme, theme } from "@zero2ai/coding-agent/modes/theme/theme";
 
 /** Optional presentation metadata a catalog or discovery source may attach. */
 type NativeMetadata = Pick<Model, "description" | "isNew" | "isBeta" | "isRecommended" | "int" | "tps"> &

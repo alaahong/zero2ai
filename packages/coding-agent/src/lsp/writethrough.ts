@@ -1,5 +1,5 @@
 import * as fs from "node:fs";
-import { isEnoent, logger, once, untilAborted } from "@oh-my-pi/pi-utils";
+import { isEnoent, logger, once, untilAborted } from "@zero2ai/utils";
 import type { BunFile } from "bun";
 import { isPermissionDeniedError, writeFileWithFallback } from "../tools/file-write-fallback";
 import { beginPendingDiskWrite, endPendingDiskWrite, FileChangeType, notifyWorkspaceWatchedFiles } from "./client";

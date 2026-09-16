@@ -10,8 +10,8 @@ if (!runtimeDir || !dependencySpec || !readyPath) {
 
 await ensureRuntimeInstalled({
 	runtimeDir,
-	install: { dependencies: { "omp-runtime-fixture": dependencySpec } },
-	probePackage: "omp-runtime-fixture",
+	install: { dependencies: { "zero2ai-runtime-fixture": dependencySpec } },
+	probePackage: "zero2ai-runtime-fixture",
 	onPhase: phase => {
 		if (phase !== "download") return;
 		fs.writeFileSync(readyPath, "ready");

@@ -2,7 +2,7 @@
  * Client for the per-model tiny-model workers.
  *
  * Each local model is served by one worker process on the machine — the ONNX
- * worker (`worker.ts`) or, with `PI_TINY_DEVICE=mlx`, the MLX worker
+ * worker (`worker.ts`) or, with `ZERO2AI_TINY_DEVICE=mlx`, the MLX worker
  * (`mlx-server.py`) — that owns a socket named after the model. This client
  * connects to it, spawning it detached when it is not running, and lets it
  * die on its own once idle. Prompt construction and title extraction live
@@ -12,7 +12,7 @@ import * as fs from "node:fs";
 import type * as net from "node:net";
 import * as path from "node:path";
 import type { Subprocess } from "bun";
-import { $env, getTinyWorkerRuntimeDir, logger, prompt } from "@oh-my-pi/pi-utils";
+import { $env, getTinyWorkerRuntimeDir, logger, prompt } from "@zero2ai/utils";
 import packageJson from "../../package.json" with { type: "json" };
 import { settings } from "../config/settings";
 import { stageRunnerScript } from "../eval/runner-cache";
@@ -117,13 +117,13 @@ function readTinyModelSetting(path: "providers.tinyModelDevice" | "providers.tin
 		const value = settings.get(path);
 		return typeof value === "string" ? value : undefined;
 	} catch {
-		// Settings may be uninitialized (e.g. `omp --smoke-test`); fall back to env/default.
+		// Settings may be uninitialized (e.g. `zero2ai --smoke-test`); fall back to env/default.
 		return undefined;
 	}
 }
 
 /**
- * Resolve the `PI_TINY_DEVICE` / `PI_TINY_DTYPE` vars a worker should run
+ * Resolve the `ZERO2AI_TINY_DEVICE` / `ZERO2AI_TINY_DTYPE` vars a worker should run
  * with. A present env var wins; otherwise the mapped persisted setting is
  * used. Only resolved keys are returned — never the default sentinel — so the
  * worker's built-in defaults apply for anything absent. Pure for testability;
@@ -136,10 +136,10 @@ export function tinyWorkerEnvOverlay(
 	dtypeSetting: string | undefined,
 ): Record<string, string> {
 	const overlay: Record<string, string> = {};
-	const device = env.PI_TINY_DEVICE || tinyModelDeviceSettingToEnv(deviceSetting);
-	if (device) overlay.PI_TINY_DEVICE = device;
-	const dtype = env.PI_TINY_DTYPE || tinyModelDtypeSettingToEnv(dtypeSetting);
-	if (dtype) overlay.PI_TINY_DTYPE = dtype;
+	const device = env.ZERO2AI_TINY_DEVICE || tinyModelDeviceSettingToEnv(deviceSetting);
+	if (device) overlay.ZERO2AI_TINY_DEVICE = device;
+	const dtype = env.ZERO2AI_TINY_DTYPE || tinyModelDtypeSettingToEnv(dtypeSetting);
+	if (dtype) overlay.ZERO2AI_TINY_DTYPE = dtype;
 	return overlay;
 }
 
@@ -169,7 +169,7 @@ export function tinyWorkerUsesMlx(): boolean {
 	return (
 		!mlxUnavailable &&
 		tinyMlxSupported() &&
-		resolveTinyModelDevicePreference(tinyModelEnv().PI_TINY_DEVICE).device === MLX_DEVICE
+		resolveTinyModelDevicePreference(tinyModelEnv().ZERO2AI_TINY_DEVICE).device === MLX_DEVICE
 	);
 }
 
@@ -349,7 +349,7 @@ export interface WorkerLaunch {
 	spawn(endpoint: string, logPath: string): Promise<SpawnedWorker>;
 }
 
-/** Detach a worker so it outlives this omp process; its output goes to a per-worker log file. */
+/** Detach a worker so it outlives this zero2ai process; its output goes to a per-worker log file. */
 function spawnDetached(
 	cmd: string[],
 	cwd: string | undefined,
@@ -377,7 +377,7 @@ function spawnDetached(
 
 /** How to start the ONNX worker for `modelKey` with the resolved device/dtype env. @internal */
 export function onnxLaunch(modelKey: TinyLocalModelKey, modelEnv: Record<string, string>): WorkerLaunch {
-	const tag = `${packageJson.version}|onnx|${modelEnv.PI_TINY_DEVICE ?? ""}|${modelEnv.PI_TINY_DTYPE ?? ""}`;
+	const tag = `${packageJson.version}|onnx|${modelEnv.ZERO2AI_TINY_DEVICE ?? ""}|${modelEnv.ZERO2AI_TINY_DTYPE ?? ""}`;
 	return {
 		backend: "onnx",
 		tag,
@@ -405,7 +405,7 @@ function mlxLaunch(modelKey: TinyLocalModelKey, emitProgress: (event: TinyTitleP
 			const python = await ensureTinyMlxRuntime(phase =>
 				emitProgress({ modelKey, status: phase, name: `mlx-lm@${MLX_LM_VERSION}` }),
 			);
-			const script = await stageRunnerScript("omp-tiny-mlx", "py", MLX_SERVER_SCRIPT);
+			const script = await stageRunnerScript("zero2ai-tiny-mlx", "py", MLX_SERVER_SCRIPT);
 			const env = inferenceWorkerEnv({
 				PYTHONUNBUFFERED: "1",
 				PYTHONIOENCODING: "utf-8",
@@ -450,7 +450,7 @@ async function logTail(logPath: string): Promise<string> {
 		const text = await Bun.file(logPath).text();
 		return text
 			.split("\n")
-			.filter(line => !line.startsWith("omp tiny worker listening on "))
+			.filter(line => !line.startsWith("zero2ai tiny worker listening on "))
 			.join("\n")
 			.trim()
 			.slice(-500);
@@ -461,7 +461,7 @@ async function logTail(logPath: string): Promise<string> {
 
 /**
  * Connect to the worker serving `modelKey`, spawning it when absent or
- * replacing it when its launch tag is stale. A concurrent omp process may win
+ * replacing it when its launch tag is stale. A concurrent zero2ai process may win
  * the spawn race; our child then fails to bind and exits while the probe
  * adopts the winner.
  */
@@ -482,7 +482,7 @@ export async function connectTinyWorker(
 		const result = await probeTinyWorker(endpoint, launch.tag);
 		if (result.kind === "live") return createSocketWorkerHandle(result.socket, logPath);
 		if (spawned.proc.exitCode !== null) {
-			// Our child is gone: either it lost the bind race to a sibling omp
+			// Our child is gone: either it lost the bind race to a sibling zero2ai
 			// (already adopted above if so) or it crashed.
 			const tail = await logTail(spawned.logPath);
 			throw new Error(

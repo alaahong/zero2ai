@@ -1,13 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { importRoomKey } from "@oh-my-pi/pi-coding-agent/collab/crypto";
-import { CollabHost } from "@oh-my-pi/pi-coding-agent/collab/host";
-import { COLLAB_PROTO, parseCollabLink } from "@oh-my-pi/pi-coding-agent/collab/protocol";
-import { CollabSocket } from "@oh-my-pi/pi-coding-agent/collab/relay-client";
-import type { InteractiveModeContext } from "@oh-my-pi/pi-coding-agent/modes/types";
-import { AgentRegistry } from "@oh-my-pi/pi-coding-agent/registry/agent-registry";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TASK_SUBAGENT_LIFECYCLE_CHANNEL } from "@oh-my-pi/pi-coding-agent/task/types";
-import { EventBus } from "@oh-my-pi/pi-coding-agent/utils/event-bus";
+import { importRoomKey } from "@zero2ai/coding-agent/collab/crypto";
+import { CollabHost } from "@zero2ai/coding-agent/collab/host";
+import { COLLAB_PROTO, parseCollabLink } from "@zero2ai/coding-agent/collab/protocol";
+import { CollabSocket } from "@zero2ai/coding-agent/collab/relay-client";
+import type { InteractiveModeContext } from "@zero2ai/coding-agent/modes/types";
+import { AgentRegistry } from "@zero2ai/coding-agent/registry/agent-registry";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { TASK_SUBAGENT_LIFECYCLE_CHANNEL } from "@zero2ai/coding-agent/task/types";
+import { EventBus } from "@zero2ai/coding-agent/utils/event-bus";
 import { installInMemoryRelay, uninstallInMemoryRelay } from "./helpers/in-memory-relay";
 
 // Embedders on the previous InteractiveMode constructor signature wire only a

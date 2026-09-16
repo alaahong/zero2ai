@@ -2,12 +2,12 @@ import type { Database } from "bun:sqlite";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { AgentToolResult } from "@oh-my-pi/pi-agent-core";
-import { type FetchImpl, getEnvApiKey, type ImageContent, type TextContent } from "@oh-my-pi/pi-ai";
-import { htmlToMarkdown, notebookToEditableText } from "@oh-my-pi/pi-natives";
-import { type Component, Text } from "@oh-my-pi/pi-tui";
-import { $which, ptree, truncate } from "@oh-my-pi/pi-utils";
-import { type ArchiveFormat, listArchiveRoot, sniffArchiveFormat } from "@oh-my-pi/pi-utils/ar";
+import type { AgentToolResult } from "@zero2ai/agent-core";
+import { type FetchImpl, getEnvApiKey, type ImageContent, type TextContent } from "@zero2ai/ai";
+import { htmlToMarkdown, notebookToEditableText } from "@zero2ai/natives";
+import { type Component, Text } from "@zero2ai/tui";
+import { $which, ptree, truncate } from "@zero2ai/utils";
+import { type ArchiveFormat, listArchiveRoot, sniffArchiveFormat } from "@zero2ai/utils/ar";
 import type { Settings } from "../config/settings";
 import type { RenderResultOptions } from "../extensibility/custom-tools/types";
 import { type Theme, theme } from "../modes/theme/theme";
@@ -524,7 +524,7 @@ function cleanFeedText(text: string): string {
  * Parse RSS/Atom feed to markdown
  */
 async function parseFeedToMarkdown(content: string, maxItems = 10): Promise<string> {
-	const { parseHTML } = await import("@oh-my-pi/pi-utils/dom");
+	const { parseHTML } = await import("@zero2ai/utils/dom");
 	try {
 		const doc = parseHTML(content).document;
 
@@ -899,13 +899,13 @@ async function withTempBinaryFile<T>(
 }
 
 async function renderNotebookPayload(bytes: Uint8Array, displayUrl: string): Promise<string> {
-	return withTempBinaryFile("omp-url-notebook-", ".ipynb", bytes, async tempPath =>
+	return withTempBinaryFile("zero2ai-url-notebook-", ".ipynb", bytes, async tempPath =>
 		notebookToEditableText(await Bun.file(tempPath).text(), displayUrl),
 	);
 }
 
 async function renderSqlitePayload(bytes: Uint8Array): Promise<string> {
-	return withTempBinaryFile("omp-url-sqlite-", ".sqlite", bytes, async tempPath => {
+	return withTempBinaryFile("zero2ai-url-sqlite-", ".sqlite", bytes, async tempPath => {
 		let db: Database | null = null;
 		try {
 			db = await openSqliteReadConnection(tempPath);

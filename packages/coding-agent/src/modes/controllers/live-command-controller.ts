@@ -1,5 +1,5 @@
-import type { AssistantMessage } from "@oh-my-pi/pi-ai";
-import { logger } from "@oh-my-pi/pi-utils";
+import type { AssistantMessage } from "@zero2ai/ai";
+import { logger } from "@zero2ai/utils";
 import { LiveSessionController, type LiveSessionControllerOptions, type LiveTranscript } from "../../live/controller";
 import { LIVE_MODEL } from "../../live/protocol";
 import { LiveVisualizer } from "../../live/visualizer";

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
-import { streamAnthropic } from "@oh-my-pi/pi-ai/providers/anthropic";
-import type { Model, ModelSpec } from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
+import { streamAnthropic } from "@zero2ai/ai/providers/anthropic";
+import type { Model, ModelSpec } from "@zero2ai/ai/types";
+import { buildModel } from "@zero2ai/catalog/build";
 
 function makeModel(supportsContextManagement?: boolean): Model<"anthropic-messages"> {
 	return buildModel({

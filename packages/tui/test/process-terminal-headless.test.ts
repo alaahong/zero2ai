@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
-import { ProcessTerminal } from "@oh-my-pi/pi-tui/terminal";
-import { isTerminalHeadless, setTerminalHeadless } from "@oh-my-pi/pi-utils";
+import { ProcessTerminal } from "@zero2ai/tui/terminal";
+import { isTerminalHeadless, setTerminalHeadless } from "@zero2ai/utils";
 
 // Regression: running `bun test` inside a real TTY used to paint the TUI frame,
 // the start() capability probes (OSC 11 / DA1 / kitty), and the editor/status
@@ -116,8 +116,8 @@ describe("ProcessTerminal headless suppression", () => {
 		}
 	});
 
-	// #6374: arrows stopped working inside omp and stayed broken in the shell
-	// after exit — a missing cursor-key/keypad reset. omp owns the TTY and emits
+	// #6374: arrows stopped working inside zero2ai and stayed broken in the shell
+	// after exit — a missing cursor-key/keypad reset. zero2ai owns the TTY and emits
 	// a full private-mode reset menu, but never restored normal cursor-key
 	// (DECCKM) / numeric-keypad mode (terminfo `rmkx` = "\x1b[?1l\x1b>"). If the
 	// terminal was left in application-cursor-keys mode, arrows arrived as SS3

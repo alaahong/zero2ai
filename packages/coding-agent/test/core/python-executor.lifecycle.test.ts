@@ -3,15 +3,15 @@ import {
 	disposeAllKernelSessions,
 	disposeKernelSessionsByOwner,
 	executePython,
-} from "@oh-my-pi/pi-coding-agent/eval/py/executor";
+} from "@zero2ai/coding-agent/eval/py/executor";
 import {
 	type KernelExecuteOptions,
 	type KernelExecuteResult,
 	type KernelShutdownResult,
 	PythonKernel,
-} from "@oh-my-pi/pi-coding-agent/eval/py/kernel";
+} from "@zero2ai/coding-agent/eval/py/kernel";
 
-Bun.env.PI_PYTHON_SKIP_CHECK = "1";
+Bun.env.ZERO2AI_PYTHON_SKIP_CHECK = "1";
 
 class FakeKernel {
 	#result: KernelExecuteResult;

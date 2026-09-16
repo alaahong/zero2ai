@@ -1,8 +1,8 @@
-import type { ThinkingLevel } from "@oh-my-pi/pi-agent-core";
-import type { Effort } from "@oh-my-pi/pi-ai";
-import { colorLuma, relativeLuminance } from "@oh-my-pi/pi-utils/color";
-import * as logger from "@oh-my-pi/pi-utils/logger";
-import chalk from "@oh-my-pi/pi-utils/chalk";
+import type { ThinkingLevel } from "@zero2ai/agent-core";
+import type { Effort } from "@zero2ai/ai";
+import { colorLuma, relativeLuminance } from "@zero2ai/utils/color";
+import * as logger from "@zero2ai/utils/logger";
+import chalk from "@zero2ai/utils/chalk";
 import type { SessionAccentTheme } from "../../utils/session-color";
 import { bgAnsi, colorToAnsi, fgAnsi, resolveToHex } from "./color";
 import { type ColorMode, isValidThemeColor, type ThemeBg, type ThemeColor } from "./schema";
@@ -593,7 +593,7 @@ export class Theme {
 			advisor: this.#symbols["icon.advisor"],
 			advisorClosed: this.#symbols["icon.advisorClosed"],
 			time: this.#symbols["icon.time"],
-			omp: this.#symbols["icon.omp"],
+			zero2ai: this.#symbols["icon.zero2ai"],
 			esc: this.#symbols["icon.esc"],
 			ghost: this.#symbols["icon.ghost"],
 			agents: this.#symbols["icon.agents"],

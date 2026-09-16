@@ -1,10 +1,10 @@
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { AgentToolResult } from "@oh-my-pi/pi-agent-core";
-import type { IsoBackendKind, VcsGitRepo, VcsWorktreeEntry } from "@oh-my-pi/pi-natives";
-import * as vcs from "@oh-my-pi/pi-natives/vcs";
-import { getWorktreeDir, hashPath, isEnoent, logger } from "@oh-my-pi/pi-utils";
+import type { AgentToolResult } from "@zero2ai/agent-core";
+import type { IsoBackendKind, VcsGitRepo, VcsWorktreeEntry } from "@zero2ai/natives";
+import * as vcs from "@zero2ai/natives/vcs";
+import { getWorktreeDir, hashPath, isEnoent, logger } from "@zero2ai/utils";
 import { github } from "../utils/github";
 import { formatIsolationBackend, parseIsolationBackend } from "../task/worktree";
 import { withRepoLock } from "../utils/repo-lock";
@@ -220,12 +220,12 @@ export async function resolvePrBranchPushTarget(
 	const repository = vcs.requireGit(repoRoot);
 	const configPrefix = `branch.${localBranch}.`;
 	const [headRef, pushRemote, remote, prUrl, maintainerCanModifyValue, isCrossRepositoryValue] = await Promise.all([
-		repository.configGet(`${configPrefix}ompPrHeadRef`, signal),
+		repository.configGet(`${configPrefix}zero2aiPrHeadRef`, signal),
 		repository.configGet(`${configPrefix}pushRemote`, signal),
 		repository.configGet(`${configPrefix}remote`, signal),
-		repository.configGet(`${configPrefix}ompPrUrl`, signal),
-		repository.configGet(`${configPrefix}ompPrMaintainerCanModify`, signal),
-		repository.configGet(`${configPrefix}ompPrIsCrossRepository`, signal),
+		repository.configGet(`${configPrefix}zero2aiPrUrl`, signal),
+		repository.configGet(`${configPrefix}zero2aiPrMaintainerCanModify`, signal),
+		repository.configGet(`${configPrefix}zero2aiPrIsCrossRepository`, signal),
 	]);
 	if (!headRef) {
 		throw new ToolError(`branch ${localBranch} has no PR push metadata; check it out via op: pr_checkout first`);
@@ -476,15 +476,15 @@ export async function checkoutPullRequest(
 			await repository.configSet(`${configPrefix}remote`, remote.name, signal);
 			await repository.configSet(`${configPrefix}merge`, `refs/heads/${headRefName}`, signal);
 			await repository.configSet(`${configPrefix}pushRemote`, remote.name, signal);
-			await repository.configSet(`${configPrefix}ompPrHeadRef`, headRefName, signal);
-			await repository.configSet(`${configPrefix}ompPrUrl`, data.url ?? "", signal);
+			await repository.configSet(`${configPrefix}zero2aiPrHeadRef`, headRefName, signal);
+			await repository.configSet(`${configPrefix}zero2aiPrUrl`, data.url ?? "", signal);
 			await repository.configSet(
-				`${configPrefix}ompPrIsCrossRepository`,
+				`${configPrefix}zero2aiPrIsCrossRepository`,
 				String(Boolean(data.isCrossRepository)),
 				signal,
 			);
 			await repository.configSet(
-				`${configPrefix}ompPrMaintainerCanModify`,
+				`${configPrefix}zero2aiPrMaintainerCanModify`,
 				String(Boolean(data.maintainerCanModify)),
 				signal,
 			);

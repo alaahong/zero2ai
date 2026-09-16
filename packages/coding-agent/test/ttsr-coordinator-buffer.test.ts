@@ -1,12 +1,12 @@
 import { describe, expect, it, vi } from "bun:test";
-import type { Agent, AgentEvent, AgentMessage } from "@oh-my-pi/pi-agent-core";
-import type { AssistantMessage, AssistantMessageEvent } from "@oh-my-pi/pi-ai";
-import type { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { Rule } from "@oh-my-pi/pi-coding-agent/capability/rule";
-import { TtsrManager } from "@oh-my-pi/pi-coding-agent/export/ttsr";
-import type { AgentSessionEvent } from "@oh-my-pi/pi-coding-agent/session/agent-session-events";
-import { TtsrCoordinator, type TtsrCoordinatorHost } from "@oh-my-pi/pi-coding-agent/session/ttsr-coordinator";
-import type { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
+import type { Agent, AgentEvent, AgentMessage } from "@zero2ai/agent-core";
+import type { AssistantMessage, AssistantMessageEvent } from "@zero2ai/ai";
+import type { Settings } from "@zero2ai/coding-agent/config/settings";
+import type { Rule } from "@zero2ai/coding-agent/capability/rule";
+import { TtsrManager } from "@zero2ai/coding-agent/export/ttsr";
+import type { AgentSessionEvent } from "@zero2ai/coding-agent/session/agent-session-events";
+import { TtsrCoordinator, type TtsrCoordinatorHost } from "@zero2ai/coding-agent/session/ttsr-coordinator";
+import type { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
 
 const CONDITION = "FORBIDDEN";
 

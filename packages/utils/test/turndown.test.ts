@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import TurndownService, { gfm, type TurndownNode } from "@oh-my-pi/pi-utils/turndown";
+import TurndownService, { gfm, type TurndownNode } from "@zero2ai/utils/turndown";
 
 type ListParent = {
 	nodeName: string;

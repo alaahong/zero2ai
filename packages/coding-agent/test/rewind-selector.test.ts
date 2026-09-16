@@ -6,16 +6,16 @@
  * rendered their call so rewinding a turn keeps its tool output.
  */
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from "bun:test";
-import type { AgentMessage } from "@oh-my-pi/pi-agent-core";
-import { KeybindingsManager } from "@oh-my-pi/pi-coding-agent/config/keybindings";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
+import type { AgentMessage } from "@zero2ai/agent-core";
+import { KeybindingsManager } from "@zero2ai/coding-agent/config/keybindings";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
 import {
 	type BranchVariantPath,
 	RewindSelectorComponent,
-} from "@oh-my-pi/pi-coding-agent/modes/components/rewind-selector";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import type { SessionMessageEntry } from "@oh-my-pi/pi-coding-agent/session/session-entries";
-import { setKeybindings, type TUI } from "@oh-my-pi/pi-tui";
+} from "@zero2ai/coding-agent/modes/components/rewind-selector";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import type { SessionMessageEntry } from "@zero2ai/coding-agent/session/session-entries";
+import { setKeybindings, type TUI } from "@zero2ai/tui";
 
 const UP = "\x1b[A";
 const DOWN = "\x1b[B";

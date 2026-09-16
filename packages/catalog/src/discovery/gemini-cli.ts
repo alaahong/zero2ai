@@ -1,5 +1,5 @@
-import { type } from "@oh-my-pi/omptype";
-import type { FetchImpl } from "@oh-my-pi/pi-utils";
+import { type } from "@zero2ai/schema";
+import type { FetchImpl } from "@zero2ai/utils";
 import { collapseVariants, type VariantCollapseTable } from "../compat/collapse";
 import { compareRevision, parseRevision } from "../compat/revision";
 import { classifyModel } from "../compat/taxonomy";

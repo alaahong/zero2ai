@@ -6,10 +6,10 @@
  * separator while every later gap stayed single (#11103).
  */
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { StatusLineComponent } from "@oh-my-pi/pi-coding-agent/modes/components/status-line";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import type { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
+import { StatusLineComponent } from "@zero2ai/coding-agent/modes/components/status-line";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import type { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
 
 beforeAll(async () => {
 	resetSettingsForTest();

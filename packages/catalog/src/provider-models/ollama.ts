@@ -1,4 +1,4 @@
-import { fetchWithRetry } from "@oh-my-pi/pi-utils";
+import { fetchWithRetry } from "@zero2ai/utils";
 import type { ModelManagerOptions } from "../model-manager";
 import type { FetchImpl, ModelSpec } from "../types";
 import { discoveryFetch } from "../utils";

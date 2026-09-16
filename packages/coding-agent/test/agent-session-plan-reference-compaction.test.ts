@@ -16,12 +16,12 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { Agent, type AgentMessage } from "@oh-my-pi/pi-agent-core";
-import * as compactionModule from "@oh-my-pi/pi-agent-core/compaction";
-import type { TextContent } from "@oh-my-pi/pi-ai";
-import { AssistantMessageEventStream } from "@oh-my-pi/pi-ai/utils/event-stream";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { Agent, type AgentMessage } from "@zero2ai/agent-core";
+import * as compactionModule from "@zero2ai/agent-core/compaction";
+import type { TextContent } from "@zero2ai/ai";
+import { AssistantMessageEventStream } from "@zero2ai/ai/utils/event-stream";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { TempDir } from "@zero2ai/utils";
 import { ModelRegistry } from "../src/config/model-registry";
 import { Settings } from "../src/config/settings";
 import { resolveLocalUrlToPath } from "../src/internal-urls";
@@ -117,14 +117,14 @@ describe("AgentSession approved-plan reference re-injection after compaction (is
 	const cleanups: Array<() => Promise<void>> = [];
 
 	beforeAll(async () => {
-		fixtureDir = TempDir.createSync("@pi-agent-session-plan-ref-compaction-fixture-");
+		fixtureDir = TempDir.createSync("@zero2ai-agent-session-plan-ref-compaction-fixture-");
 		authStorage = await AuthStorage.create(path.join(fixtureDir.path(), "testauth.db"));
 		authStorage.setRuntimeApiKey("anthropic", "test-key");
 		modelRegistry = new ModelRegistry(authStorage, path.join(fixtureDir.path(), "models.yml"));
 	});
 
 	beforeEach(() => {
-		tempDir = TempDir.createSync("@pi-agent-session-plan-ref-compaction-");
+		tempDir = TempDir.createSync("@zero2ai-agent-session-plan-ref-compaction-");
 		cleanups.length = 0;
 	});
 

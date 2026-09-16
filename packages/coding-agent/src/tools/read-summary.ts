@@ -1,6 +1,6 @@
 import * as path from "node:path";
-import { type SummaryResult, summarizeCode } from "@oh-my-pi/pi-natives";
-import { LRUCache } from "@oh-my-pi/pi-utils/lru";
+import { type SummaryResult, summarizeCode } from "@zero2ai/natives";
+import { LRUCache } from "@zero2ai/utils/lru";
 import { isMarkdownPath } from "../modes/theme/theme";
 import type { ClientBridge } from "../session/client-bridge";
 import type { ToolSession } from "../sdk";

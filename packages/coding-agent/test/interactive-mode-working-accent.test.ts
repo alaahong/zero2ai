@@ -1,13 +1,13 @@
 import { afterAll, afterEach, describe, expect, it, vi } from "bun:test";
 import { stripVTControlCharacters } from "node:util";
-import { resetSettingsForTest, Settings, settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { InteractiveMode } from "@oh-my-pi/pi-coding-agent/modes/interactive-mode";
-import { initTheme, theme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import type { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { executeBuiltinSlashCommand } from "@oh-my-pi/pi-coding-agent/slash-commands/builtin-registry";
-import * as sessionColor from "@oh-my-pi/pi-coding-agent/utils/session-color";
-import { adjustHsv, TempDir } from "@oh-my-pi/pi-utils";
+import { resetSettingsForTest, Settings, settings } from "@zero2ai/coding-agent/config/settings";
+import { InteractiveMode } from "@zero2ai/coding-agent/modes/interactive-mode";
+import { initTheme, theme } from "@zero2ai/coding-agent/modes/theme/theme";
+import type { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { executeBuiltinSlashCommand } from "@zero2ai/coding-agent/slash-commands/builtin-registry";
+import * as sessionColor from "@zero2ai/coding-agent/utils/session-color";
+import { adjustHsv, TempDir } from "@zero2ai/utils";
 
 type Harness = {
 	mode: InteractiveMode;
@@ -41,7 +41,7 @@ async function createHarness(sessionName: string): Promise<Harness> {
 		return harness;
 	}
 
-	const tempDir = TempDir.createSync("@pi-working-accent-");
+	const tempDir = TempDir.createSync("@zero2ai-working-accent-");
 	await Settings.init({ inMemory: true, cwd: tempDir.path() });
 	await initTheme(false);
 	const sessionManager = SessionManager.inMemory(tempDir.path());

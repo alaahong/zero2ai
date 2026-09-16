@@ -1,7 +1,7 @@
 /** Runtime backend that an eval cell dispatches to. */
 export type EvalLanguage = "python" | "js";
 
-import type { ImageContent } from "@oh-my-pi/pi-ai";
+import type { ImageContent } from "@zero2ai/ai";
 import type { OutputMeta } from "../tools/output-meta";
 
 /** Kernel-defined tool metadata exposed to task subagents. */

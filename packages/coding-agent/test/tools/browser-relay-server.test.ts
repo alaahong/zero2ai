@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "bun:test";
-import { findFreeCdpPort } from "@oh-my-pi/pi-coding-agent/tools/browser/attach";
-import { type RelayServer, startRelayServer } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/server";
+import { findFreeCdpPort } from "@zero2ai/coding-agent/tools/browser/attach";
+import { type RelayServer, startRelayServer } from "@zero2ai/coding-agent/tools/browser/relay/server";
 
 const EXTENSION_HELLO = {
 	t: "hello",

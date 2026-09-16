@@ -1,7 +1,7 @@
-import type { AgentOptions, AgentTelemetryConfig, AgentTool, AgentToolContext } from "@oh-my-pi/pi-agent-core";
-import type { EditStore } from "@oh-my-pi/pi-natives";
-import type { FetchImpl, ImageContent, Model, ServiceTierByFamily, ToolChoice } from "@oh-my-pi/pi-ai";
-import { logger } from "@oh-my-pi/pi-utils";
+import type { AgentOptions, AgentTelemetryConfig, AgentTool, AgentToolContext } from "@zero2ai/agent-core";
+import type { EditStore } from "@zero2ai/natives";
+import type { FetchImpl, ImageContent, Model, ServiceTierByFamily, ToolChoice } from "@zero2ai/ai";
+import { logger } from "@zero2ai/utils";
 import type { AsyncJobManager } from "../async/job-manager";
 import type { Rule } from "../capability/rule";
 import type { EffectiveExtensionRoots } from "../capability/types";
@@ -111,7 +111,7 @@ export * from "./write";
 export * from "./xdev";
 export * from "./yield";
 
-/** Tool type (AgentTool from pi-ai) */
+/** Tool type (AgentTool from zero2ai-ai) */
 export type Tool = AgentTool<any, any, any>;
 
 export type ContextFileEntry = {
@@ -218,7 +218,7 @@ export interface ToolSession {
 	 */
 	effectiveExtensionRoots?(): EffectiveExtensionRoots;
 	/**
-	 * Pre-discovered custom-tool source paths from `.omp/tools/`, `.claude/tools/`,
+	 * Pre-discovered custom-tool source paths from `.zero2ai/tools/`, `.claude/tools/`,
 	 * plugins, etc. Forwarded to subagents so they skip the FS scan but still
 	 * re-bind tools to their own session-scoped `CustomToolAPI`.
 	 */

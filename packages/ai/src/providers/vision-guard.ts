@@ -1,4 +1,4 @@
-import { $env } from "@oh-my-pi/pi-utils";
+import { $env } from "@zero2ai/utils";
 import type { Api, ImageContent, Model, TextContent } from "../types";
 
 export const NON_VISION_IMAGE_PLACEHOLDER = "[image omitted: model does not support vision]";
@@ -45,18 +45,18 @@ export function isOpenAICompletionsVisionSupported(model: Model<"openai-completi
 /**
  * Whether the transport that will carry `model` sends image content on the wire.
  *
- * The `pi-native` transport forwards the original context (images included) to
+ * The `zero2ai-native` transport forwards the original context (images included) to
  * the gateway, which resolves its own model server-side, so the Chat
  * Completions guard below never runs client-side and the declared input
  * applies. Otherwise the OpenAI Chat Completions path applies the text-only
- * guard, as does the OpenRouter chat fallback (`PI_OPENROUTER_RESPONSES=0`,
+ * guard, as does the OpenRouter chat fallback (`ZERO2AI_OPENROUTER_RESPONSES=0`,
  * which dispatches `openrouter` models through `streamOpenAICompletions`);
  * every other API ships the modalities the model declares. Callers that report
- * or gate on the wire (for example the `omp models` table) read this
+ * or gate on the wire (for example the `zero2ai models` table) read this
  * predicate; declared capability reads `model.input`.
  */
 export function sendsImageInputOnWire(model: Model<Api>): boolean {
-	if (model.transport === "pi-native") return model.input.includes("image");
+	if (model.transport === "zero2ai-native") return model.input.includes("image");
 	if (isGuardedCompletionsTransport(model)) return isOpenAICompletionsVisionSupported(model);
 	return model.input.includes("image");
 }
@@ -64,5 +64,5 @@ export function sendsImageInputOnWire(model: Model<Api>): boolean {
 /** True for the transports that encode through the Chat Completions guard. */
 function isGuardedCompletionsTransport(model: Model<Api>): model is Model<"openai-completions" | "openrouter"> {
 	if (model.api === "openai-completions") return true;
-	return model.api === "openrouter" && $env.PI_OPENROUTER_RESPONSES === "0";
+	return model.api === "openrouter" && $env.ZERO2AI_OPENROUTER_RESPONSES === "0";
 }

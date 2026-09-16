@@ -22,7 +22,7 @@
 import * as path from "node:path";
 
 /**
- * A `pi_read` range composed onto the path as `read`'s inline `:raw:N+K`
+ * A `zero2ai_read` range composed onto the path as `read`'s inline `:raw:N+K`
  * selector.
  *
  * `read` exposes no range kwargs, so an uncomposed range reads the whole file.
@@ -65,7 +65,7 @@ function isReadRangeList(value: string): boolean {
 }
 
 /**
- * Whether a read path ends in an OMP line selector, including compound `raw`
+ * Whether a read path ends in an ZERO2AI line selector, including compound `raw`
  * forms. Cursor uses this only to describe the operation already executed by
  * the coding-agent read tool; the selector remains embedded in the path.
  */
@@ -163,7 +163,7 @@ export function piJoinPath(basePath: string | undefined, pattern: string): strin
 }
 
 /**
- * The path a `pi_ls` frame lists.
+ * The path a `zero2ai_ls` frame lists.
  *
  * The frame's `limit` is deliberately NOT mapped. It caps directory *entries*
  * (the reference does a flat `readdir` and slices the entry array), while the
@@ -188,7 +188,7 @@ export function piLimit(limit: number | undefined): number | undefined {
 }
 
 /**
- * A `pi_bash` frame's timeout as the local `bash` tool's kwarg.
+ * A `zero2ai_bash` frame's timeout as the local `bash` tool's kwarg.
  *
  * Presence-sensitive like every other `optional int32` here, and unusually
  * load-bearing: `bash` documents `timeout: 0` as "disables the command

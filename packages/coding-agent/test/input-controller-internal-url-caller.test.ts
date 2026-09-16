@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { KeybindingsManager } from "@oh-my-pi/pi-coding-agent/config/keybindings";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { InternalUrlRouter } from "@oh-my-pi/pi-coding-agent/internal-urls/router";
-import { InputController } from "@oh-my-pi/pi-coding-agent/modes/controllers/input-controller";
-import type { InteractiveModeContext } from "@oh-my-pi/pi-coding-agent/modes/types";
-import { AgentRegistry } from "@oh-my-pi/pi-coding-agent/registry/agent-registry";
-import type { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
+import { KeybindingsManager } from "@zero2ai/coding-agent/config/keybindings";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { InternalUrlRouter } from "@zero2ai/coding-agent/internal-urls/router";
+import { InputController } from "@zero2ai/coding-agent/modes/controllers/input-controller";
+import type { InteractiveModeContext } from "@zero2ai/coding-agent/modes/types";
+import { AgentRegistry } from "@zero2ai/coding-agent/registry/agent-registry";
+import type { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
 
 const SHARED_CWD = "/tmp/input-controller-internal-url-caller";
 

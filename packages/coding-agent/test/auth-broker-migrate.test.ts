@@ -2,10 +2,10 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { AuthStorage, SqliteAuthCredentialStore } from "@oh-my-pi/pi-ai";
-import { type AuthBrokerServerHandle, startAuthBroker } from "@oh-my-pi/pi-ai/auth-broker";
-import { runAuthBrokerCommand } from "@oh-my-pi/pi-coding-agent/cli/auth-broker-cli";
-import { getAgentDbPath, removeWithRetries, setAgentDir } from "@oh-my-pi/pi-utils";
+import { AuthStorage, SqliteAuthCredentialStore } from "@zero2ai/ai";
+import { type AuthBrokerServerHandle, startAuthBroker } from "@zero2ai/ai/auth-broker";
+import { runAuthBrokerCommand } from "@zero2ai/coding-agent/cli/auth-broker-cli";
+import { getAgentDbPath, removeWithRetries, setAgentDir } from "@zero2ai/utils";
 
 const TEAM_ORG = "org-team-1111";
 
@@ -37,10 +37,10 @@ describe("auth-broker migrate (org-only dedupe)", () => {
 	const savedEnv: Record<string, string | undefined> = {};
 
 	beforeEach(async () => {
-		savedEnv.OMP_AUTH_BROKER_URL = process.env.OMP_AUTH_BROKER_URL;
-		savedEnv.OMP_AUTH_BROKER_TOKEN = process.env.OMP_AUTH_BROKER_TOKEN;
-		agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "omp-migrate-client-"));
-		brokerAgentDir = await fs.mkdtemp(path.join(os.tmpdir(), "omp-migrate-broker-"));
+		savedEnv.ZERO2AI_AUTH_BROKER_URL = process.env.ZERO2AI_AUTH_BROKER_URL;
+		savedEnv.ZERO2AI_AUTH_BROKER_TOKEN = process.env.ZERO2AI_AUTH_BROKER_TOKEN;
+		agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-migrate-client-"));
+		brokerAgentDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-migrate-broker-"));
 		setAgentDir(agentDir);
 
 		brokerStore = await SqliteAuthCredentialStore.open(path.join(brokerAgentDir, "agent.db"));
@@ -52,8 +52,8 @@ describe("auth-broker migrate (org-only dedupe)", () => {
 			bearerTokens: [token],
 			disableRefresher: true,
 		});
-		process.env.OMP_AUTH_BROKER_URL = handle.url;
-		process.env.OMP_AUTH_BROKER_TOKEN = token;
+		process.env.ZERO2AI_AUTH_BROKER_URL = handle.url;
+		process.env.ZERO2AI_AUTH_BROKER_TOKEN = token;
 	});
 
 	afterEach(async () => {
@@ -62,7 +62,7 @@ describe("auth-broker migrate (org-only dedupe)", () => {
 		brokerStore?.close();
 		await removeWithRetries(agentDir);
 		await removeWithRetries(brokerAgentDir);
-		for (const key of ["OMP_AUTH_BROKER_URL", "OMP_AUTH_BROKER_TOKEN"] as const) {
+		for (const key of ["ZERO2AI_AUTH_BROKER_URL", "ZERO2AI_AUTH_BROKER_TOKEN"] as const) {
 			if (savedEnv[key] === undefined) delete process.env[key];
 			else process.env[key] = savedEnv[key];
 		}

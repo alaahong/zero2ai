@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { EvalToolDetails } from "@oh-my-pi/pi-coding-agent/eval/types";
-import { getThemeByName, setThemeInstance, type Theme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { EvalTool, evalToolRenderer } from "@oh-my-pi/pi-coding-agent/tools/eval";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
+import type { EvalToolDetails } from "@zero2ai/coding-agent/eval/types";
+import { getThemeByName, setThemeInstance, type Theme } from "@zero2ai/coding-agent/modes/theme/theme";
+import { EvalTool, evalToolRenderer } from "@zero2ai/coding-agent/tools/eval";
 
 describe("eval renderer: display-only streaming formatting", () => {
 	let theme: Theme;

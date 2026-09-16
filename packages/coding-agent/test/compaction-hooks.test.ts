@@ -6,23 +6,23 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { Agent } from "@oh-my-pi/pi-agent-core";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
+import { Agent } from "@zero2ai/agent-core";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
 import {
 	HookRunner,
 	type LoadedHook,
 	type SessionBeforeCompactEvent,
 	type SessionCompactEvent,
 	type SessionEvent,
-} from "@oh-my-pi/pi-coding-agent/extensibility/hooks";
-import { theme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { createTools, type ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { removeSyncWithRetries, Snowflake } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/extensibility/hooks";
+import { theme } from "@zero2ai/coding-agent/modes/theme/theme";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { createTools, type ToolSession } from "@zero2ai/coding-agent/tools";
+import { removeSyncWithRetries, Snowflake } from "@zero2ai/utils";
 import { e2eApiKey } from "./utilities";
 
 describe.skipIf(!e2eApiKey("ANTHROPIC_API_KEY"))("Compaction hooks", () => {
@@ -32,7 +32,7 @@ describe.skipIf(!e2eApiKey("ANTHROPIC_API_KEY"))("Compaction hooks", () => {
 	let capturedEvents: SessionEvent[];
 
 	beforeEach(() => {
-		tempDir = path.join(os.tmpdir(), `omp-compaction-hooks-test-${Snowflake.next()}`);
+		tempDir = path.join(os.tmpdir(), `zero2ai-compaction-hooks-test-${Snowflake.next()}`);
 		fs.mkdirSync(tempDir, { recursive: true });
 		capturedEvents = [];
 	});

@@ -1,15 +1,15 @@
 import { afterAll, describe, expect, it } from "bun:test";
-import type { AgentTool, AgentToolResult } from "@oh-my-pi/pi-agent-core";
-import { PYTHON_PRELUDE } from "@oh-my-pi/pi-coding-agent/eval/py/prelude";
+import type { AgentTool, AgentToolResult } from "@zero2ai/agent-core";
+import { PYTHON_PRELUDE } from "@zero2ai/coding-agent/eval/py/prelude";
 import {
 	disposePyToolBridge,
 	ensurePyToolBridge,
 	registerPyToolBridge,
-} from "@oh-my-pi/pi-coding-agent/eval/py/tool-bridge";
-import type { EvalShadowCellSession } from "@oh-my-pi/pi-coding-agent/eval/speculation/cell-session";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { $which, isRecord } from "@oh-my-pi/pi-utils";
-import { INTENT_FIELD } from "@oh-my-pi/pi-wire";
+} from "@zero2ai/coding-agent/eval/py/tool-bridge";
+import type { EvalShadowCellSession } from "@zero2ai/coding-agent/eval/speculation/cell-session";
+import type { ToolSession } from "@zero2ai/coding-agent/tools";
+import { $which, isRecord } from "@zero2ai/utils";
+import { INTENT_FIELD } from "@zero2ai/wire";
 
 interface FakeCall {
 	id: string;
@@ -152,9 +152,9 @@ asyncio.run(check_intent())
 				signal: AbortSignal.timeout(10_000),
 				env: {
 					...process.env,
-					PI_TOOL_BRIDGE_URL: info.url,
-					PI_TOOL_BRIDGE_TOKEN: info.token,
-					PI_TOOL_BRIDGE_SESSION: sessionId,
+					ZERO2AI_TOOL_BRIDGE_URL: info.url,
+					ZERO2AI_TOOL_BRIDGE_TOKEN: info.token,
+					ZERO2AI_TOOL_BRIDGE_SESSION: sessionId,
 				},
 			});
 			try {
@@ -344,9 +344,9 @@ asyncio.run(check_identity())
 				signal: AbortSignal.timeout(10_000),
 				env: {
 					...process.env,
-					PI_TOOL_BRIDGE_URL: info.url,
-					PI_TOOL_BRIDGE_TOKEN: info.token,
-					PI_TOOL_BRIDGE_SESSION: sessionId,
+					ZERO2AI_TOOL_BRIDGE_URL: info.url,
+					ZERO2AI_TOOL_BRIDGE_TOKEN: info.token,
+					ZERO2AI_TOOL_BRIDGE_SESSION: sessionId,
 				},
 			});
 			try {

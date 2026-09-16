@@ -2,10 +2,10 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { resolveExplicitSearchPaths } from "@oh-my-pi/pi-coding-agent/tools/path-utils";
-import { removeWithRetries } from "@oh-my-pi/pi-utils";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import type { ToolSession } from "@zero2ai/coding-agent/tools";
+import { resolveExplicitSearchPaths } from "@zero2ai/coding-agent/tools/path-utils";
+import { removeWithRetries } from "@zero2ai/utils";
 import { GrepTool } from "../../src/tools/grep";
 
 const testSettings = Settings.isolated();
@@ -51,7 +51,7 @@ describe.skipIf(isWindows)("search with omitted paths", () => {
 	let cwd: string;
 
 	beforeEach(async () => {
-		cwd = await fs.mkdtemp(path.join(os.tmpdir(), "pi-search-default-cwd-"));
+		cwd = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-search-default-cwd-"));
 		await Bun.write(path.join(cwd, "rooted.txt"), "default-needle here\n");
 	});
 
@@ -94,9 +94,9 @@ describe.skipIf(isWindows)("search across unrelated filesystem trees", () => {
 		// Place fixtures in two unrelated top-level subtrees so their only shared
 		// ancestor is the filesystem root. Without the multi-target fanout, the
 		// search tool would scan from `/` and walk the entire filesystem.
-		dirA = await fs.mkdtemp(path.join("/tmp", "pi-search-multi-A-"));
-		dirB = await fs.mkdtemp(path.join("/var/tmp", "pi-search-multi-B-"));
-		cwd = await fs.mkdtemp(path.join(os.tmpdir(), "pi-search-multi-cwd-"));
+		dirA = await fs.mkdtemp(path.join("/tmp", "zero2ai-search-multi-A-"));
+		dirB = await fs.mkdtemp(path.join("/var/tmp", "zero2ai-search-multi-B-"));
+		cwd = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-search-multi-cwd-"));
 		await Bun.write(path.join(dirA, "alpha.txt"), "shared-needle alpha\n");
 		await Bun.write(path.join(dirB, "beta.txt"), "shared-needle beta\n");
 	});
@@ -135,7 +135,7 @@ describe.skipIf(isWindows)("resolveExplicitSearchPaths shared non-root ancestor"
 	let cousinFile: string;
 
 	beforeEach(async () => {
-		parent = await fs.mkdtemp(path.join(os.tmpdir(), "pi-search-ancestor-"));
+		parent = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-search-ancestor-"));
 		repo = path.join(parent, "repo");
 		await fs.mkdir(path.join(repo, "src"), { recursive: true });
 		await Bun.write(path.join(repo, "src", "a.ts"), "alpha\n");
@@ -200,7 +200,7 @@ describe.skipIf(isWindows)("resolveExplicitSearchPaths shared non-root ancestor"
 
 describe.skipIf(!isWindows)("resolveExplicitSearchPaths Windows casing", () => {
 	it("collapses overlapping scopes whose drive letters differ in case", async () => {
-		const repo = await fs.mkdtemp(path.join(os.tmpdir(), "pi-search-case-"));
+		const repo = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-search-case-"));
 		try {
 			await fs.mkdir(path.join(repo, "src"), { recursive: true });
 			await Bun.write(path.join(repo, "src", "a.ts"), "alpha\n");
@@ -224,7 +224,7 @@ describe.skipIf(isWindows)("search with explicit walker-pruned file targets", ()
 	let repo: string;
 
 	beforeEach(async () => {
-		repo = await fs.mkdtemp(path.join(os.tmpdir(), "pi-search-pruned-"));
+		repo = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-search-pruned-"));
 		await fs.mkdir(path.join(repo, ".git"), { recursive: true });
 		await Bun.write(path.join(repo, ".git", "config"), "[push]\n\tfollowTags = true\n");
 		await Bun.write(path.join(repo, "readme.txt"), "no needle here\n");

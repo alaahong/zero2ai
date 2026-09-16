@@ -1,11 +1,11 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
-import { TranscriptContainer } from "@oh-my-pi/pi-coding-agent/modes/components/transcript-container";
-import { COMPOSER_DEFAULTS, Composer } from "@oh-my-pi/pi-coding-agent/modes/composer";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { type Component, Container, type RenderScheduler, visibleWidth } from "@oh-my-pi/pi-tui";
-import { Image } from "@oh-my-pi/pi-tui/components/image";
-import { getKittyGraphics, setKittyGraphics } from "@oh-my-pi/pi-tui/kitty-graphics";
-import { getCellDimensions, ImageProtocol, setCellDimensions, TERMINAL } from "@oh-my-pi/pi-tui/terminal-capabilities";
+import { TranscriptContainer } from "@zero2ai/coding-agent/modes/components/transcript-container";
+import { COMPOSER_DEFAULTS, Composer } from "@zero2ai/coding-agent/modes/composer";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import { type Component, Container, type RenderScheduler, visibleWidth } from "@zero2ai/tui";
+import { Image } from "@zero2ai/tui/components/image";
+import { getKittyGraphics, setKittyGraphics } from "@zero2ai/tui/kitty-graphics";
+import { getCellDimensions, ImageProtocol, setCellDimensions, TERMINAL } from "@zero2ai/tui/terminal-capabilities";
 import { VirtualRenderScheduler } from "../../tui/test/virtual-render-scheduler";
 import { VirtualTerminal } from "../../tui/test/virtual-terminal";
 import { withoutTerminalMultiplexer } from "./helpers/terminal-multiplexer";

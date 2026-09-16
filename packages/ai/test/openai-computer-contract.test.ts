@@ -1,26 +1,26 @@
 import { describe, expect, test } from "bun:test";
-import { type } from "@oh-my-pi/omptype";
+import { type } from "@zero2ai/schema";
 import {
 	buildTransformedCodexRequestBody,
 	convertCodexResponsesMessages,
 	convertOpenAICodexResponsesTools,
 	normalizeCodexToolChoice,
-} from "@oh-my-pi/pi-ai/providers/openai-codex-responses";
+} from "@zero2ai/ai/providers/openai-codex-responses";
 import {
 	buildParams,
 	convertTools,
 	mapOpenAIResponsesToolChoiceForTools,
-} from "@oh-my-pi/pi-ai/providers/openai-responses";
-import type { ResponseStreamEvent } from "@oh-my-pi/pi-ai/providers/openai-responses-wire";
+} from "@zero2ai/ai/providers/openai-responses";
+import type { ResponseStreamEvent } from "@zero2ai/ai/providers/openai-responses-wire";
 import {
 	appendResponsesToolResultMessages,
 	buildResponsesInput,
 	convertResponsesAssistantMessage,
 	processResponsesStream,
-} from "@oh-my-pi/pi-ai/providers/openai-shared";
-import type { AssistantMessage, Context, Model, ModelSpec, Tool, ToolResultMessage } from "@oh-my-pi/pi-ai/types";
-import { sanitizeOpenAIResponsesHistoryItemsForReplay } from "@oh-my-pi/pi-ai/utils";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
+} from "@zero2ai/ai/providers/openai-shared";
+import type { AssistantMessage, Context, Model, ModelSpec, Tool, ToolResultMessage } from "@zero2ai/ai/types";
+import { sanitizeOpenAIResponsesHistoryItemsForReplay } from "@zero2ai/ai/utils";
+import { buildModel } from "@zero2ai/catalog/build";
 
 function model<TApi extends "openai-responses" | "openai-codex-responses">(
 	api: TApi,

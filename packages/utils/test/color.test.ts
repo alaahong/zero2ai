@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { colorLuma, hexToOklch, hslToHex, oklchToHex, relativeLuminance } from "@oh-my-pi/pi-utils/color";
+import { colorLuma, hexToOklch, hslToHex, oklchToHex, relativeLuminance } from "@zero2ai/utils/color";
 
 describe("relativeLuminance (WCAG, linearized sRGB)", () => {
 	it("hits the extremes", () => {

@@ -2,16 +2,16 @@ import { afterEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { createMockModel } from "@oh-my-pi/pi-ai/providers/mock";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { rebindMemoryBackendForCwd } from "@oh-my-pi/pi-coding-agent/hindsight/backend";
-import { createAgentSession } from "@oh-my-pi/pi-coding-agent/sdk";
-import type { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { executeAcpBuiltinSlashCommand } from "@oh-my-pi/pi-coding-agent/slash-commands/acp-builtins";
-import { getProjectAgentDir, getProjectDir, setProjectDir, removeSyncWithRetries, Snowflake } from "@oh-my-pi/pi-utils";
+import { createMockModel } from "@zero2ai/ai/providers/mock";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { rebindMemoryBackendForCwd } from "@zero2ai/coding-agent/hindsight/backend";
+import { createAgentSession } from "@zero2ai/coding-agent/sdk";
+import type { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { executeAcpBuiltinSlashCommand } from "@zero2ai/coding-agent/slash-commands/acp-builtins";
+import { getProjectAgentDir, getProjectDir, setProjectDir, removeSyncWithRetries, Snowflake } from "@zero2ai/utils";
 import { createInMemoryAuthStorage } from "./helpers/agent-session-setup";
 
 function textContent(result: { content?: Array<{ type: string; text?: string }> }): string {
@@ -37,7 +37,7 @@ describe("createAgentSession cwd after /move", () => {
 	it.each(["disabled", "empty", "failed"] as const)(
 		"drops source Hindsight context after cwd rebind when destination recall is %s",
 		async destinationRecall => {
-			const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "pi-sdk-memory-prompt-move-"));
+			const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-sdk-memory-prompt-move-"));
 			tempDirs.push(tempDir);
 			const cwdA = path.join(tempDir, "cwd-a");
 			const cwdB = path.join(tempDir, "cwd-b");
@@ -142,7 +142,7 @@ describe("createAgentSession cwd after /move", () => {
 	);
 
 	it("runs tools from the moved session directory", async () => {
-		const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), `pi-sdk-move-cwd-${Snowflake.next()}-`));
+		const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), `zero2ai-sdk-move-cwd-${Snowflake.next()}-`));
 		tempDirs.push(tempDir);
 		const cwdA = path.join(tempDir, "cwd-a");
 		const cwdB = path.join(tempDir, "cwd-b");
@@ -194,7 +194,7 @@ describe("createAgentSession cwd after /move", () => {
 		}
 	});
 	it.each(["hindsight", "mnemopi"] as const)("keeps %s disabled in restricted sessions after /move", async backend => {
-		const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "pi-sdk-restricted-memory-move-"));
+		const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-sdk-restricted-memory-move-"));
 		tempDirs.push(tempDir);
 		const cwdA = path.join(tempDir, "cwd-a");
 		const cwdB = path.join(tempDir, "cwd-b");

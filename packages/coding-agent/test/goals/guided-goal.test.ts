@@ -1,18 +1,18 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
 import * as path from "node:path";
-import { Agent, AgentBusyError } from "@oh-my-pi/pi-agent-core";
-import type { ImageContent } from "@oh-my-pi/pi-ai";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { GoalTool } from "@oh-my-pi/pi-coding-agent/goals/tools/goal-tool";
-import { InteractiveMode } from "@oh-my-pi/pi-coding-agent/modes/interactive-mode";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import type { AgentSessionEvent } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { createTools, type Tool, type ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { Agent, AgentBusyError } from "@zero2ai/agent-core";
+import type { ImageContent } from "@zero2ai/ai";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
+import { GoalTool } from "@zero2ai/coding-agent/goals/tools/goal-tool";
+import { InteractiveMode } from "@zero2ai/coding-agent/modes/interactive-mode";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import type { AgentSessionEvent } from "@zero2ai/coding-agent/session/agent-session";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { createTools, type Tool, type ToolSession } from "@zero2ai/coding-agent/tools";
+import { TempDir } from "@zero2ai/utils";
 
 function createToolSession(cwd: string, settings: Settings, overrides: Partial<ToolSession> = {}): ToolSession {
 	return {
@@ -36,7 +36,7 @@ type GuidedGoalHarness = {
 
 async function createHarness(options?: { goalEnabled?: boolean }): Promise<GuidedGoalHarness> {
 	resetSettingsForTest();
-	const tempDir = TempDir.createSync("@pi-guided-goal-");
+	const tempDir = TempDir.createSync("@zero2ai-guided-goal-");
 	await Settings.init({ inMemory: true, cwd: tempDir.path() });
 	const settings = Settings.isolated({
 		"compaction.enabled": false,

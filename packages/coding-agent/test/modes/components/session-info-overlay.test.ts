@@ -1,6 +1,6 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
-import { type Component, type OverlayHandle, setKeybindings, TUI, visibleWidth } from "@oh-my-pi/pi-tui";
-import type { Terminal, TerminalAppearance } from "@oh-my-pi/pi-tui/terminal";
+import { type Component, type OverlayHandle, setKeybindings, TUI, visibleWidth } from "@zero2ai/tui";
+import type { Terminal, TerminalAppearance } from "@zero2ai/tui/terminal";
 import { KeybindingsManager } from "../../../src/config/keybindings";
 import { Settings } from "../../../src/config/settings";
 import { SessionInfoOverlay } from "../../../src/modes/components/session-info-overlay";

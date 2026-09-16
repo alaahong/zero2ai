@@ -1,4 +1,4 @@
-import { mmrRerankIndices } from "@oh-my-pi/pi-natives";
+import { mmrRerankIndices } from "@zero2ai/natives";
 
 export interface MmrResult {
 	readonly content?: string;

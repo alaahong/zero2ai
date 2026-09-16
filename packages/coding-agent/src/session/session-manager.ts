@@ -8,8 +8,8 @@ import type {
 	ServiceTierByFamily,
 	TextContent,
 	Usage,
-} from "@oh-my-pi/pi-ai";
-import { createSyntheticToolResultMessage } from "@oh-my-pi/pi-agent-core";
+} from "@zero2ai/ai";
+import { createSyntheticToolResultMessage } from "@zero2ai/agent-core";
 import {
 	directoryIsEnterable,
 	getBlobsDir,
@@ -24,7 +24,7 @@ import {
 	pathIsWithin,
 	stringifyJson,
 	toError,
-} from "@oh-my-pi/pi-utils";
+} from "@zero2ai/utils";
 import type { StructuredSubagentSchemaMode } from "../task/types";
 import { ArtifactManager } from "./artifacts";
 import { type BlobPutOptions, type BlobPutResult, BlobStore, lazyImageDataSync } from "./blob-store";
@@ -249,7 +249,7 @@ async function mergeDirectoryInto(
  * The destination may already exist: a session moving back into a bucket it
  * lived in before finds its own `<id>/` there whenever a writer that captured
  * the old path — subagents adopt the parent's `ArtifactManager`, eval
- * subprocesses inherit `PI_ARTIFACTS_DIR` — kept writing after the move away.
+ * subprocesses inherit `ZERO2AI_ARTIFACTS_DIR` — kept writing after the move away.
  * Renaming onto an existing directory fails with a platform-specific code
  * (ENOTEMPTY, EEXIST, EPERM on Windows), so the fallback is decided by what is
  * there, not by the code: an existing directory is merged into.
@@ -2049,7 +2049,7 @@ export class SessionManager {
 		await this.#rewriteAtomically();
 	}
 
-	/** Persist this session's transcript as a newly identified OMP session. */
+	/** Persist this session's transcript as a newly identified ZERO2AI session. */
 	async persistCopy(
 		options?: { sessionDir?: string; suppressBreadcrumb?: boolean },
 		storage: SessionStorage = new FileSessionStorage(),

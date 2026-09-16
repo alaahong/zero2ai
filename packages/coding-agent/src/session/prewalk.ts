@@ -1,7 +1,7 @@
-import type { Agent, AgentMessage, AgentToolResult, AgentTurnEndContext } from "@oh-my-pi/pi-agent-core";
-import { invalidateMessageCache } from "@oh-my-pi/pi-agent-core/compaction";
-import type { Model, ToolResultMessage } from "@oh-my-pi/pi-ai";
-import { logger, prompt } from "@oh-my-pi/pi-utils";
+import type { Agent, AgentMessage, AgentToolResult, AgentTurnEndContext } from "@zero2ai/agent-core";
+import { invalidateMessageCache } from "@zero2ai/agent-core/compaction";
+import type { Model, ToolResultMessage } from "@zero2ai/ai";
+import { logger, prompt } from "@zero2ai/utils";
 import type { Settings } from "../config/settings";
 import type { LocalProtocolOptions } from "../internal-urls";
 import { resolveApprovedPlan } from "../plan-mode/approved-plan";

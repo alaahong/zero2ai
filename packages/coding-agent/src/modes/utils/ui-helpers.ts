@@ -1,8 +1,8 @@
-import type { AgentMessage } from "@oh-my-pi/pi-agent-core";
-import type { AssistantMessage, ImageContent, Message, Usage } from "@oh-my-pi/pi-ai";
-import { getStreamingPartialJson } from "@oh-my-pi/pi-ai/utils/block-symbols";
-import { type Component, Spacer, Text, TruncatedText } from "@oh-my-pi/pi-tui";
-import { logger } from "@oh-my-pi/pi-utils";
+import type { AgentMessage } from "@zero2ai/agent-core";
+import type { AssistantMessage, ImageContent, Message, Usage } from "@zero2ai/ai";
+import { getStreamingPartialJson } from "@zero2ai/ai/utils/block-symbols";
+import { type Component, Spacer, Text, TruncatedText } from "@zero2ai/tui";
+import { logger } from "@zero2ai/utils";
 import type { AdvisorMessageDetails } from "../../advisor";
 import { COLLAB_PROMPT_MESSAGE_TYPE, type CollabPromptDetails } from "../../collab/protocol";
 import { settings } from "../../config/settings";
@@ -1074,7 +1074,7 @@ export class UiHelpers {
 		block.addChild(new DynamicBorder(text => theme.fg("warning", text)));
 		const title = "Update Available";
 		const prefix = `New version ${newVersion} is available. Run: `;
-		const command = "omp update";
+		const command = "zero2ai update";
 		block.addChild(
 			new Text(`${title}\n${prefix}${command}`, 1, 0).setStyleFn(
 				() =>

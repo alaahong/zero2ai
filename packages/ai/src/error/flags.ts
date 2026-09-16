@@ -1,4 +1,4 @@
-import { isUnexpectedSocketCloseMessage } from "@oh-my-pi/pi-utils/fetch-retry";
+import { isUnexpectedSocketCloseMessage } from "@zero2ai/utils/fetch-retry";
 import type { Api, AssistantMessage } from "../types";
 import { AwsCredentialsError } from "./aws";
 import {

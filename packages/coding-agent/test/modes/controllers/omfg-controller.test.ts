@@ -2,17 +2,17 @@ import { afterEach, beforeAll, describe, expect, it, type Mock, vi } from "bun:t
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { AgentMessage } from "@oh-my-pi/pi-agent-core";
-import type { AssistantMessage, Usage } from "@oh-my-pi/pi-ai";
-import type { Rule } from "@oh-my-pi/pi-coding-agent/capability/rule";
-import { OmfgController } from "@oh-my-pi/pi-coding-agent/modes/controllers/omfg-controller";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import type { InteractiveModeContext } from "@oh-my-pi/pi-coding-agent/modes/types";
-import { Container, type TUI } from "@oh-my-pi/pi-tui";
-import { removeWithRetries } from "@oh-my-pi/pi-utils";
-import { clearCache, readDirEntries } from "@oh-my-pi/pi-coding-agent/capability/fs";
+import type { AgentMessage } from "@zero2ai/agent-core";
+import type { AssistantMessage, Usage } from "@zero2ai/ai";
+import type { Rule } from "@zero2ai/coding-agent/capability/rule";
+import { OmfgController } from "@zero2ai/coding-agent/modes/controllers/omfg-controller";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import type { InteractiveModeContext } from "@zero2ai/coding-agent/modes/types";
+import { Container, type TUI } from "@zero2ai/tui";
+import { removeWithRetries } from "@zero2ai/utils";
+import { clearCache, readDirEntries } from "@zero2ai/coding-agent/capability/fs";
 
-const PROJECT_OPTION = "This project (.omp/rules)";
+const PROJECT_OPTION = "This project (.zero2ai/rules)";
 
 const usage: Usage = {
 	input: 0,
@@ -173,7 +173,7 @@ describe("OmfgController", () => {
 		expect(harness.container.children).toHaveLength(0);
 		expect(signal?.aborted).toBe(true);
 		expect(controller.hasActiveRequest()).toBe(false);
-		expect(await Bun.file(path.join(harness.projectDir, ".omp", "rules", "ts-no-any.md")).exists()).toBe(false);
+		expect(await Bun.file(path.join(harness.projectDir, ".zero2ai", "rules", "ts-no-any.md")).exists()).toBe(false);
 	});
 
 	it("invalidates the discovery cache after saving so rediscovery observes the new rule", async () => {
@@ -193,7 +193,7 @@ describe("OmfgController", () => {
 			messages: createMatchingMessages(),
 			selectorChoice: PROJECT_OPTION,
 		});
-		const rulesDir = path.join(harness.projectDir, ".omp", "rules");
+		const rulesDir = path.join(harness.projectDir, ".zero2ai", "rules");
 
 		// Warm the discovery cache with the pre-save (absent) directory snapshot, the
 		// state the mid-session rule rediscovery would read on the next prompt rebuild.

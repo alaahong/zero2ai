@@ -1,6 +1,6 @@
 import { deflateSync, inflateSync } from "node:zlib";
-import type { ImageContent } from "@oh-my-pi/pi-ai";
-import { decodeSixelToPng } from "@oh-my-pi/pi-natives";
+import type { ImageContent } from "@zero2ai/ai";
+import { decodeSixelToPng } from "@zero2ai/natives";
 import { MAX_IMAGE_INPUT_BYTES, convertImageToPng } from "./image-loading";
 
 const ESC = "\x1b";

@@ -1,5 +1,5 @@
-import { postmortem } from "@oh-my-pi/pi-utils";
-import { Args, Command, Flags } from "@oh-my-pi/pi-utils/cli";
+import { postmortem } from "@zero2ai/utils";
+import { Args, Command, Flags } from "@zero2ai/utils/cli";
 import { compressHelp as commandHelp } from "../cli/command-help";
 import { CliUsageError } from "../cli/usage-error";
 import { runCompressCommand } from "../compress";
@@ -18,11 +18,11 @@ export default class Compress extends Command {
 	};
 
 	static examples = [
-		"omp compress prompts/tools/read.md",
-		"omp compress notes.md -o notes.compressed.md",
-		"omp compress 'src/prompts/**/*.md' -i",
-		"omp compress a.md b.md c.md -i -n 8",
-		"omp compress spec.md -r 5 -m opus",
+		"zero2ai compress prompts/tools/read.md",
+		"zero2ai compress notes.md -o notes.compressed.md",
+		"zero2ai compress 'src/prompts/**/*.md' -i",
+		"zero2ai compress a.md b.md c.md -i -n 8",
+		"zero2ai compress spec.md -r 5 -m opus",
 	];
 
 	async run(): Promise<void> {

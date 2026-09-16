@@ -1,4 +1,4 @@
-import type { AssistantMessage } from "@oh-my-pi/pi-ai";
+import type { AssistantMessage } from "@zero2ai/ai";
 import { heapStats } from "bun:jsc";
 import { Settings } from "../src/config/settings";
 import { AssistantMessageComponent } from "../src/modes/components/assistant-message";

@@ -6,9 +6,9 @@
  * server instead of being dropped.
  */
 import { describe, expect, test } from "bun:test";
-import type { SourceMeta } from "@oh-my-pi/pi-coding-agent/capability/types";
-import { filterExaMCPServers, shouldFilterBrowserMCPForPrelude } from "@oh-my-pi/pi-coding-agent/mcp/config";
-import type { MCPServerConfig } from "@oh-my-pi/pi-coding-agent/mcp/types";
+import type { SourceMeta } from "@zero2ai/coding-agent/capability/types";
+import { filterExaMCPServers, shouldFilterBrowserMCPForPrelude } from "@zero2ai/coding-agent/mcp/config";
+import type { MCPServerConfig } from "@zero2ai/coding-agent/mcp/types";
 
 const SOURCE: SourceMeta = {
 	provider: "test",

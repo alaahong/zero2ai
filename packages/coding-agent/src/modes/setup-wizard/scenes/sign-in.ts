@@ -1,6 +1,6 @@
-import type { AuthStorage } from "@oh-my-pi/pi-ai";
-import { PASTE_CODE_LOGIN_PROVIDERS } from "@oh-my-pi/pi-ai";
-import type { OAuthProvider } from "@oh-my-pi/pi-ai/oauth/types";
+import type { AuthStorage } from "@zero2ai/ai";
+import { PASTE_CODE_LOGIN_PROVIDERS } from "@zero2ai/ai";
+import type { OAuthProvider } from "@zero2ai/ai/oauth/types";
 import {
 	type Component,
 	type Focusable,
@@ -8,8 +8,8 @@ import {
 	matchesKey,
 	type SgrMouseEvent,
 	wrapTextWithAnsi,
-} from "@oh-my-pi/pi-tui";
-import { getAgentDbPath } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/tui";
+import { getAgentDbPath } from "@zero2ai/utils";
 import { captureBrowserSession } from "../../../utils/browser-session";
 import { copyToClipboard } from "../../../utils/clipboard";
 import { OAuthSelectorComponent } from "../../components/oauth-selector";
@@ -206,7 +206,7 @@ export class SignInTab implements SetupTab {
 				onAuth: info => {
 					// Store the full authorization URL as the primary copy/display
 					// target: it works from any machine, including SSH boxes where
-					// the OMP-hosted `launchUrl` would resolve against the user's
+					// the ZERO2AI-hosted `launchUrl` would resolve against the user's
 					// local browser and fail. The wizard render uses
 					// `wrapTextWithAnsi`, so long URLs wrap across lines rather
 					// than getting truncated — the RFC 7636 §4.3 PKCE-downgrade

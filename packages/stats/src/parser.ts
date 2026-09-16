@@ -10,9 +10,9 @@ import {
 	type ToolCall,
 	type ToolResultMessage,
 	type Usage,
-} from "@oh-my-pi/pi-ai";
-import { classifyModel } from "@oh-my-pi/pi-catalog/compat/taxonomy";
-import { getSessionsDir, isEnoent, readLines } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/ai";
+import { classifyModel } from "@zero2ai/catalog/compat/taxonomy";
+import { getSessionsDir, isEnoent, readLines } from "@zero2ai/utils";
 import type {
 	AgentType,
 	MessageStatsInput,

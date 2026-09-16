@@ -1,12 +1,12 @@
-import type { AgentMessage } from "@oh-my-pi/pi-agent-core";
-import { getAnthropicCompactionPayload } from "@oh-my-pi/pi-agent-core/compaction";
+import type { AgentMessage } from "@zero2ai/agent-core";
+import { getAnthropicCompactionPayload } from "@zero2ai/agent-core/compaction";
 import {
 	coerceServiceTierByFamily,
 	type OpenAIResponsesHistoryPayload,
 	type ServiceTierByFamily,
-} from "@oh-my-pi/pi-ai";
-import * as snapcompact from "@oh-my-pi/snapcompact";
-import { isRecord } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/ai";
+import * as snapcompact from "@zero2ai/snapcompact";
+import { isRecord } from "@zero2ai/utils";
 import {
 	type CustomMessage,
 	createBranchSummaryMessage,

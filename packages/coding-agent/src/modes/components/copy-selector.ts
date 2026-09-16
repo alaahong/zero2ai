@@ -14,7 +14,7 @@
  * A URL that wrapped across terminal rows therefore needs neither a careful
  * mouse selection nor cmd-click.
  */
-import type { AgentTool } from "@oh-my-pi/pi-agent-core";
+import type { AgentTool } from "@zero2ai/agent-core";
 import {
 	type Component,
 	matchesKey,
@@ -23,7 +23,7 @@ import {
 	type TUI,
 	truncateToWidth,
 	visibleWidth,
-} from "@oh-my-pi/pi-tui";
+} from "@zero2ai/tui";
 import type { MessageRenderer } from "../../extensibility/extensions/types";
 import {
 	isUserRequestEntry,

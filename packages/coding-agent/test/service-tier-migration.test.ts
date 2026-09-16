@@ -1,15 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import type { ServiceTierByFamily } from "@oh-my-pi/pi-ai";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
+import type { ServiceTierByFamily } from "@zero2ai/ai";
+import { getBundledModel } from "@zero2ai/catalog/models";
 import {
 	resolveAgentServiceTierOverride,
 	validateAgentServiceTierOverrides,
-} from "@oh-my-pi/pi-coding-agent/config/service-tier";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AgentStorage } from "@oh-my-pi/pi-coding-agent/session/agent-storage";
-import { getProjectAgentDir, TempDir } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/config/service-tier";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
+import { AgentStorage } from "@zero2ai/coding-agent/session/agent-storage";
+import { getProjectAgentDir, TempDir } from "@zero2ai/utils";
 import { YAML } from "bun";
 import { beginSettingsTest, restoreSettingsTestState, type SettingsTestState } from "./helpers/settings-test-state";
 

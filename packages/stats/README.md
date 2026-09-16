@@ -1,10 +1,10 @@
-# @oh-my-pi/omp-stats
+# @zero2ai/stats
 
 Local observability dashboard for AI usage statistics.
 
 ## Features
 
-- **Session log parsing**: Reads JSONL session logs from `~/.omp/agent/sessions/`
+- **Session log parsing**: Reads JSONL session logs from `~/.zero2ai/agent/sessions/`
 - **SQLite aggregation**: Efficient stats storage and querying using `bun:sqlite`
 - **Web dashboard**: Real-time metrics visualization with Chart.js
 - **Incremental sync**: Only processes new/modified log entries
@@ -29,22 +29,22 @@ Subscription-backed models use matching public API prices when an exact public m
 
 ```bash
 # Start dashboard server (default: http://localhost:3847)
-omp stats
+zero2ai stats
 
 # Custom port
-omp stats --port 8080
+zero2ai stats --port 8080
 
 # Print summary to console
-omp stats --summary
+zero2ai stats --summary
 
 # Output as JSON (for scripting)
-omp stats --json
+zero2ai stats --json
 ```
 
 ### Programmatic
 
 ```typescript
-import { getDashboardStats, syncAllSessions } from "@oh-my-pi/omp-stats";
+import { getDashboardStats, syncAllSessions } from "@zero2ai/stats";
 
 // Sync session logs to database
 const { processed, files } = await syncAllSessions();
@@ -67,8 +67,8 @@ console.log(stats.byModel[0].avgTokensPerSecond);
 
 ## Data Storage
 
-- **Session logs**: `~/.omp/agent/sessions/` (JSONL files)
-- **Stats database**: `~/.omp/stats.db` (SQLite)
+- **Session logs**: `~/.zero2ai/agent/sessions/` (JSONL files)
+- **Stats database**: `~/.zero2ai/stats.db` (SQLite)
 
 ## Dashboard
 

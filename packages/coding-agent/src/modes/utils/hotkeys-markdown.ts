@@ -1,4 +1,4 @@
-import { canonicalKeyId } from "@oh-my-pi/pi-tui";
+import { canonicalKeyId } from "@zero2ai/tui";
 import {
 	type AppKeybinding,
 	formatKeyHints,

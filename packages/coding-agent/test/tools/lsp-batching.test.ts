@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import { createLspWritethrough, FileFormatResult } from "@oh-my-pi/pi-coding-agent/lsp";
-import * as lspConfig from "@oh-my-pi/pi-coding-agent/lsp/config";
-import type { LinterClient, ServerConfig } from "@oh-my-pi/pi-coding-agent/lsp/types";
-import { addFileWriteFallback } from "@oh-my-pi/pi-coding-agent/tools/file-write-fallback";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { createLspWritethrough, FileFormatResult } from "@zero2ai/coding-agent/lsp";
+import * as lspConfig from "@zero2ai/coding-agent/lsp/config";
+import type { LinterClient, ServerConfig } from "@zero2ai/coding-agent/lsp/types";
+import { addFileWriteFallback } from "@zero2ai/coding-agent/tools/file-write-fallback";
+import { TempDir } from "@zero2ai/utils";
 
 function createFormatter(format: (filePath: string, content: string) => Promise<string>): ServerConfig {
 	return {
@@ -24,7 +24,7 @@ describe("createLspWritethrough batching", () => {
 	let tempDir: TempDir;
 
 	beforeEach(() => {
-		tempDir = TempDir.createSync("@omp-lsp-batch-");
+		tempDir = TempDir.createSync("@zero2ai-lsp-batch-");
 	});
 
 	afterEach(() => {
@@ -216,7 +216,7 @@ describe.skipIf(process.getuid?.() === 0)("createLspWritethrough batching with a
 	const disposers: Array<() => void> = [];
 
 	beforeEach(async () => {
-		tempDir = TempDir.createSync("@omp-lsp-batch-broker-");
+		tempDir = TempDir.createSync("@zero2ai-lsp-batch-broker-");
 		// The seam hands handlers a symlink-resolved path and `os.tmpdir()` sits
 		// under `/var` — itself a link — on macOS, so a lexical fixture root would
 		// differ from the brokered path for a reason unrelated to this test.

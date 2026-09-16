@@ -6,7 +6,7 @@ import { installStatsTestIsolation } from "./helpers/temp-agent";
 
 const HOUR_MS = 60 * 60 * 1000;
 
-installStatsTestIsolation("@pi-stats-errors-range-");
+installStatsTestIsolation("@zero2ai-stats-errors-range-");
 
 function makeError(timestamp: number, entryId: string): MessageStats {
 	return {

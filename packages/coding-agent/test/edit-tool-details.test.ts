@@ -2,11 +2,11 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { EditTool, type EditToolDetails, getEditStore } from "@oh-my-pi/pi-coding-agent/edit";
-import type { EditMode } from "@oh-my-pi/pi-coding-agent/utils/edit-mode";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { removeWithRetries } from "@oh-my-pi/pi-utils";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
+import { EditTool, type EditToolDetails, getEditStore } from "@zero2ai/coding-agent/edit";
+import type { EditMode } from "@zero2ai/coding-agent/utils/edit-mode";
+import type { ToolSession } from "@zero2ai/coding-agent/tools";
+import { removeWithRetries } from "@zero2ai/utils";
 
 function makeSession(cwd: string, settings: Record<string, unknown> = {}): ToolSession {
 	return {
@@ -26,7 +26,7 @@ let tempDir: string;
 
 beforeEach(async () => {
 	resetSettingsForTest();
-	tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "omp-edit-tool-details-"));
+	tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-edit-tool-details-"));
 });
 
 afterEach(async () => {

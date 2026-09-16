@@ -1,12 +1,12 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "bun:test";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AssistantMessageComponent } from "@oh-my-pi/pi-coding-agent/modes/components/assistant-message";
-import { TranscriptContainer } from "@oh-my-pi/pi-coding-agent/modes/components/transcript-container";
-import { EventController } from "@oh-my-pi/pi-coding-agent/modes/controllers/event-controller";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import type { AgentSessionEvent } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { TRUNCATE_LENGTHS } from "@oh-my-pi/pi-coding-agent/tools/render-utils";
-import type { Component } from "@oh-my-pi/pi-tui";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
+import { AssistantMessageComponent } from "@zero2ai/coding-agent/modes/components/assistant-message";
+import { TranscriptContainer } from "@zero2ai/coding-agent/modes/components/transcript-container";
+import { EventController } from "@zero2ai/coding-agent/modes/controllers/event-controller";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import type { AgentSessionEvent } from "@zero2ai/coding-agent/session/agent-session";
+import { TRUNCATE_LENGTHS } from "@zero2ai/coding-agent/tools/render-utils";
+import type { Component } from "@zero2ai/tui";
 import { createInteractiveModeContext } from "./helpers/interactive-mode-context";
 
 beforeAll(async () => {

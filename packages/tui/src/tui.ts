@@ -14,10 +14,10 @@
  */
 import * as fs from "node:fs";
 import { performance } from "node:perf_hooks";
-import { getDebugLogPath } from "@oh-my-pi/pi-utils/dirs";
-import { $flag } from "@oh-my-pi/pi-utils/env";
-import * as logger from "@oh-my-pi/pi-utils/logger";
-import * as postmortem from "@oh-my-pi/pi-utils/postmortem";
+import { getDebugLogPath } from "@zero2ai/utils/dirs";
+import { $flag } from "@zero2ai/utils/env";
+import * as logger from "@zero2ai/utils/logger";
+import * as postmortem from "@zero2ai/utils/postmortem";
 import { DEFAULT_MAX_INLINE_IMAGES, ImageBudget } from "./components/image";
 import { TuiDebugServer } from "./debug-server";
 import { isKeyRelease, matchesKey } from "./keys";
@@ -97,13 +97,13 @@ const MOUSE_TRACKING_OFF = "\x1b[?1006l\x1b[?1003l\x1b[?1000l";
 type MouseTrackingState = "off" | "inline" | "full";
 
 /**
- * `PI_TUI_RESIZE_IN_PLACE=1|true` forces in-place resize (no alt-buffer borrow).
+ * `ZERO2AI_TUI_RESIZE_IN_PLACE=1|true` forces in-place resize (no alt-buffer borrow).
  * `0|false` forces the alt-buffer path even on Warp. Unset defers to Warp detection:
  * Warp re-reports its size on CSI ?1049h / CSI ?1049l, which the resize alt-borrow
  * turns into a flicker loop.
  */
 function resizeInPlaceOverride(): boolean | null {
-	const override = Bun.env.PI_TUI_RESIZE_IN_PLACE;
+	const override = Bun.env.ZERO2AI_TUI_RESIZE_IN_PLACE;
 	if (override === "1" || override === "true") return true;
 	if (override === "0" || override === "false") return false;
 	return null;
@@ -557,8 +557,8 @@ interface LineClassification {
 // terminal dispatch one SGR instead of several. On a real transcript ~40% of
 // all SGR sequences are collapsible this way, which meaningfully cuts the
 // per-frame byte volume and SGR-dispatch count a slow (xterm.js/WebGL) terminal
-// must process. On by default; `PI_NO_SGR_COALESCE=1` disables it.
-const SGR_COALESCE_ENABLED = !$flag("PI_NO_SGR_COALESCE");
+// must process. On by default; `ZERO2AI_NO_SGR_COALESCE=1` disables it.
+const SGR_COALESCE_ENABLED = !$flag("ZERO2AI_NO_SGR_COALESCE");
 const CC_ESC = 0x1b;
 const CC_KITTY_PLACEHOLDER_HIGH = KITTY_PLACEHOLDER.charCodeAt(0);
 const CC_BRACKET = 0x5b; // [
@@ -832,7 +832,7 @@ export class TUI extends Container {
 	#sixelProbeBuffer = "";
 	#sixelProbeTimeout?: NodeJS.Timeout;
 	#sixelProbeUnsubscribe?: () => void;
-	#showHardwareCursor = $flag("PI_HARDWARE_CURSOR");
+	#showHardwareCursor = $flag("ZERO2AI_HARDWARE_CURSOR");
 	#synchronizedOutputEnabled = shouldEnableSynchronizedOutputByDefault();
 	#paintBeginSequence = this.#synchronizedOutputEnabled ? PAINT_BEGIN : PAINT_BEGIN_NO_SYNC;
 	#paintEndSequence = this.#synchronizedOutputEnabled ? PAINT_END : PAINT_END_NO_SYNC;
@@ -909,7 +909,7 @@ export class TUI extends Container {
 		this.#watchdog = new LoopWatchdog();
 	}
 	static #initialResizeScrollbackMode(): ResizeScrollbackMode {
-		const mode = Bun.env.PI_TUI_RESIZE_SCROLLBACK;
+		const mode = Bun.env.ZERO2AI_TUI_RESIZE_SCROLLBACK;
 		return mode === "append" || mode === "rebuild" || mode === "preserve" ? mode : "preserve";
 	}
 
@@ -1207,7 +1207,7 @@ export class TUI extends Container {
 		this.#debugPaint = undefined;
 		this.#debugServer?.stop();
 		this.#debugServer = undefined;
-		const debugPath = process.env.OMP_TUI_DEBUG;
+		const debugPath = process.env.ZERO2AI_TUI_DEBUG;
 		if (debugPath !== undefined && debugPath.length > 0) {
 			this.#debugServer = new TuiDebugServer(this, debugPath);
 			this.#debugServer.start();
@@ -1549,7 +1549,7 @@ export class TUI extends Container {
 		// full timeout, so anchor from the fallback immediately. Two exemptions:
 		// a multiplexer answers DSR from its own grid, so under WSL-in-tmux the
 		// reply is attributable and the width-reflow / hidden-grow / reversed-
-		// burst logic still needs it; and PI_TUI_RESIZE_IN_PLACE=1 forces the
+		// burst logic still needs it; and ZERO2AI_TUI_RESIZE_IN_PLACE=1 forces the
 		// in-place repaint, whose anchor is only as good as this probe, so the
 		// documented escape hatch restores the whole pre-change path.
 		if (
@@ -1680,7 +1680,7 @@ export class TUI extends Container {
 					: reportedTop;
 			top = Math.max(0, Math.min(fallbackTop, height - staleRows));
 		}
-		if ($flag("PI_DEBUG_REDRAW")) {
+		if ($flag("ZERO2AI_DEBUG_REDRAW")) {
 			const msg = `[${new Date().toISOString()}] resize anchor: size=${width}x${height} cpr=${reportedRow ?? "timeout"} park=${probe.offset} stale=${staleRows} old=${this.#providerViewportTop} top=${top}\n`;
 			fs.appendFileSync(getDebugLogPath(), msg);
 		}
@@ -1760,7 +1760,7 @@ export class TUI extends Container {
 
 	#querySixelSupport(): void {
 		// A statically known protocol (Kitty/iTerm2 terminals) or an explicit
-		// PI_FORCE_IMAGE_PROTOCOL choice — including its `off` kill switch — wins
+		// ZERO2AI_FORCE_IMAGE_PROTOCOL choice — including its `off` kill switch — wins
 		// over the probe.
 		if (TERMINAL.imageProtocol) return;
 		if (isImageProtocolForced()) return;

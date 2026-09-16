@@ -2,8 +2,8 @@
  * Draw a session's entire thread through the production transcript pipeline.
  */
 
-import { postmortem } from "@oh-my-pi/pi-utils";
-import { Args, Command, Flags } from "@oh-my-pi/pi-utils/cli";
+import { postmortem } from "@zero2ai/utils";
+import { Args, Command, Flags } from "@zero2ai/utils/cli";
 import { renderHelp as commandHelp } from "../cli/command-help";
 import { runRenderCommand } from "../cli/render-cli";
 import { CliUsageError } from "../cli/usage-error";
@@ -25,10 +25,10 @@ export default class Render extends Command {
 	};
 
 	static examples = [
-		"omp render",
-		"omp render 01a0285c --plain",
-		"omp render ~/.omp/agent/sessions/--work-pi--/big.jsonl -q -t --repaint 5",
-		"omp render -w 200 > thread.ansi",
+		"zero2ai render",
+		"zero2ai render 01a0285c --plain",
+		"zero2ai render ~/.zero2ai/agent/sessions/--work-pi--/big.jsonl -q -t --repaint 5",
+		"zero2ai render -w 200 > thread.ansi",
 	];
 
 	async run(): Promise<void> {

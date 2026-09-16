@@ -118,7 +118,7 @@ export function extractRetryHint(
 	// A body can carry several timing signals at once: the account-reset
 	// window plus header timing folded into the message text (already the
 	// max across response headers — see getRetryAfterMsFromHeaders in
-	// pi-ai). Honor the longest: retrying before either window clears
+	// zero2ai-ai). Honor the longest: retrying before either window clears
 	// re-hits a still-blocked credential and burns the retry budget.
 	let longestMs: number | undefined;
 	// A parsed-but-non-positive signal is a provider "retry now": an explicit

@@ -4,17 +4,17 @@
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { Agent } from "@oh-my-pi/pi-agent-core";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { ExtensionRunner } from "@oh-my-pi/pi-coding-agent/extensibility/extensions";
-import type { SecretObfuscator } from "@oh-my-pi/pi-coding-agent/secrets/obfuscator";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { createTools, type ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { Snowflake } from "@oh-my-pi/pi-utils";
+import { Agent } from "@zero2ai/agent-core";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import type { ExtensionRunner } from "@zero2ai/coding-agent/extensibility/extensions";
+import type { SecretObfuscator } from "@zero2ai/coding-agent/secrets/obfuscator";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { createTools, type ToolSession } from "@zero2ai/coding-agent/tools";
+import { Snowflake } from "@zero2ai/utils";
 import { e2eApiKey } from "../../ai/test/oauth";
 
 export { e2eApiKey };
@@ -80,7 +80,7 @@ export function assistantMsg(text: string) {
  * Use this for e2e tests that need real LLM calls.
  */
 export async function createTestSession(options: TestSessionOptions = {}): Promise<TestSessionContext> {
-	const tempDir = path.join(os.tmpdir(), `omp-test-${Snowflake.next()}`);
+	const tempDir = path.join(os.tmpdir(), `zero2ai-test-${Snowflake.next()}`);
 	fs.mkdirSync(tempDir, { recursive: true });
 
 	const toolSession: ToolSession = {

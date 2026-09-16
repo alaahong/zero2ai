@@ -1,5 +1,5 @@
 /**
- * `omp if-bench` — instruction-following and working-memory benchmark.
+ * `zero2ai if-bench` — instruction-following and working-memory benchmark.
  *
  * One cacheable conversation per model: turn N issues N glyph actions over the
  * array the model itself reported last turn, while a `nya{1,N}` directive
@@ -7,8 +7,8 @@
  * the depth it reaches before it either loses the array or drops the cat sound,
  * which makes the two failure modes separable from a single reply.
  */
-import { streamSimple } from "@oh-my-pi/pi-ai";
-import chalk from "@oh-my-pi/pi-utils/chalk";
+import { streamSimple } from "@zero2ai/ai";
+import chalk from "@zero2ai/utils/chalk";
 import {
 	type BenchRuntime,
 	createDefaultBenchRuntime,
@@ -64,7 +64,7 @@ export async function runIfBenchCommand(
 	deps: IfBenchDependencies = {},
 ): Promise<IfBenchSummary> {
 	if (command.models.length === 0) {
-		throw new Error("Pass at least one model selector, e.g. `omp if-bench opus gpt-5.2`");
+		throw new Error("Pass at least one model selector, e.g. `zero2ai if-bench opus gpt-5.2`");
 	}
 	const maxTurns = positiveInteger("turns", command.flags.turns, DEFAULT_TURNS);
 	const arrayLength = positiveInteger("length", command.flags.length, DEFAULT_ARRAY_LENGTH);

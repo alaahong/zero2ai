@@ -9,9 +9,9 @@
  * model into the worker's cache.
  */
 
-import { getProjectDir } from "@oh-my-pi/pi-utils";
-import chalk from "@oh-my-pi/pi-utils/chalk";
-import { Args, Command, Flags } from "@oh-my-pi/pi-utils/cli";
+import { getProjectDir } from "@zero2ai/utils";
+import chalk from "@zero2ai/utils/chalk";
+import { Args, Command, Flags } from "@zero2ai/utils/cli";
 import { sayHelp as commandHelp } from "../cli/command-help";
 import { Settings, settings } from "../config/settings";
 import { TTS_LOCAL_VOICE_VALUES } from "../tts/models";
@@ -34,9 +34,9 @@ export default class Say extends Command {
 	};
 
 	static examples = [
-		'omp say "hello world"',
-		"omp say --file notes.md --voice bm_fable",
-		'omp say "hello world" --out /tmp/hello.wav',
+		'zero2ai say "hello world"',
+		"zero2ai say --file notes.md --voice bm_fable",
+		'zero2ai say "hello world" --out /tmp/hello.wav',
 	];
 
 	async run(): Promise<void> {
@@ -139,7 +139,7 @@ export default class Say extends Command {
 	#synthesisFailed(model: string): void {
 		process.stderr.write(
 			chalk.red(
-				`error: could not synthesize with local TTS model "${model}". Run \`omp setup speech\` to install it.\n`,
+				`error: could not synthesize with local TTS model "${model}". Run \`zero2ai setup speech\` to install it.\n`,
 			),
 		);
 	}

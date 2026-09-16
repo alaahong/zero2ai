@@ -1,9 +1,9 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as path from "node:path";
 import { scheduler } from "node:timers/promises";
-import { type } from "@oh-my-pi/omptype";
-import { Agent, type AgentTool } from "@oh-my-pi/pi-agent-core";
-import { createCompactionSummaryMessage } from "@oh-my-pi/pi-agent-core/compaction";
+import { type } from "@zero2ai/schema";
+import { Agent, type AgentTool } from "@zero2ai/agent-core";
+import { createCompactionSummaryMessage } from "@zero2ai/agent-core/compaction";
 import {
 	type Api,
 	type AssistantMessage,
@@ -13,30 +13,30 @@ import {
 	type ModelUsageHealth,
 	type ProviderSessionState,
 	type ToolCall,
-} from "@oh-my-pi/pi-ai";
-import * as AIError from "@oh-my-pi/pi-ai/error";
-import { createMockModel } from "@oh-my-pi/pi-ai/providers/mock";
-import { buildParams } from "@oh-my-pi/pi-ai/providers/openai-responses";
-import { AssistantMessageEventStream } from "@oh-my-pi/pi-ai/utils/event-stream";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { writeModelCache } from "@oh-my-pi/pi-catalog/model-cache";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { parseModelPattern, parseModelString } from "@oh-my-pi/pi-coding-agent/config/model-resolver";
-import { type SettingPath, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { ExtensionRuntime, loadExtensionFromFactory } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/loader";
-import { ExtensionRunner } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/runner";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { AgentSession, type AgentSessionEvent } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
+} from "@zero2ai/ai";
+import * as AIError from "@zero2ai/ai/error";
+import { createMockModel } from "@zero2ai/ai/providers/mock";
+import { buildParams } from "@zero2ai/ai/providers/openai-responses";
+import { AssistantMessageEventStream } from "@zero2ai/ai/utils/event-stream";
+import { buildModel } from "@zero2ai/catalog/build";
+import { writeModelCache } from "@zero2ai/catalog/model-cache";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { parseModelPattern, parseModelString } from "@zero2ai/coding-agent/config/model-resolver";
+import { type SettingPath, Settings } from "@zero2ai/coding-agent/config/settings";
+import { ExtensionRuntime, loadExtensionFromFactory } from "@zero2ai/coding-agent/extensibility/extensions/loader";
+import { ExtensionRunner } from "@zero2ai/coding-agent/extensibility/extensions/runner";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import { AgentSession, type AgentSessionEvent } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
 import {
 	type ServingModel,
 	validateRetryFallbackChains,
-} from "@oh-my-pi/pi-coding-agent/session/retry-fallback-chains";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { convertToLlm } from "@oh-my-pi/pi-coding-agent/session/messages";
-import { EventBus } from "@oh-my-pi/pi-coding-agent/utils/event-bus";
-import { TempDir } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/session/retry-fallback-chains";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { convertToLlm } from "@zero2ai/coding-agent/session/messages";
+import { EventBus } from "@zero2ai/coding-agent/utils/event-bus";
+import { TempDir } from "@zero2ai/utils";
 
 type AutoRetryStartEvent = Extract<AgentSessionEvent, { type: "auto_retry_start" }>;
 type AutoRetryEndEvent = Extract<AgentSessionEvent, { type: "auto_retry_end" }>;
@@ -241,7 +241,7 @@ describe("AgentSession retry fallback", () => {
 	// auth DB) once for the whole file instead of per-test; reset only the
 	// mutable retry-fallback cooldown state between tests.
 	beforeAll(async () => {
-		tempDir = TempDir.createSync("@pi-retry-fallback-");
+		tempDir = TempDir.createSync("@zero2ai-retry-fallback-");
 		await initTheme();
 		authStorage = await AuthStorage.create(path.join(tempDir.path(), "testauth.db"));
 		authStorage.setRuntimeApiKey("anthropic", "anthropic-test-key");
@@ -6214,7 +6214,7 @@ describe("AgentSession retry fallback", () => {
 	});
 
 	it("carries attribution across a fork, which continues the conversation under a new id", async () => {
-		using tempDir = TempDir.createSync("@omp-fallback-fork-");
+		using tempDir = TempDir.createSync("@zero2ai-fallback-fork-");
 		const primaryModel = getBundledModel("anthropic", "claude-sonnet-4-5");
 		const fallbackModel = getBundledModel("openai", "gpt-4o-mini");
 		if (!primaryModel || !fallbackModel) {

@@ -1,25 +1,25 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as path from "node:path";
-import { Agent, type AgentMessage, type StreamFn } from "@oh-my-pi/pi-agent-core";
-import * as compactionModule from "@oh-my-pi/pi-agent-core/compaction";
-import type { AssistantMessage, Model, ToolCall } from "@oh-my-pi/pi-ai";
-import { createMockModel } from "@oh-my-pi/pi-ai/providers/mock";
-import { AssistantMessageEventStream } from "@oh-my-pi/pi-ai/utils/event-stream";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
+import { Agent, type AgentMessage, type StreamFn } from "@zero2ai/agent-core";
+import * as compactionModule from "@zero2ai/agent-core/compaction";
+import type { AssistantMessage, Model, ToolCall } from "@zero2ai/ai";
+import { createMockModel } from "@zero2ai/ai/providers/mock";
+import { AssistantMessageEventStream } from "@zero2ai/ai/utils/event-stream";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
 import {
 	ExtensionRunner,
 	loadExtensionFromFactory,
 	loadExtensions,
-} from "@oh-my-pi/pi-coding-agent/extensibility/extensions";
-import { SecretObfuscator } from "@oh-my-pi/pi-coding-agent/secrets";
-import { AgentSession, type AgentSessionEvent } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { EventBus } from "@oh-my-pi/pi-coding-agent/utils/event-bus";
-import { TempDir } from "@oh-my-pi/pi-utils";
-import * as snapcompact from "@oh-my-pi/snapcompact";
+} from "@zero2ai/coding-agent/extensibility/extensions";
+import { SecretObfuscator } from "@zero2ai/coding-agent/secrets";
+import { AgentSession, type AgentSessionEvent } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { EventBus } from "@zero2ai/coding-agent/utils/event-bus";
+import { TempDir } from "@zero2ai/utils";
+import * as snapcompact from "@zero2ai/snapcompact";
 
 const HANDOFF_SECRET = "HANDOFF_SECRET_TOKEN_12345";
 const UNRENDERABLE_SNAPCOMPACT_TEXT = "\uE000\uE001\uE002\uE003\uE004\uE005\uE006\uE007\uE008\uE009";
@@ -51,7 +51,7 @@ describe("AgentSession handoff", () => {
 	}
 
 	beforeAll(async () => {
-		sharedDir = TempDir.createSync("@pi-handoff-shared-");
+		sharedDir = TempDir.createSync("@zero2ai-handoff-shared-");
 		authStorage = await AuthStorage.create(path.join(sharedDir.path(), "testauth.db"));
 		authStorage.setRuntimeApiKey("anthropic", "test-key");
 		modelRegistry = new ModelRegistry(authStorage);
@@ -71,7 +71,7 @@ describe("AgentSession handoff", () => {
 	});
 
 	beforeEach(async () => {
-		tempDir = TempDir.createSync("@pi-handoff-");
+		tempDir = TempDir.createSync("@zero2ai-handoff-");
 		sessionManager = SessionManager.create(tempDir.path(), tempDir.path());
 		events = [];
 		obfuscator = new SecretObfuscator([{ type: "plain", content: HANDOFF_SECRET }]);
@@ -440,7 +440,7 @@ describe("AgentSession handoff", () => {
 	});
 
 	it("strips hook-supplied snapcompact data when persisting context-full compaction", async () => {
-		const localTempDir = TempDir.createSync("@pi-context-full-preserve-data-");
+		const localTempDir = TempDir.createSync("@zero2ai-context-full-preserve-data-");
 		const localSessionManager = SessionManager.inMemory(localTempDir.path());
 		const firstKeptEntryId = localSessionManager.appendMessage({
 			role: "user",
@@ -511,7 +511,7 @@ describe("AgentSession handoff", () => {
 	});
 
 	it("strips hook-supplied snapcompact data when persisting auto context-full compaction", async () => {
-		const localTempDir = TempDir.createSync("@pi-auto-context-full-preserve-data-");
+		const localTempDir = TempDir.createSync("@zero2ai-auto-context-full-preserve-data-");
 		const localSessionManager = SessionManager.inMemory(localTempDir.path());
 		const firstKeptEntryId = localSessionManager.appendMessage({
 			role: "user",

@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { type Api, Effort, type Model, type ModelSpec } from "@oh-my-pi/pi-ai";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { DEFAULT_MODEL_PER_PROVIDER } from "@oh-my-pi/pi-catalog/provider-models";
+import { type Api, Effort, type Model, type ModelSpec } from "@zero2ai/ai";
+import { buildModel } from "@zero2ai/catalog/build";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { DEFAULT_MODEL_PER_PROVIDER } from "@zero2ai/catalog/provider-models";
 import {
 	expandRoleAlias,
 	extractExplicitThinkingSelector,
@@ -22,9 +22,9 @@ import {
 	resolveModelRoleValue,
 	resolveModelScope,
 	resolveProviderModelReference,
-} from "@oh-my-pi/pi-coding-agent/config/model-resolver";
-import { DEFAULT_MODEL_ROLE_ALIAS, LEGACY_MODEL_ROLE_ALIAS_PREFIX } from "@oh-my-pi/pi-coding-agent/config/model-roles";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
+} from "@zero2ai/coding-agent/config/model-resolver";
+import { DEFAULT_MODEL_ROLE_ALIAS, LEGACY_MODEL_ROLE_ALIAS_PREFIX } from "@zero2ai/coding-agent/config/model-roles";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
 
 // Mock models for testing
 const mockModels: Model<"anthropic-messages">[] = [
@@ -1759,7 +1759,7 @@ describe("resolveCliModel", () => {
 
 	test("inherits provider-scoped guardrail, transport, and header overrides onto an ARN model, but not the template's prompt-cache checkpoints", () => {
 		const templateModel = createBedrockDefaultModel({
-			transport: "pi-native",
+			transport: "zero2ai-native",
 			headers: { "X-Custom-Header": "custom-value" },
 			guardrailIdentifier: "arn:aws:bedrock:eu-west-2:123456789012:guardrail/abcd1234",
 			guardrailVersion: "1",
@@ -1775,7 +1775,7 @@ describe("resolveCliModel", () => {
 
 		expect(result.error).toBeUndefined();
 		expect(result.model?.id).toBe(profileArn);
-		expect(result.model?.transport).toBe("pi-native");
+		expect(result.model?.transport).toBe("zero2ai-native");
 		expect(result.model?.headers).toEqual({ "X-Custom-Header": "custom-value" });
 		expect(result.model?.guardrailIdentifier).toBe("arn:aws:bedrock:eu-west-2:123456789012:guardrail/abcd1234");
 		expect(result.model?.guardrailVersion).toBe("1");

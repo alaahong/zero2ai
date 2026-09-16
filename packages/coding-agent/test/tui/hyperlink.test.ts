@@ -4,10 +4,10 @@ import * as os from "node:os";
 import * as path from "node:path";
 import * as url from "node:url";
 import { stripVTControlCharacters } from "node:util";
-import { resetSettingsForTest, Settings, settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { LocalProtocolHandler } from "@oh-my-pi/pi-coding-agent/internal-urls/local-protocol";
-import { getMarkdownTheme, initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { AgentRegistry } from "@oh-my-pi/pi-coding-agent/registry/agent-registry";
+import { resetSettingsForTest, Settings, settings } from "@zero2ai/coding-agent/config/settings";
+import { LocalProtocolHandler } from "@zero2ai/coding-agent/internal-urls/local-protocol";
+import { getMarkdownTheme, initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import { AgentRegistry } from "@zero2ai/coding-agent/registry/agent-registry";
 import {
 	applyHyperlinkSetting,
 	fileHyperlink,
@@ -18,8 +18,8 @@ import {
 	uriHyperlink,
 	urlHyperlink,
 	urlHyperlinkAlways,
-} from "@oh-my-pi/pi-coding-agent/tui/hyperlink";
-import * as terminalCaps from "@oh-my-pi/pi-tui";
+} from "@zero2ai/coding-agent/tui/hyperlink";
+import * as terminalCaps from "@zero2ai/tui";
 
 // OSC 8 sequence markers
 const OSC = "\x1b]";
@@ -340,7 +340,7 @@ describe("tryResolveInternalUrlSync", () => {
 		expect(tryResolveInternalUrlSync("artifact://123")).toBeUndefined();
 		expect(tryResolveInternalUrlSync("agent://abc")).toBeUndefined();
 		expect(tryResolveInternalUrlSync("skill://foo")).toBeUndefined();
-		expect(tryResolveInternalUrlSync("omp://docs.md")).toBeUndefined();
+		expect(tryResolveInternalUrlSync("zero2ai://docs.md")).toBeUndefined();
 	});
 
 	it("returns undefined when local:// resolution has no session options", () => {
@@ -422,7 +422,7 @@ describe("resource links in chat markdown", () => {
 	let originalHyperlinks: boolean;
 
 	beforeEach(async () => {
-		tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "omp-markdown-links-"));
+		tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-markdown-links-"));
 		originalHyperlinks = terminalCaps.TERMINAL.hyperlinks;
 		terminalCaps.setTerminalHyperlinks(true);
 		await initTheme();
@@ -549,8 +549,8 @@ describe("applyHyperlinkSetting on project-scoped reload", () => {
 	// value while path links already track the new one (#10196 review).
 	it("reapplies the effective policy so the runtime flag tracks the reloaded setting", async () => {
 		const origHyperlinks = terminalCaps.TERMINAL.hyperlinks;
-		const dirA = path.join(os.tmpdir(), "omp-hyperlink-reload-a");
-		const dirB = path.join(os.tmpdir(), "omp-hyperlink-reload-b");
+		const dirA = path.join(os.tmpdir(), "zero2ai-hyperlink-reload-a");
+		const dirB = path.join(os.tmpdir(), "zero2ai-hyperlink-reload-b");
 		try {
 			terminalCaps.setTerminalHyperlinks(false);
 			settings.override("tui.hyperlinks", "always");

@@ -1,9 +1,9 @@
 import { describe, expect, it } from "bun:test";
 import * as path from "node:path";
-import type { AuthStorage, FetchImpl } from "@oh-my-pi/pi-ai";
-import { AuthStorage as CodingAuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { searchAnthropic } from "@oh-my-pi/pi-coding-agent/web/search/providers/anthropic";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import type { AuthStorage, FetchImpl } from "@zero2ai/ai";
+import { AuthStorage as CodingAuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { searchAnthropic } from "@zero2ai/coding-agent/web/search/providers/anthropic";
+import { TempDir } from "@zero2ai/utils";
 
 function makeCaptureFetch(): { fetch: FetchImpl; body: () => Record<string, unknown> | undefined } {
 	let captured: Record<string, unknown> | undefined;
@@ -41,7 +41,7 @@ function withSearchModel(model: string) {
 
 describe("Anthropic search request body", () => {
 	it("forwards the raw session id as metadata.user_id for API-key auth", async () => {
-		using tempDir = TempDir.createSync("@pi-anthropic-search-apikey-");
+		using tempDir = TempDir.createSync("@zero2ai-anthropic-search-apikey-");
 		const authStorage = await CodingAuthStorage.create(path.join(tempDir.path(), "auth.db"));
 		try {
 			authStorage.setRuntimeApiKey("anthropic", "test-key");
@@ -91,7 +91,7 @@ describe("Anthropic search request body", () => {
 	});
 
 	it("maps site: to allowed_domains and strips the directive from the query", async () => {
-		using tempDir = TempDir.createSync("@pi-anthropic-search-sites-");
+		using tempDir = TempDir.createSync("@zero2ai-anthropic-search-sites-");
 		const authStorage = await CodingAuthStorage.create(path.join(tempDir.path(), "auth.db"));
 		try {
 			authStorage.setRuntimeApiKey("anthropic", "test-key");
@@ -117,7 +117,7 @@ describe("Anthropic search request body", () => {
 	});
 
 	it("maps -site: to blocked_domains when there are no site includes", async () => {
-		using tempDir = TempDir.createSync("@pi-anthropic-search-blocked-");
+		using tempDir = TempDir.createSync("@zero2ai-anthropic-search-blocked-");
 		const authStorage = await CodingAuthStorage.create(path.join(tempDir.path(), "auth.db"));
 		try {
 			authStorage.setRuntimeApiKey("anthropic", "test-key");
@@ -144,7 +144,7 @@ describe("Anthropic search request body", () => {
 
 	it("omits temperature for sampling-restricted models", async () => {
 		using _model = withSearchModel("claude-opus-5");
-		using tempDir = TempDir.createSync("@pi-anthropic-search-opus-");
+		using tempDir = TempDir.createSync("@zero2ai-anthropic-search-opus-");
 		const authStorage = await CodingAuthStorage.create(path.join(tempDir.path(), "auth.db"));
 		try {
 			authStorage.setRuntimeApiKey("anthropic", "test-key");
@@ -167,7 +167,7 @@ describe("Anthropic search request body", () => {
 
 	it("preserves temperature for compatible models", async () => {
 		using _model = withSearchModel("claude-haiku-4-5");
-		using tempDir = TempDir.createSync("@pi-anthropic-search-haiku-");
+		using tempDir = TempDir.createSync("@zero2ai-anthropic-search-haiku-");
 		const authStorage = await CodingAuthStorage.create(path.join(tempDir.path(), "auth.db"));
 		try {
 			authStorage.setRuntimeApiKey("anthropic", "test-key");

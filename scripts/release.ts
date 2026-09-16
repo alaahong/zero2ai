@@ -21,7 +21,7 @@ const cargoTomlGlob = new Glob("crates/*/Cargo.toml");
  * leading `v` and NO prerelease suffix. Prereleases are rejected because the
  * downstream publish (`scripts/ci-release-publish.ts`) runs `npm publish` with
  * no `--tag`, which would promote a prerelease to the npm `latest` dist-tag —
- * hitting every unqualified install and the `/latest` endpoint `omp update`
+ * hitting every unqualified install and the `/latest` endpoint `zero2ai update`
  * reads. Bump keywords (major/minor/patch) are handled separately and must not
  * be routed through this check.
  *
@@ -303,12 +303,12 @@ async function cmdRelease(versionOrBump: string): Promise<void> {
 	}
 	console.log();
 
-	// Update @oh-my-pi/* catalog entries in root package.json
+	// Update @zero2ai/* catalog entries in root package.json
 	console.log("Updating root catalog versions...");
 	let rootPkgRaw = await Bun.file("package.json").text();
 	rootPkgRaw = rootPkgRaw.replace(/("@oh-my-pi\/[^"]+":\s*)"[^"]+"/g, `$1"${version}"`);
 	await Bun.write("package.json", rootPkgRaw);
-	console.log("  Updated root catalog @oh-my-pi/* entries");
+	console.log("  Updated root catalog @zero2ai/* entries");
 
 	// 3. Update Rust workspace version
 	console.log(`Updating Rust workspace version to ${version}…`);
@@ -333,7 +333,7 @@ async function cmdRelease(versionOrBump: string): Promise<void> {
 	}
 	console.log();
 
-	// 3b. Rename the pi-natives version sentinel so any `.node` left on disk from
+	// 3b. Rename the zero2ai-natives version sentinel so any `.node` left on disk from
 	// a previous release physically cannot expose the symbol the new `index.js`
 	// expects. The JS loader derives `VERSION_SENTINEL_EXPORT` from `package.json`
 	// at runtime, so the only thing that has to move on the Rust side is the
@@ -341,19 +341,19 @@ async function cmdRelease(versionOrBump: string): Promise<void> {
 	// entries in `packages/natives/native/{index.d.ts,index.js}` on the next napi
 	// build, but bump them here too so the committed surface tracks the version
 	// without waiting for a local rebuild on the release host.
-	console.log(`Bumping pi-natives version sentinel to v${version}…`);
+	console.log(`Bumping zero2ai-natives version sentinel to v${version}…`);
 	const sentinelJsId = version.replace(/[^A-Za-z0-9]/g, "_");
 	const sentinelName = `__piNativesV${sentinelJsId}`;
 	const sentinelFiles = [
-		"crates/pi-natives/src/lib.rs",
+		"crates/zero2ai-natives/src/lib.rs",
 		"packages/natives/native/index.d.ts",
 		"packages/natives/native/index.js",
 	];
 	await $`sd '__piNativesV[A-Za-z0-9_]+' ${sentinelName} ${sentinelFiles}`;
-	const libRs = await Bun.file("crates/pi-natives/src/lib.rs").text();
+	const libRs = await Bun.file("crates/zero2ai-natives/src/lib.rs").text();
 	if (!libRs.includes(`js_name = "${sentinelName}"`)) {
 		console.error(
-			`Error: pi-natives version sentinel did not move to ${sentinelName} in crates/pi-natives/src/lib.rs. ` +
+			`Error: zero2ai-natives version sentinel did not move to ${sentinelName} in crates/zero2ai-natives/src/lib.rs. ` +
 				"The `__piNativesV…` literal may have been removed or renamed; restore it before releasing.",
 		);
 		process.exit(1);

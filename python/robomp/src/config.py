@@ -89,14 +89,14 @@ class Settings(BaseSettings):
     # agent having reached a terminal tool (`gh_open_pr`,
     # `mark_unable_to_reproduce`, `abort_task`) for a `bug`/`documentation`
     # classification, the driver sends up to this many "you stopped before
-    # opening a PR — continue" reminder prompts into the same omp session.
+    # opening a PR — continue" reminder prompts into the same zero2ai session.
     # Set to 0 to disable.
     task_completion_max_reminders: int = Field(2, alias="ROBOMP_TASK_COMPLETION_MAX_REMINDERS")
-    omp_command: str = Field("omp", alias="ROBOMP_OMP_COMMAND")
+    omp_command: str = Field("zero2ai", alias="ROBOMP_OMP_COMMAND")
 
     # Graceful shutdown (Phase B). On SIGTERM the dispatcher stops claiming
     # new work, then waits up to `drain` seconds for in-flight events to
-    # complete cleanly; any still running after that get their omp
+    # complete cleanly; any still running after that get their zero2ai
     # subprocess killed and the row left in `running` so it requeues on
     # next start. Sum of both MUST stay below the compose `stop_grace_period`.
     shutdown_drain_timeout_seconds: float = Field(25.0, alias="ROBOMP_SHUTDOWN_DRAIN_TIMEOUT_SECONDS")
@@ -149,14 +149,14 @@ class Settings(BaseSettings):
     # repo has a sync watermark.
     issue_index_sync_seconds: float = Field(900.0, alias="ROBOMP_ISSUE_INDEX_SYNC_SECONDS")
 
-    # pi-natives build-output cache. Hardlinks pre-built
+    # zero2ai-natives build-output cache. Hardlinks pre-built
     # `packages/natives/native/*.node` (and its companions) into new
     # workspaces keyed by the git tree-hashes of inputs that determine the
     # build output. Misses are captured automatically when a task that
     # finishes successfully has fresh artifacts. Disable to fall back to
     # per-workspace builds.
     natives_cache_enabled: bool = Field(True, alias="ROBOMP_NATIVES_CACHE_ENABLED")
-    natives_cache_root: Path = Field(Path("/data/cache/pi-natives"), alias="ROBOMP_NATIVES_CACHE_ROOT")
+    natives_cache_root: Path = Field(Path("/data/cache/zero2ai-natives"), alias="ROBOMP_NATIVES_CACHE_ROOT")
     natives_cache_max_entries_per_repo: int = Field(8, alias="ROBOMP_NATIVES_CACHE_MAX_ENTRIES_PER_REPO")
     natives_cache_max_bytes: int = Field(4 * 1024**3, alias="ROBOMP_NATIVES_CACHE_MAX_BYTES")
     natives_cache_gc_interval_seconds: float = Field(3600.0, alias="ROBOMP_NATIVES_CACHE_GC_INTERVAL_SECONDS")

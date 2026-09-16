@@ -1,13 +1,13 @@
 import { afterEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { createAgentSession } from "@oh-my-pi/pi-coding-agent/sdk";
-import type { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { createAgentSession } from "@zero2ai/coding-agent/sdk";
+import type { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { TempDir } from "@zero2ai/utils";
 import { discoverWatchdogFiles } from "../src/advisor/watchdog";
 import { createInMemoryAuthStorage } from "./helpers/agent-session-setup";
 
@@ -21,7 +21,7 @@ describe("advisor watchdog prompt discovery", () => {
 	});
 
 	it("appends WATCHDOG.md and active child repo context to the advisor prompt", async () => {
-		const tempDir = TempDir.createSync("@pi-advisor-watchdog-");
+		const tempDir = TempDir.createSync("@zero2ai-advisor-watchdog-");
 		tempDirs.push(tempDir);
 		const cwd = tempDir.join("project-root");
 		fs.mkdirSync(cwd, { recursive: true });
@@ -87,7 +87,7 @@ describe("advisor watchdog prompt discovery", () => {
 	});
 
 	it("resolves nested folders and sorts by depth", async () => {
-		const tempDir = TempDir.createSync("@pi-advisor-watchdog-");
+		const tempDir = TempDir.createSync("@zero2ai-advisor-watchdog-");
 		tempDirs.push(tempDir);
 		const parentCwd = tempDir.join("project-root");
 		const childCwd = path.join(parentCwd, "subfolder");
@@ -115,14 +115,14 @@ describe("advisor watchdog prompt discovery", () => {
 	});
 
 	it("discovers user-level and native project-level watchdog files", async () => {
-		const tempDir = TempDir.createSync("@pi-advisor-watchdog-");
+		const tempDir = TempDir.createSync("@zero2ai-advisor-watchdog-");
 		tempDirs.push(tempDir);
 		const cwd = tempDir.join("project-root");
-		const ompDir = path.join(cwd, ".omp");
+		const zero2aiDir = path.join(cwd, ".zero2ai");
 		const userAgentDir = tempDir.join("user-agent");
 		fs.mkdirSync(cwd, { recursive: true });
 		fs.mkdirSync(path.join(cwd, ".git"), { recursive: true });
-		fs.mkdirSync(ompDir, { recursive: true });
+		fs.mkdirSync(zero2aiDir, { recursive: true });
 		fs.mkdirSync(userAgentDir, { recursive: true });
 
 		const userWatchdogContent = "User-level watchdog rule.";
@@ -130,7 +130,7 @@ describe("advisor watchdog prompt discovery", () => {
 		const standaloneWatchdogContent = "Standalone project watchdog rule.";
 
 		fs.writeFileSync(path.join(userAgentDir, "WATCHDOG.md"), userWatchdogContent, "utf8");
-		fs.writeFileSync(path.join(ompDir, "WATCHDOG.md"), nativeWatchdogContent, "utf8");
+		fs.writeFileSync(path.join(zero2aiDir, "WATCHDOG.md"), nativeWatchdogContent, "utf8");
 		fs.writeFileSync(path.join(cwd, "WATCHDOG.md"), standaloneWatchdogContent, "utf8");
 
 		const dump = (await discoverWatchdogFiles(cwd, userAgentDir)).join("\n\n");

@@ -1,7 +1,7 @@
-import type { AgentMessage } from "@oh-my-pi/pi-agent-core";
-import type { CompactionOutcome } from "@oh-my-pi/pi-agent-core/compaction";
-import type { AssistantMessage, ImageContent, Message, Model, Usage, UsageReport } from "@oh-my-pi/pi-ai";
-import type { Component, Container, EditorTheme, Loader, Spacer, Text, TUI } from "@oh-my-pi/pi-tui";
+import type { AgentMessage } from "@zero2ai/agent-core";
+import type { CompactionOutcome } from "@zero2ai/agent-core/compaction";
+import type { AssistantMessage, ImageContent, Message, Model, Usage, UsageReport } from "@zero2ai/ai";
+import type { Component, Container, EditorTheme, Loader, Spacer, Text, TUI } from "@zero2ai/tui";
 import type { CollabController } from "../collab/controller";
 import type { CollabGuestLink } from "../collab/guest";
 import type { CollabHost } from "../collab/host";

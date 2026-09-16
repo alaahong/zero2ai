@@ -1,12 +1,12 @@
 /**
  * Agents CLI command handlers.
  *
- * Handles `omp agents unpack` for writing bundled agent definitions to disk.
+ * Handles `zero2ai agents unpack` for writing bundled agent definitions to disk.
  */
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import { getAgentDir, getProjectDir, isEnoent } from "@oh-my-pi/pi-utils";
-import chalk from "@oh-my-pi/pi-utils/chalk";
+import { getAgentDir, getProjectDir, isEnoent } from "@zero2ai/utils";
+import chalk from "@zero2ai/utils/chalk";
 import { YAML } from "bun";
 import { theme } from "../modes/theme/theme";
 import { loadBundledAgents } from "../task/agents";
@@ -46,7 +46,7 @@ function resolveTargetDir(flags: AgentsCommandArgs["flags"]): string {
 	}
 
 	if (flags.project) {
-		return path.resolve(getProjectDir(), ".omp", "agents");
+		return path.resolve(getProjectDir(), ".zero2ai", "agents");
 	}
 
 	return path.join(getAgentDir(), "agents");

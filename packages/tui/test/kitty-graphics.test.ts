@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { visibleWidth } from "@oh-my-pi/pi-natives";
+import { visibleWidth } from "@zero2ai/natives";
 import {
 	detectKittyUnicodePlaceholdersSupport,
 	encodeKittyPlaceholderGrid,
@@ -10,7 +10,7 @@ import {
 	kittyPlaceholdersFit,
 	renderKittyPlaceholderLines,
 	setKittyGraphics,
-} from "@oh-my-pi/pi-tui/kitty-graphics";
+} from "@zero2ai/tui/kitty-graphics";
 
 const ORIGINAL = { ...getKittyGraphics() };
 const ORIGINAL_TMUX = Bun.env.TMUX;
@@ -109,11 +109,11 @@ describe("detectKittyUnicodePlaceholdersSupport", () => {
 	});
 
 	it("uses scroll-aware placeholders when Kitty is explicitly forced through a multiplexer", () => {
-		const forcedTmux = env({ TMUX: "/tmp/tmux-1000/default,1,0", PI_FORCE_IMAGE_PROTOCOL: "kitty" });
+		const forcedTmux = env({ TMUX: "/tmp/tmux-1000/default,1,0", ZERO2AI_FORCE_IMAGE_PROTOCOL: "kitty" });
 		expect(detectKittyUnicodePlaceholdersSupport("base", forcedTmux)).toBe(true);
 		expect(detectKittyUnicodePlaceholdersSupport("wezterm", forcedTmux)).toBe(true);
 		expect(
-			detectKittyUnicodePlaceholdersSupport("ghostty", env({ HERDR_ENV: "1", PI_FORCE_IMAGE_PROTOCOL: "kitty" })),
+			detectKittyUnicodePlaceholdersSupport("ghostty", env({ HERDR_ENV: "1", ZERO2AI_FORCE_IMAGE_PROTOCOL: "kitty" })),
 		).toBe(true);
 		// Automatic multiplexer fallback remains conservative when the outer terminal is unknown.
 		expect(detectKittyUnicodePlaceholdersSupport("base", env({ TMUX: "/tmp/tmux-1000/default,1,0" }))).toBe(false);
@@ -124,36 +124,36 @@ describe("detectKittyUnicodePlaceholdersSupport", () => {
 	it("ignores leaked Kitty-capable terminal identities inside Herdr unless placeholders are explicitly forced", () => {
 		const leaked = env({ HERDR_ENV: "1", GHOSTTY_RESOURCES_DIR: "/usr/share/ghostty" });
 		expect(detectKittyUnicodePlaceholdersSupport("ghostty", leaked)).toBe(false);
-		expect(detectKittyUnicodePlaceholdersSupport("ghostty", { ...leaked, PI_KITTY_PLACEHOLDERS: "1" })).toBe(true);
+		expect(detectKittyUnicodePlaceholdersSupport("ghostty", { ...leaked, ZERO2AI_KITTY_PLACEHOLDERS: "1" })).toBe(true);
 		const paneOnly = env({ HERDR_PANE_ID: "p1", GHOSTTY_RESOURCES_DIR: "/usr/share/ghostty" });
 		expect(detectKittyUnicodePlaceholdersSupport("ghostty", paneOnly)).toBe(false);
-		expect(detectKittyUnicodePlaceholdersSupport("ghostty", { ...paneOnly, PI_KITTY_PLACEHOLDERS: "1" })).toBe(true);
+		expect(detectKittyUnicodePlaceholdersSupport("ghostty", { ...paneOnly, ZERO2AI_KITTY_PLACEHOLDERS: "1" })).toBe(true);
 	});
 
-	it("honors PI_NO_KITTY_PLACEHOLDERS=1 as a hard off override on supporting terminals", () => {
-		expect(detectKittyUnicodePlaceholdersSupport("kitty", env({ PI_NO_KITTY_PLACEHOLDERS: "1" }))).toBe(false);
-		expect(detectKittyUnicodePlaceholdersSupport("ghostty", env({ PI_NO_KITTY_PLACEHOLDERS: "true" }))).toBe(false);
+	it("honors ZERO2AI_NO_KITTY_PLACEHOLDERS=1 as a hard off override on supporting terminals", () => {
+		expect(detectKittyUnicodePlaceholdersSupport("kitty", env({ ZERO2AI_NO_KITTY_PLACEHOLDERS: "1" }))).toBe(false);
+		expect(detectKittyUnicodePlaceholdersSupport("ghostty", env({ ZERO2AI_NO_KITTY_PLACEHOLDERS: "true" }))).toBe(false);
 	});
 
-	it("honors PI_KITTY_PLACEHOLDERS=1 as opt-in on otherwise-unsupported terminals", () => {
-		expect(detectKittyUnicodePlaceholdersSupport("wezterm", env({ PI_KITTY_PLACEHOLDERS: "1" }))).toBe(true);
+	it("honors ZERO2AI_KITTY_PLACEHOLDERS=1 as opt-in on otherwise-unsupported terminals", () => {
+		expect(detectKittyUnicodePlaceholdersSupport("wezterm", env({ ZERO2AI_KITTY_PLACEHOLDERS: "1" }))).toBe(true);
 	});
 
-	it("PI_NO_KITTY_PLACEHOLDERS beats PI_KITTY_PLACEHOLDERS when both are set", () => {
-		const both = env({ PI_NO_KITTY_PLACEHOLDERS: "1", PI_KITTY_PLACEHOLDERS: "1" });
+	it("ZERO2AI_NO_KITTY_PLACEHOLDERS beats ZERO2AI_KITTY_PLACEHOLDERS when both are set", () => {
+		const both = env({ ZERO2AI_NO_KITTY_PLACEHOLDERS: "1", ZERO2AI_KITTY_PLACEHOLDERS: "1" });
 		expect(detectKittyUnicodePlaceholdersSupport("kitty", both)).toBe(false);
 	});
 
-	it("PI_KITTY_PLACEHOLDERS=0 forces off on a default-on terminal", () => {
-		expect(detectKittyUnicodePlaceholdersSupport("kitty", env({ PI_KITTY_PLACEHOLDERS: "0" }))).toBe(false);
-		expect(detectKittyUnicodePlaceholdersSupport("ghostty", env({ PI_KITTY_PLACEHOLDERS: "off" }))).toBe(false);
+	it("ZERO2AI_KITTY_PLACEHOLDERS=0 forces off on a default-on terminal", () => {
+		expect(detectKittyUnicodePlaceholdersSupport("kitty", env({ ZERO2AI_KITTY_PLACEHOLDERS: "0" }))).toBe(false);
+		expect(detectKittyUnicodePlaceholdersSupport("ghostty", env({ ZERO2AI_KITTY_PLACEHOLDERS: "off" }))).toBe(false);
 	});
 
 	it("placeholder opt-out beats forced Kitty under tmux", () => {
 		const forcedOff = env({
 			TMUX: "/tmp/tmux-1000/default,1,0",
-			PI_FORCE_IMAGE_PROTOCOL: "kitty",
-			PI_KITTY_PLACEHOLDERS: "0",
+			ZERO2AI_FORCE_IMAGE_PROTOCOL: "kitty",
+			ZERO2AI_KITTY_PLACEHOLDERS: "0",
 		});
 		expect(detectKittyUnicodePlaceholdersSupport("base", forcedOff)).toBe(false);
 	});

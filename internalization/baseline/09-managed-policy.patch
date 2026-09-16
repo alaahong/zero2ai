@@ -1,0 +1,376 @@
+diff --git a/packages/coding-agent/src/config/managed-policy.ts b/packages/coding-agent/src/config/managed-policy.ts
+new file mode 100644
+--- /dev/null
++++ b/packages/coding-agent/src/config/managed-policy.ts
+@@ -0,0 +1,133 @@
++/**
++ * Managed (administrator) approval policy.
++ *
++ * This layer sits *above* user settings and runtime flags: the values here are
++ * what an operator guarantees, so `--yolo`, project config, ACP client
++ * permission gates, or subagent defaults cannot lift them. Only restrictive
++ * directives take effect — `deny`, `prompt`, and a stricter `approvalMode`;
++ * `allow` is accepted for readability but grants nothing.
++ *
++ * Resolution order (first hit wins):
++ *   1. `ZERO2AI_MANAGED_POLICY` — explicit file path. Missing, unreadable, or
++ *      malformed is a hard error: a silently ignored policy file is worse than
++ *      a visible failure.
++ *   2. `<dir>/managed-policy.json`, where `<dir>` is
++ *      `ZERO2AI_MANAGED_POLICY_DIR`, else `%ProgramData%\zero2ai` (Windows) or
++ *      `/etc/zero2ai` (POSIX). Absence is normal; a malformed file throws.
++ *
++ * File shape (JSON, deliberately — this layer must not depend on the YAML
++ * settings pipeline it constrains):
++ *
++ *   {
++ *     "approvalMode": "always-ask",
++ *     "approval": { "*": "prompt", "bash": "prompt", "eval": "deny" }
++ *   }
++ */
++import * as fs from "node:fs";
++import * as path from "node:path";
++
++export type ManagedPolicyValue = "allow" | "deny" | "prompt";
++export type ManagedApprovalMode = "always-ask" | "write" | "yolo";
++
++export interface ManagedPolicy {
++	readonly approvalMode?: ManagedApprovalMode;
++	readonly approval: Readonly<Record<string, ManagedPolicyValue>>;
++	/** Path the policy was loaded from; surfaced in prompts and diagnostics. */
++	readonly sourcePath: string;
++}
++
++const MANAGED_POLICY_FILE = "managed-policy.json";
++const POLICY_VALUES: Readonly<Record<string, true>> = { allow: true, deny: true, prompt: true };
++const MODE_VALUES: Readonly<Record<string, true>> = { "always-ask": true, write: true, yolo: true };
++
++function managedPolicyDir(): string {
++	const configured = process.env.ZERO2AI_MANAGED_POLICY_DIR?.trim();
++	if (configured) return configured;
++	if (process.platform === "win32") return path.join(process.env.ProgramData?.trim() || "C:\\ProgramData", "zero2ai");
++	return "/etc/zero2ai";
++}
++
++/** Candidate policy files in resolution order; the first exists-and-parses wins. */
++function candidatePolicyPaths(): Array<{ path: string; required: boolean }> {
++	const explicit = process.env.ZERO2AI_MANAGED_POLICY?.trim();
++	if (explicit) return [{ path: explicit, required: true }];
++	return [{ path: path.join(managedPolicyDir(), MANAGED_POLICY_FILE), required: false }];
++}
++
++function parsePolicy(text: string, sourcePath: string): ManagedPolicy {
++	let raw: unknown;
++	try {
++		raw = JSON.parse(text);
++	} catch (error) {
++		throw new Error(`managed policy ${sourcePath} is not valid JSON: ${(error as Error).message}`);
++	}
++	if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
++		throw new Error(`managed policy ${sourcePath} must be a JSON object`);
++	}
++	const record = raw as { approvalMode?: unknown; approval?: unknown };
++	const approvalMode =
++		typeof record.approvalMode === "string" && MODE_VALUES[record.approvalMode] === true
++			? (record.approvalMode as ManagedApprovalMode)
++			: undefined;
++	if (record.approvalMode !== undefined && approvalMode === undefined) {
++		throw new Error(`managed policy ${sourcePath} has an unknown approvalMode: ${String(record.approvalMode)}`);
++	}
++	const approval: Record<string, ManagedPolicyValue> = {};
++	if (record.approval !== undefined) {
++		if (typeof record.approval !== "object" || record.approval === null || Array.isArray(record.approval)) {
++			throw new Error(`managed policy ${sourcePath} has a non-object "approval" map`);
++		}
++		for (const [tool, value] of Object.entries(record.approval as Record<string, unknown>)) {
++			if (typeof value !== "string" || POLICY_VALUES[value] !== true) {
++				throw new Error(`managed policy ${sourcePath} has an invalid policy for "${tool}": ${String(value)}`);
++			}
++			approval[tool] = value as ManagedPolicyValue;
++		}
++	}
++	return { approvalMode, approval, sourcePath };
++}
++
++let cached: ManagedPolicy | null | undefined;
++
++/**
++ * Load the managed policy once per process. Synchronous by necessity:
++ * {@link resolveApproval} runs on the tool-call hot path and is not async.
++ */
++export function getManagedPolicy(): ManagedPolicy | undefined {
++	if (cached !== undefined) return cached ?? undefined;
++	for (const candidate of candidatePolicyPaths()) {
++		let text: string;
++		try {
++			text = fs.readFileSync(candidate.path, "utf-8");
++		} catch (error) {
++			if (candidate.required) {
++				throw new Error(`managed policy ${candidate.path} could not be read: ${(error as Error).message}`);
++			}
++			continue;
++		}
++		cached = parsePolicy(text, candidate.path);
++		return cached;
++	}
++	cached = null;
++	return undefined;
++}
++
++/** Restricted approval directive for a tool, if the operator declared one. */
++export function lookupManagedApproval(
++	policy: ManagedPolicy | undefined,
++	...keys: Array<string | undefined>
++): ManagedPolicyValue | undefined {
++	if (!policy) return undefined;
++	for (const key of keys) {
++		if (!key) continue;
++		const value = policy.approval[key];
++		if (value === "deny" || value === "prompt") return value;
++	}
++	const wildcard = policy.approval["*"];
++	return wildcard === "deny" || wildcard === "prompt" ? wildcard : undefined;
++}
++
++/** Test-only: drop the cached policy so a rewritten file is re-read. */
++export function __resetManagedPolicyCacheForTests(): void {
++	cached = undefined;
++}
+diff --git a/packages/coding-agent/test/managed-policy.test.ts b/packages/coding-agent/test/managed-policy.test.ts
+new file mode 100644
+--- /dev/null
++++ b/packages/coding-agent/test/managed-policy.test.ts
+@@ -0,0 +1,115 @@
++/**
++ * Managed (administrator) approval policy.
++ *
++ * Contract under test: restrictions declared by the operator survive every
++ * user-facing way of loosening approval — `--yolo`, per-tool `allow`, and
++ * project config — while an absent policy file changes nothing.
++ */
++import { afterEach, beforeEach, describe, expect, it } from "bun:test";
++import * as fs from "node:fs";
++import * as os from "node:os";
++import * as path from "node:path";
++import { __resetManagedPolicyCacheForTests, getManagedPolicy } from "../src/config/managed-policy";
++import { resolveApproval } from "../src/tools/approval";
++
++const BASH = { name: "bash", approval: "exec" } as const;
++const READ_TOOL = { name: "read", approval: "read" } as const;
++
++let tempDir: string | undefined;
++let previousPolicyEnv: string | undefined;
++
++function writePolicy(contents: string): void {
++	tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-managed-policy-"));
++	const file = path.join(tempDir, "managed-policy.json");
++	fs.writeFileSync(file, contents);
++	process.env.ZERO2AI_MANAGED_POLICY = file;
++	__resetManagedPolicyCacheForTests();
++}
++
++beforeEach(() => {
++	previousPolicyEnv = process.env.ZERO2AI_MANAGED_POLICY;
++	delete process.env.ZERO2AI_MANAGED_POLICY;
++	__resetManagedPolicyCacheForTests();
++});
++
++afterEach(() => {
++	if (previousPolicyEnv === undefined) delete process.env.ZERO2AI_MANAGED_POLICY;
++	else process.env.ZERO2AI_MANAGED_POLICY = previousPolicyEnv;
++	__resetManagedPolicyCacheForTests();
++	if (tempDir) {
++		fs.rmSync(tempDir, { recursive: true, force: true });
++		tempDir = undefined;
++	}
++});
++
++describe("absent managed policy", () => {
++	it("leaves yolo auto-approval untouched", () => {
++		expect(getManagedPolicy()).toBeUndefined();
++		expect(resolveApproval(BASH, {}, "yolo", {}).policy).toBe("allow");
++	});
++
++	it("leaves user policy untouched", () => {
++		expect(resolveApproval(BASH, {}, "always-ask", { bash: "allow" }).policy).toBe("allow");
++	});
++});
++
++describe("managed tool directives", () => {
++	it("deny survives --yolo", () => {
++		writePolicy(JSON.stringify({ approval: { bash: "deny" } }));
++		const resolved = resolveApproval(BASH, {}, "yolo", {});
++		expect(resolved.policy).toBe("deny");
++		expect(resolved.source).toBe("managed");
++	});
++
++	it("prompt survives --yolo and a user allow", () => {
++		writePolicy(JSON.stringify({ approval: { bash: "prompt" } }));
++		const resolved = resolveApproval(BASH, {}, "yolo", { bash: "allow" });
++		expect(resolved.policy).toBe("prompt");
++		expect(resolved.source).toBe("managed");
++	});
++
++	it("wildcard applies to tools without a specific entry", () => {
++		writePolicy(JSON.stringify({ approval: { "*": "prompt" } }));
++		expect(resolveApproval(READ_TOOL, {}, "yolo", {}).policy).toBe("prompt");
++	});
++
++	it("a user deny is still reported as the user's own decision", () => {
++		writePolicy(JSON.stringify({ approval: { bash: "prompt" } }));
++		expect(resolveApproval(BASH, {}, "yolo", { bash: "deny" }).source).toBe("user");
++	});
++
++	it("allow grants nothing on its own", () => {
++		writePolicy(JSON.stringify({ approval: { bash: "allow" } }));
++		expect(resolveApproval(BASH, {}, "always-ask", {}).policy).toBe("prompt");
++	});
++});
++
++describe("managed approval mode ceiling", () => {
++	it("always-ask prevents yolo from auto-approving exec tools", () => {
++		writePolicy(JSON.stringify({ approvalMode: "always-ask" }));
++		const resolved = resolveApproval(BASH, {}, "yolo", {});
++		expect(resolved.policy).toBe("prompt");
++	});
++
++	it("always-ask still auto-approves read-only tools", () => {
++		writePolicy(JSON.stringify({ approvalMode: "always-ask" }));
++		expect(resolveApproval(READ_TOOL, {}, "yolo", {}).policy).toBe("allow");
++	});
++
++	it("a looser managed mode does not tighten the session", () => {
++		writePolicy(JSON.stringify({ approvalMode: "yolo" }));
++		expect(resolveApproval(BASH, {}, "yolo", {}).policy).toBe("allow");
++	});
++});
++
++describe("malformed policy", () => {
++	it("throws for an explicitly configured file that is not valid JSON", () => {
++		writePolicy("{ not json");
++		expect(() => getManagedPolicy()).toThrow(/not valid JSON/);
++	});
++
++	it("throws for an unknown approval mode", () => {
++		writePolicy(JSON.stringify({ approvalMode: "anything-goes" }));
++		expect(() => getManagedPolicy()).toThrow(/unknown approvalMode/);
++	});
++});
+diff --git a/docs/internalization-plan.md b/docs/internalization-plan.md
+--- a/docs/internalization-plan.md
++++ b/docs/internalization-plan.md
+@@ -41,7 +41,7 @@
+ | **深度改名第二阶段**（包作用域/crate/环境变量/模型库/遥测） | ✅ 已完成 | 作用域 `@oh-my-pi/*` → `@zero2ai/*` 且去 `pi-`/`omp` 前缀（如 `@zero2ai/coding-agent`）；crate `pi-*` → `zero2ai-*`；环境变量 `PI_*` → `ZERO2AI_*`；`omptype` → `schema`；遥测扩展属性 `pi.gen_ai.*` → `zero2ai.gen_ai.*`；4013 文件改写 + 19 处路径 + napi `binaryName`。**16/16 包类型检查通过**；CLI 冒烟通过；`env`/`dirs`/`install-id` 32 项测试通过 |
+ | 改名结果固化（可 rebase 基线） | ✅ 已完成 | `internalization/baseline/`（**7 个补丁**）+ `apply-baseline.sh` / `revert-baseline.sh`；**应用到干净 HEAD 后与工作区逐文件 SHA256 零差异（7328 文件），回滚残留 0** |
+ | P1 落地包（策略/网关/启动器/验收） | ✅ 已产出 | `internalization/p1/`：`config.yml`、`models.yml`、`disabled-providers.yml`（71 项）、env 基线、受控启动器（sh/ps1）、4 个验收脚本 |
+-| **L2 源码补丁（§8 清单）** | 🔶 已做 3/6 | ✅ catalog 刷新开关与镜像改写（`ZERO2AI_DISABLE_MODEL_CATALOG` / `ZERO2AI_MODEL_CATALOG_URL`）；✅ 自更新源可覆盖（`ZERO2AI_UPDATE_NPM_REGISTRY` / `_GITHUB_API` / `_GITHUB_REPO`）；✅ 日志级别阈值与敏感字段脱敏（`ZERO2AI_LOG_LEVEL`，本地传输与外部 sink 双路径脱敏）。⏳ 未做：Windows 凭据 DPAPI、托管配置层、受管扩展目录锁定（均需改加载器/优先级语义，见 §8 备注） |
++| **L2 源码补丁（§8 清单）** | 🔶 已做 4/6 | ✅ catalog 刷新开关与镜像改写；✅ 自更新源可覆盖；✅ 日志级别与脱敏；✅ **托管策略层**（`ZERO2AI_MANAGED_POLICY` → 审批上限与逐工具 deny/prompt，**`--yolo`、ACP 权限门、子代理默认值均无法绕过**，注入在 `resolveApproval` 单点路径上）。⏳ 未做：Windows 凭据 DPAPI、受管扩展目录锁定 |
+ | P1 真实断网构建 / P2 网关与密钥 / P3 策略 / P4 沙箱 / P5 推广 | ⏳ 待实施 | 需行内基础设施到位后按 §6 推进 |
+ 
+ > 未完成且必须在行内环境做的三件事：① Rust 侧编译验证（本机无 cargo）② 内网镜像与制品库落地 ③ 沙箱外层与网关上线。
+@@ -344,7 +344,9 @@
+ > - 自更新：`ZERO2AI_UPDATE_NPM_REGISTRY` / `ZERO2AI_UPDATE_GITHUB_API` / `ZERO2AI_UPDATE_GITHUB_REPO` 覆盖官方源（`--registry` 亦随之指向内网）。
+ > - 日志：`ZERO2AI_LOG_LEVEL=error|warn|info|debug` 控制本地传输阈值；`redactSecrets` 对本地传输与外部 sink **双路径**递归脱敏（`pass`/`secret`/`token`/`apiKey`/`authorization`/`credential`/`cookie`/`privateKey` 等键，深度上限 4）。
+ >
+-> 第 4、5、6 项尚未编码，原因是它们不是"加开关"而是**语义改动**：DPAPI 需要原生绑定（Bun 无 OS 凭据库 API），托管配置层要改 `settings` 的优先级链并让运行时标志无法覆盖，受管扩展锁定要改扩展/hook 发现器。建议在 P3 阶段与策略基线一并设计实现。
++> 第 4、5、6 项状态：**第 5 项已完成**——受管策略层落在 `packages/coding-agent/src/config/managed-policy.ts`，并在 `resolveApproval` 中生效（该函数是 5 处调用点的唯一汇聚路径，因此 `--yolo`、ACP `session/request_permission`、子代理 headless 默认值都无法放宽）。策略文件为 JSON（避免依赖它所要约束的 YAML 设置管线），路径取 `ZERO2AI_MANAGED_POLICY`（显式指定时**缺失或损坏即报错**，fail-closed），否则 `/etc/zero2ai/managed-policy.json` 或 `%ProgramData%\zero2ai\managed-policy.json`。语义为**纯限制性**：`deny` / `prompt` / 更严格的 `approvalMode` 生效，`allow` 不授予任何额外权限。样例见 `internalization/p1/managed-policy.json`。
++>
++> 第 4、6 项尚未编码：DPAPI 需要原生绑定（Bun 无 OS 凭据库 API），受管扩展目录锁定要改扩展/hook 发现器。建议在 P3 阶段与策略基线一并设计实现。
+ 
+ ---
+ 
+@@ -398,6 +400,8 @@
+ |---|---|---|
+ | `baseline/01-core-identity.patch` … `07-deep-rename.patch` | 改名基线：01–06 为第一阶段（`omp`→`zero2ai`），**07 为第二阶段深度改名**（包作用域、crate、环境变量、`omptype`→`schema`、遥测属性） | 应用 7/7 成功；与工作区逐文件 SHA256 **零差异（7328 文件）**；纯重命名以 `rename from/to` 表达（含二进制 tokenizer 数据） |
+ | `baseline/08-l2-harden.patch` | **L2 收紧**：catalog 刷新开关与镜像、自更新源可覆盖、日志级别与敏感字段脱敏 | 4 文件 / 14.9 KB；全序列 8/8 应用成功 |
++| `baseline/09-managed-policy.patch` | **托管策略层**：`config/managed-policy.ts` + `resolveApproval` 注入 + 12 项契约测试 | 12/12 测试通过（无需原生插件）；全序列 9/9 应用成功 |
++| `p1/managed-policy.json` | 管理员策略样例（审批上限 + 逐工具 deny/prompt） | JSON 可解析；已被启动器与 env 基线引用 |
+ | `apply-baseline.sh` / `apply-baseline.ps1` | 应用基线（`--check` 预演、`--target` 指定仓库） | `--check` 全绿；应用后条目数与主树一致 |
+ | `revert-baseline.sh` | 逆序回滚 | 回滚后残留改动 0 |
+ | `p1/config.yml` | 项目级策略基线（审批收紧、工具开关、外发面关闭） | YAML 可解析；键名逐条核对 |
+diff --git a/packages/coding-agent/src/tools/approval.ts b/packages/coding-agent/src/tools/approval.ts
+--- a/packages/coding-agent/src/tools/approval.ts
++++ b/packages/coding-agent/src/tools/approval.ts
+@@ -7,6 +7,7 @@
+  * - format the generic approval prompt body.
+  */
+ import type { AgentTool, ToolApprovalDecision, ToolTier } from "@zero2ai/agent-core";
++import { getManagedPolicy, lookupManagedApproval } from "../config/managed-policy";
+ 
+ export type { ToolApproval, ToolApprovalDecision, ToolTier } from "@zero2ai/agent-core";
+ 
+@@ -89,7 +90,7 @@
+ 	tier: ToolTier;
+ 	reason?: string;
+ 	override: boolean;
+-	source?: "tool" | "user" | "mode";
++	source?: "tool" | "user" | "mode" | "managed";
+ 	/** User-policy key that produced `source: "user"` (defaults to the tool name). */
+ 	policyKey?: string;
+ }
+@@ -194,6 +195,15 @@
+ ): ResolvedApproval {
+ 	const decision = getToolDecision(tool, args);
+ 	const policyKey = decision.policyKey ?? tool.name;
++	const managed = getManagedPolicy();
++	// Administrator policy cannot be lifted by `--yolo`, ACP permission gates, or
++	// subagent defaults: both the mode ceiling and the per-tool directive are
++	// applied here, on the single path every caller funnels through.
++	const effectiveMode: ApprovalMode =
++		managed?.approvalMode && TIER_RANK[APPROVAL_MODE_MAX_TIER[managed.approvalMode]] < TIER_RANK[APPROVAL_MODE_MAX_TIER[mode]]
++			? managed.approvalMode
++			: mode;
++	const managedPolicy = lookupManagedApproval(managed, policyKey, tool.name);
+ 	const userPolicy = Object.hasOwn(userConfig, policyKey) ? normalizePolicy(userConfig[policyKey]) : undefined;
+ 	const fallbackPolicy =
+ 		policyKey !== tool.name && userPolicy === undefined && Object.hasOwn(userConfig, tool.name)
+@@ -238,7 +248,26 @@
+ 		};
+ 	}
+ 
+-	if (mode === "yolo") {
++	if (managedPolicy === "deny") {
++		return {
++			policy: "deny",
++			tier: decision.tier,
++			override: decision.override,
++			source: "managed",
++			...(decision.policyKey ? { policyKey: decision.policyKey } : {}),
++		};
++	}
++	if (managedPolicy === "prompt") {
++		return {
++			policy: "prompt",
++			tier: decision.tier,
++			override: false,
++			source: "managed",
++			...(decision.policyKey ? { policyKey: decision.policyKey } : {}),
++		};
++	}
++
++	if (effectiveMode === "yolo") {
+ 		if (decision.policy) {
+ 			return {
+ 				policy: decision.policy,
+@@ -290,7 +319,7 @@
+ 		};
+ 	}
+ 
+-	if (modeApprovesTier(mode, decision.tier)) {
++	if (modeApprovesTier(effectiveMode, decision.tier)) {
+ 		return { policy: "allow", tier: decision.tier, override: false, source: "mode" };
+ 	}
+ 
+@@ -310,6 +339,12 @@
+ 	const { source, reason, policyKey } = resolved;
+ 	if (source === "tool") {
+ 		return new Error(`Tool "${toolName}" is blocked by tool policy.${reason ? `\nReason: ${reason}` : ""}`);
++	}
++	if (source === "managed") {
++		return new Error(
++			`Tool "${policyKey ?? toolName}" is blocked by administrator policy (managed-policy).\n` +
++				`This restriction is enforced centrally and cannot be overridden by user or runtime settings.`,
++		);
+ 	}
+ 	return new Error(
+ 		`Tool "${policyKey ?? toolName}" is blocked by user policy.\n` +

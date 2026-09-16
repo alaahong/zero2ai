@@ -1,4 +1,4 @@
-import { isAnthropicServerToolHistoryBlock } from "@oh-my-pi/pi-ai/providers/anthropic-wire";
+import { isAnthropicServerToolHistoryBlock } from "@zero2ai/ai/providers/anthropic-wire";
 import {
 	type BlobStore,
 	externalizeImageDataSync,

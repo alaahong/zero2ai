@@ -1,8 +1,8 @@
 import { describe, expect, it } from "bun:test";
-import { streamBedrock } from "@oh-my-pi/pi-ai/providers/amazon-bedrock";
-import { streamSimple } from "@oh-my-pi/pi-ai/stream";
-import type { Model } from "@oh-my-pi/pi-ai/types";
-import { USER_AGENT } from "@oh-my-pi/pi-utils";
+import { streamBedrock } from "@zero2ai/ai/providers/amazon-bedrock";
+import { streamSimple } from "@zero2ai/ai/stream";
+import type { Model } from "@zero2ai/ai/types";
+import { USER_AGENT } from "@zero2ai/utils";
 import {
 	bedrockTestModel,
 	BEDROCK_TEST_CONTEXT,
@@ -89,7 +89,7 @@ describe("Bedrock caller headers", () => {
 });
 
 describe("amazon-bedrock user-agent default", () => {
-	it("defaults user-agent to the shared omp UA when no headers are set", async () => {
+	it("defaults user-agent to the shared zero2ai UA when no headers are set", async () => {
 		const seen: { headers?: Record<string, string> } = {};
 		await withSkippedBedrockAuth(async () => {
 			const stream = streamBedrock(model(), context, { region: "us-east-1", fetch: capturingBedrockFetch(seen) });

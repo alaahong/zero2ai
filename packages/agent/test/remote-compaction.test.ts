@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "bun:test";
-import { ThinkingLevel, Tokenizer } from "@oh-my-pi/pi-agent-core";
+import { ThinkingLevel, Tokenizer } from "@zero2ai/agent-core";
 import {
 	type CompactionPreparation,
 	compact,
@@ -8,7 +8,7 @@ import {
 	NativeCompactionError,
 	prepareCompaction,
 	type SessionEntry,
-} from "@oh-my-pi/pi-agent-core/compaction";
+} from "@zero2ai/agent-core/compaction";
 import {
 	buildCompactionV2Request,
 	buildOpenAiNativeHistory,
@@ -20,13 +20,13 @@ import {
 	shouldUseCompactionV2Streaming,
 	shouldUseOpenAiRemoteCompaction,
 	trimRemoteCompactionInputToContextWindow,
-} from "@oh-my-pi/pi-agent-core/compaction/openai";
-import * as ai from "@oh-my-pi/pi-ai";
-import * as AIError from "@oh-my-pi/pi-ai/error";
+} from "@zero2ai/agent-core/compaction/openai";
+import * as ai from "@zero2ai/ai";
+import * as AIError from "@zero2ai/ai/error";
 import {
 	buildTransformedCodexRequestBody,
 	getOpenAICodexTransportDetails,
-} from "@oh-my-pi/pi-ai/providers/openai-codex-responses";
+} from "@zero2ai/ai/providers/openai-codex-responses";
 import type {
 	AssistantMessage,
 	CodexCompactionContext,
@@ -35,10 +35,10 @@ import type {
 	ProviderSessionState,
 	ToolResultMessage,
 	UserMessage,
-} from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import type { ModelSpec } from "@oh-my-pi/pi-catalog/types";
-import * as piUtils from "@oh-my-pi/pi-utils";
+} from "@zero2ai/ai/types";
+import { buildModel } from "@zero2ai/catalog/build";
+import type { ModelSpec } from "@zero2ai/catalog/types";
+import * as piUtils from "@zero2ai/utils";
 
 const { isRecord } = piUtils;
 const TEST_INSTALLATION_ID = "00000000-0000-4000-8000-000000000001";
@@ -1884,7 +1884,7 @@ describe("requestOpenAiRemoteCompaction abort", () => {
 
 describe("requestOpenAiRemoteCompaction timeout", () => {
 	test("a never-responding endpoint rejects with TimeoutError instead of hanging", async () => {
-		// Contract: the compact endpoint is a raw fetch outside the pi-ai stream
+		// Contract: the compact endpoint is a raw fetch outside the zero2ai-ai stream
 		// watchdogs — a silently dropped connection must not hang compaction
 		// forever (frozen "Auto context-full maintenance…" spinner).
 		const fetchMock: FetchImpl = (_input, init) => {
@@ -1955,7 +1955,7 @@ describe("requestRemoteCompaction wire formats", () => {
 		});
 	});
 
-	test("keeps the generic omp summarizer format for other endpoints", async () => {
+	test("keeps the generic zero2ai summarizer format for other endpoints", async () => {
 		let sentBody: unknown;
 		const fetchMock: FetchImpl = async (_input, init) => {
 			if (typeof init?.body !== "string") throw new Error("missing remote compaction request body");

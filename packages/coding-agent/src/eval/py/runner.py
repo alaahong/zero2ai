@@ -1,4 +1,4 @@
-"""OMP Python runner — subprocess wrapper used by the coding-agent host.
+"""ZERO2AI Python runner — subprocess wrapper used by the coding-agent host.
 
 NDJSON protocol over stdin/stdout. Host writes one JSON object per line;
 wrapper writes typed frames back.
@@ -877,7 +877,7 @@ def _start_capture_drain() -> None:
     if _CAPTURE_READ_FD is None:
         return
     thread = threading.Thread(
-        target=_drain_captured_stdout, name="omp-fd1-capture", daemon=True
+        target=_drain_captured_stdout, name="zero2ai-fd1-capture", daemon=True
     )
     thread.start()
 
@@ -1043,7 +1043,7 @@ def cell_magic(
 
 
 def _emit_status(op: str, **data: Any) -> None:
-    bundle = {"application/x-omp-status": {"op": op, **data}}
+    bundle = {"application/x-zero2ai-status": {"op": op, **data}}
     rid = _CURRENT_RID.get()
     if rid is None:
         return
@@ -1897,12 +1897,12 @@ def _end_exec_sigint() -> None:
 
 
 _MANAGED_ENV_KEYS = (
-    "PI_SESSION_FILE",
-    "PI_ARTIFACTS_DIR",
-    "PI_TOOL_BRIDGE_URL",
-    "PI_TOOL_BRIDGE_TOKEN",
-    "PI_TOOL_BRIDGE_SESSION",
-    "PI_EVAL_LOCAL_ROOTS",
+    "ZERO2AI_SESSION_FILE",
+    "ZERO2AI_ARTIFACTS_DIR",
+    "ZERO2AI_TOOL_BRIDGE_URL",
+    "ZERO2AI_TOOL_BRIDGE_TOKEN",
+    "ZERO2AI_TOOL_BRIDGE_SESSION",
+    "ZERO2AI_EVAL_LOCAL_ROOTS",
 )
 
 
@@ -1952,7 +1952,7 @@ def _start_parent_watchdog() -> None:
                 return
             time.sleep(10)
 
-    thread = threading.Thread(target=watch, name="omp-parent-watchdog", daemon=True)
+    thread = threading.Thread(target=watch, name="zero2ai-parent-watchdog", daemon=True)
     thread.start()
 
 
@@ -2206,7 +2206,7 @@ def _read_stdin(loop: asyncio.AbstractEventLoop, queue: asyncio.Queue, stdin) ->
             threading.Thread(
                 target=_handle_tool_request,
                 args=(req,),
-                name=f"omp-tool-{req.get('id')}",
+                name=f"zero2ai-tool-{req.get('id')}",
                 daemon=True,
             ).start()
             continue
@@ -2229,7 +2229,7 @@ async def _serve_posix(loop: asyncio.AbstractEventLoop, stdin) -> None:
     reader = threading.Thread(
         target=_read_stdin,
         args=(loop, queue, stdin),
-        name="omp-stdin-reader",
+        name="zero2ai-stdin-reader",
         daemon=True,
     )
     reader.start()
@@ -2304,7 +2304,7 @@ async def _serve_windows(loop: asyncio.AbstractEventLoop, stdin) -> None:
             threading.Thread(
                 target=_handle_tool_request,
                 args=(req,),
-                name=f"omp-tool-{req.get('id')}",
+                name=f"zero2ai-tool-{req.get('id')}",
                 daemon=True,
             ).start()
             continue

@@ -12,8 +12,8 @@
  * is testable without a live session or TUI. The interactive mode performs the
  * resulting side effect.
  */
-import type { Model } from "@oh-my-pi/pi-ai";
-import { modelsAreEqual } from "@oh-my-pi/pi-catalog/models";
+import type { Model } from "@zero2ai/ai";
+import { modelsAreEqual } from "@zero2ai/catalog/models";
 import type { ResolvedModelRoleValue } from "../config/model-resolver";
 import type { ConfiguredThinkingLevel } from "../thinking";
 

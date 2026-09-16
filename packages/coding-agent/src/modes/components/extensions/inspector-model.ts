@@ -6,8 +6,8 @@
  */
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { arkToWireSchema, isArkSchema } from "@oh-my-pi/pi-ai/utils/schema";
-import { normalizePathForComparison, parseFrontmatter } from "@oh-my-pi/pi-utils";
+import { arkToWireSchema, isArkSchema } from "@zero2ai/ai/utils/schema";
+import { normalizePathForComparison, parseFrontmatter } from "@zero2ai/utils";
 import { parseRuleAgents, parseRuleConditionAndScope } from "../../../capability/rule";
 import { slashCommandFrontmatterDisplay } from "../../../capability/slash-command";
 import { isFilesystemSourcePath } from "../../../tools/path-utils";
@@ -248,13 +248,13 @@ function pathSegments(filePath: string): string[] {
 	return normalized.split(flavor.sep).filter(part => part.length > 0 && part !== ".");
 }
 
-/** Project-local items only. Uses the directory that contains `.omp`, when present. */
+/** Project-local items only. Uses the directory that contains `.zero2ai`, when present. */
 export function projectListHint(ext: Extension): string | undefined {
 	if (ext.source.level !== "project") return undefined;
 	const parts = pathSegments(ext.path);
-	const ompIndex = parts.lastIndexOf(".omp");
-	if (ompIndex <= 0) return undefined;
-	const parent = parts[ompIndex - 1];
+	const zero2aiIndex = parts.lastIndexOf(".zero2ai");
+	if (zero2aiIndex <= 0) return undefined;
+	const parent = parts[zero2aiIndex - 1];
 	return parent && parent !== "." ? parent : undefined;
 }
 

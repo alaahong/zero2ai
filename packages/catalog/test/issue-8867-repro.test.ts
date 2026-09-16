@@ -9,9 +9,9 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { readModelCache, writeModelCache } from "@oh-my-pi/pi-catalog/model-cache";
-import type { Model } from "@oh-my-pi/pi-catalog/types";
+import { buildModel } from "@zero2ai/catalog/build";
+import { readModelCache, writeModelCache } from "@zero2ai/catalog/model-cache";
+import type { Model } from "@zero2ai/catalog/types";
 import { removeWithRetries } from "../../utils/src/temp";
 
 const TTL_MS = 24 * 60 * 60 * 1000;
@@ -57,7 +57,7 @@ describe("model cache corruption self-heal (#8867)", () => {
 	let dbPath = "";
 
 	beforeEach(async () => {
-		tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-catalog-corrupt-cache-"));
+		tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-catalog-corrupt-cache-"));
 		dbPath = path.join(tempDir, "models.db");
 	});
 

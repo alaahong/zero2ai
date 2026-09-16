@@ -1,9 +1,9 @@
 import { describe, expect, it } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { FileSessionStorage } from "@oh-my-pi/pi-coding-agent/session/session-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { isEnoent, TempDir } from "@oh-my-pi/pi-utils";
+import { FileSessionStorage } from "@zero2ai/coding-agent/session/session-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { isEnoent, TempDir } from "@zero2ai/utils";
 
 async function fileExists(p: string): Promise<boolean> {
 	try {
@@ -38,7 +38,7 @@ describe("SessionManager close() drops empty metadata-only sessions", () => {
 	// the sidecar — before the fix, close() left the metadata-only file
 	// behind and every ctrl+D cycle leaked another 500–750B zombie.
 	it("drops the session file when close() runs with no user/assistant messages and no draft", async () => {
-		using tempDir = TempDir.createSync("@pi-session-close-drop-empty-");
+		using tempDir = TempDir.createSync("@zero2ai-session-close-drop-empty-");
 		const session = SessionManager.create(tempDir.path(), tempDir.path());
 		session.appendModelChange("hai-proxy/anthropic--claude-4.6-opus");
 		session.appendModelChange("litellm/anthropic--claude-4.7-opus", "default");
@@ -59,7 +59,7 @@ describe("SessionManager close() drops empty metadata-only sessions", () => {
 	// otherwise metadata-only file — mode changes are startup selector state,
 	// not durable conversation.
 	it("drops the session file when only mode/model changes precede a cleared draft", async () => {
-		using tempDir = TempDir.createSync("@pi-session-close-drop-plan-startup-");
+		using tempDir = TempDir.createSync("@zero2ai-session-close-drop-plan-startup-");
 		const session = SessionManager.create(tempDir.path(), tempDir.path());
 		session.appendModelChange("hai-proxy/anthropic--claude-4.6-opus");
 		session.appendModeChange("plan", { planFilePath: "local://PLAN.md" });
@@ -76,7 +76,7 @@ describe("SessionManager close() drops empty metadata-only sessions", () => {
 	});
 
 	it("drops a resumed draft-only session after consumeDraft removes the sidecar", async () => {
-		using tempDir = TempDir.createSync("@pi-session-close-drop-resumed-draft-");
+		using tempDir = TempDir.createSync("@zero2ai-session-close-drop-resumed-draft-");
 		const firstRun = SessionManager.create(tempDir.path(), tempDir.path());
 		firstRun.appendModelChange("hai-proxy/anthropic--claude-4.6-opus");
 		await firstRun.saveDraft("resume me");
@@ -101,7 +101,7 @@ describe("SessionManager close() drops empty metadata-only sessions", () => {
 	// with a stale draft-only in-memory view. The close-time GC must re-read the
 	// file it is about to delete and keep B's transcript intact.
 	it("keeps the session file when another process consumed the draft and appended real messages", async () => {
-		using tempDir = TempDir.createSync("@pi-session-close-keep-cross-writer-");
+		using tempDir = TempDir.createSync("@zero2ai-session-close-keep-cross-writer-");
 		const termA = SessionManager.create(tempDir.path(), tempDir.path());
 		termA.appendModelChange("hai-proxy/anthropic--claude-4.6-opus");
 		await termA.saveDraft("draft in terminal A");
@@ -121,7 +121,7 @@ describe("SessionManager close() drops empty metadata-only sessions", () => {
 	});
 
 	it("keeps the session file when its current contents include a malformed record", async () => {
-		using tempDir = TempDir.createSync("@pi-session-close-keep-malformed-");
+		using tempDir = TempDir.createSync("@zero2ai-session-close-keep-malformed-");
 		const session = SessionManager.create(tempDir.path(), tempDir.path());
 		session.appendModelChange("hai-proxy/anthropic--claude-4.6-opus");
 		await session.saveDraft("draft in terminal A");
@@ -137,7 +137,7 @@ describe("SessionManager close() drops empty metadata-only sessions", () => {
 	});
 
 	it("serializes a concurrent append before the close-time draft GC decision", async () => {
-		using tempDir = TempDir.createSync("@pi-session-close-lock-cross-writer-");
+		using tempDir = TempDir.createSync("@zero2ai-session-close-lock-cross-writer-");
 		const deleteAttemptPath = path.join(tempDir.path(), "delete-attempted");
 		const termAStorage = new SignalingDeleteStorage(deleteAttemptPath);
 		const termA = SessionManager.create(tempDir.path(), tempDir.path(), termAStorage);
@@ -191,7 +191,7 @@ describe("SessionManager close() drops empty metadata-only sessions", () => {
 	// file was materialized in the first place (`--resume` needs to find
 	// this session's file to reattach the draft). Never drop it.
 	it("keeps the session file when a draft sidecar is still present at close", async () => {
-		using tempDir = TempDir.createSync("@pi-session-close-keep-draft-");
+		using tempDir = TempDir.createSync("@zero2ai-session-close-keep-draft-");
 		const session = SessionManager.create(tempDir.path(), tempDir.path());
 		session.appendModelChange("hai-proxy/anthropic--claude-4.6-opus");
 		await session.saveDraft("queued for next time");
@@ -209,7 +209,7 @@ describe("SessionManager close() drops empty metadata-only sessions", () => {
 
 	// Real conversations must survive close() unconditionally.
 	it("keeps the session file when it contains a real user message", async () => {
-		using tempDir = TempDir.createSync("@pi-session-close-keep-user-");
+		using tempDir = TempDir.createSync("@zero2ai-session-close-keep-user-");
 		const session = SessionManager.create(tempDir.path(), tempDir.path());
 		session.appendModelChange("hai-proxy/anthropic--claude-4.6-opus");
 		session.appendMessage({ role: "user", content: "hello", timestamp: 1 });
@@ -225,7 +225,7 @@ describe("SessionManager close() drops empty metadata-only sessions", () => {
 	});
 
 	it("keeps an explicitly ensured empty session discoverable after close", async () => {
-		using tempDir = TempDir.createSync("@pi-session-close-keep-explicit-empty-");
+		using tempDir = TempDir.createSync("@zero2ai-session-close-keep-explicit-empty-");
 		const session = SessionManager.create(tempDir.path(), tempDir.path());
 		await session.ensureOnDisk();
 
@@ -238,7 +238,7 @@ describe("SessionManager close() drops empty metadata-only sessions", () => {
 	});
 
 	it("keeps an explicitly ensured empty session after its draft is consumed on resume", async () => {
-		using tempDir = TempDir.createSync("@pi-session-close-keep-explicit-resumed-draft-");
+		using tempDir = TempDir.createSync("@zero2ai-session-close-keep-explicit-resumed-draft-");
 		const firstRun = SessionManager.create(tempDir.path(), tempDir.path());
 		await firstRun.ensureOnDisk();
 		await firstRun.saveDraft("resume me");
@@ -258,7 +258,7 @@ describe("SessionManager close() drops empty metadata-only sessions", () => {
 	});
 
 	it("keeps a handoff custom message even before the next user turn", async () => {
-		using tempDir = TempDir.createSync("@pi-session-close-keep-handoff-");
+		using tempDir = TempDir.createSync("@zero2ai-session-close-keep-handoff-");
 		const session = SessionManager.create(tempDir.path(), tempDir.path());
 		session.appendCustomMessageEntry("handoff", "handoff context", true, undefined, "agent");
 		await session.ensureOnDisk();
@@ -274,7 +274,7 @@ describe("SessionManager close() drops empty metadata-only sessions", () => {
 	// Never-materialized sessions (no draft ever saved, no assistant reply)
 	// must not be summoned into existence by close() itself.
 	it("is a no-op when the session file was never materialized", async () => {
-		using tempDir = TempDir.createSync("@pi-session-close-never-materialized-");
+		using tempDir = TempDir.createSync("@zero2ai-session-close-never-materialized-");
 		const session = SessionManager.create(tempDir.path(), tempDir.path());
 		session.appendModelChange("hai-proxy/anthropic--claude-4.6-opus");
 

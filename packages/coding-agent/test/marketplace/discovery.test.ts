@@ -1,13 +1,13 @@
 /**
- * Discovery integration tests for OMP plugin registry reading.
+ * Discovery integration tests for ZERO2AI plugin registry reading.
  *
  * NOTE: listClaudePluginRoots() lives in discovery/helpers.ts which imports
- * @oh-my-pi/pi-natives (native Rust addon via glob). We cannot call it here.
+ * @zero2ai/natives (native Rust addon via glob). We cannot call it here.
  *
  * Instead these tests validate the structural contract that listClaudePluginRoots
  * depends on:
- *   1. OMP registry lives at path.join(home, ".omp", "plugins", "installed_plugins.json")
- *      (matches getConfigDirName() == ".omp")
+ *   1. ZERO2AI registry lives at path.join(home, ".zero2ai", "plugins", "installed_plugins.json")
+ *      (matches getConfigDirName() == ".zero2ai")
  *   2. The registry format passes the same validator that parseClaudePluginsRegistry uses
  *   3. readInstalledPluginsRegistry / writeInstalledPluginsRegistry produce files that
  *      satisfy that validator
@@ -19,19 +19,19 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { InstalledPluginEntry } from "@oh-my-pi/pi-coding-agent/extensibility/plugins/marketplace";
+import type { InstalledPluginEntry } from "@zero2ai/coding-agent/extensibility/plugins/marketplace";
 import {
 	addInstalledPlugin,
 	buildPluginId,
 	readInstalledPluginsRegistry,
 	writeInstalledPluginsRegistry,
-} from "@oh-my-pi/pi-coding-agent/extensibility/plugins/marketplace";
-import { removeSyncWithRetries } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/extensibility/plugins/marketplace";
+import { removeSyncWithRetries } from "@zero2ai/utils";
 
 // ── Inline validator ───────────────────────────────────────────────────────────
 //
 // Mirrors parseClaudePluginsRegistry() in discovery/helpers.ts exactly.
-// Kept here to avoid importing helpers.ts (which pulls in @oh-my-pi/pi-natives).
+// Kept here to avoid importing helpers.ts (which pulls in @zero2ai/natives).
 function validateClaudeRegistryFormat(content: string): Record<string, unknown> | null {
 	let data: Record<string, unknown>;
 	try {
@@ -52,10 +52,10 @@ function validateClaudeRegistryFormat(content: string): Record<string, unknown> 
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-// Matches getConfigDirName() — single source of truth is in @oh-my-pi/pi-utils,
-// but we know the value is ".omp" and hardcoding it here keeps tests free of
+// Matches getConfigDirName() — single source of truth is in @zero2ai/utils,
+// but we know the value is ".zero2ai" and hardcoding it here keeps tests free of
 // native-addon transitive imports.
-const OMP_CONFIG_DIR = ".omp";
+const ZERO2AI_CONFIG_DIR = ".zero2ai";
 
 function makeEntry(installPath: string, version = "1.0.0"): InstalledPluginEntry {
 	return {
@@ -70,13 +70,13 @@ function makeEntry(installPath: string, version = "1.0.0"): InstalledPluginEntry
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 
 let tmpHome: string;
-/** ~/.omp/plugins/installed_plugins.json inside tmpHome */
-let ompRegistryPath: string;
+/** ~/.zero2ai/plugins/installed_plugins.json inside tmpHome */
+let zero2aiRegistryPath: string;
 
 beforeEach(() => {
-	tmpHome = fs.mkdtempSync(path.join(os.tmpdir(), "omp-discovery-test-"));
-	ompRegistryPath = path.join(tmpHome, OMP_CONFIG_DIR, "plugins", "installed_plugins.json");
-	fs.mkdirSync(path.dirname(ompRegistryPath), { recursive: true });
+	tmpHome = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-discovery-test-"));
+	zero2aiRegistryPath = path.join(tmpHome, ZERO2AI_CONFIG_DIR, "plugins", "installed_plugins.json");
+	fs.mkdirSync(path.dirname(zero2aiRegistryPath), { recursive: true });
 });
 
 afterEach(() => {
@@ -85,22 +85,22 @@ afterEach(() => {
 
 // ── Path contract ─────────────────────────────────────────────────────────────
 
-describe("OMP registry path contract", () => {
-	it("OMP registry lives at home/.omp/plugins/installed_plugins.json", () => {
+describe("ZERO2AI registry path contract", () => {
+	it("ZERO2AI registry lives at home/.zero2ai/plugins/installed_plugins.json", () => {
 		// This is the path that listClaudePluginRoots reads.
 		// Any change to this path must be reflected in helpers.ts.
-		const expected = path.join(tmpHome, ".omp", "plugins", "installed_plugins.json");
-		expect(ompRegistryPath).toBe(expected);
+		const expected = path.join(tmpHome, ".zero2ai", "plugins", "installed_plugins.json");
+		expect(zero2aiRegistryPath).toBe(expected);
 	});
 });
 
 // ── Format compatibility ───────────────────────────────────────────────────────
 
-describe("OMP registry format compatibility with Claude parser", () => {
+describe("ZERO2AI registry format compatibility with Claude parser", () => {
 	it("empty registry written by writeInstalledPluginsRegistry passes validator", async () => {
-		await writeInstalledPluginsRegistry(ompRegistryPath, { version: 2, plugins: {} });
+		await writeInstalledPluginsRegistry(zero2aiRegistryPath, { version: 2, plugins: {} });
 
-		const content = fs.readFileSync(ompRegistryPath, "utf8");
+		const content = fs.readFileSync(zero2aiRegistryPath, "utf8");
 		const parsed = validateClaudeRegistryFormat(content);
 		expect(parsed).not.toBeNull();
 		expect((parsed as Record<string, unknown>).version).toBe(2);
@@ -110,11 +110,11 @@ describe("OMP registry format compatibility with Claude parser", () => {
 		const pluginId = buildPluginId("quality-review", "example-marketplace");
 		const entry = makeEntry(path.join(tmpHome, "plugins", "cache", "example-marketplace--quality-review--1.0.0"));
 
-		let reg = await readInstalledPluginsRegistry(ompRegistryPath);
+		let reg = await readInstalledPluginsRegistry(zero2aiRegistryPath);
 		reg = addInstalledPlugin(reg, pluginId, entry);
-		await writeInstalledPluginsRegistry(ompRegistryPath, reg);
+		await writeInstalledPluginsRegistry(zero2aiRegistryPath, reg);
 
-		const content = fs.readFileSync(ompRegistryPath, "utf8");
+		const content = fs.readFileSync(zero2aiRegistryPath, "utf8");
 		const parsed = validateClaudeRegistryFormat(content);
 		expect(parsed).not.toBeNull();
 
@@ -142,16 +142,16 @@ describe("OMP registry format compatibility with Claude parser", () => {
 
 // ── Round-trip ────────────────────────────────────────────────────────────────
 
-describe("OMP registry round-trip", () => {
+describe("ZERO2AI registry round-trip", () => {
 	it("reads back what was written — single plugin", async () => {
 		const id = buildPluginId("hello-plugin", "test-marketplace");
 		const entry = makeEntry("/tmp/fake-plugin-path");
 
-		let reg = await readInstalledPluginsRegistry(ompRegistryPath);
+		let reg = await readInstalledPluginsRegistry(zero2aiRegistryPath);
 		reg = addInstalledPlugin(reg, id, entry);
-		await writeInstalledPluginsRegistry(ompRegistryPath, reg);
+		await writeInstalledPluginsRegistry(zero2aiRegistryPath, reg);
 
-		const readBack = await readInstalledPluginsRegistry(ompRegistryPath);
+		const readBack = await readInstalledPluginsRegistry(zero2aiRegistryPath);
 		expect(readBack.plugins[id]).toBeDefined();
 		expect(readBack.plugins[id]?.[0]?.installPath).toBe(entry.installPath);
 		expect(readBack.plugins[id]?.[0]?.version).toBe("1.0.0");
@@ -164,12 +164,12 @@ describe("OMP registry round-trip", () => {
 		const entry1 = makeEntry("/tmp/fake-a", "1.0.0");
 		const entry2 = makeEntry("/tmp/fake-b", "2.0.0");
 
-		let reg = await readInstalledPluginsRegistry(ompRegistryPath);
+		let reg = await readInstalledPluginsRegistry(zero2aiRegistryPath);
 		reg = addInstalledPlugin(reg, id1, entry1);
 		reg = addInstalledPlugin(reg, id2, entry2);
-		await writeInstalledPluginsRegistry(ompRegistryPath, reg);
+		await writeInstalledPluginsRegistry(zero2aiRegistryPath, reg);
 
-		const readBack = await readInstalledPluginsRegistry(ompRegistryPath);
+		const readBack = await readInstalledPluginsRegistry(zero2aiRegistryPath);
 		expect(Object.keys(readBack.plugins)).toHaveLength(2);
 		expect(readBack.plugins[id1]?.[0]?.version).toBe("1.0.0");
 		expect(readBack.plugins[id2]?.[0]?.version).toBe("2.0.0");
@@ -185,11 +185,11 @@ describe("OMP registry round-trip", () => {
 			lastUpdated: "2025-01-15T10:30:00.000Z",
 		};
 
-		let reg = await readInstalledPluginsRegistry(ompRegistryPath);
+		let reg = await readInstalledPluginsRegistry(zero2aiRegistryPath);
 		reg = addInstalledPlugin(reg, id, entry);
-		await writeInstalledPluginsRegistry(ompRegistryPath, reg);
+		await writeInstalledPluginsRegistry(zero2aiRegistryPath, reg);
 
-		const readBack = await readInstalledPluginsRegistry(ompRegistryPath);
+		const readBack = await readInstalledPluginsRegistry(zero2aiRegistryPath);
 		expect(readBack.plugins[id]?.[0]?.scope).toBe("project");
 	});
 
@@ -204,20 +204,20 @@ describe("OMP registry round-trip", () => {
 
 // ── Precedence contract (structural) ─────────────────────────────────────────
 //
-// listClaudePluginRoots must replace Claude entries with OMP entries when the same
+// listClaudePluginRoots must replace Claude entries with ZERO2AI entries when the same
 // plugin ID appears in both registries. We cannot call that function here, but we
 // can verify the data shapes that the replacement logic reads are correct.
 
-describe("OMP precedence contract (registry structure)", () => {
-	it("same plugin ID in both registries — OMP entry has required fields for deduplication", () => {
+describe("ZERO2AI precedence contract (registry structure)", () => {
+	it("same plugin ID in both registries — ZERO2AI entry has required fields for deduplication", () => {
 		// The replacement logic: roots.filter(r => r.id !== pluginId) keyed by id.
-		// OMP entries must have installPath so they can be added to roots[].
+		// ZERO2AI entries must have installPath so they can be added to roots[].
 		const id = buildPluginId("shared-plugin", "common-mkt");
-		const ompEntry = makeEntry("/omp/cached/path");
+		const zero2aiEntry = makeEntry("/zero2ai/cached/path");
 
-		// OMP registry entry has installPath (required by listClaudePluginRoots)
-		expect(ompEntry.installPath).toBeTruthy();
-		expect(typeof ompEntry.installPath).toBe("string");
+		// ZERO2AI registry entry has installPath (required by listClaudePluginRoots)
+		expect(zero2aiEntry.installPath).toBeTruthy();
+		expect(typeof zero2aiEntry.installPath).toBe("string");
 		// ID parses correctly with lastIndexOf("@")
 		const atIndex = id.lastIndexOf("@");
 		expect(atIndex).toBeGreaterThan(0);

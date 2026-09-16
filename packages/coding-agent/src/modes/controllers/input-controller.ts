@@ -1,14 +1,14 @@
 import * as path from "node:path";
-import { ThinkingLevel } from "@oh-my-pi/pi-agent-core";
-import type { ImageContent } from "@oh-my-pi/pi-ai";
+import { ThinkingLevel } from "@zero2ai/agent-core";
+import type { ImageContent } from "@zero2ai/ai";
 import {
 	type AutocompleteProvider,
 	matchesKey,
 	parseSgrMouse,
 	type PasteOptions,
 	type SlashCommand,
-} from "@oh-my-pi/pi-tui";
-import { isEnoent, logger, postmortem, sanitizeText } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/tui";
+import { isEnoent, logger, postmortem, sanitizeText } from "@zero2ai/utils";
 import { isSettingsInitialized, settings } from "../../config/settings";
 import { resolveLocalRoot } from "../../internal-urls";
 import { AskDialogComponent } from "../../modes/components/ask-dialog";
@@ -116,14 +116,14 @@ function hasPasteText(value: unknown): value is PasteTarget {
 const SHELL_PROMPT_COMMAND_RE =
 	/^(?:\.{0,2}\/|~\/|cd(?:\s|$)|sudo(?:\s|$)|git(?:\s|$)|bun(?:\s|$)|npm(?:\s|$)|pnpm(?:\s|$)|yarn(?:\s|$)|node(?:\s|$)|python\d*(?:\s|$)|cargo(?:\s|$)|go(?:\s|$)|make(?:\s|$)|docker(?:\s|$)|kubectl(?:\s|$))/;
 const SHELL_PROMPT_OPERATOR_RE = /(?:^|\s)(?:&&|\|\||\||2>&1|[<>]{1,2})(?:\s|$)/;
-const OMP_STATUS_LINE_RE = /^\s*in:\s+\d+\s+out:\s+\d+(?:\s+cache\s+\S+)?\s+t:\s+\S+\s+tok\/s:\s+\S+/m;
+const ZERO2AI_STATUS_LINE_RE = /^\s*in:\s+\d+\s+out:\s+\d+(?:\s+cache\s+\S+)?\s+t:\s+\S+\s+tok\/s:\s+\S+/m;
 
 function looksLikePastedShellPrompt(code: string): boolean {
 	const firstLine = code.split("\n", 1)[0]?.trimStart() ?? "";
 	return (
 		SHELL_PROMPT_COMMAND_RE.test(firstLine) ||
 		SHELL_PROMPT_OPERATOR_RE.test(firstLine) ||
-		OMP_STATUS_LINE_RE.test(code)
+		ZERO2AI_STATUS_LINE_RE.test(code)
 	);
 }
 
@@ -1382,15 +1382,15 @@ export class InputController {
 			// for a given SignalKind permanently replaces the kernel-default
 			// handler for the lifetime of the process. So once the user has
 			// issued even one bash command — e.g. `/usr/bin/true` — SIGTSTP no
-			// longer stops omp: tokio swallows it and the TUI ends up torn down
+			// longer stops zero2ai: tokio swallows it and the TUI ends up torn down
 			// while the process keeps running with no live terminal (issue
 			// [#3461]). SIGSTOP cannot be caught, blocked, or ignored, so the
 			// kernel stops the process regardless of installed handlers.
 			//
-			// pid=0 (foreground process group, not just our PID): omp is not
+			// pid=0 (foreground process group, not just our PID): zero2ai is not
 			// always the shell's direct child. Package-manager launchers (`npx`,
 			// `pnpm exec`, `bunx`, …) wait on the real CLI from a parent shim
-			// that shares omp's process group, and a `omp … | tee log` style
+			// that shares zero2ai's process group, and a `zero2ai … | tee log` style
 			// pipeline puts a sibling foreground job member in the same group
 			// too. The shell sees the job as stopped only when its direct
 			// child / pipeline leader is stopped, so suspending only our PID
@@ -2419,7 +2419,7 @@ export class InputController {
 
 		try {
 			this.ctx.ui.stop();
-			const result = await openInEditor(editorCmd, currentText, { extension: ".omp.md" });
+			const result = await openInEditor(editorCmd, currentText, { extension: ".zero2ai.md" });
 			if (result !== null) {
 				this.ctx.editor.setText(result);
 			}

@@ -8,8 +8,8 @@ import {
 	type CredentialDisabledEvent,
 	SqliteAuthCredentialStore,
 	type StoredAuthCredential,
-} from "@oh-my-pi/pi-ai/auth-storage";
-import * as oauthUtils from "@oh-my-pi/pi-ai/registry/oauth";
+} from "@zero2ai/ai/auth-storage";
+import * as oauthUtils from "@zero2ai/ai/registry/oauth";
 import { removeWithRetries } from "../../utils/src/temp";
 import { withEnv } from "./helpers";
 
@@ -25,7 +25,7 @@ describe("AuthStorage OAuth refresh race", () => {
 	let events: CredentialDisabledEvent[] = [];
 
 	beforeEach(async () => {
-		tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-ai-auth-oauth-race-"));
+		tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-ai-auth-oauth-race-"));
 		store = await SqliteAuthCredentialStore.open(path.join(tempDir, "agent.db"));
 		events = [];
 		authStorage = new AuthStorage(store, {
@@ -52,7 +52,7 @@ describe("AuthStorage OAuth refresh race", () => {
 		if (!authStorage || !store) throw new Error("test setup failed");
 
 		// Seed the shared DB with one expired OAuth credential; this simulates the
-		// state two cooperating omp processes both load from the persisted row.
+		// state two cooperating zero2ai processes both load from the persisted row.
 		await authStorage.set("anthropic", [
 			{
 				type: "oauth",

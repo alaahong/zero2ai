@@ -1,18 +1,18 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "bun:test";
 import * as path from "node:path";
-import { Agent } from "@oh-my-pi/pi-agent-core";
-import { type Api, type AssistantMessage, Effort, type Model } from "@oh-my-pi/pi-ai";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { type CreateAgentSessionResult, createAgentSession } from "@oh-my-pi/pi-coding-agent/sdk";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { getRestorableSessionModels } from "@oh-my-pi/pi-coding-agent/session/session-context";
-import { EPHEMERAL_MODEL_CHANGE_ROLE } from "@oh-my-pi/pi-coding-agent/session/session-entries";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { AUTO_THINKING } from "@oh-my-pi/pi-coding-agent/thinking";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { Agent } from "@zero2ai/agent-core";
+import { type Api, type AssistantMessage, Effort, type Model } from "@zero2ai/ai";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { type CreateAgentSessionResult, createAgentSession } from "@zero2ai/coding-agent/sdk";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { getRestorableSessionModels } from "@zero2ai/coding-agent/session/session-context";
+import { EPHEMERAL_MODEL_CHANGE_ROLE } from "@zero2ai/coding-agent/session/session-entries";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { AUTO_THINKING } from "@zero2ai/coding-agent/thinking";
+import { TempDir } from "@zero2ai/utils";
 
 describe("AgentSession model persistence", () => {
 	let tempDir: TempDir;
@@ -26,7 +26,7 @@ describe("AgentSession model persistence", () => {
 	let sharedModelRegistry: ModelRegistry;
 
 	beforeAll(async () => {
-		sharedDir = TempDir.createSync("@pi-model-persistence-shared-");
+		sharedDir = TempDir.createSync("@zero2ai-model-persistence-shared-");
 		sharedAuthStorage = await AuthStorage.create(path.join(sharedDir.path(), "auth.db"));
 		sharedAuthStorage.setRuntimeApiKey("anthropic", "test-key");
 		sharedModelRegistry = new ModelRegistry(sharedAuthStorage, path.join(sharedDir.path(), "models.yml"));
@@ -38,7 +38,7 @@ describe("AgentSession model persistence", () => {
 	});
 
 	beforeEach(() => {
-		tempDir = TempDir.createSync("@pi-model-persistence-");
+		tempDir = TempDir.createSync("@zero2ai-model-persistence-");
 	});
 
 	afterEach(async () => {
@@ -473,7 +473,7 @@ describe("AgentSession model persistence", () => {
 			role: "assistant",
 			content: [],
 			stopReason: "aborted",
-			errorMessage: "Previous OMP process exited before completing the turn.",
+			errorMessage: "Previous ZERO2AI process exited before completing the turn.",
 		});
 		expect(
 			messages.some(

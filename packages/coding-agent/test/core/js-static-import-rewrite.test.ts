@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
 
-import { rewriteImports, wrapCode } from "@oh-my-pi/pi-coding-agent/eval/js/context-manager";
-import { indirectEval } from "@oh-my-pi/pi-coding-agent/eval/js/shared/indirect-eval";
+import { rewriteImports, wrapCode } from "@zero2ai/coding-agent/eval/js/context-manager";
+import { indirectEval } from "@zero2ai/coding-agent/eval/js/shared/indirect-eval";
 
 // Test fixtures embed user-supplied `import(...)` syntax that the rewriter must
 // transform. The strings are split so static-analysis heuristics don't read them
@@ -191,30 +191,30 @@ describe("wrapCode cross-cell persistence", () => {
 	it("publishes top-level function declarations and their sibling consts from async-wrapped cells", async () => {
 		const globals = globalThis as Record<string, unknown>;
 		const wrapped = await wrapCode(
-			"async function ompPersistedFn(n) { return (await Promise.resolve(n)) + 1; }\nconst ompPersistedTotal = await ompPersistedFn(41);",
+			"async function zero2aiPersistedFn(n) { return (await Promise.resolve(n)) + 1; }\nconst zero2aiPersistedTotal = await zero2aiPersistedFn(41);",
 		);
 		expect(wrapped.asyncWrapped).toBe(true);
 		try {
 			await indirectEval(wrapped.source);
-			const fn = globals.ompPersistedFn as (n: number) => Promise<number>;
+			const fn = globals.zero2aiPersistedFn as (n: number) => Promise<number>;
 			expect(typeof fn).toBe("function");
 			expect(await fn(1)).toBe(2);
-			expect(globals.ompPersistedTotal).toBe(42);
+			expect(globals.zero2aiPersistedTotal).toBe(42);
 		} finally {
-			delete globals.ompPersistedFn;
-			delete globals.ompPersistedTotal;
+			delete globals.zero2aiPersistedFn;
+			delete globals.zero2aiPersistedTotal;
 		}
 	});
 
 	it("publishes explicit top-level var declarations from async-wrapped cells", async () => {
 		const globals = globalThis as Record<string, unknown>;
-		const wrapped = await wrapCode("await Promise.resolve();\nvar ompPersistedVar = 5;");
+		const wrapped = await wrapCode("await Promise.resolve();\nvar zero2aiPersistedVar = 5;");
 		expect(wrapped.asyncWrapped).toBe(true);
 		try {
 			await indirectEval(wrapped.source);
-			expect(globals.ompPersistedVar).toBe(5);
+			expect(globals.zero2aiPersistedVar).toBe(5);
 		} finally {
-			delete globals.ompPersistedVar;
+			delete globals.zero2aiPersistedVar;
 		}
 	});
 });

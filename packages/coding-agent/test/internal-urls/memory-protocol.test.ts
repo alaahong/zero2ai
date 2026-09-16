@@ -2,24 +2,24 @@ import { afterAll, afterEach, beforeEach, describe, expect, it } from "bun:test"
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { InternalUrlRouter } from "@oh-my-pi/pi-coding-agent/internal-urls";
-import { splitMemoryGlobPattern } from "@oh-my-pi/pi-coding-agent/internal-urls/memory-protocol";
-import { getMemoryRoot } from "@oh-my-pi/pi-coding-agent/memories";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { InternalUrlRouter } from "@zero2ai/coding-agent/internal-urls";
+import { splitMemoryGlobPattern } from "@zero2ai/coding-agent/internal-urls/memory-protocol";
+import { getMemoryRoot } from "@zero2ai/coding-agent/memories";
 import {
 	loadMnemopi,
 	loadMnemopiCore,
 	MnemopiSessionState,
 	setMnemopiSessionState,
-} from "@oh-my-pi/pi-coding-agent/mnemopi/state";
-import { getInternalUrlSuggestions } from "@oh-my-pi/pi-coding-agent/modes/internal-url-autocomplete";
-import { AgentRegistry } from "@oh-my-pi/pi-coding-agent/registry/agent-registry";
-import type { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { GlobTool } from "@oh-my-pi/pi-coding-agent/tools/glob";
-import { ReadTool } from "@oh-my-pi/pi-coding-agent/tools/read";
-import { getAgentDir, removeWithRetries, setAgentDir, TempDir } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/mnemopi/state";
+import { getInternalUrlSuggestions } from "@zero2ai/coding-agent/modes/internal-url-autocomplete";
+import { AgentRegistry } from "@zero2ai/coding-agent/registry/agent-registry";
+import type { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import type { ToolSession } from "@zero2ai/coding-agent/tools";
+import { GlobTool } from "@zero2ai/coding-agent/tools/glob";
+import { ReadTool } from "@zero2ai/coding-agent/tools/read";
+import { getAgentDir, removeWithRetries, setAgentDir, TempDir } from "@zero2ai/utils";
 
 // Mnemopi state is loaded lazily; preload so `new MnemopiSessionState(...)` can
 // resolve the module synchronously in the fixtures below.

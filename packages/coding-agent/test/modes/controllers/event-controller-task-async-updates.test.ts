@@ -14,16 +14,16 @@
  *    background ("running") finalizes and untracks it.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
-import type { AssistantMessage, ToolResultMessage } from "@oh-my-pi/pi-ai";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { ToolExecutionComponent } from "@oh-my-pi/pi-coding-agent/modes/components/tool-execution";
-import { EventController } from "@oh-my-pi/pi-coding-agent/modes/controllers/event-controller";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { UiHelpers } from "@oh-my-pi/pi-coding-agent/modes/utils/ui-helpers";
-import type { SessionContext } from "@oh-my-pi/pi-coding-agent/session/session-context";
-import type { TaskToolDetails } from "@oh-my-pi/pi-coding-agent/task/types";
-import type { BashToolDetails } from "@oh-my-pi/pi-coding-agent/tools/bash";
-import type { CoordinationDetails } from "@oh-my-pi/pi-coding-agent/tools/hub";
+import type { AssistantMessage, ToolResultMessage } from "@zero2ai/ai";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
+import { ToolExecutionComponent } from "@zero2ai/coding-agent/modes/components/tool-execution";
+import { EventController } from "@zero2ai/coding-agent/modes/controllers/event-controller";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import { UiHelpers } from "@zero2ai/coding-agent/modes/utils/ui-helpers";
+import type { SessionContext } from "@zero2ai/coding-agent/session/session-context";
+import type { TaskToolDetails } from "@zero2ai/coding-agent/task/types";
+import type { BashToolDetails } from "@zero2ai/coding-agent/tools/bash";
+import type { CoordinationDetails } from "@zero2ai/coding-agent/tools/hub";
 import { createInteractiveModeContext } from "../../helpers/interactive-mode-context";
 
 function taskResult(asyncState: "running" | "completed" | "failed" | undefined, text: string) {

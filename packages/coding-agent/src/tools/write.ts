@@ -2,17 +2,17 @@ import { Database } from "bun:sqlite";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 
-import { type } from "@oh-my-pi/omptype";
+import { type } from "@zero2ai/schema";
 import type {
 	AgentTool,
 	AgentToolContext,
 	AgentToolResult,
 	AgentToolUpdateCallback,
 	ToolApprovalDecision,
-} from "@oh-my-pi/pi-agent-core";
-import type { HighlightStream } from "@oh-my-pi/pi-natives";
-import { type Component, Text } from "@oh-my-pi/pi-tui";
-import { isEnoent, isRecord, prompt, untilAborted } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/agent-core";
+import type { HighlightStream } from "@zero2ai/natives";
+import { type Component, Text } from "@zero2ai/tui";
+import { isEnoent, isRecord, prompt, untilAborted } from "@zero2ai/utils";
 import {
 	type ArchiveMemberContent,
 	archiveFormatFromPath,
@@ -20,7 +20,7 @@ import {
 	parseArchivePathCandidates,
 	readArchiveEntries,
 	writeArchive,
-} from "@oh-my-pi/pi-utils/ar";
+} from "@zero2ai/utils/ar";
 import { getEditStore } from "../edit/store";
 import { normalizeToLF } from "../edit/normalize";
 import type { RenderResultOptions } from "../extensibility/custom-tools/types";
@@ -432,7 +432,7 @@ function assertNotShorterReadProjection(
 	const payloadLength = writeContent === rawContent ? rawPayloadLength : normalizeToLF(writeContent).length;
 	if (payloadLength >= normalizeToLF(currentContent).length) return;
 	throw new ToolError(
-		`Refusing to overwrite '${displayPath}' with an incomplete read projection: the content ends with an omp read truncation notice and covers less than the current source, so it would discard unseen content. Re-read the omitted ranges and write the complete file, or use edit for a partial change.`,
+		`Refusing to overwrite '${displayPath}' with an incomplete read projection: the content ends with an zero2ai read truncation notice and covers less than the current source, so it would discard unseen content. Re-read the omitted ranges and write the complete file, or use edit for a partial change.`,
 	);
 }
 
@@ -1406,7 +1406,7 @@ export class WriteTool implements AgentTool<typeof writeSchema, WriteToolDetails
 			emitWriteProgress(onUpdate, cleanContent, displayPath, absolutePath);
 
 			// Try ACP bridge first for editor-visible filesystem paths. Internal
-			// artifacts such as local:// plans are owned by OMP, not the editor.
+			// artifacts such as local:// plans are owned by ZERO2AI, not the editor.
 			const bridgeWrite = await routeWriteThroughBridge(this.session, path, absolutePath, cleanContent, signal);
 			if (bridgeWrite) {
 				// `write` always replaces the whole file, so (unlike hashline's

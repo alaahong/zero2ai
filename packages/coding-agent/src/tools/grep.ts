@@ -1,24 +1,24 @@
 import { mkdtemp, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import * as path from "node:path";
-import { type } from "@oh-my-pi/omptype";
+import { type } from "@zero2ai/schema";
 import type {
 	AgentTool,
 	AgentToolContext,
 	AgentToolResult,
 	AgentToolUpdateCallback,
 	ToolTier,
-} from "@oh-my-pi/pi-agent-core";
-import { type GrepMatch, GrepOutputMode, type GrepResult, grep } from "@oh-my-pi/pi-natives";
-import type { Component } from "@oh-my-pi/pi-tui";
-import { Text } from "@oh-my-pi/pi-tui";
-import { prompt, untilAborted } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/agent-core";
+import { type GrepMatch, GrepOutputMode, type GrepResult, grep } from "@zero2ai/natives";
+import type { Component } from "@zero2ai/tui";
+import { Text } from "@zero2ai/tui";
+import { prompt, untilAborted } from "@zero2ai/utils";
 import {
 	type ArchiveReader,
 	type ExtractedArchiveFile,
 	openArchive,
 	parseArchivePathCandidates,
-} from "@oh-my-pi/pi-utils/ar";
+} from "@zero2ai/utils/ar";
 import { getEditStore } from "../edit/store";
 import type { RenderResultOptions } from "../extensibility/custom-tools/types";
 import { formatHashlineHeader } from "./hashline-format";
@@ -116,7 +116,7 @@ export const SINGLE_FILE_MATCHES = 200;
  * (DEFAULT_FILE_LIMIT files × MULTI_FILE_PER_FILE_MATCHES matches) plus
  * pagination headroom so the caller can see total file count. */
 const INTERNAL_TOTAL_CAP = 2000;
-/** Mirrors `MAX_FILE_BYTES` in `crates/pi-natives/src/grep.rs`. Native grep
+/** Mirrors `MAX_FILE_BYTES` in `crates/zero2ai-natives/src/grep.rs`. Native grep
  * searches only the first `MAX_FILE_BYTES` of a larger file (a leading mmap
  * window) and drops the rest; matches beyond the window are not returned. We
  * surface a partial-coverage note when the caller explicitly targeted such a
@@ -306,7 +306,7 @@ async function resolveArchiveSearchPaths(
 		}
 
 		if (!tempDir) {
-			tempDir = await mkdtemp(path.join(tmpdir(), "omp-search-archive-"));
+			tempDir = await mkdtemp(path.join(tmpdir(), "zero2ai-search-archive-"));
 		}
 		// Per-entry filename keeps the scratch path unique even when two selectors
 		// resolve to members with the same basename.
@@ -356,7 +356,7 @@ interface IndexedContentLines {
 	starts: number[];
 }
 
-const OMP_ROOT_URL_RE = /^omp:\/\/(?:\/?|docs\/?)$/i;
+const ZERO2AI_ROOT_URL_RE = /^zero2ai:\/\/(?:\/?|docs\/?)$/i;
 
 function normalizeSearchLine(line: string): string {
 	return line.endsWith("\r") ? line.slice(0, -1) : line;
@@ -661,7 +661,7 @@ async function searchVirtualResources(
 	// `[[:digit:]]`) behaves identically on virtual/remote resources. The JS helpers
 	// below then rebuild the exact forward-only, range-trimmed context windows the
 	// virtual-search contract requires.
-	const dir = await mkdtemp(path.join(tmpdir(), "omp-search-virtual-"));
+	const dir = await mkdtemp(path.join(tmpdir(), "zero2ai-search-virtual-"));
 	try {
 		for (let idx = 0; idx < resources.length; idx++) {
 			const resource = resources[idx];
@@ -756,15 +756,15 @@ async function expandVirtualInternalResource(
 	context: ResolveContext,
 	ranges: readonly LineRange[] | undefined,
 ): Promise<VirtualSearchResource[]> {
-	if (OMP_ROOT_URL_RE.test(rawPath)) {
-		const completions = await internalRouter.complete("omp", "");
+	if (ZERO2AI_ROOT_URL_RE.test(rawPath)) {
+		const completions = await internalRouter.complete("zero2ai", "");
 		if (completions && completions.length > 0) {
 			const resources: VirtualSearchResource[] = [];
 			const seen = new Set<string>();
 			for (const completion of completions) {
 				if (seen.has(completion.value)) continue;
 				seen.add(completion.value);
-				const docUrl = `omp://${completion.value}`;
+				const docUrl = `zero2ai://${completion.value}`;
 				const doc = await internalRouter.resolve(docUrl, context);
 				if (!doc.sourcePath) {
 					resources.push({ path: docUrl, content: doc.content, ranges });
@@ -918,7 +918,7 @@ type SearchParams = typeof searchSchema.infer;
  * Construction-time overrides for callers that are not the model.
  *
  * The model-facing schema deliberately does not grow these: they exist for
- * wire bridges (the Cursor `pi_grep` frame) whose protocol carries an explicit
+ * wire bridges (the Cursor `zero2ai_grep` frame) whose protocol carries an explicit
  * context width and total match cap, and which would otherwise have to drop
  * them. Unset means "use the session settings / built-in caps" — the behavior
  * every model-issued call keeps.
@@ -1371,7 +1371,7 @@ export class GrepTool implements AgentTool<typeof searchSchema, GrepToolDetails>
 				const canPaginate = isMultiScope;
 				const skipFiles = canPaginate ? Math.min(normalizedSkip, totalFiles) : 0;
 				// A caller with a total match cap is not paginating: the cap bounds the
-				// output, and the only consumer that sets one (`pi_grep`) has no `skip`
+				// output, and the only consumer that sets one (`zero2ai_grep`) has no `skip`
 				// field to follow a "use skip=N" suggestion with. Windowing it to the
 				// first 20 files would silently return fewer matches than it asked for
 				// while reporting the cap as unreached.

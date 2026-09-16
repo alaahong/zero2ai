@@ -2,8 +2,8 @@ import { beforeAll, describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { hasMagicKeyword, highlightMagicKeywords } from "@oh-my-pi/pi-coding-agent/modes/magic-keywords";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
+import { hasMagicKeyword, highlightMagicKeywords } from "@zero2ai/coding-agent/modes/magic-keywords";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
 
 const magicKeywordsPath = path.resolve(import.meta.dir, "../../src/modes/magic-keywords.ts");
 
@@ -14,7 +14,7 @@ beforeAll(async () => {
 
 describe("highlightMagicKeywords", () => {
 	it("paints keywords when the module-level theme is uninitialized", async () => {
-		const dir = await fs.mkdtemp(path.join(os.tmpdir(), "omp-magic-keywords-"));
+		const dir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-magic-keywords-"));
 		try {
 			const script = [
 				`import { highlightMagicKeywords } from ${JSON.stringify(magicKeywordsPath)};`,

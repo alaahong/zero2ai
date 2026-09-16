@@ -8,9 +8,9 @@
  * - Interact with the user via UI primitives
  */
 
-import type { type as ArkType } from "@oh-my-pi/omptype";
-import type * as TypeBox from "@oh-my-pi/omptype/typebox";
-import type * as zod from "@oh-my-pi/omptype/zod";
+import type { type as ArkType } from "@zero2ai/schema";
+import type * as TypeBox from "@zero2ai/schema/typebox";
+import type * as zod from "@zero2ai/schema/zod";
 import type {
 	AgentMessage,
 	AgentToolResult,
@@ -18,8 +18,8 @@ import type {
 	ThinkingLevel,
 	ToolApproval,
 	ToolLoadMode,
-} from "@oh-my-pi/pi-agent-core";
-import type { CompactionResult } from "@oh-my-pi/pi-agent-core/compaction";
+} from "@zero2ai/agent-core";
+import type { CompactionResult } from "@zero2ai/agent-core/compaction";
 import type {
 	Api,
 	AssistantMessageEvent,
@@ -37,8 +37,8 @@ import type {
 	TextContent,
 	TSchema,
 	UsageProvider,
-} from "@oh-my-pi/pi-ai";
-import type { OAuthCredentials, OAuthLoginCallbacks } from "@oh-my-pi/pi-ai/oauth/types";
+} from "@zero2ai/ai";
+import type { OAuthCredentials, OAuthLoginCallbacks } from "@zero2ai/ai/oauth/types";
 import type {
 	AutocompleteItem,
 	AutocompleteProvider,
@@ -49,8 +49,8 @@ import type {
 	OverlayHandle,
 	OverlayOptions,
 	TUI,
-} from "@oh-my-pi/pi-tui";
-import type { logger as PiLogger } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/tui";
+import type { logger as PiLogger } from "@zero2ai/utils";
 import type { KeybindingsManager } from "../../config/keybindings";
 import type { ModelRegistry } from "../../config/model-registry";
 import type { EditToolDetails } from "../../edit";
@@ -119,7 +119,7 @@ import type {
 } from "../shared-events";
 import type { SlashCommandInfo } from "../slash-commands";
 
-export type { OverlayHandle, OverlayOptions } from "@oh-my-pi/pi-tui";
+export type { OverlayHandle, OverlayOptions } from "@zero2ai/tui";
 export type { AppKeybinding, KeybindingsManager } from "../../config/keybindings";
 export type { ExecOptions, ExecResult } from "../../exec/exec";
 export type { AgentToolResult, AgentToolUpdateCallback };
@@ -241,7 +241,7 @@ export interface ExtensionCustomOptions {
 	signal?: AbortSignal;
 }
 
-/** Wrap the current autocomplete provider with additional behavior (pi-compatible). */
+/** Wrap the current autocomplete provider with additional behavior (zero2ai-compatible). */
 export type AutocompleteProviderFactory = (current: AutocompleteProvider) => AutocompleteProvider;
 
 /**
@@ -334,7 +334,7 @@ export interface ExtensionUIContext {
 
 	/**
 	 * Stack additional autocomplete behavior on top of the built-in provider
-	 * (pi-compatible). Interactive mode rebuilds the editor's provider through
+	 * (zero2ai-compatible). Interactive mode rebuilds the editor's provider through
 	 * every registered factory, in registration order; headless modes (print,
 	 * RPC, ACP, subagents) accept and ignore the factory.
 	 */
@@ -497,7 +497,7 @@ export interface ExtensionContext {
 	/** Gracefully shutdown and exit. */
 	shutdown(): void;
 	/**
-	 * Whether the current project/workspace is trusted. OMP performs no
+	 * Whether the current project/workspace is trusted. ZERO2AI performs no
 	 * project-trust gating — project-level settings and extensions load
 	 * unconditionally — so this always returns `true`. Exposed for
 	 * compatibility with extensions authored against upstream Pi, whose
@@ -549,11 +549,11 @@ export interface ExtensionContext {
 	 * here; extensions written against that API (e.g. Plannotator) feature-detect this method to
 	 * decide whether project-local config is safe to load, and warn when it is absent.
 	 *
-	 * OMP has no equivalent per-directory trust gate: `.omp/extensions`, `.omp/config.yml`, and
+	 * ZERO2AI has no equivalent per-directory trust gate: `.zero2ai/extensions`, `.zero2ai/config.yml`, and
 	 * other project-local inputs are already discovered and loaded unconditionally (see
 	 * `docs/extension-loading.md`). This method exists for compatibility with that upstream surface
-	 * and always returns `true`, truthfully reflecting that OMP already trusts project-local inputs
-	 * by default -- it does not narrow or widen OMP's own security model.
+	 * and always returns `true`, truthfully reflecting that ZERO2AI already trusts project-local inputs
+	 * by default -- it does not narrow or widen ZERO2AI's own security model.
 	 */
 	isProjectTrusted(): boolean;
 }
@@ -1246,13 +1246,13 @@ export interface ExtensionAPI {
 	/** Injected TypeBox shim for legacy `Type.Object(...)` parameter authoring. */
 	typebox: typeof TypeBox;
 
-	/** Injected omptype schema builder for extension tools. */
+	/** Injected schema schema builder for extension tools. */
 	arktype: typeof ArkType;
 
-	/** Injected Zod-compatible omptype builder for extension tools. */
+	/** Injected Zod-compatible schema builder for extension tools. */
 	zod: typeof zod;
 
-	/** Injected pi-coding-agent exports for accessing SDK utilities */
+	/** Injected zero2ai-coding-agent exports for accessing SDK utilities */
 	pi: typeof PiCodingAgent;
 
 	// =========================================================================

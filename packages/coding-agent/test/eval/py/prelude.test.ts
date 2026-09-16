@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { $which, TempDir } from "@oh-my-pi/pi-utils";
+import { $which, TempDir } from "@zero2ai/utils";
 import { PYTHON_PRELUDE } from "../../../src/eval/py/prelude";
 const pythonPath = Bun.env.PYTHON ?? ($which("python3") ? "python3" : "python");
 
@@ -14,7 +14,7 @@ async function runPrelude(
 	const script = `${prelude}\n${code}`;
 	// The full prelude exceeds Windows' ~32k `python -c` command-line limit
 	// (ENAMETOOLONG); a script file behaves identically on every platform.
-	const dir = await TempDir.create("omp-py-prelude-");
+	const dir = await TempDir.create("zero2ai-py-prelude-");
 	try {
 		const scriptPath = dir.join("script.py");
 		await Bun.write(scriptPath, script);
@@ -94,9 +94,9 @@ describe("python prelude", () => {
 			const result = await runPrelude(
 				[`print(read("artifact://21", 3, 2))`, `print(read("mcp://server/resource", 10, 5))`].join("\n"),
 				{
-					PI_TOOL_BRIDGE_URL: server.url.toString(),
-					PI_TOOL_BRIDGE_TOKEN: "test-token",
-					PI_TOOL_BRIDGE_SESSION: "test-session",
+					ZERO2AI_TOOL_BRIDGE_URL: server.url.toString(),
+					ZERO2AI_TOOL_BRIDGE_TOKEN: "test-token",
+					ZERO2AI_TOOL_BRIDGE_SESSION: "test-session",
 				},
 			);
 
@@ -161,9 +161,9 @@ describe("python prelude", () => {
 					"asyncio.run(main())",
 				].join("\n"),
 				{
-					PI_TOOL_BRIDGE_URL: bridge.url.toString(),
-					PI_TOOL_BRIDGE_TOKEN: "test-token",
-					PI_TOOL_BRIDGE_SESSION: "test-session",
+					ZERO2AI_TOOL_BRIDGE_URL: bridge.url.toString(),
+					ZERO2AI_TOOL_BRIDGE_TOKEN: "test-token",
+					ZERO2AI_TOOL_BRIDGE_SESSION: "test-session",
 					HTTP_PROXY: proxyUrl,
 					http_proxy: proxyUrl,
 					ALL_PROXY: proxyUrl,

@@ -1,7 +1,7 @@
 /**
  * End-to-end regression for broker-backed MCP OAuth refresh (issue #8933).
  *
- * Topology mirrors `omp auth-broker serve` fronting a sandboxed client:
+ * Topology mirrors `zero2ai auth-broker serve` fronting a sandboxed client:
  *   client (RemoteAuthCredentialStore) → broker (SqliteAuthCredentialStore
  *   + refreshBrokerOAuthCredential override) → MCP token endpoint.
  *
@@ -19,18 +19,18 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { AuthStorage, type OAuthCredential, REMOTE_REFRESH_SENTINEL, SqliteAuthCredentialStore } from "@oh-my-pi/pi-ai";
+import { AuthStorage, type OAuthCredential, REMOTE_REFRESH_SENTINEL, SqliteAuthCredentialStore } from "@zero2ai/ai";
 import {
 	AuthBrokerClient,
 	type AuthBrokerServerHandle,
 	RemoteAuthCredentialStore,
 	startAuthBroker,
-} from "@oh-my-pi/pi-ai/auth-broker";
-import { refreshBrokerOAuthCredential } from "@oh-my-pi/pi-coding-agent/cli/auth-broker-cli";
-import { MCPManager } from "@oh-my-pi/pi-coding-agent/mcp/manager";
-import { mcpOAuthCredentialId } from "@oh-my-pi/pi-coding-agent/mcp/oauth-flow";
-import type { MCPServerConfig } from "@oh-my-pi/pi-coding-agent/mcp/types";
-import { removeWithRetries } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/ai/auth-broker";
+import { refreshBrokerOAuthCredential } from "@zero2ai/coding-agent/cli/auth-broker-cli";
+import { MCPManager } from "@zero2ai/coding-agent/mcp/manager";
+import { mcpOAuthCredentialId } from "@zero2ai/coding-agent/mcp/oauth-flow";
+import type { MCPServerConfig } from "@zero2ai/coding-agent/mcp/types";
+import { removeWithRetries } from "@zero2ai/utils";
 import type { Server } from "bun";
 
 const SERVER_URL = "https://mcp.granola.ai/mcp";
@@ -54,7 +54,7 @@ describe("broker-backed MCP OAuth refresh", () => {
 	let manager: MCPManager | undefined;
 
 	beforeEach(async () => {
-		tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "omp-broker-mcp-refresh-"));
+		tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-broker-mcp-refresh-"));
 		tokenRequests = [];
 		const server = Bun.serve({
 			port: 0,

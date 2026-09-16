@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
-import { type } from "@oh-my-pi/omptype";
-import { Agent, AgentBusyError, type AgentMessage, type AgentTool } from "@oh-my-pi/pi-agent-core";
-import { createMockModel } from "@oh-my-pi/pi-ai/providers/mock";
+import { type } from "@zero2ai/schema";
+import { Agent, AgentBusyError, type AgentMessage, type AgentTool } from "@zero2ai/agent-core";
+import { createMockModel } from "@zero2ai/ai/providers/mock";
 import { createAssistantMessage, createUserMessage } from "./helpers";
 
 function userTexts(messages: readonly AgentMessage[]): string[] {

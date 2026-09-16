@@ -2,15 +2,15 @@ import { describe, expect, it } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { buildSpec, type CompletionSpec, generateCompletion } from "@oh-my-pi/pi-coding-agent/cli/completion-gen";
-import { generateLiveCompletion } from "@oh-my-pi/pi-coding-agent/commands/completions";
-import type { CliConfig, CommandCtor } from "@oh-my-pi/pi-utils/cli";
+import { buildSpec, type CompletionSpec, generateCompletion } from "@zero2ai/coding-agent/cli/completion-gen";
+import { generateLiveCompletion } from "@zero2ai/coding-agent/commands/completions";
+import type { CliConfig, CommandCtor } from "@zero2ai/utils/cli";
 
 // A compact synthetic spec exercising every value-source kind and an aliased
 // subcommand. The generators are pure functions of this shape, so pinning their
 // output here defends the exact bytes each shell parses without booting the CLI.
 const spec: CompletionSpec = {
-	bin: "omp",
+	bin: "zero2ai",
 	root: {
 		flags: [
 			{ name: "model", description: "Model to use", value: { kind: "models", multiple: false }, repeatable: false },
@@ -51,7 +51,7 @@ describe("generateCompletion — bash", () => {
 	const out = generateCompletion("bash", spec);
 
 	it("registers the dispatcher and resolves alias arms to the canonical handler", () => {
-		expect(out).toContain("complete -F _omp omp");
+		expect(out).toContain("complete -F _omp zero2ai");
 		expect(out).toContain("_omp_cmd_commit");
 		// worktree + its alias dispatch to the same function
 		expect(out).toContain("worktree|wt)");
@@ -59,9 +59,9 @@ describe("generateCompletion — bash", () => {
 
 	it("completes enum, dynamic, and comma-list flag values by previous flag", () => {
 		expect(out).toContain('--thinking)\n\t\t\tCOMPREPLY=( $(compgen -W "low high"');
-		expect(out).toContain('--model)\n\t\t\tCOMPREPLY=( $(compgen -W "$(command omp __complete models -- "$cur"');
+		expect(out).toContain('--model)\n\t\t\tCOMPREPLY=( $(compgen -W "$(command zero2ai __complete models -- "$cur"');
 		expect(out).toContain("--resume|-r)");
-		expect(out).toContain("command omp __complete sessions");
+		expect(out).toContain("command zero2ai __complete sessions");
 		// static comma list routes through the comma-aware helper
 		expect(out).toContain('--tools)\n\t\t\t_omp_comma "read bash"');
 		// multiple-value models flag also uses the comma helper
@@ -95,11 +95,11 @@ describe.skipIf(!hasZsh)("zsh action helper under _arguments' calling convention
 		expect(start).toBeGreaterThanOrEqual(0);
 		const fn = script.slice(start, script.indexOf("\n}\n", start) + 3);
 
-		const dir = fs.mkdtempSync(path.join(os.tmpdir(), "omp-zsh-action-"));
+		const dir = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-zsh-action-"));
 		try {
-			// `command omp` bypasses shell functions, so the stub must be an
+			// `command zero2ai` bypasses shell functions, so the stub must be an
 			// executable on PATH.
-			const bin = path.join(dir, "omp");
+			const bin = path.join(dir, "zero2ai");
 			fs.writeFileSync(bin, `#!/bin/sh\nprintf '%s\\n' "$*" >> "${dir}/argv.log"\n`, { mode: 0o755 });
 			fs.writeFileSync(
 				path.join(dir, "harness.zsh"),
@@ -131,9 +131,9 @@ describe("generateCompletion — zsh", () => {
 	const out = generateCompletion("zsh", spec);
 
 	it("emits the compdef header and dual-mode (autoload + eval) tail", () => {
-		expect(out.startsWith("#compdef omp")).toBe(true);
+		expect(out.startsWith("#compdef zero2ai")).toBe(true);
 		expect(out).toContain('if [ "$funcstack[1]" = "_omp" ]; then');
-		expect(out).toContain("compdef _omp omp");
+		expect(out).toContain("compdef _omp zero2ai");
 	});
 
 	it("maps value sources to the right _arguments actions", () => {
@@ -169,10 +169,10 @@ describe("generateCompletion — fish", () => {
 	});
 
 	it("maps value sources to fish completion args", () => {
-		expect(out).toContain("-l model -d 'Model to use' -x -a '(command omp __complete models -- (commandline -ct))'");
+		expect(out).toContain("-l model -d 'Model to use' -x -a '(command zero2ai __complete models -- (commandline -ct))'");
 		expect(out).toContain("-l thinking -d 'Effort' -x -a 'low high'");
 		expect(out).toContain("-l tools -d 'Tools' -x -a 'read bash'");
-		expect(out).toContain("-s r -l resume -d 'Resume' -x -a '(command omp __complete sessions");
+		expect(out).toContain("-s r -l resume -d 'Resume' -x -a '(command zero2ai __complete sessions");
 		// a bare boolean flag takes no value
 		expect(out).toContain("-s p -l print -d 'Print'");
 		expect(out).not.toContain("-l print -d 'Print' -x");
@@ -190,7 +190,7 @@ describe("buildSpec", () => {
 
 	it("lifts the root command's flags and excludes root + hidden from subcommands", () => {
 		const config: CliConfig = {
-			bin: "omp",
+			bin: "zero2ai",
 			version: "0",
 			commands: new Map<string, CommandCtor>([
 				["launch", fakeCmd({ hidden: true, flags: { model: { kind: "string" } }, args: {} })],
@@ -208,7 +208,7 @@ describe("buildSpec", () => {
 
 	it("classifies flag value sources from descriptor metadata", () => {
 		const config: CliConfig = {
-			bin: "omp",
+			bin: "zero2ai",
 			version: "0",
 			commands: new Map<string, CommandCtor>([
 				[
@@ -253,10 +253,10 @@ describe("live completion surface", () => {
 		expect(stdout).toContain("_omp_cmd_commit");
 		expect(stdout).toContain("'completions:");
 		// zsh routes single-value dynamic flags through the _omp_call action, which
-		// itself shells out to `omp __complete $kind`.
+		// itself shells out to `zero2ai __complete $kind`.
 		expect(stdout).toContain("_omp_call models");
 		expect(stdout).toContain("_omp_call sessions");
-		expect(stdout).toContain("command omp __complete $kind");
+		expect(stdout).toContain("command zero2ai __complete $kind");
 		// Hidden/default commands must NOT surface as completable subcommands.
 		expect(stdout).not.toContain("_omp_cmd_launch");
 		expect(stdout).not.toContain("_omp_cmd___complete");

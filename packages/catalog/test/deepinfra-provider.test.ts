@@ -2,14 +2,14 @@ import { describe, expect, test } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { Effort } from "@oh-my-pi/pi-catalog/effort";
-import { resolveProviderModels } from "@oh-my-pi/pi-catalog/model-manager";
-import { getBundledModels } from "@oh-my-pi/pi-catalog/models";
-import { DEFAULT_MODEL_PER_PROVIDER, PROVIDER_DESCRIPTORS } from "@oh-my-pi/pi-catalog/provider-models/descriptors";
-import { DEEPINFRA_BASE_URL, deepinfraModelManagerOptions } from "@oh-my-pi/pi-catalog/provider-models/openai-compat";
-import type { ModelSpec } from "@oh-my-pi/pi-catalog/types";
+import { Effort } from "@zero2ai/catalog/effort";
+import { resolveProviderModels } from "@zero2ai/catalog/model-manager";
+import { getBundledModels } from "@zero2ai/catalog/models";
+import { DEFAULT_MODEL_PER_PROVIDER, PROVIDER_DESCRIPTORS } from "@zero2ai/catalog/provider-models/descriptors";
+import { DEEPINFRA_BASE_URL, deepinfraModelManagerOptions } from "@zero2ai/catalog/provider-models/openai-compat";
+import type { ModelSpec } from "@zero2ai/catalog/types";
 
-const DISCOVERY_URL = "https://api.deepinfra.com/v1/openai/models?filter=with_meta&sort_by=omp";
+const DISCOVERY_URL = "https://api.deepinfra.com/v1/openai/models?filter=with_meta&sort_by=zero2ai";
 
 function catalogFixture(): Response {
 	return Response.json({
@@ -205,7 +205,7 @@ describe("DeepInfra built-in provider", () => {
 		// without the provider override a model that lost its `vision`/`vlm` tags
 		// would keep advertising image input and the agent would send images to a
 		// now text-only route.
-		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-catalog-deepinfra-refresh-"));
+		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-catalog-deepinfra-refresh-"));
 		const dbPath = path.join(tempDir, "models.db");
 		const bundledVisionModel: ModelSpec<"openai-completions"> = {
 			id: "vendor/was-vision",

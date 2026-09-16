@@ -7,15 +7,15 @@
 import { Database, type Statement } from "bun:sqlite";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import { parseAlibabaTokenPlanCredential } from "@oh-my-pi/pi-catalog/wire/alibaba-token-plan";
-import { parseCloudflareAiGatewayCredential } from "@oh-my-pi/pi-catalog/wire/cloudflare-ai-gateway";
+import { parseAlibabaTokenPlanCredential } from "@zero2ai/catalog/wire/alibaba-token-plan";
+import { parseCloudflareAiGatewayCredential } from "@zero2ai/catalog/wire/cloudflare-ai-gateway";
 import {
 	getAgentDbPath,
 	getDbBusyTimeoutMs,
 	isSqliteBusyError,
 	isSqliteCorruptionError,
 	logger,
-} from "@oh-my-pi/pi-utils";
+} from "@zero2ai/utils";
 import type {
 	AuthCredential,
 	AuthCredentialStore,
@@ -28,6 +28,7 @@ import type {
 import * as AIError from "../error";
 import type { OAuthCredentials } from "../registry/oauth/types";
 import type { Provider } from "../types";
+import { assertCredentialPersistenceAllowed, hardenCredentialFilePermissions } from "./credential-persistence";
 import type {
 	ClientProviderUsage,
 	ClientUsageReport,
@@ -94,9 +95,9 @@ const LEGACY_CODEX_BLOCK_PROVIDER_KEY = "openai-codex:oauth";
 const LEGACY_CODEX_BLOCK_SCOPE = "shared";
 const CODEX_METER_BLOCK_SCOPES = ["chat", "spark"] as const;
 
-// SQLite error classifiers live in pi-utils so the credential store and the
+// SQLite error classifiers live in zero2ai-utils so the credential store and the
 // model cache share one implementation; re-exported here to preserve the
-// pre-existing `@oh-my-pi/pi-ai/auth-storage` surface.
+// pre-existing `@zero2ai/ai/auth-storage` surface.
 export { isSqliteBusyError, isSqliteCorruptionError };
 
 function normalizeStoredAccountId(accountId: string | null | undefined): string | null {
@@ -343,7 +344,7 @@ function extractOAuthTokenIdentifiers(token: string | undefined): string[] | und
 /**
  * Default SQLite-backed implementation of {@link AuthCredentialStore}.
  *
- * Used by the pi-ai CLI and as the default store for `AuthStorage.create()`.
+ * Used by the zero2ai-ai CLI and as the default store for `AuthStorage.create()`.
  * Also exposes convenience methods (`saveOAuth`, `getOAuth`, `saveApiKey`,
  * `getApiKey`, `listProviders`, `deleteProvider`) that callers can use directly
  * without going through `AuthStorage`.
@@ -519,7 +520,7 @@ export class SqliteAuthCredentialStore implements AuthCredentialStore {
 			await fs.mkdir(dir, { recursive: true, mode: 0o700 });
 		}
 
-		// Concurrent omp startups can race against WAL recovery and the schema
+		// Concurrent zero2ai startups can race against WAL recovery and the schema
 		// init's first lock-taking statement. Bun's default `busy_timeout` is 0,
 		// so retry the open on `SQLITE_BUSY` / `SQLITE_BUSY_RECOVERY` with bounded
 		// exponential backoff before surfacing the failure. See issue #2421.
@@ -541,6 +542,8 @@ export class SqliteAuthCredentialStore implements AuthCredentialStore {
 				} catch {
 					// Ignore chmod failures (e.g., Windows)
 				}
+				// chmod is a no-op on Windows; restrict the NTFS ACL instead.
+				hardenCredentialFilePermissions(dbPath);
 				SqliteAuthCredentialStore.#ensureAuthCredentialRefreshLeasesTable(db);
 				return new SqliteAuthCredentialStore(db);
 			} catch (err) {
@@ -576,7 +579,7 @@ export class SqliteAuthCredentialStore implements AuthCredentialStore {
 	 * Install the per-connection busy handler so lock-taking statements wait for
 	 * a contended writer instead of failing immediately (Bun defaults
 	 * `busy_timeout` to 0). MUST run before the first lock-taking statement on
-	 * the connection: concurrent omp startups race WAL recovery and the leases
+	 * the connection: concurrent zero2ai startups race WAL recovery and the leases
 	 * DDL. Uses the centralized timeout so headless hosts keep their bounded
 	 * busy wait instead of the interactive 5s value. See issues #2421, #7298.
 	 */
@@ -587,7 +590,7 @@ export class SqliteAuthCredentialStore implements AuthCredentialStore {
 	#initializeSchema(): void {
 		// Install the busy handler BEFORE any lock-taking statement (incl.
 		// `PRAGMA journal_mode=WAL`, which acquires an exclusive lock during WAL
-		// recovery). Without this, concurrent omp startups can crash here with
+		// recovery). Without this, concurrent zero2ai startups can crash here with
 		// `SQLITE_BUSY` / `SQLITE_BUSY_RECOVERY`. Re-setting when opened via
 		// `open()` (which already installed it) is idempotent. See issue #2421.
 		SqliteAuthCredentialStore.#installBusyTimeout(this.#db);
@@ -1239,6 +1242,7 @@ export class SqliteAuthCredentialStore implements AuthCredentialStore {
 	}
 
 	replaceAuthCredentialsForProvider(provider: string, credentials: AuthCredential[]): StoredAuthCredential[] {
+		assertCredentialPersistenceAllowed(provider);
 		const replace = this.#db.transaction((providerName: string, items: AuthCredential[]) => {
 			const existingRows = this.#listActiveByProviderStmt.all(providerName) as AuthRow[];
 			const existing = existingRows.map(row => ({
@@ -1290,6 +1294,7 @@ export class SqliteAuthCredentialStore implements AuthCredentialStore {
 	}
 
 	upsertAuthCredentialForProvider(provider: string, credential: AuthCredential): StoredAuthCredential[] {
+		assertCredentialPersistenceAllowed(provider);
 		const upsert = this.#db.transaction((providerName: string, item: AuthCredential) => {
 			const serialized = serializeCredential(providerName, item);
 			if (!serialized) return this.listAuthCredentials(providerName);

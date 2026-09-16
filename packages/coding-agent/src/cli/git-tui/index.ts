@@ -1,5 +1,5 @@
 /**
- * `omp git` — fullscreen repository TUI.
+ * `zero2ai git` — fullscreen repository TUI.
  *
  * Layout: header (file path, encoding, stage-file button, close), toolbar
  * (scope chip, file/diff toggle, hunk navigation, hunk/inline/split view
@@ -24,7 +24,7 @@
  * every file underneath it.
  */
 
-import * as vcs from "@oh-my-pi/pi-natives/vcs";
+import * as vcs from "@zero2ai/natives/vcs";
 import {
 	type Component,
 	matchesKey,
@@ -33,7 +33,7 @@ import {
 	TUI,
 	truncateToWidth,
 	visibleWidth,
-} from "@oh-my-pi/pi-tui";
+} from "@zero2ai/tui";
 import { generateGitCommit } from "../../commit/conventional/service";
 import { theme, warmHighlighter } from "../../modes/theme/theme";
 import { aiStage } from "./ai-stage";
@@ -857,7 +857,7 @@ export async function showGitOverlay(ui: TUI, options: GitTuiOptions = {}): Prom
 	}
 }
 
-/** Run the fullscreen git TUI standalone (`omp git`) until the user quits. */
+/** Run the fullscreen git TUI standalone (`zero2ai git`) until the user quits. */
 export async function runGitTui(options: GitTuiOptions = {}): Promise<void> {
 	const ui = new TUI(new ProcessTerminal());
 	ui.start();

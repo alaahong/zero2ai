@@ -17,12 +17,12 @@ A successful call is not memoized by JS. Repeated calls rely on the runtime's `r
 - `platformTag`: `${platform}-${process.arch}`;
 - package version and sentinel name `__piNativesV<version_with_underscores>`;
 - package-local `nativeDir` and the directory of `process.execPath`;
-- `nativesDir`, normally `~/.omp/natives`; it uses `$XDG_DATA_HOME/omp/natives` only when `$XDG_DATA_HOME/omp` exists;
+- `nativesDir`, normally `~/.zero2ai/natives`; it uses `$XDG_DATA_HOME/zero2ai/natives` only when `$XDG_DATA_HOME/zero2ai` exists;
 - `versionedDir`: `<nativesDir>/<packageVersion>`;
-- legacy compiled-binary directory: `%LOCALAPPDATA%/omp` (or `~/AppData/Local/omp`) on Windows, `~/.local/bin` elsewhere;
+- legacy compiled-binary directory: `%LOCALAPPDATA%/zero2ai` (or `~/AppData/Local/zero2ai`) on Windows, `~/.local/bin` elsewhere;
 - workspace/install/compiled mode, optional leaf directory, Windows staging policy, CPU variant, filenames, and ordered candidates.
 
-Compiled mode is true when a populated embedded manifest exists, `PI_COMPILED` is set, or `import.meta.url` contains a Bun embedded marker (`$bunfs`, `~BUN`, or `%7EBUN`). A non-compiled `nativeDir` outside a `node_modules` path is a workspace load. Windows path classification is case-insensitive; other platforms use case-sensitive path matching.
+Compiled mode is true when a populated embedded manifest exists, `ZERO2AI_COMPILED` is set, or `import.meta.url` contains a Bun embedded marker (`$bunfs`, `~BUN`, or `%7EBUN`). A non-compiled `nativeDir` outside a `node_modules` path is a workspace load. Windows path classification is case-insensitive; other platforms use case-sensitive path matching.
 
 ## Platforms and variants
 
@@ -37,7 +37,7 @@ Supported publish tags are:
 
 An unsupported tag is reported only after probing candidates.
 
-For x64, `PI_NATIVE_VARIANT=modern|baseline` wins. Invalid values are ignored. Otherwise the private inherited `__PI_NATIVE_VARIANT_CACHE` result is used when valid; only then does the loader detect AVX2:
+For x64, `ZERO2AI_NATIVE_VARIANT=modern|baseline` wins. Invalid values are ignored. Otherwise the private inherited `__PI_NATIVE_VARIANT_CACHE` result is used when valid; only then does the loader detect AVX2:
 
 - Linux reads `/proc/cpuinfo`.
 - macOS tries `/usr/sbin/sysctl` and then `sysctl`, querying `machdep.cpu.leaf7_features` and `machdep.cpu.features`.
@@ -112,7 +112,7 @@ For each candidate:
 
 The sentinel error distinguishes a previous addon still resident in the current process from a stale file on disk. If the loaded exports carry an older sentinel but the candidate bytes contain the expected current sentinel, the diagnostic says to restart. Otherwise it says to reinstall. The loader does not validate all public exports.
 
-Rust module initialization installs crash diagnostics but does not spawn runtime threads under the dynamic-loader lock. The optional post-load hook installs bounded Windows Tokio and Rayon pools. It is best-effort; older addons or hook failures fall back to napi-rs behavior. Set `PI_DEBUG_STARTUP` to emit synchronous `[startup]` markers to stderr, including hook success/failure.
+Rust module initialization installs crash diagnostics but does not spawn runtime threads under the dynamic-loader lock. The optional post-load hook installs bounded Windows Tokio and Rayon pools. It is best-effort; older addons or hook failures fall back to napi-rs behavior. Set `ZERO2AI_DEBUG_STARTUP` to emit synchronous `[startup]` markers to stderr, including hook success/failure.
 
 Cache cleanup ignores read/delete failures and removes only directories whose parsed semantic version is older than the current package. It preserves current/future versions, prerelease/non-semver names, and ordinary files.
 

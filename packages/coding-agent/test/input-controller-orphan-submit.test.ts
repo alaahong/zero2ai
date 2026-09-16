@@ -1,19 +1,19 @@
 import { describe, expect, it, vi } from "bun:test";
 import * as path from "node:path";
-import { Agent } from "@oh-my-pi/pi-agent-core";
-import type { ImageContent } from "@oh-my-pi/pi-ai";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { ExtensionRuntime, loadExtensionFromFactory } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/loader";
-import { ExtensionRunner } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/runner";
-import { InputController } from "@oh-my-pi/pi-coding-agent/modes/controllers/input-controller";
-import type { InteractiveModeContext } from "@oh-my-pi/pi-coding-agent/modes/types";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { EventBus } from "@oh-my-pi/pi-coding-agent/utils/event-bus";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { Agent } from "@zero2ai/agent-core";
+import type { ImageContent } from "@zero2ai/ai";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { ExtensionRuntime, loadExtensionFromFactory } from "@zero2ai/coding-agent/extensibility/extensions/loader";
+import { ExtensionRunner } from "@zero2ai/coding-agent/extensibility/extensions/runner";
+import { InputController } from "@zero2ai/coding-agent/modes/controllers/input-controller";
+import type { InteractiveModeContext } from "@zero2ai/coding-agent/modes/types";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { EventBus } from "@zero2ai/coding-agent/utils/event-bus";
+import { TempDir } from "@zero2ai/utils";
 
 /**
  * Regression: a submission arriving while the main loop has no input waiter
@@ -168,7 +168,7 @@ describe("InputController orphaned submit", () => {
 	});
 
 	it("starts a real idle session even when steer drain would be non-resumable", async () => {
-		const tempDir = TempDir.createSync("@pi-orphan-submit-");
+		const tempDir = TempDir.createSync("@zero2ai-orphan-submit-");
 		let session: AgentSession | undefined;
 		let authStorage: AuthStorage | undefined;
 		try {
@@ -263,9 +263,9 @@ describe("InputController orphaned submit", () => {
 		expect(ctx.editor.pendingImageLinks).toEqual([undefined]);
 	});
 	it("skips automatic titles only for locally consumed extension commands", async () => {
-		const previousNoTitle = Bun.env.PI_NO_TITLE;
-		delete Bun.env.PI_NO_TITLE;
-		const tempDir = TempDir.createSync("@pi-extension-title-");
+		const previousNoTitle = Bun.env.ZERO2AI_NO_TITLE;
+		delete Bun.env.ZERO2AI_NO_TITLE;
+		const tempDir = TempDir.createSync("@zero2ai-extension-title-");
 		let session: AgentSession | undefined;
 		let authStorage: AuthStorage | undefined;
 		try {
@@ -359,9 +359,9 @@ describe("InputController orphaned submit", () => {
 			authStorage?.close();
 			tempDir.removeSync();
 			if (previousNoTitle === undefined) {
-				delete Bun.env.PI_NO_TITLE;
+				delete Bun.env.ZERO2AI_NO_TITLE;
 			} else {
-				Bun.env.PI_NO_TITLE = previousNoTitle;
+				Bun.env.ZERO2AI_NO_TITLE = previousNoTitle;
 			}
 		}
 	});

@@ -1,5 +1,5 @@
-import type { AgentToolResult } from "@oh-my-pi/pi-agent-core";
-import type { ImageContent, TextContent } from "@oh-my-pi/pi-ai";
+import type { AgentToolResult } from "@zero2ai/agent-core";
+import type { ImageContent, TextContent } from "@zero2ai/ai";
 import type { OutputSummary, TruncationResult } from "../session/streaming-output";
 import type {
 	LimitsInput,

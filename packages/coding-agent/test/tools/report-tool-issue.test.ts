@@ -1,8 +1,8 @@
 import { Database } from "bun:sqlite";
 import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import * as reportIssue from "@oh-my-pi/pi-coding-agent/tools/report-tool-issue";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import type { ToolSession } from "@zero2ai/coding-agent/tools";
+import * as reportIssue from "@zero2ai/coding-agent/tools/report-tool-issue";
 import {
 	__awaitAutoQaRecordPipelineForTests,
 	__resetAutoQaConsentForTests,
@@ -11,8 +11,8 @@ import {
 	flushGrievances,
 	isAutoQaEnabled,
 	reportIssueDeviceUsage,
-} from "@oh-my-pi/pi-coding-agent/tools/report-tool-issue";
-import * as piUtils from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/tools/report-tool-issue";
+import * as piUtils from "@zero2ai/utils";
 import { mockFetch } from "../helpers/fetch-mock";
 
 function openTempDb(): Database {
@@ -61,7 +61,7 @@ function pushSettings(overrides: Record<string, unknown> = {}): Settings {
 	return Settings.isolated({
 		"dev.autoqa": true,
 		// Consent is the push opt-in; `granted` is what `resolvePushConfig`
-		// gates on (or `PI_AUTO_QA_PUSH=1` for headless overrides).
+		// gates on (or `ZERO2AI_AUTO_QA_PUSH=1` for headless overrides).
 		"dev.autoqaConsent": "granted",
 		"dev.autoqaPush.endpoint": "https://qa.example.com/grievances",
 		...overrides,
@@ -72,10 +72,10 @@ let originalPiAutoQa: string | undefined;
 
 function restoreAutoQaEnv(): void {
 	if (originalPiAutoQa === undefined) {
-		delete Bun.env.PI_AUTO_QA;
+		delete Bun.env.ZERO2AI_AUTO_QA;
 		return;
 	}
-	Bun.env.PI_AUTO_QA = originalPiAutoQa;
+	Bun.env.ZERO2AI_AUTO_QA = originalPiAutoQa;
 }
 
 describe("flushGrievances", () => {
@@ -83,8 +83,8 @@ describe("flushGrievances", () => {
 
 	beforeEach(() => {
 		__resetAutoQaFlushStateForTests();
-		originalPiAutoQa = Bun.env.PI_AUTO_QA;
-		delete Bun.env.PI_AUTO_QA;
+		originalPiAutoQa = Bun.env.ZERO2AI_AUTO_QA;
+		delete Bun.env.ZERO2AI_AUTO_QA;
 		db = openTempDb();
 	});
 
@@ -95,14 +95,14 @@ describe("flushGrievances", () => {
 		db.close();
 	});
 
-	it("lets PI_AUTO_QA=false disable auto QA when the setting is enabled", () => {
-		Bun.env.PI_AUTO_QA = "0";
+	it("lets ZERO2AI_AUTO_QA=false disable auto QA when the setting is enabled", () => {
+		Bun.env.ZERO2AI_AUTO_QA = "0";
 
 		expect(isAutoQaEnabled(Settings.isolated({ "dev.autoqa": true }))).toBe(false);
 	});
 
-	it("lets PI_AUTO_QA=true enable auto QA when the setting is disabled", () => {
-		Bun.env.PI_AUTO_QA = "1";
+	it("lets ZERO2AI_AUTO_QA=true enable auto QA when the setting is disabled", () => {
+		Bun.env.ZERO2AI_AUTO_QA = "1";
 
 		expect(isAutoQaEnabled(Settings.isolated({ "dev.autoqa": false }))).toBe(true);
 	});
@@ -186,7 +186,7 @@ describe("flushGrievances", () => {
 		expect(headers?.authorization).toBe("Bearer secret-token");
 
 		const body = JSON.parse(String(capturedInit?.body));
-		expect(body.agent?.name).toBe("omp");
+		expect(body.agent?.name).toBe("zero2ai");
 		expect(typeof body.agent?.version).toBe("string");
 		expect(body.host).toBeUndefined();
 		expect(typeof body.platform).toBe("string");
@@ -198,7 +198,7 @@ describe("flushGrievances", () => {
 		]);
 
 		// Rows are retained for inspection — `pushed=1` flips, but the data
-		// stays so users can browse what they've shipped via `omp grievances`.
+		// stays so users can browse what they've shipped via `zero2ai grievances`.
 		expect(selectIds(db)).toEqual([1, 2]);
 		expect(selectPushedIds(db)).toEqual([1, 2]);
 		expect(selectUnpushedIds(db)).toEqual([]);
@@ -369,7 +369,7 @@ describe("dispatchReportIssueDevice", () => {
 	}
 
 	it("records a grievance from `<tool>: <report>` text", async () => {
-		Bun.env.PI_AUTO_QA = "1";
+		Bun.env.ZERO2AI_AUTO_QA = "1";
 		const db = openTempDb();
 		const openSpy = vi.spyOn(reportIssue, "openAutoQaDb").mockReturnValue(db);
 		try {
@@ -393,7 +393,7 @@ describe("dispatchReportIssueDevice", () => {
 	});
 
 	it("accepts the two-line fallback body format", async () => {
-		Bun.env.PI_AUTO_QA = "1";
+		Bun.env.ZERO2AI_AUTO_QA = "1";
 		const db = openTempDb();
 		const openSpy = vi.spyOn(reportIssue, "openAutoQaDb").mockReturnValue(db);
 		try {
@@ -409,9 +409,9 @@ describe("dispatchReportIssueDevice", () => {
 	});
 
 	it("writes nothing while consent is unresolved", async () => {
-		Bun.env.PI_AUTO_QA = "1";
-		const originalPush = Bun.env.PI_AUTO_QA_PUSH;
-		delete Bun.env.PI_AUTO_QA_PUSH;
+		Bun.env.ZERO2AI_AUTO_QA = "1";
+		const originalPush = Bun.env.ZERO2AI_AUTO_QA_PUSH;
+		delete Bun.env.ZERO2AI_AUTO_QA_PUSH;
 		const db = openTempDb();
 		const openSpy = vi.spyOn(reportIssue, "openAutoQaDb").mockReturnValue(db);
 		try {
@@ -423,8 +423,8 @@ describe("dispatchReportIssueDevice", () => {
 			await settlePipeline();
 			expect(selectIds(db)).toHaveLength(0);
 		} finally {
-			if (originalPush === undefined) delete Bun.env.PI_AUTO_QA_PUSH;
-			else Bun.env.PI_AUTO_QA_PUSH = originalPush;
+			if (originalPush === undefined) delete Bun.env.ZERO2AI_AUTO_QA_PUSH;
+			else Bun.env.ZERO2AI_AUTO_QA_PUSH = originalPush;
 			openSpy.mockRestore();
 			db.close();
 		}

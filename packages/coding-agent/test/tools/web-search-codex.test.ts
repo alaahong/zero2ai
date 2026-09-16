@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "bun:test";
-import type { AuthStorage, FetchImpl } from "@oh-my-pi/pi-ai";
-import type { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import type { SearchParams } from "@oh-my-pi/pi-coding-agent/web/search/providers/base";
-import { hasCodexSearch, searchCodex } from "@oh-my-pi/pi-coding-agent/web/search/providers/codex";
+import type { AuthStorage, FetchImpl } from "@zero2ai/ai";
+import type { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import type { SearchParams } from "@zero2ai/coding-agent/web/search/providers/base";
+import { hasCodexSearch, searchCodex } from "@zero2ai/coding-agent/web/search/providers/codex";
 
 type CapturedRequest = {
 	url: string;
@@ -11,7 +11,7 @@ type CapturedRequest = {
 	signal?: AbortSignal | null;
 };
 
-const originalCodexSearchModel = process.env.PI_CODEX_WEB_SEARCH_MODEL;
+const originalCodexSearchModel = process.env.ZERO2AI_CODEX_WEB_SEARCH_MODEL;
 
 // A completed hosted web_search tool call. Real Codex searches always stream a
 // `response.web_search_call.*` event; the provider now requires that evidence
@@ -300,14 +300,14 @@ describe("searchCodex model selection", () => {
 		vi.restoreAllMocks();
 		capturedRequest = null;
 		if (originalCodexSearchModel === undefined) {
-			delete process.env.PI_CODEX_WEB_SEARCH_MODEL;
+			delete process.env.ZERO2AI_CODEX_WEB_SEARCH_MODEL;
 		} else {
-			process.env.PI_CODEX_WEB_SEARCH_MODEL = originalCodexSearchModel;
+			process.env.ZERO2AI_CODEX_WEB_SEARCH_MODEL = originalCodexSearchModel;
 		}
 	});
 
 	it("uses GPT-5.6 Luna as the first bundled default", async () => {
-		delete process.env.PI_CODEX_WEB_SEARCH_MODEL;
+		delete process.env.ZERO2AI_CODEX_WEB_SEARCH_MODEL;
 		const result = await searchCodex(makeSearchParams("default codex model", mockCodexFetch("gpt-5.6-luna")));
 
 		expect(capturedRequest).not.toBeNull();
@@ -351,7 +351,7 @@ describe("searchCodex model selection", () => {
 	}
 
 	it("re-emits directive queries with normalized Google-style operators", async () => {
-		delete process.env.PI_CODEX_WEB_SEARCH_MODEL;
+		delete process.env.ZERO2AI_CODEX_WEB_SEARCH_MODEL;
 		await searchCodex(
 			makeSearchParams(
 				'bun runtime site:bun.sh -site:reddit.com after:2024-01-01 "exact phrase"',
@@ -367,7 +367,7 @@ describe("searchCodex model selection", () => {
 	});
 
 	it("sends directive-free queries byte-identical", async () => {
-		delete process.env.PI_CODEX_WEB_SEARCH_MODEL;
+		delete process.env.ZERO2AI_CODEX_WEB_SEARCH_MODEL;
 		const query = "how does the bun runtime schedule timers?";
 		await searchCodex(makeSearchParams(query, mockCodexFetch("gpt-5.6-luna")));
 
@@ -375,7 +375,7 @@ describe("searchCodex model selection", () => {
 	});
 
 	it("uses configured Codex endpoint, API key, and headers without OAuth", async () => {
-		process.env.PI_CODEX_WEB_SEARCH_MODEL = "gpt-5.4";
+		process.env.ZERO2AI_CODEX_WEB_SEARCH_MODEL = "gpt-5.4";
 		const result = await searchCodex({
 			...makeSearchParams("proxy codex model", mockCodexFetch("gpt-5.4")),
 			authStorage: proxyAuthStorage,
@@ -393,7 +393,7 @@ describe("searchCodex model selection", () => {
 	});
 
 	it("refuses to send official OAuth credentials to a configured Codex endpoint", async () => {
-		process.env.PI_CODEX_WEB_SEARCH_MODEL = "gpt-5.4";
+		process.env.ZERO2AI_CODEX_WEB_SEARCH_MODEL = "gpt-5.4";
 		const fetchMock = vi.fn();
 
 		await expect(
@@ -407,7 +407,7 @@ describe("searchCodex model selection", () => {
 	});
 
 	it("validates the credential origin from the registry storage that supplies the key", async () => {
-		process.env.PI_CODEX_WEB_SEARCH_MODEL = "gpt-5.4";
+		process.env.ZERO2AI_CODEX_WEB_SEARCH_MODEL = "gpt-5.4";
 		const fetchMock = vi.fn();
 		const oauthBackedRegistry = {
 			...proxyModelRegistry,
@@ -428,7 +428,7 @@ describe("searchCodex model selection", () => {
 	});
 
 	it("prefers a command-backed proxy key over stored OAuth on a custom endpoint", async () => {
-		process.env.PI_CODEX_WEB_SEARCH_MODEL = "gpt-5.4";
+		process.env.ZERO2AI_CODEX_WEB_SEARCH_MODEL = "gpt-5.4";
 		const commandBackedRegistry = {
 			...proxyModelRegistry,
 			authStorage: oauthOnlyAuthStorage,
@@ -452,8 +452,8 @@ describe("searchCodex model selection", () => {
 		expect(result.answer).toBe("Codex answer");
 	});
 
-	it("falls back to the default model when PI_CODEX_WEB_SEARCH_MODEL is blank", async () => {
-		process.env.PI_CODEX_WEB_SEARCH_MODEL = "   ";
+	it("falls back to the default model when ZERO2AI_CODEX_WEB_SEARCH_MODEL is blank", async () => {
+		process.env.ZERO2AI_CODEX_WEB_SEARCH_MODEL = "   ";
 		const result = await searchCodex(makeSearchParams("blank codex model", mockCodexFetch("gpt-5.6-luna")));
 
 		expect(capturedRequest).not.toBeNull();
@@ -462,7 +462,7 @@ describe("searchCodex model selection", () => {
 	});
 
 	it("retries the next bundled default when Codex rejects a model for ChatGPT accounts", async () => {
-		delete process.env.PI_CODEX_WEB_SEARCH_MODEL;
+		delete process.env.ZERO2AI_CODEX_WEB_SEARCH_MODEL;
 		let calls = 0;
 		capturedRequest = null;
 		const fetchMock: FetchImpl = (url, init) => {
@@ -503,7 +503,7 @@ describe("searchCodex model selection", () => {
 	});
 
 	it("keeps hosted web_search top-level for explicit Responses-Lite catalog models (#7666)", async () => {
-		process.env.PI_CODEX_WEB_SEARCH_MODEL = "gpt-5.6-sol";
+		process.env.ZERO2AI_CODEX_WEB_SEARCH_MODEL = "gpt-5.6-sol";
 		const result = await searchCodex(makeSearchParams("Sol web search", mockCodexFetch("gpt-5.6-sol")));
 
 		expect(capturedRequest).not.toBeNull();
@@ -527,8 +527,8 @@ describe("searchCodex model selection", () => {
 		expect(result.model).toBe("gpt-5.6-sol");
 	});
 
-	it("does not retry default candidates when PI_CODEX_WEB_SEARCH_MODEL is explicitly unsupported", async () => {
-		process.env.PI_CODEX_WEB_SEARCH_MODEL = "gpt-5.5";
+	it("does not retry default candidates when ZERO2AI_CODEX_WEB_SEARCH_MODEL is explicitly unsupported", async () => {
+		process.env.ZERO2AI_CODEX_WEB_SEARCH_MODEL = "gpt-5.5";
 		let calls = 0;
 		capturedRequest = null;
 		const fetchMock: FetchImpl = (url, init) => {
@@ -555,7 +555,7 @@ describe("searchCodex model selection", () => {
 	});
 
 	it("forces web_search tool choice and extracts markdown link citations when annotations are absent", async () => {
-		process.env.PI_CODEX_WEB_SEARCH_MODEL = "gpt-5.4";
+		process.env.ZERO2AI_CODEX_WEB_SEARCH_MODEL = "gpt-5.4";
 		const result = await searchCodex(
 			makeSearchParams("markdown citations", mockCodexFetch("gpt-5.4", makeMarkdownLinkSseResponse("gpt-5.4"))),
 		);
@@ -566,7 +566,7 @@ describe("searchCodex model selection", () => {
 	});
 
 	it("requests and merges web-search action sources with citation metadata", async () => {
-		process.env.PI_CODEX_WEB_SEARCH_MODEL = "gpt-5.4";
+		process.env.ZERO2AI_CODEX_WEB_SEARCH_MODEL = "gpt-5.4";
 		const answer = "The Responses API supports hosted web search.";
 		const citationStart = answer.indexOf("hosted web search");
 		const sse = [
@@ -628,7 +628,7 @@ describe("searchCodex model selection", () => {
 	});
 
 	it("extracts plain text URLs when annotations are absent", async () => {
-		process.env.PI_CODEX_WEB_SEARCH_MODEL = "gpt-5.4";
+		process.env.ZERO2AI_CODEX_WEB_SEARCH_MODEL = "gpt-5.4";
 		const result = await searchCodex(
 			makeSearchParams("plain url citations", mockCodexFetch("gpt-5.4", makePlainUrlSseResponse("gpt-5.4"))),
 		);
@@ -640,7 +640,7 @@ describe("searchCodex model selection", () => {
 	});
 
 	it("preserves markdown URLs that contain balanced parentheses", async () => {
-		process.env.PI_CODEX_WEB_SEARCH_MODEL = "gpt-5.4";
+		process.env.ZERO2AI_CODEX_WEB_SEARCH_MODEL = "gpt-5.4";
 		const result = await searchCodex(
 			makeSearchParams(
 				"markdown parentheses citations",
@@ -654,7 +654,7 @@ describe("searchCodex model selection", () => {
 	});
 
 	it("strips trailing prose punctuation from plain text URLs", async () => {
-		process.env.PI_CODEX_WEB_SEARCH_MODEL = "gpt-5.4";
+		process.env.ZERO2AI_CODEX_WEB_SEARCH_MODEL = "gpt-5.4";
 		const result = await searchCodex(
 			makeSearchParams(
 				"plain url punctuation",
@@ -761,7 +761,7 @@ describe("searchCodex model selection", () => {
 	});
 
 	it("fails a configured Responses-Lite model that answers without running web search (#6988)", async () => {
-		process.env.PI_CODEX_WEB_SEARCH_MODEL = "gpt-5.6-terra";
+		process.env.ZERO2AI_CODEX_WEB_SEARCH_MODEL = "gpt-5.6-terra";
 		const sse = [
 			`data: ${JSON.stringify({
 				type: "response.output_item.done",
@@ -791,7 +791,7 @@ describe("searchCodex model selection", () => {
 	});
 
 	it("advances to the next default candidate when a lite model skips web search (#6988)", async () => {
-		delete process.env.PI_CODEX_WEB_SEARCH_MODEL;
+		delete process.env.ZERO2AI_CODEX_WEB_SEARCH_MODEL;
 		let calls = 0;
 		const noSearchSse = [
 			`data: ${JSON.stringify({
@@ -827,7 +827,7 @@ describe("searchCodex model selection", () => {
 	});
 
 	it("preserves a nested type:error code and message instead of Unknown error (#7200)", async () => {
-		delete process.env.PI_CODEX_WEB_SEARCH_MODEL;
+		delete process.env.ZERO2AI_CODEX_WEB_SEARCH_MODEL;
 		const sse = [
 			`data: ${JSON.stringify({
 				type: "error",
@@ -847,7 +847,7 @@ describe("searchCodex model selection", () => {
 	});
 
 	it("preserves a structured response.failed error code and message (#7200)", async () => {
-		delete process.env.PI_CODEX_WEB_SEARCH_MODEL;
+		delete process.env.ZERO2AI_CODEX_WEB_SEARCH_MODEL;
 		const sse = [
 			`data: ${JSON.stringify({
 				type: "response.failed",

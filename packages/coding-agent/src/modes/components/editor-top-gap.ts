@@ -1,4 +1,4 @@
-import type { Component } from "@oh-my-pi/pi-tui";
+import type { Component } from "@zero2ai/tui";
 import { settings } from "../../config/settings";
 
 const GAP: readonly string[] = [""];

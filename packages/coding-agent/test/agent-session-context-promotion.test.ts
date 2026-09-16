@@ -1,14 +1,14 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as path from "node:path";
 import { scheduler } from "node:timers/promises";
-import { Agent } from "@oh-my-pi/pi-agent-core";
-import type { AssistantMessage, Model, ProviderSessionState } from "@oh-my-pi/pi-ai";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { Agent } from "@zero2ai/agent-core";
+import type { AssistantMessage, Model, ProviderSessionState } from "@zero2ai/ai";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { TempDir } from "@zero2ai/utils";
 
 const originalSchedulerWait = scheduler.wait.bind(scheduler);
 
@@ -31,7 +31,7 @@ describe("AgentSession context promotion", () => {
 		// mechanism users configure promotion pairs with. gpt-5.4-mini is pinned
 		// text-only so the snapcompact-fallback case has a codex model on which
 		// snapcompact (vision-based) cannot run.
-		tempDir = TempDir.createSync("@pi-context-promotion-");
+		tempDir = TempDir.createSync("@zero2ai-context-promotion-");
 		const modelsConfigPath = path.join(tempDir.path(), "models.json");
 		await Bun.write(
 			modelsConfigPath,

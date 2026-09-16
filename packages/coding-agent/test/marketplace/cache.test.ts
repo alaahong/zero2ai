@@ -10,8 +10,8 @@ import {
 	isCached,
 	isValidVersionForCache,
 	removeCachedPlugin,
-} from "@oh-my-pi/pi-coding-agent/extensibility/plugins/marketplace";
-import { removeSyncWithRetries } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/extensibility/plugins/marketplace";
+import { removeSyncWithRetries } from "@zero2ai/utils";
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -106,7 +106,7 @@ describe("cachePlugin, isCached, removeCachedPlugin", () => {
 	let sourceDir: string;
 
 	beforeEach(async () => {
-		tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "omp-cache-test-"));
+		tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-cache-test-"));
 		cacheDir = path.join(tmpDir, "cache");
 		sourceDir = path.join(tmpDir, "sources");
 		await fsp.mkdir(sourceDir, { recursive: true });
@@ -173,7 +173,7 @@ describe("cleanOrphanedCache", () => {
 	let sourceDir: string;
 
 	beforeEach(async () => {
-		tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "omp-orphan-test-"));
+		tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-orphan-test-"));
 		cacheDir = path.join(tmpDir, "cache");
 		sourceDir = path.join(tmpDir, "sources");
 		await fsp.mkdir(sourceDir, { recursive: true });

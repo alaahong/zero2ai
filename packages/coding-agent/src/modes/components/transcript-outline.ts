@@ -4,8 +4,8 @@
  * map each rendered turn to a selectable target, and compose gutter-prefixed
  * columns with a dotted outline around the selected target.
  */
-import type { Component } from "@oh-my-pi/pi-tui";
-import { visibleWidth } from "@oh-my-pi/pi-tui";
+import type { Component } from "@zero2ai/tui";
+import { visibleWidth } from "@zero2ai/tui";
 import { isUserRequestEntry, type TranscriptEntry, userTurnDraft } from "../../session/session-context";
 import type { SessionMessageEntry } from "../../session/session-entries";
 import { type ThemeColor, theme } from "../theme/theme";

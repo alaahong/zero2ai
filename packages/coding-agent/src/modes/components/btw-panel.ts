@@ -1,4 +1,4 @@
-import { type Component, Markdown, Spacer, Text, type TUI } from "@oh-my-pi/pi-tui";
+import { type Component, Markdown, Spacer, Text, type TUI } from "@zero2ai/tui";
 import { replaceTabs } from "../../tools/render-utils";
 import { getMarkdownTheme, theme } from "../theme/theme";
 import { sanitizeErrorLine } from "./error-block";

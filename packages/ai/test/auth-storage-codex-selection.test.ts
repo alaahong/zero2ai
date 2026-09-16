@@ -3,17 +3,17 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { parseCodexRateLimitHeaders } from "@oh-my-pi/pi-ai";
+import { parseCodexRateLimitHeaders } from "@zero2ai/ai";
 import {
 	AuthBrokerClient,
 	RemoteAuthCredentialStore,
 	type SnapshotResponse,
 	startAuthBroker,
-} from "@oh-my-pi/pi-ai/auth-broker";
-import { type AuthCredentialStore, AuthStorage, SqliteAuthCredentialStore } from "@oh-my-pi/pi-ai/auth-storage";
-import * as oauthUtils from "@oh-my-pi/pi-ai/registry/oauth";
-import type { OAuthCredentials } from "@oh-my-pi/pi-ai/registry/oauth/types";
-import type { UsageLimit, UsageProvider, UsageReport } from "@oh-my-pi/pi-ai/usage";
+} from "@zero2ai/ai/auth-broker";
+import { type AuthCredentialStore, AuthStorage, SqliteAuthCredentialStore } from "@zero2ai/ai/auth-storage";
+import * as oauthUtils from "@zero2ai/ai/registry/oauth";
+import type { OAuthCredentials } from "@zero2ai/ai/registry/oauth/types";
+import type { UsageLimit, UsageProvider, UsageReport } from "@zero2ai/ai/usage";
 import { removeWithRetries } from "../../utils/src/temp";
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
@@ -259,7 +259,7 @@ describe("AuthStorage codex oauth ranking", () => {
 	};
 
 	beforeEach(async () => {
-		tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-ai-auth-codex-selection-"));
+		tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-ai-auth-codex-selection-"));
 		dbPath = path.join(tempDir, "agent.db");
 		store = await SqliteAuthCredentialStore.open(dbPath);
 		authStorage = new AuthStorage(store, {
@@ -2958,7 +2958,7 @@ describe("AuthStorage claude oauth ranking", () => {
 	};
 
 	beforeEach(async () => {
-		tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-ai-auth-claude-selection-"));
+		tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-ai-auth-claude-selection-"));
 		store = await SqliteAuthCredentialStore.open(path.join(tempDir, "agent.db"));
 		authStorage = new AuthStorage(store, {
 			usageProviderResolver: provider => (provider === "anthropic" ? usageProvider : undefined),

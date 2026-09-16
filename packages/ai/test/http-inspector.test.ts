@@ -4,7 +4,7 @@ import {
 	type RawHttpRequestDump,
 	rewriteClinePassError,
 	shouldDumpRejectedRequest,
-} from "@oh-my-pi/pi-ai/utils/http-inspector";
+} from "@zero2ai/ai/utils/http-inspector";
 
 class HttpError extends Error {
 	constructor(

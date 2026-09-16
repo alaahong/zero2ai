@@ -1,9 +1,9 @@
 import { createHash } from "node:crypto";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { OmpErrors, type } from "@oh-my-pi/omptype";
-import type { ProviderFileReference } from "@oh-my-pi/pi-ai";
-import { isEnoent } from "@oh-my-pi/pi-utils";
+import { Zero2AiErrors, type } from "@zero2ai/schema";
+import type { ProviderFileReference } from "@zero2ai/ai";
+import { isEnoent } from "@zero2ai/utils";
 import type { RemoteDeleteAction } from "./publication";
 
 /** Model providers whose official APIs support reusable uploaded-file references. */
@@ -386,7 +386,7 @@ export class ProviderFileCache {
 			return 0;
 		}
 		const checked = PersistedIndexSchema(parsed);
-		if (checked instanceof OmpErrors) {
+		if (checked instanceof Zero2AiErrors) {
 			this.#lastError = "Unsupported or malformed provider file cache index";
 			return 0;
 		}

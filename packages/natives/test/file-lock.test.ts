@@ -5,7 +5,7 @@ import * as path from "node:path";
 import { FileLock } from "../native/index.js";
 
 test("FileLock binds release to one native owner", async () => {
-	const root = await fs.mkdtemp(path.join(os.tmpdir(), "pi-native-lock-"));
+	const root = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-native-lock-"));
 	const lockPath = path.join(root, "resource.lock");
 	try {
 		const first = FileLock.tryAcquire(lockPath);

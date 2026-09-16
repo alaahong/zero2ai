@@ -4,14 +4,14 @@ import {
 	highlightCode as nativeHighlightCode,
 	supportsLanguage as nativeSupportsLanguage,
 	warmHighlighter as nativeWarmHighlighter,
-} from "@oh-my-pi/pi-natives";
-import type { EditorTheme } from "@oh-my-pi/pi-tui/components/editor";
-import type { MarkdownTheme } from "@oh-my-pi/pi-tui/components/markdown";
-import type { SelectListTheme } from "@oh-my-pi/pi-tui/components/select-list";
-import type { SettingsListTheme } from "@oh-my-pi/pi-tui/components/settings-list";
-import type { SymbolTheme } from "@oh-my-pi/pi-tui/symbols";
-import chalk from "@oh-my-pi/pi-utils/chalk";
-import { LRUCache } from "@oh-my-pi/pi-utils/lru";
+} from "@zero2ai/natives";
+import type { EditorTheme } from "@zero2ai/tui/components/editor";
+import type { MarkdownTheme } from "@zero2ai/tui/components/markdown";
+import type { SelectListTheme } from "@zero2ai/tui/components/select-list";
+import type { SettingsListTheme } from "@zero2ai/tui/components/settings-list";
+import type { SymbolTheme } from "@zero2ai/tui/symbols";
+import chalk from "@zero2ai/utils/chalk";
+import { LRUCache } from "@zero2ai/utils/lru";
 import { resolveMermaidAscii } from "./mermaid-cache";
 import type { SlashCommandIconName } from "./symbols";
 import { ensureThemeSync, theme } from "./theme";
@@ -301,7 +301,7 @@ export function getEditorTheme(): EditorTheme {
 }
 
 export function getSettingsListTheme(): SettingsListTheme {
-	// Plugins (e.g. pi-rtk-optimizer) may call this before `initTheme()` assigns
+	// Plugins (e.g. zero2ai-rtk-optimizer) may call this before `initTheme()` assigns
 	// the global `theme`, or from a separate module instance under npm-global
 	// installs where the live binding was never initialized. Fall back to plain
 	// text so the call returns a usable (unstyled) theme instead of crashing with

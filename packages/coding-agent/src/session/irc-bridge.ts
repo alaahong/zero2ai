@@ -1,5 +1,5 @@
-import type { Agent, AgentMessage } from "@oh-my-pi/pi-agent-core";
-import { logger, prompt } from "@oh-my-pi/pi-utils";
+import type { Agent, AgentMessage } from "@zero2ai/agent-core";
+import { logger, prompt } from "@zero2ai/utils";
 import type { Settings } from "../config/settings";
 import { IrcBus, type IrcMessage } from "../irc/bus";
 import parentIrcSteerTemplate from "../prompts/steering/parent-irc.md" with { type: "text" };

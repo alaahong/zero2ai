@@ -1,11 +1,11 @@
 /**
  * Web search CLI command handlers.
  *
- * Handles `omp q`/`omp web-search` subcommands for testing web search providers.
+ * Handles `zero2ai q`/`zero2ai web-search` subcommands for testing web search providers.
  */
 
-import { APP_NAME, getProjectDir } from "@oh-my-pi/pi-utils";
-import chalk from "@oh-my-pi/pi-utils/chalk";
+import { APP_NAME, getProjectDir } from "@zero2ai/utils";
+import chalk from "@zero2ai/utils/chalk";
 import { applyProviderGlobalsFromSettings } from "../config/provider-globals";
 import { Settings } from "../config/settings";
 import { initTheme, theme } from "../modes/theme/theme";

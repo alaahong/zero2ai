@@ -6,9 +6,9 @@ import {
 	classifySource,
 	fetchMarketplace,
 	parseMarketplaceCatalog,
-} from "@oh-my-pi/pi-coding-agent/extensibility/plugins/marketplace";
-import * as vcs from "@oh-my-pi/pi-natives/vcs";
-import { removeSyncWithRetries } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/extensibility/plugins/marketplace";
+import * as vcs from "@zero2ai/natives/vcs";
+import { removeSyncWithRetries } from "@zero2ai/utils";
 
 // Fixture lives at test/marketplace/fixtures/valid-marketplace/
 const FIXTURE_DIR = path.join(import.meta.dir, "fixtures", "valid-marketplace");
@@ -180,7 +180,7 @@ describe("fetchMarketplace", () => {
 	let tmpDir: string;
 
 	beforeEach(() => {
-		tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "omp-fetcher-test-"));
+		tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-fetcher-test-"));
 	});
 
 	afterEach(() => {
@@ -208,27 +208,27 @@ describe("fetchMarketplace", () => {
 		await expect(fetchMarketplace(fakeSrc, tmpDir)).rejects.toThrow(/Marketplace catalog not found/);
 	});
 
-	it("loads catalog from .omp-plugin/marketplace.json when present", async () => {
-		const root = path.join(tmpDir, "omp-only");
-		fs.mkdirSync(path.join(root, ".omp-plugin"), { recursive: true });
+	it("loads catalog from .zero2ai-plugin/marketplace.json when present", async () => {
+		const root = path.join(tmpDir, "zero2ai-only");
+		fs.mkdirSync(path.join(root, ".zero2ai-plugin"), { recursive: true });
 		const catalog = {
-			name: "omp-only-marketplace",
+			name: "zero2ai-only-marketplace",
 			owner: { name: "Test" },
-			plugins: [{ name: "omp-plugin", source: "./plugins/omp-plugin", description: "x" }],
+			plugins: [{ name: "zero2ai-plugin", source: "./plugins/zero2ai-plugin", description: "x" }],
 		};
-		fs.writeFileSync(path.join(root, ".omp-plugin", "marketplace.json"), JSON.stringify(catalog));
+		fs.writeFileSync(path.join(root, ".zero2ai-plugin", "marketplace.json"), JSON.stringify(catalog));
 
 		const result = await fetchMarketplace(root, tmpDir);
-		expect(result.catalog.name).toBe("omp-only-marketplace");
-		expect(result.catalog.plugins[0].name).toBe("omp-plugin");
+		expect(result.catalog.name).toBe("zero2ai-only-marketplace");
+		expect(result.catalog.plugins[0].name).toBe("zero2ai-plugin");
 	});
 
-	it("prefers .omp-plugin/marketplace.json over .claude-plugin/marketplace.json when both exist", async () => {
+	it("prefers .zero2ai-plugin/marketplace.json over .claude-plugin/marketplace.json when both exist", async () => {
 		const root = path.join(tmpDir, "both-catalogs");
-		fs.mkdirSync(path.join(root, ".omp-plugin"), { recursive: true });
+		fs.mkdirSync(path.join(root, ".zero2ai-plugin"), { recursive: true });
 		fs.mkdirSync(path.join(root, ".claude-plugin"), { recursive: true });
-		const ompCatalog = {
-			name: "from-omp-plugin",
+		const zero2aiCatalog = {
+			name: "from-zero2ai-plugin",
 			owner: { name: "Test" },
 			plugins: [{ name: "p", source: "./p", description: "x" }],
 		};
@@ -237,14 +237,14 @@ describe("fetchMarketplace", () => {
 			owner: { name: "Test" },
 			plugins: [{ name: "p", source: "./p", description: "x" }],
 		};
-		fs.writeFileSync(path.join(root, ".omp-plugin", "marketplace.json"), JSON.stringify(ompCatalog));
+		fs.writeFileSync(path.join(root, ".zero2ai-plugin", "marketplace.json"), JSON.stringify(zero2aiCatalog));
 		fs.writeFileSync(path.join(root, ".claude-plugin", "marketplace.json"), JSON.stringify(claudeCatalog));
 
 		const result = await fetchMarketplace(root, tmpDir);
-		expect(result.catalog.name).toBe("from-omp-plugin");
+		expect(result.catalog.name).toBe("from-zero2ai-plugin");
 	});
 
-	it("falls back to .claude-plugin/marketplace.json when .omp-plugin is absent", async () => {
+	it("falls back to .claude-plugin/marketplace.json when .zero2ai-plugin is absent", async () => {
 		// The shared fixture only ships .claude-plugin/marketplace.json — confirms
 		// the legacy path still loads unchanged.
 		const result = await fetchMarketplace(FIXTURE_DIR, tmpDir);
@@ -255,7 +255,7 @@ describe("fetchMarketplace", () => {
 		const empty = path.join(tmpDir, "empty-dir");
 		fs.mkdirSync(empty, { recursive: true });
 		await expect(fetchMarketplace(empty, tmpDir)).rejects.toThrow(
-			/\.omp-plugin[\\/]marketplace\.json.*\.claude-plugin[\\/]marketplace\.json/,
+			/\.zero2ai-plugin[\\/]marketplace\.json.*\.claude-plugin[\\/]marketplace\.json/,
 		);
 	});
 

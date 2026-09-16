@@ -1,10 +1,10 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { detectMacOSAppearance, MacAppearanceObserver } from "@oh-my-pi/pi-natives";
-import type { Terminal, TerminalAppearance } from "@oh-my-pi/pi-tui/terminal";
-import { colorLuma } from "@oh-my-pi/pi-utils/color";
-import { getCustomThemesDir } from "@oh-my-pi/pi-utils/dirs";
-import * as logger from "@oh-my-pi/pi-utils/logger";
+import { detectMacOSAppearance, MacAppearanceObserver } from "@zero2ai/natives";
+import type { Terminal, TerminalAppearance } from "@zero2ai/tui/terminal";
+import { colorLuma } from "@zero2ai/utils/color";
+import { getCustomThemesDir } from "@zero2ai/utils/dirs";
+import * as logger from "@zero2ai/utils/logger";
 import { ansi256ToHex, resolveThemeColors, resolveVarRefs } from "./color";
 import { type CreateThemeOptions, getBuiltinThemes, loadTheme, loadThemeJson, loadThemeSync } from "./loader";
 import type { ThemeColor, ThemeJson } from "./schema";

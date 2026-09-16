@@ -10,9 +10,9 @@
  * OpenRouter never saw `providers.openrouterVariant`, breaking sticky routing
  * and OpenRouter response-cache hits across advisor calls.
  */
-import type { StreamFn } from "@oh-my-pi/pi-agent-core";
-import { type SimpleStreamOptions, streamSimple } from "@oh-my-pi/pi-ai";
-import { classifyModel } from "@oh-my-pi/pi-catalog/identity";
+import type { StreamFn } from "@zero2ai/agent-core";
+import { type SimpleStreamOptions, streamSimple } from "@zero2ai/ai";
+import { classifyModel } from "@zero2ai/catalog/identity";
 import { type Settings, validateProviderMaxInFlightRequests } from "../config/settings";
 
 function timeoutSecondsToMs(value: number): number | undefined {
@@ -42,7 +42,7 @@ export function createSettingsAwareStreamFn(settings: Settings, base: StreamFn =
 					? settings.get("textVerbosity")
 					: undefined;
 		// "auto" leaves the option unset so provider defaults and the
-		// PI_CACHE_RETENTION env override keep working; anything else is an
+		// ZERO2AI_CACHE_RETENTION env override keep working; anything else is an
 		// explicit per-request retention (long restores 1h Anthropic TTLs and
 		// implicitly disables the short-entry keep-alive refresh loop).
 		const cacheRetentionSetting = settings.get("providers.cacheRetention");

@@ -65,22 +65,22 @@ export interface KittyGraphicsFeatures {
  *
  * Kitty and Ghostty advertise placeholder support directly. A multiplexer
  * cannot use cursor-positioned placements because the outer terminal does not
- * know pane scroll/reflow state. An explicit `PI_FORCE_IMAGE_PROTOCOL=kitty`
+ * know pane scroll/reflow state. An explicit `ZERO2AI_FORCE_IMAGE_PROTOCOL=kitty`
  * opts into placeholders under any multiplexer — matching `timg -pk`.
  * Automatic Herdr fallback stays off because its pane marker does not prove
  * that the experimental Kitty renderer is enabled.
  *
- * `PI_NO_KITTY_PLACEHOLDERS=1` and `PI_KITTY_PLACEHOLDERS=0` remain hard
- * opt-outs; `PI_KITTY_PLACEHOLDERS=1` explicitly opts in anywhere else.
+ * `ZERO2AI_NO_KITTY_PLACEHOLDERS=1` and `ZERO2AI_KITTY_PLACEHOLDERS=0` remain hard
+ * opt-outs; `ZERO2AI_KITTY_PLACEHOLDERS=1` explicitly opts in anywhere else.
  */
 export function detectKittyUnicodePlaceholdersSupport(terminalId: string, env: NodeJS.ProcessEnv = Bun.env): boolean {
-	const offRaw = env.PI_NO_KITTY_PLACEHOLDERS?.trim().toLowerCase();
+	const offRaw = env.ZERO2AI_NO_KITTY_PLACEHOLDERS?.trim().toLowerCase();
 	if (offRaw === "1" || offRaw === "true" || offRaw === "on" || offRaw === "yes" || offRaw === "y") return false;
-	const force = env.PI_KITTY_PLACEHOLDERS?.trim().toLowerCase();
+	const force = env.ZERO2AI_KITTY_PLACEHOLDERS?.trim().toLowerCase();
 	if (force === "1" || force === "true" || force === "on" || force === "yes" || force === "y") return true;
 	if (force === "0" || force === "false" || force === "off" || force === "no" || force === "n") return false;
 	const insideMultiplexer = isInsideTerminalMultiplexer(env);
-	if (insideMultiplexer && env.PI_FORCE_IMAGE_PROTOCOL?.trim().toLowerCase() === "kitty") return true;
+	if (insideMultiplexer && env.ZERO2AI_FORCE_IMAGE_PROTOCOL?.trim().toLowerCase() === "kitty") return true;
 	if (isInsideHerdr(env)) return false;
 	return terminalId === "kitty" || terminalId === "ghostty";
 }

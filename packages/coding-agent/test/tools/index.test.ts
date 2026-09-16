@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "bun:test";
-import { type SettingPath, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { createTools, HIDDEN_TOOLS, type ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
+import { type SettingPath, Settings } from "@zero2ai/coding-agent/config/settings";
+import { createTools, HIDDEN_TOOLS, type ToolSession } from "@zero2ai/coding-agent/tools";
 
-Bun.env.PI_PYTHON_SKIP_CHECK = "1";
+Bun.env.ZERO2AI_PYTHON_SKIP_CHECK = "1";
 
 function createTestSession(overrides: Partial<ToolSession> = {}): ToolSession {
 	return {
@@ -112,7 +112,7 @@ describe("createTools", () => {
 	it("still exposes eval when python kernel is unavailable (dispatches to js)", async () => {
 		const session = createTestSession();
 		vi.spyOn(
-			await import("@oh-my-pi/pi-coding-agent/eval/py/kernel"),
+			await import("@zero2ai/coding-agent/eval/py/kernel"),
 			"checkPythonKernelAvailability",
 		).mockResolvedValue({
 			ok: false,

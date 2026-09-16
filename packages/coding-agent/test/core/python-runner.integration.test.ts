@@ -1,22 +1,22 @@
 /**
  * End-to-end exercise of the new subprocess-backed Python runner.
  *
- * Gated by `PI_PYTHON_INTEGRATION=1` so CI without a real Python interpreter
+ * Gated by `ZERO2AI_PYTHON_INTEGRATION=1` so CI without a real Python interpreter
  * (or sandboxes where subprocess spawning is restricted) does not fail.
  */
 import { afterEach, describe, expect, it } from "bun:test";
 import * as path from "node:path";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
 import {
 	disposeAllKernelSessions,
 	executePython,
 	executePythonWithKernel,
-} from "@oh-my-pi/pi-coding-agent/eval/py/executor";
-import { PythonKernel } from "@oh-my-pi/pi-coding-agent/eval/py/kernel";
-import { filterEnv, resolvePythonRuntime } from "@oh-my-pi/pi-coding-agent/eval/py/runtime";
-import { TempDir } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/eval/py/executor";
+import { PythonKernel } from "@zero2ai/coding-agent/eval/py/kernel";
+import { filterEnv, resolvePythonRuntime } from "@zero2ai/coding-agent/eval/py/runtime";
+import { TempDir } from "@zero2ai/utils";
 
-const SHOULD_RUN = Bun.env.PI_PYTHON_INTEGRATION === "1";
+const SHOULD_RUN = Bun.env.ZERO2AI_PYTHON_INTEGRATION === "1";
 const MATPLOTLIB_TEST_CWD = process.cwd();
 
 async function hasMatplotlib(cwd: string): Promise<boolean> {

@@ -5,12 +5,12 @@
  * Tool selection persists across session reloads and respects branch navigation.
  *
  * Usage:
- * 1. Copy this file to ~/.omp/agent/extensions/ (legacy: ~/.pi/agent/extensions/) or your project's .omp/extensions/
+ * 1. Copy this file to ~/.zero2ai/agent/extensions/ (legacy: ~/.pi/agent/extensions/) or your project's .zero2ai/extensions/
  * 2. Use /tools to open the tool selector
  */
-import type { ExtensionAPI, ExtensionContext } from "@oh-my-pi/pi-coding-agent";
-import { getSettingsListTheme } from "@oh-my-pi/pi-coding-agent";
-import { Container, type SettingItem, SettingsList } from "@oh-my-pi/pi-tui";
+import type { ExtensionAPI, ExtensionContext } from "@zero2ai/coding-agent";
+import { getSettingsListTheme } from "@zero2ai/coding-agent";
+import { Container, type SettingItem, SettingsList } from "@zero2ai/tui";
 
 // State persisted to session
 interface ToolsState {

@@ -1,13 +1,13 @@
 import { beforeAll, describe, expect, it, type Mock, vi } from "bun:test";
-import type { ImageContent } from "@oh-my-pi/pi-ai";
-import { AskDialogComponent } from "@oh-my-pi/pi-coding-agent/modes/components/ask-dialog";
-import { HookEditorComponent } from "@oh-my-pi/pi-coding-agent/modes/components/hook-editor";
-import { TreeSelectorComponent } from "@oh-my-pi/pi-coding-agent/modes/components/tree-selector";
-import { InputController } from "@oh-my-pi/pi-coding-agent/modes/controllers/input-controller";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import type { InteractiveModeContext } from "@oh-my-pi/pi-coding-agent/modes/types";
-import type { SessionTreeNode } from "@oh-my-pi/pi-coding-agent/session/session-entries";
-import { type KeyId, matchesKey } from "@oh-my-pi/pi-tui";
+import type { ImageContent } from "@zero2ai/ai";
+import { AskDialogComponent } from "@zero2ai/coding-agent/modes/components/ask-dialog";
+import { HookEditorComponent } from "@zero2ai/coding-agent/modes/components/hook-editor";
+import { TreeSelectorComponent } from "@zero2ai/coding-agent/modes/components/tree-selector";
+import { InputController } from "@zero2ai/coding-agent/modes/controllers/input-controller";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import type { InteractiveModeContext } from "@zero2ai/coding-agent/modes/types";
+import type { SessionTreeNode } from "@zero2ai/coding-agent/session/session-entries";
+import { type KeyId, matchesKey } from "@zero2ai/tui";
 import manualContinuePrompt from "../src/prompts/system/manual-continue.md" with { type: "text" };
 
 type FakeEditor = {

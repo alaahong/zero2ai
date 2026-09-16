@@ -1,10 +1,10 @@
 import { describe, expect, it } from "bun:test";
-import * as AIError from "@oh-my-pi/pi-ai/error";
-import { streamGoogle } from "@oh-my-pi/pi-ai/providers/google";
-import { streamGoogleGeminiCli } from "@oh-my-pi/pi-ai/providers/google-gemini-cli";
-import { streamGoogleVertex } from "@oh-my-pi/pi-ai/providers/google-vertex";
-import type { AssistantMessageEvent, Context, FetchImpl, Model } from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
+import * as AIError from "@zero2ai/ai/error";
+import { streamGoogle } from "@zero2ai/ai/providers/google";
+import { streamGoogleGeminiCli } from "@zero2ai/ai/providers/google-gemini-cli";
+import { streamGoogleVertex } from "@zero2ai/ai/providers/google-vertex";
+import type { AssistantMessageEvent, Context, FetchImpl, Model } from "@zero2ai/ai/types";
+import { buildModel } from "@zero2ai/catalog/build";
 
 // A Gemini turn that finishes with `finishReason: STOP` but carries only an empty text part —
 // the well-known "empty response" failure. Delivered as-is, the agent receives a blank message

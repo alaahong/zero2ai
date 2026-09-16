@@ -2,19 +2,19 @@ import { afterEach, describe, expect, it, vi } from "bun:test";
 import {
 	type AzureOpenAIResponsesOptions,
 	streamAzureOpenAIResponses,
-} from "@oh-my-pi/pi-ai/providers/azure-openai-responses";
+} from "@zero2ai/ai/providers/azure-openai-responses";
 import {
 	buildParams,
 	type OpenAIResponsesOptions,
 	streamOpenAIResponses,
-} from "@oh-my-pi/pi-ai/providers/openai-responses";
-import { stream as streamModel, streamSimple } from "@oh-my-pi/pi-ai/stream";
-import type { Context, FetchImpl, Model, ProviderSessionState, SimpleStreamOptions } from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { resolveModelPolicy } from "@oh-my-pi/pi-catalog/compat/resolve";
-import { classifyModel } from "@oh-my-pi/pi-catalog/compat/taxonomy";
+} from "@zero2ai/ai/providers/openai-responses";
+import { stream as streamModel, streamSimple } from "@zero2ai/ai/stream";
+import type { Context, FetchImpl, Model, ProviderSessionState, SimpleStreamOptions } from "@zero2ai/ai/types";
+import { buildModel } from "@zero2ai/catalog/build";
+import { resolveModelPolicy } from "@zero2ai/catalog/compat/resolve";
+import { classifyModel } from "@zero2ai/catalog/compat/taxonomy";
 
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
+import { getBundledModel } from "@zero2ai/catalog/models";
 import { withEnv } from "./helpers";
 
 interface ResponsesCompatTestSpec {
@@ -540,13 +540,13 @@ describe("OpenAI Responses explicit prompt cache policy", () => {
 		expect(fetchMock).not.toHaveBeenCalled();
 	});
 
-	it("defers explicit policy validation to the gateway-resolved model for pi-native transport", async () => {
+	it("defers explicit policy validation to the gateway-resolved model for zero2ai-native transport", async () => {
 		const sidecarModel: Model<"openai-responses"> = {
 			...openAI56ResponsesModel,
 			id: "gateway-model",
 			identity: classifyModel("openai", "gateway-model"),
 			baseUrl: "http://gateway.internal",
-			transport: "pi-native",
+			transport: "zero2ai-native",
 			compat: buildOpenAIResponsesCompat({
 				id: "gpt-5.5",
 				name: "Gateway model",
@@ -639,7 +639,7 @@ describe("OpenAI Responses explicit prompt cache policy", () => {
 			}),
 		};
 
-		await withEnv({ PI_CACHE_RETENTION: "none" }, async () => {
+		await withEnv({ ZERO2AI_CACHE_RETENTION: "none" }, async () => {
 			const body = await captureSimpleOpenAIResponseBody({ promptCache: { mode: "explicit" } }, unsupportedModel);
 
 			if (body === null) throw new Error("Expected disabled prompt-cache request to reach the provider");
@@ -647,7 +647,7 @@ describe("OpenAI Responses explicit prompt cache policy", () => {
 		});
 
 		for (const retention of ["short", "long"] as const) {
-			await withEnv({ PI_CACHE_RETENTION: retention }, () => {
+			await withEnv({ ZERO2AI_CACHE_RETENTION: retention }, () => {
 				expect(() =>
 					streamSimple(
 						unsupportedModel,

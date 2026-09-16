@@ -1,4 +1,4 @@
-import { ThinkingLevel } from "@oh-my-pi/pi-agent-core";
+import { ThinkingLevel } from "@zero2ai/agent-core";
 import {
 	type Component,
 	Container,
@@ -9,8 +9,8 @@ import {
 	Spacer,
 	TruncatedText,
 	truncateToWidth,
-} from "@oh-my-pi/pi-tui";
-import { isRecord, sanitizeText } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/tui";
+import { isRecord, sanitizeText } from "@zero2ai/utils";
 import type { TreeFilterMode } from "../../config/settings-schema";
 import { theme } from "../../modes/theme/theme";
 import {

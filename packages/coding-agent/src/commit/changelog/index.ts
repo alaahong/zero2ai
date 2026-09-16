@@ -1,9 +1,9 @@
 import * as path from "node:path";
-import type { ThinkingLevel } from "@oh-my-pi/pi-agent-core";
-import type { Api, ApiKey, Model } from "@oh-my-pi/pi-ai";
-import type { VcsNumstatEntry } from "@oh-my-pi/pi-natives";
-import * as vcs from "@oh-my-pi/pi-natives/vcs";
-import { logger } from "@oh-my-pi/pi-utils";
+import type { ThinkingLevel } from "@zero2ai/agent-core";
+import type { Api, ApiKey, Model } from "@zero2ai/ai";
+import type { VcsNumstatEntry } from "@zero2ai/natives";
+import * as vcs from "@zero2ai/natives/vcs";
+import { logger } from "@zero2ai/utils";
 import { CHANGELOG_CATEGORIES } from "../../commit/types";
 import { detectChangelogBoundaries } from "./detect";
 import { generateChangelogEntries } from "./generate";

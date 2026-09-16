@@ -2,7 +2,7 @@
  * Regression tests for sticky `RULES.md` reload on in-process session reset.
  *
  * `RULES.md` is a sticky always-apply rule rendered into the system prompt's
- * generic-rules section. Creating or editing it while omp runs and then
+ * generic-rules section. Creating or editing it while zero2ai runs and then
  * resetting the context (`/clear`) or starting a new session (`/new`) MUST make
  * the next prompt observe the current file — otherwise the rule set stays frozen
  * at session creation until the process restarts (issue #10940).
@@ -10,15 +10,15 @@
 import { afterEach, describe, expect, it, vi } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import type { Api, Model, ModelSpec } from "@oh-my-pi/pi-ai";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { createAgentSession } from "@oh-my-pi/pi-coding-agent/sdk";
-import type { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { getConfigRootDir, setAgentDir, TempDir } from "@oh-my-pi/pi-utils";
+import type { Api, Model, ModelSpec } from "@zero2ai/ai";
+import { buildModel } from "@zero2ai/catalog/build";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { createAgentSession } from "@zero2ai/coding-agent/sdk";
+import type { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { getConfigRootDir, setAgentDir, TempDir } from "@zero2ai/utils";
 
 function buildLocalModel(api: string): Model<Api> {
 	return buildModel({
@@ -37,7 +37,7 @@ function buildLocalModel(api: string): Model<Api> {
 
 // User-scope `RULES.md` resolves through the process-global agent dir (getAgentDir()),
 // not the createAgentSession `agentDir` option, so a user-scope case must redirect it.
-const originalAgentDirEnv = process.env.PI_CODING_AGENT_DIR;
+const originalAgentDirEnv = process.env.ZERO2AI_CODING_AGENT_DIR;
 const fallbackAgentDir = path.join(getConfigRootDir(), "agent");
 
 function restoreAgentDir(): void {
@@ -45,7 +45,7 @@ function restoreAgentDir(): void {
 		setAgentDir(originalAgentDirEnv);
 	} else {
 		setAgentDir(fallbackAgentDir);
-		delete process.env.PI_CODING_AGENT_DIR;
+		delete process.env.ZERO2AI_CODING_AGENT_DIR;
 	}
 }
 
@@ -78,15 +78,15 @@ async function expectStickyRuleReload(
 	reset: (session: AgentSession) => Promise<unknown>,
 	opts: { seedInitial: boolean; scope: "user" | "project" },
 ): Promise<void> {
-	using tempDir = TempDir.createSync("@pi-rules-reload-");
+	using tempDir = TempDir.createSync("@zero2ai-rules-reload-");
 	const marker = Bun.nanoseconds().toString(36);
 	const original = `ORIGINAL_STICKY_${marker}`;
 	const updated = `UPDATED_STICKY_${marker}`;
 	// User scope: `<agentDir>/RULES.md` via the process-global getAgentDir().
-	// Project scope: nearest `.omp/RULES.md` walking up from cwd.
+	// Project scope: nearest `.zero2ai/RULES.md` walking up from cwd.
 	if (opts.scope === "user") setAgentDir(tempDir.path());
 	const rulesMd =
-		opts.scope === "user" ? path.join(tempDir.path(), "RULES.md") : path.join(tempDir.path(), ".omp", "RULES.md");
+		opts.scope === "user" ? path.join(tempDir.path(), "RULES.md") : path.join(tempDir.path(), ".zero2ai", "RULES.md");
 	if (opts.seedInitial) {
 		await fs.mkdir(path.dirname(rulesMd), { recursive: true });
 		await fs.writeFile(rulesMd, original);
@@ -148,12 +148,12 @@ describe("AgentSession session-local rule snapshot reload on session reset", () 
 	});
 
 	it("resolves rule://<name> for a rulebook rule created after startup once the context resets", async () => {
-		using tempDir = TempDir.createSync("@pi-rules-reload-book-");
+		using tempDir = TempDir.createSync("@zero2ai-rules-reload-book-");
 		const marker = Bun.nanoseconds().toString(36);
 		const body = `RULEBOOK_BODY_${marker}`;
 		const ruleName = `reload-book-${marker}`;
-		// Empty `.omp/rules/` keeps the project config scope present without any rulebook rule yet.
-		const rulesDir = path.join(tempDir.path(), ".omp", "rules");
+		// Empty `.zero2ai/rules/` keeps the project config scope present without any rulebook rule yet.
+		const rulesDir = path.join(tempDir.path(), ".zero2ai", "rules");
 		await fs.mkdir(rulesDir, { recursive: true });
 
 		const { session, authStorage } = await createReloadSession(tempDir);

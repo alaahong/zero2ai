@@ -5,14 +5,14 @@
  */
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { scheduler } from "node:timers/promises";
-import { type } from "@oh-my-pi/omptype";
-import { calculateCost } from "@oh-my-pi/pi-catalog/models";
+import { type } from "@zero2ai/schema";
+import { calculateCost } from "@zero2ai/catalog/models";
 import {
 	getAntigravityModelWireProfile,
 	getAntigravityUserAgent,
 	getGeminiCliHeaders,
-} from "@oh-my-pi/pi-catalog/wire/gemini-headers";
-import { extractHttpStatusFromError, fetchWithRetry, readSseJson } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/catalog/wire/gemini-headers";
+import { extractHttpStatusFromError, fetchWithRetry, readSseJson } from "@zero2ai/utils";
 import * as AIError from "../error";
 import type {
 	Api,

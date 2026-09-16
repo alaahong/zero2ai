@@ -90,7 +90,7 @@ def _baseline_env(tmp_path: Path) -> dict[str, str]:
         "ROBOMP_WORKSPACE_ROOT": str(tmp_path / "workspaces"),
         "ROBOMP_SQLITE_PATH": str(tmp_path / "robomp.sqlite"),
         "ROBOMP_LOG_DIR": str(tmp_path / "logs"),
-        # Production default is `/data/cache/pi-natives` (provisioned by the
+        # Production default is `/data/cache/zero2ai-natives` (provisioned by the
         # container entrypoint). Tests need a writable, isolated path; we also
         # default-disable the cache so its background GC loop doesn't add
         # noise to event-dispatcher timing assertions. Tests that want the

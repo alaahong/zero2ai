@@ -4,8 +4,8 @@
  * Providers learn sticky lessons about an endpoint from rejections: Anthropic's
  * `fastModeDisabled` / `strictToolsDisabled` / `replayUnsignedThinkingDisabled`
  * flags, OpenAI's strict-tools and reasoning-effort fallbacks. The map holding
- * them is non-serializable, so `pi-native-client` strips it from the wire and
- * `pi-native-server` refuses it — a gateway client cannot supply one. Without a
+ * them is non-serializable, so `zero2ai-native-client` strips it from the wire and
+ * `zero2ai-native-server` refuses it — a gateway client cannot supply one. Without a
  * server-side owner, every containerized / robomp turn re-pays the rejected
  * upstream round-trip that already taught the lesson.
  */
@@ -13,13 +13,13 @@ import { describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { clearCustomApis } from "@oh-my-pi/pi-ai/api-registry";
-import { AuthGatewaySessionStateStore, startAuthGateway } from "@oh-my-pi/pi-ai/auth-gateway";
-import type { AuthGatewayServerHandle } from "@oh-my-pi/pi-ai/auth-gateway";
-import { AuthStorage } from "@oh-my-pi/pi-ai/auth-storage";
-import { createMockModel, registerMockApi } from "@oh-my-pi/pi-ai/providers/mock";
-import type { Api, Context, Model } from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
+import { clearCustomApis } from "@zero2ai/ai/api-registry";
+import { AuthGatewaySessionStateStore, startAuthGateway } from "@zero2ai/ai/auth-gateway";
+import type { AuthGatewayServerHandle } from "@zero2ai/ai/auth-gateway";
+import { AuthStorage } from "@zero2ai/ai/auth-storage";
+import { createMockModel, registerMockApi } from "@zero2ai/ai/providers/mock";
+import type { Api, Context, Model } from "@zero2ai/ai/types";
+import { buildModel } from "@zero2ai/catalog/build";
 import { withOfficialAnthropicEndpoint } from "./helpers";
 
 function makeAnthropicModel(baseUrl: string): Model<"anthropic-messages"> {
@@ -157,7 +157,7 @@ async function startGateway(model: Model<Api>, provider: string): Promise<Gatewa
 }
 
 /**
- * One priority-tier turn through the pi-native route. Returns the status plus
+ * One priority-tier turn through the zero2ai-native route. Returns the status plus
  * the decoded envelope so a failed turn reports the upstream reason instead of
  * a bare number.
  */

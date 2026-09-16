@@ -20,20 +20,20 @@ import { afterAll, afterEach, beforeAll, describe, expect, it, spyOn } from "bun
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { AgentTool } from "@oh-my-pi/pi-agent-core";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
+import type { AgentTool } from "@zero2ai/agent-core";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
 import type {
 	ExtensionActions,
 	ExtensionContextActions,
 	ExtensionFactory,
 	ExtensionRunner,
-} from "@oh-my-pi/pi-coding-agent/extensibility/extensions";
-import { type CreateAgentSessionOptions, createAgentSession, discoverAuthStorage } from "@oh-my-pi/pi-coding-agent/sdk";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import type { FileWriteFallbackRequest } from "@oh-my-pi/pi-coding-agent/tools/file-write-fallback";
-import { removeSyncWithRetries, Snowflake } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/extensibility/extensions";
+import { type CreateAgentSessionOptions, createAgentSession, discoverAuthStorage } from "@zero2ai/coding-agent/sdk";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import type { FileWriteFallbackRequest } from "@zero2ai/coding-agent/tools/file-write-fallback";
+import { removeSyncWithRetries, Snowflake } from "@zero2ai/utils";
 
 /**
  * Drives `ExtensionRunner.initialize` with no-op stubs, mirroring what a mode
@@ -88,7 +88,7 @@ describe("registerFileWriteFallback end-to-end (real extension, real session)", 
 	let registryAuthDir: string;
 
 	const makeTempDir = (): string => {
-		const created = path.join(os.tmpdir(), `pi-file-write-fallback-e2e-${Snowflake.next()}`);
+		const created = path.join(os.tmpdir(), `zero2ai-file-write-fallback-e2e-${Snowflake.next()}`);
 		fs.mkdirSync(created, { recursive: true });
 		// The seam brokers a symlink-RESOLVED path, and `os.tmpdir()` sits under `/var`
 		// — itself a link — on macOS. Canonicalizing the fixture up front keeps a
@@ -131,7 +131,7 @@ describe("registerFileWriteFallback end-to-end (real extension, real session)", 
 	});
 
 	beforeAll(async () => {
-		registryAuthDir = path.join(os.tmpdir(), `pi-file-write-fallback-e2e-auth-${Snowflake.next()}`);
+		registryAuthDir = path.join(os.tmpdir(), `zero2ai-file-write-fallback-e2e-auth-${Snowflake.next()}`);
 		fs.mkdirSync(registryAuthDir, { recursive: true });
 		modelRegistry = new ModelRegistry(await discoverAuthStorage(registryAuthDir));
 	});

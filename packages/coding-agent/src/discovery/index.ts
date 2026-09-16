@@ -35,7 +35,7 @@ import "./gemini";
 import "./opencode";
 import "./github";
 import "./mcp-json";
-import "./omp-plugins";
+import "./zero2ai-plugins";
 import "./ssh";
 import "./vscode";
 import "./windsurf";

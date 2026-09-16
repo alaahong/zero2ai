@@ -16,8 +16,8 @@ import { randomUUID } from "node:crypto";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { configureCredentialRedaction } from "@oh-my-pi/pi-ai/providers/transform-messages";
-import { configureProviderMaxInFlightRequests } from "@oh-my-pi/pi-ai/stream";
+import { configureCredentialRedaction } from "@zero2ai/ai/providers/transform-messages";
+import { configureProviderMaxInFlightRequests } from "@zero2ai/ai/stream";
 import {
 	getAgentDbPath,
 	getAgentDir,
@@ -29,8 +29,8 @@ import {
 	MAIN_CONFIG_FILENAMES,
 	procmgr,
 	setWorktreesDir,
-} from "@oh-my-pi/pi-utils";
-import { withFileLock } from "@oh-my-pi/pi-utils/file-lock";
+} from "@zero2ai/utils";
+import { withFileLock } from "@zero2ai/utils/file-lock";
 import { JSONC, YAML } from "bun";
 import { invalidate as invalidateCapabilityFsCache } from "../capability/fs";
 import { type Settings as SettingsCapabilityItem, settingsCapability } from "../capability/settings";
@@ -258,7 +258,7 @@ const SETTINGS_GROUP_ONLY_PREFIXES: Readonly<Record<string, true>> = (() => {
  * Drop entries from capability-provided project settings whose non-object
  * value would shadow an entire settings group. `.claude/settings.json` is
  * shared with other tools, and a foreign leaf like `"tui": "fullscreen"`
- * deep-merges over omp's `tui` group, silently replacing every `tui.*`
+ * deep-merges over zero2ai's `tui` group, silently replacing every `tui.*`
  * setting for sessions rooted in that project. Values at schema leaves,
  * unknown keys, and well-formed nested objects pass through unchanged.
  */
@@ -526,7 +526,7 @@ export class Settings {
 	#global: RawSettings = {};
 	/** Project settings from .claude/settings.yml etc */
 	#project: RawSettings = {};
-	/** Last successfully loaded native .omp/config.yml contents. */
+	/** Last successfully loaded native .zero2ai/config.yml contents. */
 	#projectFileSettings: RawSettings = {};
 	/** Logical config paths whose malformed targets were moved aside. */
 	#quarantinedYamlTargets = new Map<string, string>();
@@ -589,7 +589,7 @@ export class Settings {
 		this.#cwd = path.normalize(options.cwd ?? getProjectDir());
 		this.#agentDir = path.normalize(options.agentDir ?? getAgentDir());
 		this.#configPath = options.inMemory ? null : path.join(this.#agentDir, MAIN_CONFIG_FILENAMES[0]);
-		const configFiles = process.env.PI_CONFIG_FILES?.split(path.delimiter).filter(Boolean) ?? [];
+		const configFiles = process.env.ZERO2AI_CONFIG_FILES?.split(path.delimiter).filter(Boolean) ?? [];
 		if (options.configFiles) configFiles.push(...options.configFiles);
 		this.#configFiles = configFiles.map(file => path.resolve(this.#cwd, expandTilde(file)));
 		this.#persist = !options.inMemory && options.readOnly !== true;
@@ -1013,7 +1013,7 @@ export class Settings {
 	}
 
 	/**
-	 * Raw project settings layer (`.claude/settings.yml`, `.omp/config.yml`,
+	 * Raw project settings layer (`.claude/settings.yml`, `.zero2ai/config.yml`,
 	 * etc.), deep-cloned. Companion to {@link getGlobalSettings} for the legacy
 	 * pi `SettingsManager` shim's `getProjectSettings()`.
 	 */
@@ -1046,7 +1046,7 @@ export class Settings {
 	/**
 	 * Provenance of the effective `extensions` array for extension-root
 	 * sub-discovery. `"project"` only when a project settings provider owns it
-	 * (any of `.omp/config.yml`, `.omp/settings.json`, `.claude/settings.json`,
+	 * (any of `.zero2ai/config.yml`, `.zero2ai/settings.json`, `.claude/settings.json`,
 	 * … — all merged into the project layer) and no higher user-level layer (a
 	 * `--config` overlay or a runtime override) replaces it; otherwise `"user"`.
 	 * Callers pass this into {@link EffectiveExtensionRoots.configuredLevel} so
@@ -2427,7 +2427,7 @@ export class Settings {
 					!("bankId" in hindsightObj) &&
 					typeof agentName === "string" &&
 					agentName.trim().length > 0 &&
-					agentName !== "omp"
+					agentName !== "zero2ai"
 				) {
 					hindsightObj.bankId = agentName;
 				}
@@ -3230,7 +3230,7 @@ const SETTING_HOOKS: Partial<Record<SettingPath, SettingHook<any>>> = {
 		}
 	},
 	// A project-scoped reload (`/move`, cross-project resume, rollback) can change
-	// the effective value; reapply so pi-tui renderers gating on the shared flag
+	// the effective value; reapply so zero2ai-tui renderers gating on the shared flag
 	// track it the same instant path/resource links do. Runtime `/settings` edits
 	// also go through the selector controller to invalidate and repaint live views.
 	"tui.hyperlinks": value => applyHyperlinkSetting(value),

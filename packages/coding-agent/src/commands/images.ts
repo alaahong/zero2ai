@@ -1,6 +1,6 @@
 /** Inspect and maintain image publication backends. */
 
-import { Args, Command, Flags } from "@oh-my-pi/pi-utils/cli";
+import { Args, Command, Flags } from "@zero2ai/utils/cli";
 import { imagesHelp as commandHelp } from "../cli/command-help";
 import { IMAGES_ACTIONS, type ImagesAction, type ImagesCommandArgs, runImagesCommand } from "../cli/images-cli";
 
@@ -22,12 +22,12 @@ export default class Images extends Command {
 		timeout: Flags.integer({ description: "External health probe timeout in seconds" }),
 	};
 	static examples = [
-		"omp images",
-		"omp images status --json",
-		"omp images doctor",
-		"omp images probe --timeout 15",
-		"omp images purge",
-		"omp images purge --all --apply",
+		"zero2ai images",
+		"zero2ai images status --json",
+		"zero2ai images doctor",
+		"zero2ai images probe --timeout 15",
+		"zero2ai images purge",
+		"zero2ai images purge --all --apply",
 	];
 
 	async run(): Promise<void> {

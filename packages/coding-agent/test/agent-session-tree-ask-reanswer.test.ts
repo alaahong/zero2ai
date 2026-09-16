@@ -14,14 +14,14 @@
  * silently reporting a successful no-op navigation (review on #5895).
  */
 import { describe, expect, it, vi } from "bun:test";
-import { Agent, AgentBusyError, type AgentToolResult } from "@oh-my-pi/pi-agent-core";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { ExtensionRunner, ExtensionUIContext } from "@oh-my-pi/pi-coding-agent/extensibility/extensions";
-import { SecretObfuscator } from "@oh-my-pi/pi-coding-agent/secrets/obfuscator";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import type { AskToolDetails } from "@oh-my-pi/pi-coding-agent/tools/ask";
+import { Agent, AgentBusyError, type AgentToolResult } from "@zero2ai/agent-core";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import type { ExtensionRunner, ExtensionUIContext } from "@zero2ai/coding-agent/extensibility/extensions";
+import { SecretObfuscator } from "@zero2ai/coding-agent/secrets/obfuscator";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import type { AskToolDetails } from "@zero2ai/coding-agent/tools/ask";
 
 const TEST_MODEL = getBundledModel("anthropic", "claude-sonnet-4-5")!;
 

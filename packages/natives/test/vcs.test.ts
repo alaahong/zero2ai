@@ -27,7 +27,7 @@ async function git(cwd: string, ...args: string[]): Promise<string> {
 }
 
 async function repository() {
-	const root = await mkdtemp(join(tmpdir(), "pi-natives-vcs-"));
+	const root = await mkdtemp(join(tmpdir(), "zero2ai-natives-vcs-"));
 	roots.push(root);
 	await git(root, "init", "-b", "main");
 	await git(root, "config", "user.name", "Native Test");
@@ -118,7 +118,7 @@ describe("in-process VCS bindings", () => {
 	});
 
 	test("aborts clone promptly", async () => {
-		const root = await mkdtemp(join(tmpdir(), "pi-natives-vcs-clone-"));
+		const root = await mkdtemp(join(tmpdir(), "zero2ai-natives-vcs-clone-"));
 		roots.push(root);
 		const target = join(root, "clone");
 		const controller = new AbortController();
@@ -157,7 +157,7 @@ describe("VcsRepo", () => {
 	});
 
 	test("discovers Jujutsu and rejects unsupported features", async () => {
-		const root = await mkdtemp(join(tmpdir(), "pi-natives-vcs-jj-"));
+		const root = await mkdtemp(join(tmpdir(), "zero2ai-natives-vcs-jj-"));
 		roots.push(root);
 		await mkdir(join(root, ".jj", "repo"), { recursive: true });
 

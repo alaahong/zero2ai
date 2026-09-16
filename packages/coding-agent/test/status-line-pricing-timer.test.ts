@@ -1,11 +1,11 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
 import { stripVTControlCharacters } from "node:util";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import type { Model } from "@oh-my-pi/pi-catalog/types";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { StatusLineComponent } from "@oh-my-pi/pi-coding-agent/modes/components/status-line";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import type { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import type { Model } from "@zero2ai/catalog/types";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
+import { StatusLineComponent } from "@zero2ai/coding-agent/modes/components/status-line";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import type { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
 
 beforeAll(async () => {
 	resetSettingsForTest();

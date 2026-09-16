@@ -2,7 +2,7 @@
  * OpenTelemetry instrumentation for the agent loop.
  *
  * Implements the OpenTelemetry GenAI semantic conventions
- * (https://opentelemetry.io/docs/specs/semconv/gen-ai/) plus `pi.gen_ai.*`
+ * (https://opentelemetry.io/docs/specs/semconv/gen-ai/) plus `zero2ai.gen_ai.*`
  * extension attributes for run summaries, dashboard summaries, and cost hints
  * that are useful to downstream observability UIs.
  *
@@ -38,7 +38,7 @@ import {
 	shouldSendServiceTier,
 	type ToolChoice,
 	type Usage,
-} from "@oh-my-pi/pi-ai";
+} from "@zero2ai/ai";
 import {
 	type Attributes,
 	type AttributeValue,
@@ -54,7 +54,7 @@ import type { AgentTool } from "./types";
 import { EventLoopKeepalive } from "./utils/yield";
 
 /** Default tracer name. Override via {@link AgentTelemetryConfig.tracerName}. */
-export const DEFAULT_TRACER_NAME = "@oh-my-pi/pi-agent-core";
+export const DEFAULT_TRACER_NAME = "@zero2ai/agent-core";
 
 /** Env var matching the OTEL semconv content-capture toggle. */
 const CONTENT_CAPTURE_ENV = "OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT";
@@ -125,42 +125,42 @@ export const enum OpenAIAttr {
 }
 
 /** Project extension attributes. Kept out of the reserved `gen_ai.*` namespace. */
-export const enum PiGenAIAttr {
-	AgentStepNumber = "pi.gen_ai.agent.step.number",
-	AgentStepCount = "pi.gen_ai.agent.step.count",
-	RequestReasoningEffort = "pi.gen_ai.request.reasoning.effort",
-	RequestToolChoice = "pi.gen_ai.request.tool.choice",
-	RequestAvailableTools = "pi.gen_ai.request.available_tools",
-	RequestMessages = "pi.gen_ai.request.messages",
-	ResponseText = "pi.gen_ai.response.text",
-	ResponseToolCalls = "pi.gen_ai.response.tool_calls",
-	ResponseUpstreamProvider = "pi.gen_ai.response.upstream_provider",
-	UsageTotalTokens = "pi.gen_ai.usage.total_tokens",
-	UsageServerSideTools = "pi.gen_ai.usage.server_tool_requests",
-	CostEstimatedUsd = "pi.gen_ai.cost.estimated_usd",
-	CostInputUsd = "pi.gen_ai.cost.input_usd",
-	CostOutputUsd = "pi.gen_ai.cost.output_usd",
-	CostUnavailableReason = "pi.gen_ai.cost.unavailable_reason",
-	ToolStatus = "pi.gen_ai.tool.status",
-	ToolCallIntent = "pi.gen_ai.tool.call.intent",
-	HandoffFromAgentName = "pi.gen_ai.handoff.from_agent.name",
-	HandoffFromAgentId = "pi.gen_ai.handoff.from_agent.id",
-	HandoffToAgentName = "pi.gen_ai.handoff.to_agent.name",
-	HandoffToAgentId = "pi.gen_ai.handoff.to_agent.id",
+export const enum Zero2AiGenAIAttr {
+	AgentStepNumber = "zero2ai.gen_ai.agent.step.number",
+	AgentStepCount = "zero2ai.gen_ai.agent.step.count",
+	RequestReasoningEffort = "zero2ai.gen_ai.request.reasoning.effort",
+	RequestToolChoice = "zero2ai.gen_ai.request.tool.choice",
+	RequestAvailableTools = "zero2ai.gen_ai.request.available_tools",
+	RequestMessages = "zero2ai.gen_ai.request.messages",
+	ResponseText = "zero2ai.gen_ai.response.text",
+	ResponseToolCalls = "zero2ai.gen_ai.response.tool_calls",
+	ResponseUpstreamProvider = "zero2ai.gen_ai.response.upstream_provider",
+	UsageTotalTokens = "zero2ai.gen_ai.usage.total_tokens",
+	UsageServerSideTools = "zero2ai.gen_ai.usage.server_tool_requests",
+	CostEstimatedUsd = "zero2ai.gen_ai.cost.estimated_usd",
+	CostInputUsd = "zero2ai.gen_ai.cost.input_usd",
+	CostOutputUsd = "zero2ai.gen_ai.cost.output_usd",
+	CostUnavailableReason = "zero2ai.gen_ai.cost.unavailable_reason",
+	ToolStatus = "zero2ai.gen_ai.tool.status",
+	ToolCallIntent = "zero2ai.gen_ai.tool.call.intent",
+	HandoffFromAgentName = "zero2ai.gen_ai.handoff.from_agent.name",
+	HandoffFromAgentId = "zero2ai.gen_ai.handoff.from_agent.id",
+	HandoffToAgentName = "zero2ai.gen_ai.handoff.to_agent.name",
+	HandoffToAgentId = "zero2ai.gen_ai.handoff.to_agent.id",
 	// Marks chat spans emitted outside the agent loop (compaction, handoff, branch
 	// summary, image inspection, …). Lets dashboards split oneshot cost / latency
 	// from main-turn cost without overloading the semconv `gen_ai.operation.name`.
-	OneshotKind = "pi.gen_ai.oneshot.kind",
+	OneshotKind = "zero2ai.gen_ai.oneshot.kind",
 	// Gateway / proxy (LiteLLM, Helicone, Portkey, …) — populated when a known
 	// gateway header pattern is detected on the upstream response. The base
 	// `gen_ai.provider.name` continues to track the *upstream* provider (e.g.
 	// `anthropic`) that the gateway routed to.
-	GatewayName = "pi.gen_ai.gateway.name",
-	GatewayEndpoint = "pi.gen_ai.gateway.endpoint",
-	GatewayCallId = "pi.gen_ai.gateway.call_id",
-	GatewayRoutedTo = "pi.gen_ai.gateway.routed_to",
+	GatewayName = "zero2ai.gen_ai.gateway.name",
+	GatewayEndpoint = "zero2ai.gen_ai.gateway.endpoint",
+	GatewayCallId = "zero2ai.gen_ai.gateway.call_id",
+	GatewayRoutedTo = "zero2ai.gen_ai.gateway.routed_to",
 	/** Cloudflare AI Gateway response-cache status (`cf-aig-cache-status`), never prompt-cache. */
-	GatewayResponseCacheStatus = "pi.gen_ai.gateway.response_cache.status",
+	GatewayResponseCacheStatus = "zero2ai.gen_ai.gateway.response_cache.status",
 }
 
 /** GenAI operation names — values for {@link GenAIAttr.OperationName}. */
@@ -204,9 +204,9 @@ export interface CostEstimatorContext {
 
 /**
  * Cost estimator result.
- *   { usd: number }                — cost is known; emitted as pi.gen_ai.cost.estimated_usd
+ *   { usd: number }                — cost is known; emitted as zero2ai.gen_ai.cost.estimated_usd
  *   { unavailable: string }        — cost is intentionally unknown; emitted as
- *                                    pi.gen_ai.cost.unavailable_reason
+ *                                    zero2ai.gen_ai.cost.unavailable_reason
  *   undefined                      — no opinion; nothing emitted
  */
 export type CostEstimate =
@@ -253,7 +253,7 @@ export interface ChatUsageEvent {
 	 *
 	 * Use this to reconcile gateway-issued ids (e.g. `x-litellm-call-id`) with
 	 * downstream billing / spend dashboards. Known gateway patterns are also
-	 * auto-stamped on the chat span as `pi.gen_ai.gateway.*` attributes.
+	 * auto-stamped on the chat span as `zero2ai.gen_ai.gateway.*` attributes.
 	 */
 	readonly headers: Readonly<Record<string, string>> | undefined;
 }
@@ -631,14 +631,14 @@ export function recordTelemetryWarning(telemetry: AgentTelemetry | undefined, wa
 function emitTelemetryWarning(telemetry: AgentTelemetry | undefined, warning: AgentTelemetryWarning): void {
 	const hook = telemetry?.config.onTelemetryWarning;
 	if (!hook) {
-		if (warning.error === undefined) console.warn(`[pi-agent] ${warning.message}`);
-		else console.warn(`[pi-agent] ${warning.message}`, warning.error);
+		if (warning.error === undefined) console.warn(`[zero2ai-agent] ${warning.message}`);
+		else console.warn(`[zero2ai-agent] ${warning.message}`, warning.error);
 		return;
 	}
 	try {
 		hook(warning);
 	} catch (err) {
-		console.warn("[pi-agent] onTelemetryWarning threw; swallowing:", err);
+		console.warn("[zero2ai-agent] onTelemetryWarning threw; swallowing:", err);
 	}
 }
 
@@ -683,7 +683,7 @@ export function startInvokeAgentSpan(telemetry: AgentTelemetry | undefined, mode
 /** Stamp the final step count on the `invoke_agent` span. */
 export function applyInvokeAgentFinish(span: Span | undefined, stepCount: number): void {
 	if (!span) return;
-	span.setAttribute(PiGenAIAttr.AgentStepCount, stepCount);
+	span.setAttribute(Zero2AiGenAIAttr.AgentStepCount, stepCount);
 }
 
 /**
@@ -740,7 +740,7 @@ export interface ChatRequestSnapshot {
 
 function buildChatRequestAttributes(stepNumber: number, request: ChatRequestSnapshot, provider: string): Attributes {
 	const attrs: Attributes = {
-		[PiGenAIAttr.AgentStepNumber]: stepNumber,
+		[Zero2AiGenAIAttr.AgentStepNumber]: stepNumber,
 		[GenAIAttr.OutputType]: "text",
 		[GenAIAttr.RequestStream]: true,
 	};
@@ -757,11 +757,11 @@ function buildChatRequestAttributes(stepNumber: number, request: ChatRequestSnap
 	if (request.serviceTier && shouldSendServiceTier(request.serviceTier, provider)) {
 		attrs[OpenAIAttr.RequestServiceTier] = request.serviceTier;
 	}
-	if (request.reasoningEffort) attrs[PiGenAIAttr.RequestReasoningEffort] = request.reasoningEffort;
+	if (request.reasoningEffort) attrs[Zero2AiGenAIAttr.RequestReasoningEffort] = request.reasoningEffort;
 	const toolChoice = serializeToolChoice(request.toolChoice);
-	if (toolChoice) attrs[PiGenAIAttr.RequestToolChoice] = toolChoice;
+	if (toolChoice) attrs[Zero2AiGenAIAttr.RequestToolChoice] = toolChoice;
 	if (request.tools && request.tools.length > 0) {
-		attrs[PiGenAIAttr.RequestAvailableTools] = request.tools.map(tool => tool.name);
+		attrs[Zero2AiGenAIAttr.RequestAvailableTools] = request.tools.map(tool => tool.name);
 	}
 	return attrs;
 }
@@ -779,7 +779,7 @@ function serializeToolChoice(toolChoice: ToolChoice | undefined): string | undef
 
 function applyContentCaptureForRequest(telemetry: AgentTelemetry, span: Span, request: ChatRequestSnapshot): void {
 	const requestMessages = serializeRequestMessagesForTelemetry(telemetry, request);
-	if (requestMessages) span.setAttribute(PiGenAIAttr.RequestMessages, requestMessages);
+	if (requestMessages) span.setAttribute(Zero2AiGenAIAttr.RequestMessages, requestMessages);
 	if (telemetry.contentCapture !== "full") return;
 	const systemInstructions = serializeFullSystemInstructionsForTelemetry(request);
 	if (systemInstructions) span.setAttribute(GenAIAttr.SystemInstructions, systemInstructions);
@@ -789,9 +789,9 @@ function applyContentCaptureForRequest(telemetry: AgentTelemetry, span: Span, re
 
 function applyContentCaptureForResponse(telemetry: AgentTelemetry, span: Span, message: AssistantMessage): void {
 	const responseText = serializeResponseTextForTelemetry(telemetry, message);
-	if (responseText) span.setAttribute(PiGenAIAttr.ResponseText, responseText);
+	if (responseText) span.setAttribute(Zero2AiGenAIAttr.ResponseText, responseText);
 	const responseToolCalls = serializeResponseToolCallsForTelemetry(telemetry, message);
-	if (responseToolCalls) span.setAttribute(PiGenAIAttr.ResponseToolCalls, responseToolCalls);
+	if (responseToolCalls) span.setAttribute(Zero2AiGenAIAttr.ResponseToolCalls, responseToolCalls);
 	if (telemetry.contentCapture === "full") {
 		const outputMessages = serializeFullOutputMessagesForTelemetry(message);
 		if (outputMessages) span.setAttribute(GenAIAttr.OutputMessages, outputMessages);
@@ -1199,7 +1199,7 @@ function applyChatResponseAttributes(span: Span, message: AssistantMessage): voi
 	span.setAttribute(GenAIAttr.ResponseModel, message.model);
 	if (message.responseId) span.setAttribute(GenAIAttr.ResponseId, message.responseId);
 	if (message.upstreamProvider) {
-		span.setAttribute(PiGenAIAttr.ResponseUpstreamProvider, message.upstreamProvider);
+		span.setAttribute(Zero2AiGenAIAttr.ResponseUpstreamProvider, message.upstreamProvider);
 	}
 	if (message.ttft != null) span.setAttribute(GenAIAttr.ResponseTimeToFirstChunk, message.ttft / 1000);
 	const finishReason = mapStopReason(message.stopReason);
@@ -1215,7 +1215,7 @@ function applyUsageAttributes(span: Span, usage: Usage | undefined): void {
 	span.setAttribute(GenAIAttr.UsageInputTokens, inputTokens);
 	span.setAttribute(GenAIAttr.UsageOutputTokens, outputTokens);
 	const total = usage.totalTokens ?? inputTokens + outputTokens;
-	span.setAttribute(PiGenAIAttr.UsageTotalTokens, total);
+	span.setAttribute(Zero2AiGenAIAttr.UsageTotalTokens, total);
 	if (usage.cacheRead != null) span.setAttribute(GenAIAttr.UsageCacheReadInputTokens, usage.cacheRead);
 	if (usage.cacheWrite != null) span.setAttribute(GenAIAttr.UsageCacheCreationInputTokens, usage.cacheWrite);
 	if (usage.reasoningTokens != null) {
@@ -1223,7 +1223,7 @@ function applyUsageAttributes(span: Span, usage: Usage | undefined): void {
 	}
 	if (usage.server) {
 		const sums = (usage.server.webSearch ?? 0) + (usage.server.webFetch ?? 0);
-		if (sums > 0) span.setAttribute(PiGenAIAttr.UsageServerSideTools, sums);
+		if (sums > 0) span.setAttribute(Zero2AiGenAIAttr.UsageServerSideTools, sums);
 	}
 }
 
@@ -1284,7 +1284,7 @@ export function detectGatewayFromHeaders(
 
 /**
  * Bounded Cloudflare AI Gateway response-cache statuses emitted on
- * {@link PiGenAIAttr.GatewayResponseCacheStatus}. Distinct from provider
+ * {@link Zero2AiGenAIAttr.GatewayResponseCacheStatus}. Distinct from provider
  * prompt-cache token counters (`gen_ai.usage.cache_*`).
  *
  * Cloudflare documents `HIT` / `MISS` on `cf-aig-cache-status`; `bypass` covers
@@ -1323,14 +1323,14 @@ function applyGatewayAttributes(
 ): void {
 	const gateway = detectGatewayFromHeaders(headers);
 	if (gateway) {
-		span.setAttribute(PiGenAIAttr.GatewayName, gateway.name);
-		if (baseUrl) span.setAttribute(PiGenAIAttr.GatewayEndpoint, baseUrl);
-		if (gateway.callId) span.setAttribute(PiGenAIAttr.GatewayCallId, gateway.callId);
-		if (gateway.routedTo) span.setAttribute(PiGenAIAttr.GatewayRoutedTo, gateway.routedTo);
+		span.setAttribute(Zero2AiGenAIAttr.GatewayName, gateway.name);
+		if (baseUrl) span.setAttribute(Zero2AiGenAIAttr.GatewayEndpoint, baseUrl);
+		if (gateway.callId) span.setAttribute(Zero2AiGenAIAttr.GatewayCallId, gateway.callId);
+		if (gateway.routedTo) span.setAttribute(Zero2AiGenAIAttr.GatewayRoutedTo, gateway.routedTo);
 	}
 	const responseCacheStatus = classifyGatewayResponseCacheStatus(headers);
 	if (responseCacheStatus) {
-		span.setAttribute(PiGenAIAttr.GatewayResponseCacheStatus, responseCacheStatus);
+		span.setAttribute(Zero2AiGenAIAttr.GatewayResponseCacheStatus, responseCacheStatus);
 	}
 }
 
@@ -1392,7 +1392,7 @@ function applyCostEstimateForUsage(
 	}
 	if (!result) return EMPTY_COST;
 	if ("unavailable" in result) {
-		span.setAttribute(PiGenAIAttr.CostUnavailableReason, result.unavailable);
+		span.setAttribute(Zero2AiGenAIAttr.CostUnavailableReason, result.unavailable);
 		const cost: AppliedCostEstimate = {
 			costUsd: undefined,
 			inputUsd: undefined,
@@ -1414,9 +1414,9 @@ function applyCostEstimateForUsage(
 		});
 		return cost;
 	}
-	span.setAttribute(PiGenAIAttr.CostEstimatedUsd, result.usd);
-	if (result.inputUsd != null) span.setAttribute(PiGenAIAttr.CostInputUsd, result.inputUsd);
-	if (result.outputUsd != null) span.setAttribute(PiGenAIAttr.CostOutputUsd, result.outputUsd);
+	span.setAttribute(Zero2AiGenAIAttr.CostEstimatedUsd, result.usd);
+	if (result.inputUsd != null) span.setAttribute(Zero2AiGenAIAttr.CostInputUsd, result.inputUsd);
+	if (result.outputUsd != null) span.setAttribute(Zero2AiGenAIAttr.CostOutputUsd, result.outputUsd);
 	const cost: AppliedCostEstimate = {
 		costUsd: result.usd,
 		inputUsd: result.inputUsd,
@@ -1586,7 +1586,7 @@ export async function recordManualChatTelemetry(
 		});
 	if (!span) return undefined;
 	if (options.span && options.attributes) span.setAttributes(options.attributes);
-	if (options.stepNumber != null) span.setAttribute(PiGenAIAttr.AgentStepNumber, options.stepNumber);
+	if (options.stepNumber != null) span.setAttribute(Zero2AiGenAIAttr.AgentStepNumber, options.stepNumber);
 	span.setAttribute(GenAIAttr.ResponseModel, options.responseModel ?? options.model.name);
 	if (options.responseId) span.setAttribute(GenAIAttr.ResponseId, options.responseId);
 	const finishReason = mapStopReason(options.finishReason);
@@ -1619,7 +1619,7 @@ export async function recordManualChatTelemetry(
 	}
 	if (options.responseText) {
 		const responseText = stringifyJsonAttribute(summarizeTelemetryTexts([options.responseText]));
-		if (responseText) span.setAttribute(PiGenAIAttr.ResponseText, responseText);
+		if (responseText) span.setAttribute(Zero2AiGenAIAttr.ResponseText, responseText);
 	}
 	if (options.responseToolCalls && options.responseToolCalls.length > 0) {
 		const calls = options.responseToolCalls.map(call => ({
@@ -1628,7 +1628,7 @@ export async function recordManualChatTelemetry(
 			input: summarizeTelemetryValue(call.input),
 		}));
 		const responseToolCalls = stringifyJsonAttribute(limitTelemetryToolCalls(calls));
-		if (responseToolCalls) span.setAttribute(PiGenAIAttr.ResponseToolCalls, responseToolCalls);
+		if (responseToolCalls) span.setAttribute(Zero2AiGenAIAttr.ResponseToolCalls, responseToolCalls);
 	}
 	applyTerminalStatus(span, options.finishReason, undefined);
 	if (options.endSpan ?? options.span === undefined) span.end();
@@ -1647,7 +1647,7 @@ export interface InstrumentedChatSpanOptions {
 	/** Step index recorded on the span; defaults to `-1` for non-loop calls. */
 	readonly stepNumber?: number;
 	/**
-	 * Tag stamped onto `pi.gen_ai.oneshot.kind`. Values used by the agent:
+	 * Tag stamped onto `zero2ai.gen_ai.oneshot.kind`. Values used by the agent:
 	 * `compaction_summary`, `compaction_short_summary`, `compaction_turn_prefix`,
 	 * `handoff`, `branch_summary`, `image_question`. Free-form to allow callers
 	 * outside this package to add new kinds without bumping the helper.
@@ -1657,7 +1657,7 @@ export interface InstrumentedChatSpanOptions {
 	readonly attributes?: Attributes;
 	/**
 	 * Override for the underlying {@link completeSimple} call. Defaults to
-	 * `completeSimple` from `@oh-my-pi/pi-ai`. Use to retain a test injection
+	 * `completeSimple` from `@zero2ai/ai`. Use to retain a test injection
 	 * seam while still going through the chat-span lifecycle.
 	 */
 	readonly completeImpl?: <TApi extends Api>(
@@ -1726,7 +1726,7 @@ export async function instrumentedCompleteSimple<TApi extends Api>(
 		},
 	});
 	if (chatSpan) {
-		if (oneshotKind) chatSpan.setAttribute(PiGenAIAttr.OneshotKind, oneshotKind);
+		if (oneshotKind) chatSpan.setAttribute(Zero2AiGenAIAttr.OneshotKind, oneshotKind);
 		if (span.attributes) chatSpan.setAttributes(span.attributes);
 	}
 
@@ -1881,7 +1881,7 @@ export function finishExecuteToolSpan(
 }
 
 /** Span attribute carrying the terminal {@link ToolStatus}. */
-export const EXECUTE_TOOL_STATUS_ATTR = PiGenAIAttr.ToolStatus;
+export const EXECUTE_TOOL_STATUS_ATTR = Zero2AiGenAIAttr.ToolStatus;
 
 /**
  * Mapping from non-ok {@link ToolStatus} values to the `error.type` attribute
@@ -1974,66 +1974,66 @@ export function fireOnRunEnd(telemetry: AgentTelemetry, summary: AgentRunSummary
 	}
 }
 
-/** Aggregate `pi.gen_ai.agent.*` attributes stamped on the `invoke_agent` span. */
-export const enum PiGenAIAggregateAttr {
-	ChatsCount = "pi.gen_ai.agent.chats.count",
-	ChatsTotalLatencyMs = "pi.gen_ai.agent.chats.total_latency_ms",
-	ChatsStopReasonPrefix = "pi.gen_ai.agent.chats.stop_reason.",
-	ToolsCount = "pi.gen_ai.agent.tools.count",
-	ToolsOkCount = "pi.gen_ai.agent.tools.ok.count",
-	ToolsErrorCount = "pi.gen_ai.agent.tools.error.count",
-	ToolsSkippedCount = "pi.gen_ai.agent.tools.skipped.count",
-	ToolsBlockedCount = "pi.gen_ai.agent.tools.blocked.count",
-	ToolsTimeoutCount = "pi.gen_ai.agent.tools.timeout.count",
-	ToolsAbortedCount = "pi.gen_ai.agent.tools.aborted.count",
-	ToolsTotalLatencyMs = "pi.gen_ai.agent.tools.total_latency_ms",
-	ToolsInvoked = "pi.gen_ai.agent.tools.invoked",
-	ToolsAvailable = "pi.gen_ai.agent.tools.available",
-	ToolsUnused = "pi.gen_ai.agent.tools.unused",
-	UsageInputTokensTotal = "pi.gen_ai.agent.usage.input_tokens.total",
-	UsageOutputTokensTotal = "pi.gen_ai.agent.usage.output_tokens.total",
-	UsageCacheReadInputTokensTotal = "pi.gen_ai.agent.usage.cache_read.input_tokens.total",
-	UsageCacheCreationInputTokensTotal = "pi.gen_ai.agent.usage.cache_creation.input_tokens.total",
-	UsageReasoningOutputTokensTotal = "pi.gen_ai.agent.usage.reasoning.output_tokens.total",
-	UsageTotalTokensTotal = "pi.gen_ai.agent.usage.total_tokens.total",
-	CostEstimatedUsdTotal = "pi.gen_ai.agent.cost.estimated_usd.total",
-	ErrorsCount = "pi.gen_ai.agent.errors.count",
+/** Aggregate `zero2ai.gen_ai.agent.*` attributes stamped on the `invoke_agent` span. */
+export const enum Zero2AiGenAIAggregateAttr {
+	ChatsCount = "zero2ai.gen_ai.agent.chats.count",
+	ChatsTotalLatencyMs = "zero2ai.gen_ai.agent.chats.total_latency_ms",
+	ChatsStopReasonPrefix = "zero2ai.gen_ai.agent.chats.stop_reason.",
+	ToolsCount = "zero2ai.gen_ai.agent.tools.count",
+	ToolsOkCount = "zero2ai.gen_ai.agent.tools.ok.count",
+	ToolsErrorCount = "zero2ai.gen_ai.agent.tools.error.count",
+	ToolsSkippedCount = "zero2ai.gen_ai.agent.tools.skipped.count",
+	ToolsBlockedCount = "zero2ai.gen_ai.agent.tools.blocked.count",
+	ToolsTimeoutCount = "zero2ai.gen_ai.agent.tools.timeout.count",
+	ToolsAbortedCount = "zero2ai.gen_ai.agent.tools.aborted.count",
+	ToolsTotalLatencyMs = "zero2ai.gen_ai.agent.tools.total_latency_ms",
+	ToolsInvoked = "zero2ai.gen_ai.agent.tools.invoked",
+	ToolsAvailable = "zero2ai.gen_ai.agent.tools.available",
+	ToolsUnused = "zero2ai.gen_ai.agent.tools.unused",
+	UsageInputTokensTotal = "zero2ai.gen_ai.agent.usage.input_tokens.total",
+	UsageOutputTokensTotal = "zero2ai.gen_ai.agent.usage.output_tokens.total",
+	UsageCacheReadInputTokensTotal = "zero2ai.gen_ai.agent.usage.cache_read.input_tokens.total",
+	UsageCacheCreationInputTokensTotal = "zero2ai.gen_ai.agent.usage.cache_creation.input_tokens.total",
+	UsageReasoningOutputTokensTotal = "zero2ai.gen_ai.agent.usage.reasoning.output_tokens.total",
+	UsageTotalTokensTotal = "zero2ai.gen_ai.agent.usage.total_tokens.total",
+	CostEstimatedUsdTotal = "zero2ai.gen_ai.agent.cost.estimated_usd.total",
+	ErrorsCount = "zero2ai.gen_ai.agent.errors.count",
 }
 
-/** Stamp the aggregate `pi.gen_ai.agent.*` attributes on the given span. */
+/** Stamp the aggregate `zero2ai.gen_ai.agent.*` attributes on the given span. */
 function applyAggregateAttributes(span: Span, summary: AgentRunSummary, coverage: AgentRunCoverage): void {
-	span.setAttribute(PiGenAIAggregateAttr.ChatsCount, summary.chats.total);
-	span.setAttribute(PiGenAIAggregateAttr.ChatsTotalLatencyMs, summary.chats.totalLatencyMs);
+	span.setAttribute(Zero2AiGenAIAggregateAttr.ChatsCount, summary.chats.total);
+	span.setAttribute(Zero2AiGenAIAggregateAttr.ChatsTotalLatencyMs, summary.chats.totalLatencyMs);
 	for (const [reason, count] of Object.entries(summary.chats.byStopReason)) {
-		span.setAttribute(`${PiGenAIAggregateAttr.ChatsStopReasonPrefix}${reason}.count`, count);
+		span.setAttribute(`${Zero2AiGenAIAggregateAttr.ChatsStopReasonPrefix}${reason}.count`, count);
 	}
-	span.setAttribute(PiGenAIAggregateAttr.ToolsCount, summary.tools.total);
-	span.setAttribute(PiGenAIAggregateAttr.ToolsOkCount, summary.tools.ok);
-	span.setAttribute(PiGenAIAggregateAttr.ToolsErrorCount, summary.tools.error);
-	span.setAttribute(PiGenAIAggregateAttr.ToolsSkippedCount, summary.tools.skipped);
-	span.setAttribute(PiGenAIAggregateAttr.ToolsBlockedCount, summary.tools.blocked);
-	span.setAttribute(PiGenAIAggregateAttr.ToolsTimeoutCount, summary.tools.timeout);
-	span.setAttribute(PiGenAIAggregateAttr.ToolsAbortedCount, summary.tools.aborted);
-	span.setAttribute(PiGenAIAggregateAttr.ToolsTotalLatencyMs, summary.tools.totalLatencyMs);
+	span.setAttribute(Zero2AiGenAIAggregateAttr.ToolsCount, summary.tools.total);
+	span.setAttribute(Zero2AiGenAIAggregateAttr.ToolsOkCount, summary.tools.ok);
+	span.setAttribute(Zero2AiGenAIAggregateAttr.ToolsErrorCount, summary.tools.error);
+	span.setAttribute(Zero2AiGenAIAggregateAttr.ToolsSkippedCount, summary.tools.skipped);
+	span.setAttribute(Zero2AiGenAIAggregateAttr.ToolsBlockedCount, summary.tools.blocked);
+	span.setAttribute(Zero2AiGenAIAggregateAttr.ToolsTimeoutCount, summary.tools.timeout);
+	span.setAttribute(Zero2AiGenAIAggregateAttr.ToolsAbortedCount, summary.tools.aborted);
+	span.setAttribute(Zero2AiGenAIAggregateAttr.ToolsTotalLatencyMs, summary.tools.totalLatencyMs);
 	if (coverage.toolsInvoked.length > 0) {
-		span.setAttribute(PiGenAIAggregateAttr.ToolsInvoked, [...coverage.toolsInvoked]);
+		span.setAttribute(Zero2AiGenAIAggregateAttr.ToolsInvoked, [...coverage.toolsInvoked]);
 	}
 	if (coverage.toolsAvailable.length > 0) {
-		span.setAttribute(PiGenAIAggregateAttr.ToolsAvailable, [...coverage.toolsAvailable]);
+		span.setAttribute(Zero2AiGenAIAggregateAttr.ToolsAvailable, [...coverage.toolsAvailable]);
 	}
 	if (coverage.toolsUnused.length > 0) {
-		span.setAttribute(PiGenAIAggregateAttr.ToolsUnused, [...coverage.toolsUnused]);
+		span.setAttribute(Zero2AiGenAIAggregateAttr.ToolsUnused, [...coverage.toolsUnused]);
 	}
-	span.setAttribute(PiGenAIAggregateAttr.UsageInputTokensTotal, summary.usage.inputTokens);
-	span.setAttribute(PiGenAIAggregateAttr.UsageOutputTokensTotal, summary.usage.outputTokens);
-	span.setAttribute(PiGenAIAggregateAttr.UsageCacheReadInputTokensTotal, summary.usage.cachedInputTokens);
-	span.setAttribute(PiGenAIAggregateAttr.UsageCacheCreationInputTokensTotal, summary.usage.cacheWriteTokens);
-	span.setAttribute(PiGenAIAggregateAttr.UsageReasoningOutputTokensTotal, summary.usage.reasoningOutputTokens);
-	span.setAttribute(PiGenAIAggregateAttr.UsageTotalTokensTotal, summary.usage.totalTokens);
+	span.setAttribute(Zero2AiGenAIAggregateAttr.UsageInputTokensTotal, summary.usage.inputTokens);
+	span.setAttribute(Zero2AiGenAIAggregateAttr.UsageOutputTokensTotal, summary.usage.outputTokens);
+	span.setAttribute(Zero2AiGenAIAggregateAttr.UsageCacheReadInputTokensTotal, summary.usage.cachedInputTokens);
+	span.setAttribute(Zero2AiGenAIAggregateAttr.UsageCacheCreationInputTokensTotal, summary.usage.cacheWriteTokens);
+	span.setAttribute(Zero2AiGenAIAggregateAttr.UsageReasoningOutputTokensTotal, summary.usage.reasoningOutputTokens);
+	span.setAttribute(Zero2AiGenAIAggregateAttr.UsageTotalTokensTotal, summary.usage.totalTokens);
 	if (summary.cost.estimatedUsd > 0) {
-		span.setAttribute(PiGenAIAggregateAttr.CostEstimatedUsdTotal, summary.cost.estimatedUsd);
+		span.setAttribute(Zero2AiGenAIAggregateAttr.CostEstimatedUsdTotal, summary.cost.estimatedUsd);
 	}
-	span.setAttribute(PiGenAIAggregateAttr.ErrorsCount, summary.errors.total);
+	span.setAttribute(Zero2AiGenAIAggregateAttr.ErrorsCount, summary.errors.total);
 }
 
 /**
@@ -2068,10 +2068,10 @@ export function recordHandoff(
 	const attrs: Attributes = {};
 	const fromAgent = options.fromAgent ? normalizeAgentIdentity(telemetry, options.fromAgent) : undefined;
 	const toAgent = normalizeAgentIdentity(telemetry, options.toAgent);
-	if (fromAgent?.name) attrs[PiGenAIAttr.HandoffFromAgentName] = fromAgent.name;
-	if (fromAgent?.id) attrs[PiGenAIAttr.HandoffFromAgentId] = fromAgent.id;
-	if (toAgent.name) attrs[PiGenAIAttr.HandoffToAgentName] = toAgent.name;
-	if (toAgent.id) attrs[PiGenAIAttr.HandoffToAgentId] = toAgent.id;
+	if (fromAgent?.name) attrs[Zero2AiGenAIAttr.HandoffFromAgentName] = fromAgent.name;
+	if (fromAgent?.id) attrs[Zero2AiGenAIAttr.HandoffFromAgentId] = fromAgent.id;
+	if (toAgent.name) attrs[Zero2AiGenAIAttr.HandoffToAgentName] = toAgent.name;
+	if (toAgent.id) attrs[Zero2AiGenAIAttr.HandoffToAgentId] = toAgent.id;
 	const name = toAgent.name
 		? fromAgent?.name
 			? `handoff ${fromAgent.name} → ${toAgent.name}`

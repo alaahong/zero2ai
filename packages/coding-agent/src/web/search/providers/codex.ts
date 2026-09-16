@@ -4,9 +4,9 @@
  * Uses the configured Codex Responses transport for proxy/API-key setups and
  * the official ChatGPT backend for OAuth logins.
  */
-import { type AuthStorage, type FetchImpl, type Model, withAuth, withOAuthAccess } from "@oh-my-pi/pi-ai";
-import { resolveCodexResponsesUrl } from "@oh-my-pi/pi-ai/providers/openai-codex-responses";
-import { getBundledModels } from "@oh-my-pi/pi-catalog/models";
+import { type AuthStorage, type FetchImpl, type Model, withAuth, withOAuthAccess } from "@zero2ai/ai";
+import { resolveCodexResponsesUrl } from "@zero2ai/ai/providers/openai-codex-responses";
+import { getBundledModels } from "@zero2ai/catalog/models";
 import {
 	applyCodexResidencyHeader,
 	CODEX_BASE_URL,
@@ -14,8 +14,8 @@ import {
 	getCodexAccountId,
 	OPENAI_HEADER_VALUES,
 	OPENAI_HEADERS,
-} from "@oh-my-pi/pi-catalog/wire/codex";
-import { $env, readSseJson, USER_AGENT } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/catalog/wire/codex";
+import { $env, readSseJson, USER_AGENT } from "@zero2ai/utils";
 import type { ModelRegistry } from "../../../config/model-registry";
 import type { SearchResponse, SearchSource } from "../../../web/search/types";
 import { SearchProviderError } from "../../../web/search/types";
@@ -74,7 +74,7 @@ function getBundledCodexModels(): CodexSearchModel[] {
 }
 
 function getConfiguredModel(): CodexModelCandidate | undefined {
-	const configuredModel = $env.PI_CODEX_WEB_SEARCH_MODEL?.trim();
+	const configuredModel = $env.ZERO2AI_CODEX_WEB_SEARCH_MODEL?.trim();
 	if (!configuredModel) return undefined;
 
 	const catalogModel = getBundledCodexModels().find(model => model.id === configuredModel);
@@ -700,7 +700,7 @@ async function runCodexSearchCandidates(options: {
  * Executes a web search using OpenAI Codex's built-in web search tool.
  *
  * Default-model behavior:
- * - If `PI_CODEX_WEB_SEARCH_MODEL` is set, use it exactly once and surface any
+ * - If `ZERO2AI_CODEX_WEB_SEARCH_MODEL` is set, use it exactly once and surface any
  *   upstream error verbatim.
  * - Otherwise prefer ChatGPT-account-safe bundled defaults (GPT-5.6 Luna,
  *   Terra, Sol, GPT-5.5, …) and retry the next candidate only when Codex
@@ -771,7 +771,7 @@ export async function searchCodex(params: SearchParams): Promise<SearchResponse>
 		});
 		if (!seed) {
 			throw new Error(
-				"No Codex OAuth credentials found. Login with 'omp /login openai-codex' to enable Codex web search.",
+				"No Codex OAuth credentials found. Login with 'zero2ai /login openai-codex' to enable Codex web search.",
 			);
 		}
 

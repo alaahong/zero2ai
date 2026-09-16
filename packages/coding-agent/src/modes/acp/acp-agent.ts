@@ -1,8 +1,8 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import { AgentBusyError, type AgentToolResult } from "@oh-my-pi/pi-agent-core";
-import type { AssistantMessage, Model } from "@oh-my-pi/pi-ai";
-import { getBlobsDir, isEnoent, logger, type postmortem, VERSION } from "@oh-my-pi/pi-utils";
+import { AgentBusyError, type AgentToolResult } from "@zero2ai/agent-core";
+import type { AssistantMessage, Model } from "@zero2ai/ai";
+import { getBlobsDir, isEnoent, logger, type postmortem, VERSION } from "@zero2ai/utils";
 import {
 	type Agent,
 	type AgentSideConnection,
@@ -43,7 +43,7 @@ import {
 	type SetSessionModeRequest,
 	type SetSessionModeResponse,
 	type Usage,
-} from "@oh-my-pi/pi-utils/acp";
+} from "@zero2ai/utils/acp";
 import { disableProvider, enableProvider, reset as resetCapabilities } from "../../capability";
 import { Settings } from "../../config/settings";
 import { clearPluginRootsAndCaches, resolveActiveProjectRegistryPath } from "../../discovery/helpers";
@@ -635,7 +635,7 @@ export class AcpAgent implements Agent {
 			{
 				id: "agent",
 				name: "Use existing local credentials",
-				description: "Authenticate via the provider keys/OAuth state already configured under ~/.omp.",
+				description: "Authenticate via the provider keys/OAuth state already configured under ~/.zero2ai.",
 			},
 		];
 		if (params.clientCapabilities?.auth?.terminal === true) {
@@ -643,7 +643,7 @@ export class AcpAgent implements Agent {
 				type: "terminal",
 				id: "terminal",
 				name: "Set up Oh My Pi in terminal",
-				description: "Launch the omp TUI to add provider keys and select models.",
+				description: "Launch the zero2ai TUI to add provider keys and select models.",
 				args: [ACP_TERMINAL_AUTH_FLAG],
 			});
 		}

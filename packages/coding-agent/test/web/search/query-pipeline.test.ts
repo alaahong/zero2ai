@@ -5,11 +5,11 @@
  * any dimension that would eliminate every result.
  */
 import { afterEach, describe, expect, it, vi } from "bun:test";
-import type { AuthStorage } from "@oh-my-pi/pi-ai";
-import { runSearchQuery } from "@oh-my-pi/pi-coding-agent/web/search";
-import type { SearchParams } from "@oh-my-pi/pi-coding-agent/web/search/provider";
-import * as provider from "@oh-my-pi/pi-coding-agent/web/search/provider";
-import type { SearchProviderId, SearchResponse, SearchSource } from "@oh-my-pi/pi-coding-agent/web/search/types";
+import type { AuthStorage } from "@zero2ai/ai";
+import { runSearchQuery } from "@zero2ai/coding-agent/web/search";
+import type { SearchParams } from "@zero2ai/coding-agent/web/search/provider";
+import * as provider from "@zero2ai/coding-agent/web/search/provider";
+import type { SearchProviderId, SearchResponse, SearchSource } from "@zero2ai/coding-agent/web/search/types";
 
 const SOURCES: SearchSource[] = [
 	{ title: "Docs page", url: "https://docs.example.com/guide" },

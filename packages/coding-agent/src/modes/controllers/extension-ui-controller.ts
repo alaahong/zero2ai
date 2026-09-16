@@ -1,6 +1,6 @@
-import type { Component, OverlayHandle, TUI } from "@oh-my-pi/pi-tui";
-import { Container, Spacer, Text } from "@oh-my-pi/pi-tui";
-import type { CollabUiRequestDraft, CollabUiSelectItem } from "@oh-my-pi/pi-wire";
+import type { Component, OverlayHandle, TUI } from "@zero2ai/tui";
+import { Container, Spacer, Text } from "@zero2ai/tui";
+import type { CollabUiRequestDraft, CollabUiSelectItem } from "@zero2ai/wire";
 import type { CollabHost } from "../../collab/host";
 import { KeybindingsManager } from "../../config/keybindings";
 import type {

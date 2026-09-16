@@ -1,5 +1,5 @@
-import { getProjectDir } from "@oh-my-pi/pi-utils/dirs";
-import * as logger from "@oh-my-pi/pi-utils/logger";
+import { getProjectDir } from "@zero2ai/utils/dirs";
+import * as logger from "@zero2ai/utils/logger";
 import {
 	type AutocompleteItem,
 	type AutocompleteProvider,

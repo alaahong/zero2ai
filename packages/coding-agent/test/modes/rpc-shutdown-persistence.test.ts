@@ -9,7 +9,7 @@
 import { afterEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { isRecord, TempDir } from "@oh-my-pi/pi-utils";
+import { isRecord, TempDir } from "@zero2ai/utils";
 
 const tempDirs: TempDir[] = [];
 
@@ -60,11 +60,11 @@ function spawnRpcChild(options: { root: string; sessionDir: string }) {
 			env: {
 				...Bun.env,
 				ANTHROPIC_API_KEY: "sk-ant-not-a-real-key",
-				PI_NO_TITLE: "1",
+				ZERO2AI_NO_TITLE: "1",
 				NO_COLOR: "1",
 				XDG_DATA_HOME: options.root,
 				XDG_CONFIG_HOME: options.root,
-				PI_CODING_AGENT_DIR: agentDir,
+				ZERO2AI_CODING_AGENT_DIR: agentDir,
 			},
 			stdin: "pipe",
 			stdout: fifo,
@@ -162,7 +162,7 @@ const exitedWhileQueued = (child: { exited: Promise<number> }): Promise<boolean>
 
 describe.skipIf(unsupportedHarness)("RPC shutdown on a failed session store", () => {
 	it("drains the queued notice before exiting on a persistence failure", async () => {
-		const dir = TempDir.createSync("@pi-rpc-shutdown-");
+		const dir = TempDir.createSync("@zero2ai-rpc-shutdown-");
 		tempDirs.push(dir);
 		const root = dir.path();
 		// A session directory the process can read but not write: the first
@@ -199,7 +199,7 @@ describe.skipIf(unsupportedHarness)("RPC shutdown on a failed session store", ()
 	}, 30_000);
 
 	it("drains a recovered failure's notice before exiting successfully", async () => {
-		const dir = TempDir.createSync("@pi-rpc-recovered-");
+		const dir = TempDir.createSync("@zero2ai-rpc-recovered-");
 		tempDirs.push(dir);
 		const root = dir.path();
 		const sessionDir = path.join(root, "sessions");

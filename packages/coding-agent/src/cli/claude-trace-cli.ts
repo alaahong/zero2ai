@@ -9,8 +9,8 @@ import * as net from "node:net";
 import * as path from "node:path";
 import * as tls from "node:tls";
 import * as zlib from "node:zlib";
-import { PtySession } from "@oh-my-pi/pi-natives";
-import xterm from "@oh-my-pi/pi-utils/vterm";
+import { PtySession } from "@zero2ai/natives";
+import xterm from "@zero2ai/utils/vterm";
 
 const DEFAULT_PROXY_HOST = "127.0.0.1";
 const DEFAULT_PROXY_PORT = 8080;
@@ -763,7 +763,7 @@ export async function runClaudeMessagesCapture(args: ClaudeTraceCommandArgs = {}
 			try {
 				session.write(`${message}\r`);
 			} catch (error) {
-				ptyOutput += `\n[omp input write failed: ${errorMessage(error)}]\n`;
+				ptyOutput += `\n[zero2ai input write failed: ${errorMessage(error)}]\n`;
 			}
 		})();
 		const captureRace = proxy.waitForCapture(timeoutMs).then(

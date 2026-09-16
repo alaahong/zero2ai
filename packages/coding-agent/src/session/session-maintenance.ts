@@ -9,7 +9,7 @@ import {
 	resolveTelemetry,
 	type StreamFn,
 	type ThinkingLevel,
-} from "@oh-my-pi/pi-agent-core";
+} from "@zero2ai/agent-core";
 import {
 	AGGRESSIVE_SHAKE_CONFIG,
 	AUTO_HANDOFF_THRESHOLD_FOCUS,
@@ -41,14 +41,14 @@ import {
 	shouldCompact,
 	shouldUseProviderNativeCompaction,
 	upsertFileOperations,
-} from "@oh-my-pi/pi-agent-core/compaction";
+} from "@zero2ai/agent-core/compaction";
 import {
 	DEFAULT_PRUNE_CONFIG,
 	pruneSupersededToolResults,
 	pruneToolOutputs,
 	readToolSupersedeKey,
-} from "@oh-my-pi/pi-agent-core/compaction/pruning";
-import type { ProtectedToolMatcher } from "@oh-my-pi/pi-agent-core/compaction/tool-protection";
+} from "@zero2ai/agent-core/compaction/pruning";
+import type { ProtectedToolMatcher } from "@zero2ai/agent-core/compaction/tool-protection";
 import type {
 	AssistantMessage,
 	CodexCompactionContext,
@@ -56,12 +56,12 @@ import type {
 	Model,
 	OpenAIResponsesHistoryPayload,
 	ProviderSessionState,
-} from "@oh-my-pi/pi-ai";
-import * as AIError from "@oh-my-pi/pi-ai/error";
-import { preferredDialect } from "@oh-my-pi/pi-catalog/identity";
-import { modelsAreEqual } from "@oh-my-pi/pi-catalog/models";
-import { isRecord, logger, Snowflake, stringifyJson } from "@oh-my-pi/pi-utils";
-import * as snapcompact from "@oh-my-pi/snapcompact";
+} from "@zero2ai/ai";
+import * as AIError from "@zero2ai/ai/error";
+import { preferredDialect } from "@zero2ai/catalog/identity";
+import { modelsAreEqual } from "@zero2ai/catalog/models";
+import { isRecord, logger, Snowflake, stringifyJson } from "@zero2ai/utils";
+import * as snapcompact from "@zero2ai/snapcompact";
 import { writeArtifact } from "./artifacts";
 import type { ModelRegistry } from "../config/model-registry";
 import { MODEL_ROLE_IDS } from "../config/model-roles";

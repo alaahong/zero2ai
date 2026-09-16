@@ -1,11 +1,11 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "bun:test";
-import type { AssistantMessage, Usage } from "@oh-my-pi/pi-ai";
-import { resetSettingsForTest, Settings, settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AssistantMessageComponent } from "@oh-my-pi/pi-coding-agent/modes/components/assistant-message";
-import { EventController } from "@oh-my-pi/pi-coding-agent/modes/controllers/event-controller";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import type { AgentSessionEvent } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { vocalizer } from "@oh-my-pi/pi-coding-agent/tts/vocalizer";
+import type { AssistantMessage, Usage } from "@zero2ai/ai";
+import { resetSettingsForTest, Settings, settings } from "@zero2ai/coding-agent/config/settings";
+import { AssistantMessageComponent } from "@zero2ai/coding-agent/modes/components/assistant-message";
+import { EventController } from "@zero2ai/coding-agent/modes/controllers/event-controller";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import type { AgentSessionEvent } from "@zero2ai/coding-agent/session/agent-session";
+import { vocalizer } from "@zero2ai/coding-agent/tts/vocalizer";
 import { createInteractiveModeContext } from "./helpers/interactive-mode-context";
 
 function zeroUsage(): Usage {

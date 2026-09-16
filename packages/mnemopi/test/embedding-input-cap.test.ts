@@ -4,8 +4,8 @@ import {
 	embed,
 	resetEmbeddingProviderForTests,
 	setEmbeddingProviderForTests,
-} from "@oh-my-pi/pi-mnemopi/core/embeddings";
-import { withMnemopiRuntimeOptions } from "@oh-my-pi/pi-mnemopi/core/runtime-options";
+} from "@zero2ai/mnemopi/core/embeddings";
+import { withMnemopiRuntimeOptions } from "@zero2ai/mnemopi/core/runtime-options";
 
 /**
  * Regression coverage for issue #3126: `MnemopiSessionState.retainMessages`

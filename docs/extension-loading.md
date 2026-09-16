@@ -32,20 +32,20 @@ Extension loading builds a list of module entry files, imports each module with 
 
 Native `extension-module` discovery comes from:
 
-- Project directory: `<cwd>/.omp/extensions`
-- User directory: the active agent directory's `extensions/` (default `~/.omp/agent/extensions`)
-- Native legacy/settings JSON entries: `<cwd>/.omp/settings.json#extensions` and the active agent directory's `settings.json#extensions`
+- Project directory: `<cwd>/.zero2ai/extensions`
+- User directory: the active agent directory's `extensions/` (default `~/.zero2ai/agent/extensions`)
+- Native legacy/settings JSON entries: `<cwd>/.zero2ai/settings.json#extensions` and the active agent directory's `settings.json#extensions`
 
-The project root is the native provider's `.omp` directory (`SOURCE_PATHS.native.projectDir`), cwd-only; it does not walk ancestors. The user root is the active profile's agent directory via `getAgentDir()`, so under `omp --profile <name>` it becomes `~/.omp/profiles/<name>/agent/extensions` (and it honors `PI_CODING_AGENT_DIR`). See [Profiles](./config-usage.md#profiles).
+The project root is the native provider's `.zero2ai` directory (`SOURCE_PATHS.native.projectDir`), cwd-only; it does not walk ancestors. The user root is the active profile's agent directory via `getAgentDir()`, so under `zero2ai --profile <name>` it becomes `~/.zero2ai/profiles/<name>/agent/extensions` (and it honors `ZERO2AI_CODING_AGENT_DIR`). See [Profiles](./config-usage.md#profiles).
 
 Notes:
 
-- Native auto-discovery is currently `.omp` based.
+- Native auto-discovery is currently `.zero2ai` based.
 - Legacy `.pi` is still accepted in package manifests (`pi.extensions`) and project override lookup, but `.pi/extensions` is not a native root here.
 
 ### 2) Discovered JS/TS hook factories
 
-After native auto-discovery, `discoverAndLoadExtensions()` also appends JS/TS hook factories from the `hook` capability — any hook whose entry path is a `.ts`/`.js` file — so they load through the same module pipeline. The native provider discovers these under `<cwd>/.omp/hooks/pre|post/` and `<agentDir>/hooks/pre|post/` only; see [Hooks: native discovery location](./hooks.md#native-discovery-location) for the required `pre/`/`post/` layout.
+After native auto-discovery, `discoverAndLoadExtensions()` also appends JS/TS hook factories from the `hook` capability — any hook whose entry path is a `.ts`/`.js` file — so they load through the same module pipeline. The native provider discovers these under `<cwd>/.zero2ai/hooks/pre|post/` and `<agentDir>/hooks/pre|post/` only; see [Hooks: native discovery location](./hooks.md#native-discovery-location) for the required `pre/`/`post/` layout.
 
 Hook-capability loading already applies its own hook-specific disabled ids, so these paths are not additionally filtered by `disabledExtensions` extension-module names.
 
@@ -53,7 +53,7 @@ Hook-capability loading already applies its own hook-specific disabled ids, so t
 
 After hook discovery, `discoverAndLoadExtensions()` appends extension entry points from enabled installed plugins via `getAllPluginExtensionPaths(cwd)`.
 
-Plugin extension entries come from package `omp.extensions` / `pi.extensions` manifests, including enabled feature entries.
+Plugin extension entries come from package `zero2ai.extensions` / `pi.extensions` manifests, including enabled feature entries.
 
 Installed-plugin manifest resolution accepts explicit `.ts`, `.js`, `.mjs`, and `.cjs` files. For a manifest entry that names a directory, it recognizes `index.ts`, `index.js`, `index.mjs`, or `index.cjs`; extension-directory expansion uses the same four suffixes. This is broader than native and configured-directory auto-scanning, which remains limited to `.ts` and `.js`.
 
@@ -68,18 +68,18 @@ Configured path sources in the main session startup path (`sdk.ts`):
 
 Settings files:
 
-- User: the active agent directory's `config.yml` (default `~/.omp/agent/config.yml`; with `--profile <name>`, `~/.omp/profiles/<name>/agent/config.yml`; `PI_CODING_AGENT_DIR` can override the agent directory)
-- Project/native settings capability: `<cwd>/.omp/config.yml` and `<cwd>/.omp/settings.json`
+- User: the active agent directory's `config.yml` (default `~/.zero2ai/agent/config.yml`; with `--profile <name>`, `~/.zero2ai/profiles/<name>/agent/config.yml`; `ZERO2AI_CODING_AGENT_DIR` can override the agent directory)
+- Project/native settings capability: `<cwd>/.zero2ai/config.yml` and `<cwd>/.zero2ai/settings.json`
 
 Native extension-module discovery also reads legacy JSON extension lists from:
 
-- The active agent directory's `settings.json` (default `~/.omp/agent/settings.json`)
-- `<cwd>/.omp/settings.json`
+- The active agent directory's `settings.json` (default `~/.zero2ai/agent/settings.json`)
+- `<cwd>/.zero2ai/settings.json`
 
 Examples:
 
 ```yaml
-# ~/.omp/agent/config.yml
+# ~/.zero2ai/agent/config.yml
 extensions:
   - ~/my-exts/safety.ts
   - ./local/ext-pack
@@ -87,7 +87,7 @@ extensions:
 
 ```json
 {
-  "extensions": ["./.omp/extensions/my-extra"]
+  "extensions": ["./.zero2ai/extensions/my-extra"]
 }
 ```
 
@@ -104,14 +104,14 @@ Behavior split:
 
 - SDK: when `disableExtensionDiscovery=true`, ambient extension factories are
   excluded, while `additionalExtensionPaths` are still resolved normally
-  (including package directories with `package.json#omp.extensions`).
+  (including package directories with `package.json#zero2ai.extensions`).
 - CLI: `--no-extensions` follows the same explicit-only contract. Explicit
   `-e/--extension` and `--hook` paths still load, and only sibling capability
   roots from explicitly named extension packages remain eligible. Project/user
-  `extensions:` settings and installed OMP extension packages are excluded from
+  `extensions:` settings and installed ZERO2AI extension packages are excluded from
   that sibling surface.
 
-This flag governs extension factories and OMP extension-package sibling roots;
+This flag governs extension factories and ZERO2AI extension-package sibling roots;
 it is not a whole-process capability-isolation switch. Skills, MCP servers,
 tools, prompts, and rules owned by other discovery subsystems retain their own
 enable/disable controls.
@@ -173,13 +173,13 @@ It is used directly as a module entry candidate. Explicit `.ts`, `.js`, `.mjs`, 
 
 Resolution order:
 
-1. `package.json` in that directory with a non-empty `omp.extensions` (or legacy `pi.extensions`) array -> use declared entries
+1. `package.json` in that directory with a non-empty `zero2ai.extensions` (or legacy `pi.extensions`) array -> use declared entries
 2. `index.ts`
 3. `index.js`
 4. Otherwise scan one level for extension entries:
    - direct `*.ts` / `*.js`
    - subdir `index.ts` / `index.js`
-   - subdir `package.json` with `omp.extensions` / `pi.extensions`
+   - subdir `package.json` with `zero2ai.extensions` / `pi.extensions`
 
 Rules and constraints:
 
@@ -227,8 +227,8 @@ Implication: if the same module path is both auto-discovered and explicitly conf
 
 Each candidate path is loaded via `loadLegacyPiModule()` (`src/extensibility/plugins/legacy-pi-compat.ts`):
 
-- the entry's realpath is resolved, then dynamically imported with an `?mtime` cache-buster so edited source reloads. Since 16.3.7 the same mtime tag propagates to every module in the extension-owned dependency graph — relative `./`/`../` imports, package `imports` aliases (`#alias/*`), and extension-local bare dependencies — via the graph-wide `onLoad` rewrite, so same-process re-imports pick up edits across the whole graph, not just the entry file. Host-resolved rewrites (legacy pi-package specifiers, the TypeBox shim) stay untagged `file://` URLs because they point at in-process host code that never changes between reloads
-- a scoped Bun `onLoad` hook rewrites legacy pi-package specifiers (`@mariozechner/*`, `@earendil-works/*`) and bare `@sinclair/typebox` onto the host-bundled copies before evaluation. Legacy Pi package-root imports resolve through compat shims: catalog symbols that moved to `@oh-my-pi/pi-catalog/models` (`calculateCost`, `modelsAreEqual`, `getBundledProviders`, plus `getModel`/`getModels` aliases) are re-exported by the legacy pi-ai shim (`src/extensibility/legacy-pi-ai-shim.ts`), and legacy `@oh-my-pi/pi-coding-agent` imports — including `DefaultResourceLoader` — resolve to the compat loader in `src/extensibility/legacy-pi-coding-agent-shim.ts`
+- the entry's realpath is resolved, then dynamically imported with an `?mtime` cache-buster so edited source reloads. Since 16.3.7 the same mtime tag propagates to every module in the extension-owned dependency graph — relative `./`/`../` imports, package `imports` aliases (`#alias/*`), and extension-local bare dependencies — via the graph-wide `onLoad` rewrite, so same-process re-imports pick up edits across the whole graph, not just the entry file. Host-resolved rewrites (legacy zero2ai-package specifiers, the TypeBox shim) stay untagged `file://` URLs because they point at in-process host code that never changes between reloads
+- a scoped Bun `onLoad` hook rewrites legacy zero2ai-package specifiers (`@mariozechner/*`, `@earendil-works/*`) and bare `@sinclair/typebox` onto the host-bundled copies before evaluation. Legacy Pi package-root imports resolve through compat shims: catalog symbols that moved to `@zero2ai/catalog/models` (`calculateCost`, `modelsAreEqual`, `getBundledProviders`, plus `getModel`/`getModels` aliases) are re-exported by the legacy zero2ai-ai shim (`src/extensibility/legacy-pi-ai-shim.ts`), and legacy `@zero2ai/coding-agent` imports — including `DefaultResourceLoader` — resolve to the compat loader in `src/extensibility/legacy-pi-coding-agent-shim.ts`
 - graph-owned CommonJS modules use synchronous Bun `onLoad` object modules exposing runtime own-string export keys, including computed and non-enumerable names; `default` remains the complete `module.exports` value. The shared evaluator preserves cycles and `require`/import identity, while required host ESM shims are prepared before synchronous evaluation. No generated facade files or AST named-export reconstruction are needed
 - factory is selected by `getExtensionFactory(module)`: the module itself if it is a function, otherwise `module.default`
 - factory must be a function (`ExtensionFactory`) and may return `void` or a promise; loading awaits it before continuing to the next path
@@ -266,7 +266,7 @@ When events run through `ExtensionRunner`, handler exceptions are caught and emi
 ### User-level
 
 ```text
-~/.omp/agent/
+~/.zero2ai/agent/
   config.yml
   extensions/
     guardrails.ts
@@ -278,7 +278,7 @@ When events run through `ExtensionRunner`, handler exceptions are caught and emi
 
 ```text
 <repo>/
-  .omp/
+  .zero2ai/
     settings.json
     extensions/
       checks/
@@ -290,7 +290,7 @@ When events run through `ExtensionRunner`, handler exceptions are caught and emi
 
 ```json
 {
-  "omp": {
+  "zero2ai": {
     "extensions": ["./src/check-a.ts", "./src/check-b.js"]
   }
 }

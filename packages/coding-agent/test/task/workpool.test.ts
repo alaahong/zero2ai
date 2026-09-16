@@ -13,7 +13,7 @@ import * as structured from "../../src/task/structured-subagent";
 import type { AgentDefinition, SingleResult } from "../../src/task/types";
 import { WorkPool, WorkPoolRegistry } from "../../src/task/workpool";
 import type { ToolSession } from "../../src/tools";
-import { prompt } from "@oh-my-pi/pi-utils";
+import { prompt } from "@zero2ai/utils";
 
 const AGENT: AgentDefinition = {
 	name: "scout",

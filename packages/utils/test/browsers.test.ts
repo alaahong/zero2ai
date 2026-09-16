@@ -15,7 +15,7 @@ const BUILD_ID = "123.0.6312.58";
 const ROOTS: string[] = [];
 
 async function makeRoot(): Promise<string> {
-	const root = await fs.mkdtemp(path.join(os.tmpdir(), "pi-browsers-test-"));
+	const root = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-browsers-test-"));
 	ROOTS.push(root);
 	return root;
 }
@@ -248,7 +248,7 @@ test("a timed-out download releases its lock and partial archive so installation
 	}
 });
 
-const networkTest = process.env.OMP_TEST_BROWSER_INSTALL ? test : test.skip;
+const networkTest = process.env.ZERO2AI_TEST_BROWSER_INSTALL ? test : test.skip;
 networkTest(
 	"network: downloads and installs the pinned Chrome-for-Testing build",
 	async () => {

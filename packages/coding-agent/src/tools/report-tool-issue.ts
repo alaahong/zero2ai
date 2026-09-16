@@ -5,7 +5,7 @@
  * `xd://report_issue`, and the system prompt tells the model to write
  * `<tool>: <concise description>` there when auto-QA is enabled.
  *
- * Enabled by default (`dev.autoqa` defaults to true); `PI_AUTO_QA=0` or an
+ * Enabled by default (`dev.autoqa` defaults to true); `ZERO2AI_AUTO_QA=0` or an
  * explicit `dev.autoqa: false` short-circuits injection entirely. When the
  * user is only enabled by default (never configured `dev.autoqa` themselves),
  * a persisted `dev.autoqaConsent: "denied"` also disables injection so a "No"
@@ -18,24 +18,24 @@
  * wired by `InteractiveMode` to a Yes/No popup — is invoked exactly once and
  * the decision is persisted; a denial (or dismissal) drops the pending report
  * without touching the database. Subsequent calls (including from subagents)
- * read the cached decision without prompting. `PI_AUTO_QA_PUSH=1` bypasses
+ * read the cached decision without prompting. `ZERO2AI_AUTO_QA_PUSH=1` bypasses
  * the dialog for headless environments.
  *
  * When the user grants consent, push is automatically active against the
  * bundled endpoint (`dev.autoqaPush.endpoint`, default `qa.omp.sh`). Each
  * insert schedules a background flush that POSTs pending rows and deletes them
- * on HTTP 2xx. `PI_AUTO_QA_PUSH=1` forces push in non-interactive environments
+ * on HTTP 2xx. `ZERO2AI_AUTO_QA_PUSH=1` forces push in non-interactive environments
  * where the consent dialog never fires. Device execution is never blocked on
  * the network and never throws.
  */
 import { Database } from "bun:sqlite";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import type { AgentToolResult } from "@oh-my-pi/pi-agent-core";
-import type { FetchImpl } from "@oh-my-pi/pi-ai";
-import type { Component } from "@oh-my-pi/pi-tui";
-import { Text } from "@oh-my-pi/pi-tui";
-import { $env, $flag, getAutoQaDbPath, getInstallId, logger, VERSION } from "@oh-my-pi/pi-utils";
+import type { AgentToolResult } from "@zero2ai/agent-core";
+import type { FetchImpl } from "@zero2ai/ai";
+import type { Component } from "@zero2ai/tui";
+import { Text } from "@zero2ai/tui";
+import { $env, $flag, getAutoQaDbPath, getInstallId, logger, VERSION } from "@zero2ai/utils";
 import type { Settings } from "..";
 import type { Theme } from "../modes/theme/theme";
 import { renderStatusLine, truncateToWidth } from "../tui";
@@ -98,7 +98,7 @@ function parseReportIssueBody(text: string): { tool: string; report: string } {
 /**
  * Whether Auto-QA is active for this session.
  *
- * Precedence: `PI_AUTO_QA` env flag > explicit `dev.autoqa` setting >
+ * Precedence: `ZERO2AI_AUTO_QA` env flag > explicit `dev.autoqa` setting >
  * default-on unless the user previously denied consent. The denial veto only
  * applies to the default: explicitly configuring `dev.autoqa: true` re-enables
  * injection (recording still no-ops until consent is granted).
@@ -111,7 +111,7 @@ export function isAutoQaEnabled(settings?: Settings): boolean {
 			? enabled
 			: enabled && settings.get("dev.autoqaConsent") !== "denied";
 	}
-	return $flag("PI_AUTO_QA", fallback);
+	return $flag("ZERO2AI_AUTO_QA", fallback);
 }
 
 // ───────────────────────────────────────────────────────────────────────────
@@ -255,7 +255,7 @@ let cachedDb: Database | null = null;
 
 /**
  * Open (or return the cached handle for) the auto-QA SQLite database at
- * `~/.omp/autoqa.db` (XDG: `$XDG_DATA_HOME/omp/autoqa.db`), creating the
+ * `~/.zero2ai/autoqa.db` (XDG: `$XDG_DATA_HOME/zero2ai/autoqa.db`), creating the
  * schema lazily. Returns `null` when the path cannot be resolved or opened.
  */
 export function openAutoQaDb(): Database | null {
@@ -310,7 +310,7 @@ export interface FlushResult {
 }
 
 /**
- * Optional per-flush controls. Used by `omp grievances push` to surface
+ * Optional per-flush controls. Used by `zero2ai grievances push` to surface
  * progress to a TTY and to skip the user-facing consent gate (manual
  * pushes are the user's explicit intent, not a side effect of a device write).
  */
@@ -377,18 +377,18 @@ function resolvePushConfig(settings: Settings | undefined, bypassConsent: boolea
 	if (!isAutoQaEnabled(settings)) return null;
 
 	// Consent IS the push opt-in for the auto-flush path. `bypassConsent`
-	// covers explicit user-driven pushes (`omp grievances push`) where the
+	// covers explicit user-driven pushes (`zero2ai grievances push`) where the
 	// user clearly intends to ship regardless of dialog state. The
-	// `PI_AUTO_QA_PUSH` env flag stays as a CI/headless override too.
+	// `ZERO2AI_AUTO_QA_PUSH` env flag stays as a CI/headless override too.
 	if (!bypassConsent) {
 		const consented = settings?.get("dev.autoqaConsent") === "granted";
-		if (!consented && !$flag("PI_AUTO_QA_PUSH")) return null;
+		if (!consented && !$flag("ZERO2AI_AUTO_QA_PUSH")) return null;
 	}
 
-	const endpoint = envOverrideString("PI_AUTO_QA_PUSH_URL") ?? settings?.get("dev.autoqaPush.endpoint");
+	const endpoint = envOverrideString("ZERO2AI_AUTO_QA_PUSH_URL") ?? settings?.get("dev.autoqaPush.endpoint");
 	if (!endpoint || endpoint.trim().length === 0) return null;
 
-	const token = envOverrideString("PI_AUTO_QA_PUSH_TOKEN") ?? settings?.get("dev.autoqaPush.token");
+	const token = envOverrideString("ZERO2AI_AUTO_QA_PUSH_TOKEN") ?? settings?.get("dev.autoqaPush.token");
 	return { endpoint: endpoint.trim(), token: token && token.length > 0 ? token : undefined };
 }
 
@@ -418,7 +418,7 @@ async function performFlush(db: Database, config: PushConfig, options: FlushOpti
 		if (rows.length === 0) return { pushed: totalPushed, ok: true };
 
 		const body = JSON.stringify({
-			agent: { name: "omp", version: VERSION },
+			agent: { name: "zero2ai", version: VERSION },
 			installId: getInstallId(),
 			// Coarse host fingerprint for triage — `darwin`/`linux`/`win32` +
 			// `arm64`/`x64`. Useful for "is this bug arch-specific?" without
@@ -522,7 +522,7 @@ export function __awaitAutoQaRecordPipelineForTests(): Promise<void> {
 /**
  * Queue a grievance for recording. The consent → insert → flush pipeline is
  * fire-and-forget: nothing is written until the user grants consent (or
- * `PI_AUTO_QA_PUSH=1` forces headless recording), and the device result
+ * `ZERO2AI_AUTO_QA_PUSH=1` forces headless recording), and the device result
  * returns immediately so the model never waits on the dialog or the network.
  */
 function recordToolIssue(session: ToolSession, tool: string, report: string): void {
@@ -530,7 +530,7 @@ function recordToolIssue(session: ToolSession, tool: string, report: string): vo
 	const model = session.getActiveModelString?.() ?? "unknown";
 	lastRecordPipeline = (async () => {
 		try {
-			if (!$flag("PI_AUTO_QA_PUSH") && !(await resolveAutoQaConsent(session.settings))) return;
+			if (!$flag("ZERO2AI_AUTO_QA_PUSH") && !(await resolveAutoQaConsent(session.settings))) return;
 			const db = openAutoQaDb();
 			if (!db) return;
 			db.prepare(

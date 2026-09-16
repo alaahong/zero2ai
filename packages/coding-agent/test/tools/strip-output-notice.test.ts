@@ -13,7 +13,7 @@ import {
 	type OutputMeta,
 	outputMeta,
 	stripOutputNotice,
-} from "@oh-my-pi/pi-coding-agent/tools/output-meta";
+} from "@zero2ai/coding-agent/tools/output-meta";
 
 const truncation: OutputMeta = {
 	truncation: {

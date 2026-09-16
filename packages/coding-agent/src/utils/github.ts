@@ -1,4 +1,4 @@
-import { $which, isRecord } from "@oh-my-pi/pi-utils";
+import { $which, isRecord } from "@zero2ai/utils";
 import { REJECT_PROMPT_COMMAND } from "../exec/non-interactive-env";
 import { ToolAbortError, ToolError, throwIfAborted } from "../tools/tool-errors";
 

@@ -7,10 +7,10 @@ import {
 	resetEmbeddingProviderForTests,
 	setEmbeddingProviderForTests,
 	setLocalModelInitializerForTests,
-} from "@oh-my-pi/pi-mnemopi/core/embeddings";
-import { Mnemopi } from "@oh-my-pi/pi-mnemopi/core/memory";
-import { withMnemopiRuntimeOptions } from "@oh-my-pi/pi-mnemopi/core/runtime-options";
-import { getFastembedCacheDir } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/mnemopi/core/embeddings";
+import { Mnemopi } from "@zero2ai/mnemopi/core/memory";
+import { withMnemopiRuntimeOptions } from "@zero2ai/mnemopi/core/runtime-options";
+import { getFastembedCacheDir } from "@zero2ai/utils";
 import packageJson from "../package.json" with { type: "json" };
 
 const ENV_KEYS = [
@@ -132,9 +132,9 @@ describe("optional embeddings", () => {
 			fetch: async request => {
 				requests += 1;
 				expect(request.headers.get("content-type")).toBe("application/json");
-				expect(request.headers.get("user-agent")).toBe(`omp/${packageJson.version}`);
+				expect(request.headers.get("user-agent")).toBe(`zero2ai/${packageJson.version}`);
 				expect(request.headers.get("http-referer")).toBe("https://omp.sh/");
-				expect(request.headers.get("x-openrouter-title")).toBe("omp");
+				expect(request.headers.get("x-openrouter-title")).toBe("zero2ai");
 				expect(request.headers.get("x-openrouter-categories")).toBe("cli-agent");
 				expect(request.headers.get("x-title")).toBeNull();
 				expect(request.headers.get("authorization")).toBeNull();

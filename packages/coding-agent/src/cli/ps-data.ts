@@ -1,5 +1,5 @@
 /**
- * Data layer shared by the `omp ps` renderers (plain CLI and interactive TUI):
+ * Data layer shared by the `zero2ai ps` renderers (plain CLI and interactive TUI):
  * broker-scope discovery, daemon snapshot collection, and display cells.
  *
  * Collection never spawns a broker: live scopes are queried over the broker
@@ -16,8 +16,8 @@ import {
 	getGlobalDaemonRuntimeRoot,
 	getProjectDir,
 	isEnoent,
-} from "@oh-my-pi/pi-utils";
-import chalk from "@oh-my-pi/pi-utils/chalk";
+} from "@zero2ai/utils";
+import chalk from "@zero2ai/utils/chalk";
 import { createDaemonBrokerClient, type DaemonBrokerClient } from "../launch/client";
 import { canonicalProjectDir, daemonRuntimeDir, readDaemonScopeMeta } from "../launch/paths";
 import { readLiveDaemonBrokerPid } from "../launch/presence";

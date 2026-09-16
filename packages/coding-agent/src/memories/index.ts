@@ -2,9 +2,9 @@ import type { Database } from "bun:sqlite";
 import type * as fsNode from "node:fs";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import type { AgentMessage } from "@oh-my-pi/pi-agent-core";
-import { type ApiKey, completeSimple, Effort, type Model, retryTransientCompletion } from "@oh-my-pi/pi-ai";
-import { clampThinkingLevelForModel } from "@oh-my-pi/pi-catalog/model-thinking";
+import type { AgentMessage } from "@zero2ai/agent-core";
+import { type ApiKey, completeSimple, Effort, type Model, retryTransientCompletion } from "@zero2ai/ai";
+import { clampThinkingLevelForModel } from "@zero2ai/catalog/model-thinking";
 import {
 	getAgentDbPath,
 	getMemoriesDir,
@@ -13,7 +13,7 @@ import {
 	parseJsonlLenient,
 	peekFile,
 	prompt,
-} from "@oh-my-pi/pi-utils";
+} from "@zero2ai/utils";
 
 import type { ModelRegistry } from "../config/model-registry";
 import { getModelMatchPreferences, resolveModelRoleValue } from "../config/model-resolver";

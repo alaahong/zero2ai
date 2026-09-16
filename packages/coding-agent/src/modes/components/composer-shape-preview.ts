@@ -16,7 +16,7 @@ import {
 	padding,
 	truncateToWidth,
 	visibleWidth,
-} from "@oh-my-pi/pi-tui";
+} from "@zero2ai/tui";
 import type { ComposerShape } from "../../config/settings-schema";
 import { theme } from "../theme/theme";
 
@@ -42,7 +42,7 @@ export interface ComposerShapePreviewOptions {
 	status?: ComposerPreviewStatusSource;
 }
 /** Stand-in session title shown while the previewed session is unnamed. */
-const PREVIEW_TITLE = "omp";
+const PREVIEW_TITLE = "zero2ai";
 
 export function renderComposerShapePreview(
 	shape: ComposerShape,

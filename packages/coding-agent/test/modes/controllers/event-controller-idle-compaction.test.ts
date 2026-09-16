@@ -1,12 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
-import type { AssistantMessage } from "@oh-my-pi/pi-ai";
-import { resetSettingsForTest, Settings, settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { GoalModeState } from "@oh-my-pi/pi-coding-agent/goals/state";
-import { EventController } from "@oh-my-pi/pi-coding-agent/modes/controllers/event-controller";
-import { SelectorController } from "@oh-my-pi/pi-coding-agent/modes/controllers/selector-controller";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import type { InteractiveModeContext } from "@oh-my-pi/pi-coding-agent/modes/types";
-import type { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
+import type { AssistantMessage } from "@zero2ai/ai";
+import { resetSettingsForTest, Settings, settings } from "@zero2ai/coding-agent/config/settings";
+import type { GoalModeState } from "@zero2ai/coding-agent/goals/state";
+import { EventController } from "@zero2ai/coding-agent/modes/controllers/event-controller";
+import { SelectorController } from "@zero2ai/coding-agent/modes/controllers/selector-controller";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import type { InteractiveModeContext } from "@zero2ai/coding-agent/modes/types";
+import type { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
 import { createInteractiveModeContext } from "../../helpers/interactive-mode-context";
 
 async function flushMicrotasks(): Promise<void> {

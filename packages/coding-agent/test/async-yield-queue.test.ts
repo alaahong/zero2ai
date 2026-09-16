@@ -4,11 +4,11 @@ import {
 	ASIDE_MESSAGE_COMMIT,
 	ASIDE_MESSAGE_DISCARD,
 	type CommittableAsideMessage,
-} from "@oh-my-pi/pi-agent-core";
-import { type AsyncJob, AsyncJobManager, type AsyncJobType } from "@oh-my-pi/pi-coding-agent/async";
-import type { CustomMessage } from "@oh-my-pi/pi-coding-agent/session/messages";
-import { YieldQueue } from "@oh-my-pi/pi-coding-agent/session/yield-queue";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
+} from "@zero2ai/agent-core";
+import { type AsyncJob, AsyncJobManager, type AsyncJobType } from "@zero2ai/coding-agent/async";
+import type { CustomMessage } from "@zero2ai/coding-agent/session/messages";
+import { YieldQueue } from "@zero2ai/coding-agent/session/yield-queue";
+import type { ToolSession } from "@zero2ai/coding-agent/tools";
 import { type CoordinationDetails, HubTool } from "../src/tools/hub";
 
 type AsyncEntry = {

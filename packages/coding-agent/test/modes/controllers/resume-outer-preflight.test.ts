@@ -1,15 +1,15 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
 import * as path from "node:path";
-import * as core from "@oh-my-pi/pi-agent-core";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { InteractiveMode } from "@oh-my-pi/pi-coding-agent/modes/interactive-mode";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { createTools, type Tool } from "@oh-my-pi/pi-coding-agent/tools";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import * as core from "@zero2ai/agent-core";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
+import { InteractiveMode } from "@zero2ai/coding-agent/modes/interactive-mode";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { createTools, type Tool } from "@zero2ai/coding-agent/tools";
+import { TempDir } from "@zero2ai/utils";
 
 beforeAll(async () => {
 	await initTheme();
@@ -25,7 +25,7 @@ async function createMode(opts: { flushFails?: boolean } = {}): Promise<{
 	cleanup: () => Promise<void>;
 }> {
 	resetSettingsForTest();
-	const tempDir = TempDir.createSync("@pi-resume-outer-");
+	const tempDir = TempDir.createSync("@zero2ai-resume-outer-");
 	await Settings.init({ inMemory: true, cwd: tempDir.path() });
 	const settings = Settings.isolated({ "compaction.enabled": false });
 

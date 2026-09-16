@@ -2,15 +2,15 @@ import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { StatusLineSegmentId } from "@oh-my-pi/pi-coding-agent/config/settings-schema";
-import { StatusLineComponent } from "@oh-my-pi/pi-coding-agent/modes/components/status-line";
-import type { SegmentContext } from "@oh-my-pi/pi-coding-agent/modes/components/status-line/segments";
-import { renderSegment } from "@oh-my-pi/pi-coding-agent/modes/components/status-line/segments";
-import { initTheme, theme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { getSessionAccentAnsi, getSessionAccentHex } from "@oh-my-pi/pi-coding-agent/utils/session-color";
-import { visibleWidth } from "@oh-my-pi/pi-tui";
-import { getProjectDir, setProjectDir } from "@oh-my-pi/pi-utils";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
+import type { StatusLineSegmentId } from "@zero2ai/coding-agent/config/settings-schema";
+import { StatusLineComponent } from "@zero2ai/coding-agent/modes/components/status-line";
+import type { SegmentContext } from "@zero2ai/coding-agent/modes/components/status-line/segments";
+import { renderSegment } from "@zero2ai/coding-agent/modes/components/status-line/segments";
+import { initTheme, theme } from "@zero2ai/coding-agent/modes/theme/theme";
+import { getSessionAccentAnsi, getSessionAccentHex } from "@zero2ai/coding-agent/utils/session-color";
+import { visibleWidth } from "@zero2ai/tui";
+import { getProjectDir, setProjectDir } from "@zero2ai/utils";
 import { StatusLineTestComponents } from "./helpers/status-line";
 
 const originalProjectDir = getProjectDir();
@@ -199,13 +199,13 @@ describe("status line session accent", () => {
 
 describe("session_name preview-title fallback", () => {
 	it("renders the stand-in title when the session is unnamed", () => {
-		const seg = renderSegment("session_name", createCtx({ previewTitle: "omp" }));
+		const seg = renderSegment("session_name", createCtx({ previewTitle: "zero2ai" }));
 		expect(seg.visible).toBe(true);
-		expect(stripAnsi(seg.content)).toBe("omp");
+		expect(stripAnsi(seg.content)).toBe("zero2ai");
 	});
 
 	it("prefers the real session name over the stand-in", () => {
-		const seg = renderSegment("session_name", createCtx({ sessionName: "Named session", previewTitle: "omp" }));
+		const seg = renderSegment("session_name", createCtx({ sessionName: "Named session", previewTitle: "zero2ai" }));
 		expect(stripAnsi(seg.content)).toBe("Named session");
 	});
 
@@ -218,12 +218,12 @@ describe("session_name preview-title fallback", () => {
 			separator: "powerline-thin",
 			sessionAccent: false,
 		});
-		const withTitle = component.getTopBorder(80, "omp");
+		const withTitle = component.getTopBorder(80, "zero2ai");
 		// The gauge fill pads the group gap, so the title chip lands flush right.
 		expect(withTitle.width).toBe(80);
-		expect(stripAnsi(withTitle.content).trimEnd().endsWith("omp")).toBe(true);
+		expect(stripAnsi(withTitle.content).trimEnd().endsWith("zero2ai")).toBe(true);
 		// Live render path passes no preview title: unnamed sessions show none.
-		expect(stripAnsi(component.getTopBorder(80).content)).not.toContain("omp");
+		expect(stripAnsi(component.getTopBorder(80).content)).not.toContain("zero2ai");
 	});
 });
 
@@ -253,7 +253,7 @@ describe("path segment truncation at varying maxLength", () => {
 	let tmpDir: string;
 
 	beforeAll(() => {
-		tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "omp-overflow-very-long-directory-name-for-testing-"));
+		tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-overflow-very-long-directory-name-for-testing-"));
 		setProjectDir(tmpDir);
 	});
 
@@ -289,7 +289,7 @@ describe("overflow: path shrinks before git is dropped", () => {
 
 	beforeAll(() => {
 		// Long dir name guarantees the path segment is wide
-		tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "omp-overflow-a-very-long-worktree-directory-name-here-"));
+		tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-overflow-a-very-long-worktree-directory-name-here-"));
 		setProjectDir(tmpDir);
 	});
 
@@ -401,7 +401,7 @@ describe("overflow: path shrinks before git is dropped", () => {
 
 	it("shrinks a short path when maxLength exceeds actual path length", () => {
 		// Short dir name — rendered path is well under the configured maxLength.
-		const shortDir = fs.mkdtempSync(path.join(os.tmpdir(), "omp-short-"));
+		const shortDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-short-"));
 		setProjectDir(shortDir);
 		try {
 			const maxLength = 160;
@@ -428,7 +428,7 @@ describe("overflow: path shrinks before git is dropped", () => {
 		}
 	});
 	it("preserves git when overflow is only 1-2 columns", () => {
-		const shortDir = fs.mkdtempSync(path.join(os.tmpdir(), "omp-narrow-ovf-"));
+		const shortDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-narrow-ovf-"));
 		setProjectDir(shortDir);
 		try {
 			const ctx = createCtx({ pathMaxLength: 80, branch: "main" });
@@ -458,7 +458,7 @@ describe("overflow: path shrinks before git is dropped", () => {
 
 describe("overflow: path survives before model", () => {
 	it("drops the model segment before the cwd path when both cannot fit", () => {
-		const root = fs.mkdtempSync(path.join(os.tmpdir(), "omp-statusline-overflow-"));
+		const root = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-statusline-overflow-"));
 		const cwd = path.join(root, "cwdxyz");
 		fs.mkdirSync(cwd);
 		setProjectDir(cwd);

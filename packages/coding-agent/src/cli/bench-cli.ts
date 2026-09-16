@@ -1,4 +1,4 @@
-import type { ResolvedThinkingLevel } from "@oh-my-pi/pi-agent-core";
+import type { ResolvedThinkingLevel } from "@zero2ai/agent-core";
 import type {
 	Api,
 	ApiKeyResolver,
@@ -10,11 +10,11 @@ import type {
 	ProviderSessionState,
 	ServiceTier,
 	ServiceTierByFamily,
-} from "@oh-my-pi/pi-ai";
-import { resolveModelServiceTier, streamSimple } from "@oh-my-pi/pi-ai";
-import { replaceTabs, truncateToWidth } from "@oh-my-pi/pi-tui";
-import { formatDuration, formatNumber, prompt } from "@oh-my-pi/pi-utils";
-import chalk from "@oh-my-pi/pi-utils/chalk";
+} from "@zero2ai/ai";
+import { resolveModelServiceTier, streamSimple } from "@zero2ai/ai";
+import { replaceTabs, truncateToWidth } from "@zero2ai/tui";
+import { formatDuration, formatNumber, prompt } from "@zero2ai/utils";
+import chalk from "@zero2ai/utils/chalk";
 import { formatModelSelectorValue, formatModelStringWithRouting } from "../config/model-resolver";
 import { buildServiceTierByFamily, serviceTierForAllFamilies, serviceTierSettingToTier } from "../config/service-tier";
 import cachePrefixTemplate from "../prompts/bench/cache-prefix.md" with { type: "text" };
@@ -551,7 +551,7 @@ function formatCachePairLine(pair: BenchCachePairReport, index: number, total: n
 interface BenchRequestOptions {
 	apiKey: ApiKeyResolver;
 	sessionId: string;
-	/** Native OMP messages; cache mode splits the stable prefix from the suffix. */
+	/** Native ZERO2AI messages; cache mode splits the stable prefix from the suffix. */
 	messages: Context["messages"];
 	maxTokens: number;
 	/** Explicit effort from a `:level` selector suffix; absent = provider default. */
@@ -609,7 +609,7 @@ async function runBenchRequest(
 			serviceTier: options.serviceTier,
 			providerSessionState,
 			preferWebsockets: true,
-			// pi-ai opts every OpenRouter request into response caching (1h TTL).
+			// zero2ai-ai opts every OpenRouter request into response caching (1h TTL).
 			// Bench sends a byte-identical request each run, so within the TTL
 			// OpenRouter replays the cached generation with zeroed usage — the run
 			// shows "tokens 0, TPS 0.0" at line speed. Opt back out so every run
@@ -918,7 +918,7 @@ export async function runBenchCommand(command: BenchCommandArgs, deps: BenchDepe
 	const now = deps.now ?? (() => performance.now());
 	const interactive = deps.stdoutIsTTY ?? process.stdout.isTTY === true;
 	if (command.models.length === 0) {
-		throw new Error("Pass at least one model selector, e.g. `omp bench opus gpt-5.2`");
+		throw new Error("Pass at least one model selector, e.g. `zero2ai bench opus gpt-5.2`");
 	}
 	let progress: BenchLiveProgress | undefined;
 	const board = json
@@ -986,7 +986,7 @@ export async function runBenchCommand(command: BenchCommandArgs, deps: BenchDepe
 			if (!preflightKey) {
 				const failure: BenchRunFailure = {
 					ok: false,
-					error: `No credentials for provider "${model.provider}". Run \`omp\` and use /login, or set the provider API key.`,
+					error: `No credentials for provider "${model.provider}". Run \`zero2ai\` and use /login, or set the provider API key.`,
 				};
 				results.push(failure);
 				if (!json) print(formatRunLine(failure, 0, runs));

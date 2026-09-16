@@ -2,9 +2,9 @@ import * as fs from "node:fs/promises";
 import * as net from "node:net";
 import * as os from "node:os";
 import * as path from "node:path";
-import { FileLock, Process, type PtyRunResult, PtySession } from "@oh-my-pi/pi-natives";
-import { isEnoent, logger, postmortem, procmgr, sanitizeText, setProcessName } from "@oh-my-pi/pi-utils";
-import { TerminalQueryResponder } from "@oh-my-pi/pi-utils/vterm";
+import { FileLock, Process, type PtyRunResult, PtySession } from "@zero2ai/natives";
+import { isEnoent, logger, postmortem, procmgr, sanitizeText, setProcessName } from "@zero2ai/utils";
+import { TerminalQueryResponder } from "@zero2ai/utils/vterm";
 import { hostHasInheritableConsole } from "../eval/py/spawn-options";
 import { truncateHead, truncateHeadBytes, truncateTail, truncateTailBytes } from "../session/streaming-output";
 import { workerEnvFromParent } from "../subprocess/worker-client";
@@ -346,7 +346,7 @@ async function holdsLiveForeignLease(pidPath: string, endpoint: string): Promise
  * Claim the one-broker-per-scope lease. The native lock is process-owned, so
  * the OS releases it however the broker dies — a crashed broker can never wedge
  * the scope behind a stale lease again (issue #11080). `broker.pid` stays as
- * human-readable metadata for `omp ps` and dead-scope pruning.
+ * human-readable metadata for `zero2ai ps` and dead-scope pruning.
  */
 async function acquireBrokerLease(runtimeDir: string, endpoint: string): Promise<BrokerLease | null> {
 	const pidPath = path.join(runtimeDir, PID_FILE);
@@ -1458,8 +1458,8 @@ export async function startDaemonBrokerFromEnvironment(options: DaemonBrokerStar
 	// releases on exit, so keeping `lease` referenced keeps the scope owned.
 	const lease = await acquireBrokerLease(runtimeDir, endpoint);
 	if (!lease) return;
-	setProcessName("omp daemon broker");
-	// Record the scope's project dir so `omp ps` can map this hash-keyed runtime
+	setProcessName("zero2ai daemon broker");
+	// Record the scope's project dir so `zero2ai ps` can map this hash-keyed runtime
 	// dir back to its project (and derive the Windows pipe name) offline.
 	void writeDaemonScopeMeta(runtimeDir, projectDir).catch(error => {
 		logger.warn("Failed to record daemon scope metadata", {

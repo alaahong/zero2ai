@@ -3,8 +3,8 @@
  * staging sidebar, and generated or manual commit composer.
  */
 
-import { getProjectDir } from "@oh-my-pi/pi-utils";
-import { Args, Command, Flags } from "@oh-my-pi/pi-utils/cli";
+import { getProjectDir } from "@zero2ai/utils";
+import { Args, Command, Flags } from "@zero2ai/utils/cli";
 import { gitHelp as commandHelp } from "../cli/command-help";
 import { runGitTui } from "../cli/git-tui";
 import { Settings, settings } from "../config/settings";
@@ -24,12 +24,12 @@ export default class Git extends Command {
 		dir: Flags.string({ char: "C", description: "Run in another directory instead of the current one" }),
 	};
 
-	static examples = ["omp git", "omp git HEAD~2", "omp git -C ~/projects/app"];
+	static examples = ["zero2ai git", "zero2ai git HEAD~2", "zero2ai git -C ~/projects/app"];
 
 	async run(): Promise<void> {
 		const { args, flags } = await this.parse(Git);
 		if (process.stdout.isTTY !== true || process.stdin.isTTY !== true) {
-			console.error("omp git is interactive and requires a TTY");
+			console.error("zero2ai git is interactive and requires a TTY");
 			process.exit(1);
 		}
 		// Load settings first so the user's configured theme/symbol preset apply

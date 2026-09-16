@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it } from "bun:test";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { TUI } from "@oh-my-pi/pi-tui";
+import type { TUI } from "@zero2ai/tui";
 import type { WatchdogConfigDoc } from "../../../src/advisor/config";
 import type { ModelRegistry } from "../../../src/config/model-registry";
 import { Settings } from "../../../src/config/settings";
@@ -59,7 +59,7 @@ describe("advisor config editor warnings and synthetic default row", () => {
 					pendingLoad = Promise.resolve({
 						advisors: [],
 						warnings: [
-							`${path.join(os.homedir(), ".omp", "WATCHDOG.yml")}: advisor "\x1b[31mBad\tName\x1b[0m" dropped — boom`,
+							`${path.join(os.homedir(), ".zero2ai", "WATCHDOG.yml")}: advisor "\x1b[31mBad\tName\x1b[0m" dropped — boom`,
 						],
 					});
 					return pendingLoad;
@@ -82,8 +82,8 @@ describe("advisor config editor warnings and synthetic default row", () => {
 
 		expect(warnings).toHaveLength(1);
 		expect(warnings[0]).toContain('advisor "Bad   Name" dropped');
-		expect(warnings[0]).toContain("~/.omp/WATCHDOG.yml");
-		expect(warnings[0]).not.toContain(path.join(os.homedir(), ".omp", "WATCHDOG.yml"));
+		expect(warnings[0]).toContain("~/.zero2ai/WATCHDOG.yml");
+		expect(warnings[0]).not.toContain(path.join(os.homedir(), ".zero2ai", "WATCHDOG.yml"));
 		// The toast is chat-mounted behind the fullscreen overlay, so the warning
 		// must also render inside the editor itself.
 		const frame = overlay.render(100).join("\n");

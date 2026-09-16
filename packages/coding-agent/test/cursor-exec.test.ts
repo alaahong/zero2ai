@@ -2,12 +2,12 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { type } from "@oh-my-pi/omptype";
-import type { AgentEvent, AgentTool, AgentToolContext } from "@oh-my-pi/pi-agent-core";
-import { type BlockState, handleServerMessage, type ToolCallState } from "@oh-my-pi/pi-ai/providers/cursor";
-import { piTruncation } from "@oh-my-pi/pi-ai/providers/cursor/exec-modern";
-import type { AssistantMessage } from "@oh-my-pi/pi-ai/types";
-import { AssistantMessageEventStream } from "@oh-my-pi/pi-ai/utils/event-stream";
+import { type } from "@zero2ai/schema";
+import type { AgentEvent, AgentTool, AgentToolContext } from "@zero2ai/agent-core";
+import { type BlockState, handleServerMessage, type ToolCallState } from "@zero2ai/ai/providers/cursor";
+import { piTruncation } from "@zero2ai/ai/providers/cursor/exec-modern";
+import type { AssistantMessage } from "@zero2ai/ai/types";
+import { AssistantMessageEventStream } from "@zero2ai/ai/utils/event-stream";
 import {
 	AgentClientMessageSchema,
 	AgentServerMessageSchema,
@@ -16,25 +16,25 @@ import {
 	McpArgsSchema,
 	ReadArgsSchema,
 	ShellArgsSchema,
-} from "@oh-my-pi/pi-catalog/discovery/cursor-proto";
-import { create, fromBinary } from "@oh-my-pi/pi-catalog/discovery/protobuf";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { CursorExecHandlers } from "@oh-my-pi/pi-coding-agent/cursor";
+} from "@zero2ai/catalog/discovery/cursor-proto";
+import { create, fromBinary } from "@zero2ai/catalog/discovery/protobuf";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { CursorExecHandlers } from "@zero2ai/coding-agent/cursor";
 import {
 	bridgeToolMap,
 	createBridgeEditTool,
 	createBridgeGrepFactory,
 	cursorMcpPrefersReplaceEdit,
 	normalizeCursorReplaceArgs,
-} from "@oh-my-pi/pi-coding-agent/cursor-bridge-tools";
+} from "@zero2ai/coding-agent/cursor-bridge-tools";
 
-import { EditTool } from "@oh-my-pi/pi-coding-agent/edit";
-import type { ExtensionRunner } from "@oh-my-pi/pi-coding-agent/extensibility/extensions";
-import { ExtensionToolWrapper } from "@oh-my-pi/pi-coding-agent/extensibility/extensions";
-import { BUILTIN_TOOLS, GrepTool, ReadTool, type Tool, type ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { BashTool } from "@oh-my-pi/pi-coding-agent/tools/bash";
-import type { TruncationMeta } from "@oh-my-pi/pi-coding-agent/tools/output-meta";
-import { removeWithRetries } from "@oh-my-pi/pi-utils";
+import { EditTool } from "@zero2ai/coding-agent/edit";
+import type { ExtensionRunner } from "@zero2ai/coding-agent/extensibility/extensions";
+import { ExtensionToolWrapper } from "@zero2ai/coding-agent/extensibility/extensions";
+import { BUILTIN_TOOLS, GrepTool, ReadTool, type Tool, type ToolSession } from "@zero2ai/coding-agent/tools";
+import { BashTool } from "@zero2ai/coding-agent/tools/bash";
+import type { TruncationMeta } from "@zero2ai/coding-agent/tools/output-meta";
+import { removeWithRetries } from "@zero2ai/utils";
 import { AdviseTool } from "../src/advisor/advise-tool";
 
 function yoloToolContext(): AgentToolContext {
@@ -121,7 +121,7 @@ describe("CursorExecHandlers.grep bridge", () => {
 		expect((sensitiveResult.details as { matchCount?: number } | undefined)?.matchCount).toBe(1);
 	});
 
-	it("honors pi_grep's requested match limit against real files", async () => {
+	it("honors zero2ai_grep's requested match limit against real files", async () => {
 		// The frame's `limit` caps total surfaced matches. The model-facing schema
 		// has no such parameter, so without a per-call tool the cap is dropped and
 		// the search returns everything it found.
@@ -145,7 +145,7 @@ describe("CursorExecHandlers.grep bridge", () => {
 		expect((uncapped.details as { matchCount?: number } | undefined)?.matchCount).toBe(10);
 	});
 
-	it("honors pi_grep's requested context width against real files", async () => {
+	it("honors zero2ai_grep's requested context width against real files", async () => {
 		// `context` has no schema parameter either: the width is read from
 		// settings fixed at tool construction, so the frame's value only lands
 		// through a per-call instance.
@@ -173,7 +173,7 @@ describe("CursorExecHandlers.grep bridge", () => {
 		expect(withContextText).toContain("after line");
 	});
 
-	it("satisfies a pi_grep limit that spans more files than one page", async () => {
+	it("satisfies a zero2ai_grep limit that spans more files than one page", async () => {
 		// The local tool windows results to the first 20 files and tells the
 		// caller to paginate with `skip`. `PiGrepExecArgs` has no `skip` field,
 		// so a frame asking for 100 matches across 25 one-match files would get
@@ -223,7 +223,7 @@ describe("CursorExecHandlers.grep bridge", () => {
 	});
 });
 
-describe("pi_bash truncation reaches the wire from a real BashTool result", () => {
+describe("zero2ai_bash truncation reaches the wire from a real BashTool result", () => {
 	let cwd: string;
 
 	beforeEach(async () => {
@@ -235,7 +235,7 @@ describe("pi_bash truncation reaches the wire from a real BashTool result", () =
 	});
 
 	it("translates the metadata BashTool actually emits, not a hand-built shape", async () => {
-		// Producer/consumer contract. `piTruncation` lives in `pi-ai`, which
+		// Producer/consumer contract. `piTruncation` lives in `zero2ai-ai`, which
 		// cannot import `BashTool`, so every test there must hand-build the
 		// details bag — and a bag built from the same assumption as the code
 		// stays green when `BashTool`'s real shape moves. This runs the actual
@@ -297,8 +297,8 @@ describe("bridge tool resolution beyond the model-facing registry", () => {
 		await removeWithRetries(cwd);
 	});
 
-	it("edits a real file from a pi_edit frame when `edit` is withheld from the model", async () => {
-		// A restricted roster omits `edit`. Native `pi_edit` still arrives, so
+	it("edits a real file from a zero2ai_edit frame when `edit` is withheld from the model", async () => {
+		// A restricted roster omits `edit`. Native `zero2ai_edit` still arrives, so
 		// the bridge must reach a real replace-mode tool through
 		// `getEditReplaceTool` — otherwise every modern edit answers
 		// `Tool "edit" not available` and the file is untouched.
@@ -344,7 +344,7 @@ describe("bridge tool resolution beyond the model-facing registry", () => {
 	it("substitutes a replace-mode edit into a granted advisor tool map", async () => {
 		// The advisor roster hands the bridge the instances it built for the
 		// advisor's own loop — default `hashline` mode, whose schema is a single
-		// `input` string. A `pi_edit` frame's `old_string`/`new_string` args fail
+		// `input` string. A `zero2ai_edit` frame's `old_string`/`new_string` args fail
 		// substitution the advisor path applies before constructing handlers.
 		const target = path.join(cwd, "sample.txt");
 		await Bun.write(target, "alpha\nbeta\n");
@@ -369,7 +369,7 @@ describe("bridge tool resolution beyond the model-facing registry", () => {
 	it("runs the replace-mode instance even when the registry still holds another mode", async () => {
 		// Hashline `edit` stays advertised as MCP. `executeTool` prefers the map
 		// over the `getTool` fallback, so without an explicit replace-mode
-		// accessor every native `pi_edit` fails validation against the hashline
+		// accessor every native `zero2ai_edit` fails validation against the hashline
 		// schema.
 
 		const target = path.join(cwd, "sample.txt");
@@ -393,7 +393,7 @@ describe("bridge tool resolution beyond the model-facing registry", () => {
 		expect(await Bun.file(target).text()).toBe("alpha\ngamma\n");
 	});
 
-	it("still refuses a pi_edit frame when the session granted no edit tool", async () => {
+	it("still refuses a zero2ai_edit frame when the session granted no edit tool", async () => {
 		// The accessor carries the grant: a restricted roster returns undefined
 		// from it, and no other resolution path may substitute a mutating tool
 		// (issue #5680). Building the instance provider-independently must not
@@ -439,7 +439,7 @@ describe("bridge tool resolution beyond the model-facing registry", () => {
 		expect(await Bun.file(target).text()).toBe("alpha\nbeta\n");
 	});
 
-	it("refuses a scoped pi_grep when no grep tool was granted", async () => {
+	it("refuses a scoped zero2ai_grep when no grep tool was granted", async () => {
 		// The factory builds a fresh tool and `executeTool` prefers that override
 		// over the registry, so a session that withheld `grep` must not install
 		// one — otherwise a frame carrying `context`/`limit` searches anyway.
@@ -454,7 +454,7 @@ describe("bridge tool resolution beyond the model-facing registry", () => {
 		expect(result.content.map(c => (c.type === "text" ? c.text : "")).join("")).toContain("not available");
 	});
 
-	it("denies a native pi_edit frame the user's policy blocks", async () => {
+	it("denies a native zero2ai_edit frame the user's policy blocks", async () => {
 		// The bridge's `edit` is wrapped, but `ExtensionToolWrapper` reads the
 		// approval mode and per-tool policies only from the execute-time
 		// context — without it the call fails closed, and a configured `deny`
@@ -480,7 +480,7 @@ describe("bridge tool resolution beyond the model-facing registry", () => {
 		expect(await Bun.file(target).text()).toBe("alpha\nbeta\n");
 	});
 
-	it("denies a scoped pi_grep frame the user's policy blocks", async () => {
+	it("denies a scoped zero2ai_grep frame the user's policy blocks", async () => {
 		// Same gate on the other bridge-only tool: the per-call `grep` the
 		// factory builds for a frame carrying `context`/`limit` must answer to
 		// `tools.approval.grep` like every registry call.
@@ -530,7 +530,7 @@ describe("bridge tool resolution beyond the model-facing registry", () => {
 		expect((result.details as { matchCount?: number } | undefined)?.matchCount).toBe(1);
 	});
 
-	it("denies a pi_write frame the user's policy blocks when the tool came from the caller's map", async () => {
+	it("denies a zero2ai_write frame the user's policy blocks when the tool came from the caller's map", async () => {
 		// The advisor hands the bridge its own tool map. Those instances are run
 		// directly by `piWrite`/`piBash`, so an unwrapped one executes whatever
 		// the frame asks regardless of `tools.approval.<tool>` — supplying
@@ -627,7 +627,7 @@ describe("Cursor MCP StrReplace fallback", () => {
 
 		const result = await handlers.mcp({
 			name: "edit",
-			providerIdentifier: "pi-agent",
+			providerIdentifier: "zero2ai-agent",
 			toolName: "edit",
 			toolCallId: "e-mix",
 			args: { path: target, old_text: "beta", new_text: "gamma" },
@@ -654,7 +654,7 @@ describe("Cursor MCP StrReplace fallback", () => {
 
 		await handlers.mcp({
 			name: "edit",
-			providerIdentifier: "pi-agent",
+			providerIdentifier: "zero2ai-agent",
 			toolName: "edit",
 			toolCallId: "e-hl",
 			args: { input: "[missing.txt]\nPUT 1.=1:\n+x\n" },
@@ -687,7 +687,7 @@ describe("Cursor MCP StrReplace fallback", () => {
 	});
 });
 
-describe("pi_bash timeout presence", () => {
+describe("zero2ai_bash timeout presence", () => {
 	let cwd: string;
 	let handlers: CursorExecHandlers;
 
@@ -883,7 +883,7 @@ describe("CursorExecHandlers mounted tool bridge", () => {
 
 		const result = await handlers.mcp({
 			name: mountedTool.name,
-			providerIdentifier: "pi-agent",
+			providerIdentifier: "zero2ai-agent",
 			toolName: mountedTool.name,
 			toolCallId: "call-mounted",
 			args: {},
@@ -924,7 +924,7 @@ describe("CursorExecHandlers mounted tool bridge", () => {
 
 		const result = await handlers.mcp({
 			name: device.name,
-			providerIdentifier: "pi-agent",
+			providerIdentifier: "zero2ai-agent",
 			toolName: device.name,
 			toolCallId: "call-denied",
 			args: {},
@@ -1391,7 +1391,7 @@ describe("CursorExecHandlers advise routing (issue #5680)", () => {
 							name: "advise",
 							toolName: "advise",
 							toolCallId: "call-advise-1",
-							providerIdentifier: "pi-agent",
+							providerIdentifier: "zero2ai-agent",
 							args: { note: new TextEncoder().encode(JSON.stringify(note)) },
 						}),
 					},
@@ -1753,7 +1753,7 @@ describe("CursorExecHandlers Pi frame translation", () => {
 		return { handlers, calls };
 	}
 
-	it("inverts pi_grep's ignore_case into the local tool's case-sensitivity flag", async () => {
+	it("inverts zero2ai_grep's ignore_case into the local tool's case-sensitivity flag", async () => {
 		// `ignore_case` and `case` are opposites. Passing the frame's value
 		// straight through would flip every search's matching.
 		const { handlers, calls } = recordingHandlers("grep");
@@ -1769,7 +1769,7 @@ describe("CursorExecHandlers Pi frame translation", () => {
 		]);
 	});
 
-	it("folds pi_grep's separate glob onto the local tool's single path spec", async () => {
+	it("folds zero2ai_grep's separate glob onto the local tool's single path spec", async () => {
 		const { handlers, calls } = recordingHandlers("grep");
 
 		await handlers.piGrep({ toolCallId: "c1", args: { pattern: "x", path: "src", glob: "**/*.ts" } } as never);
@@ -1786,7 +1786,7 @@ describe("CursorExecHandlers Pi frame translation", () => {
 		expect((calls[3] as { path: string }).path).toBe("/abs/**/*.ts");
 	});
 
-	it("composes pi_read's offset/limit onto the path as the read tool's range selector", async () => {
+	it("composes zero2ai_read's offset/limit onto the path as the read tool's range selector", async () => {
 		// `read` takes no range kwargs, so a dropped offset/limit silently returns
 		// the whole file. `offset` is a 1-indexed start and `limit` a line count,
 		// which is exactly the `:N+K` selector — `raw`, since a plain range pads
@@ -1810,7 +1810,7 @@ describe("CursorExecHandlers Pi frame translation", () => {
 		]);
 	});
 
-	it("answers a present pi_read limit of zero with empty output instead of the whole file", async () => {
+	it("answers a present zero2ai_read limit of zero with empty output instead of the whole file", async () => {
 		// `limit: 0` is present, not unset: the reference slices zero lines. No
 		// `read` selector expresses an empty range, so treating it as unset would
 		// return the entire file — the opposite of what was asked.
@@ -1823,7 +1823,7 @@ describe("CursorExecHandlers Pi frame translation", () => {
 		expect(result.content).toEqual([{ type: "text", text: "" }]);
 	});
 
-	it("composes the legacy read frame's offset/limit the same way pi_read does", async () => {
+	it("composes the legacy read frame's offset/limit the same way zero2ai_read does", async () => {
 		// Modern Cursor builds paginate the legacy `read` frame too. Dropping the
 		// range returns the whole file for every page, so a model walking a large
 		// file never advances past the first window.
@@ -1849,7 +1849,7 @@ describe("CursorExecHandlers Pi frame translation", () => {
 		expect(calls.map(call => (call as { skip?: number }).skip)).toEqual([20, undefined, undefined]);
 	});
 
-	it("returns exactly the lines a pi_read range asked for", async () => {
+	it("returns exactly the lines a zero2ai_read range asked for", async () => {
 		// Producer/consumer contract against the real `ReadTool`: a plain `:N+K`
 		// selector deliberately pads with one leading and three trailing context
 		// lines, so offset 5/limit 20 would hand Cursor lines 4-27 for a request
@@ -1881,7 +1881,7 @@ describe("CursorExecHandlers Pi frame translation", () => {
 		}
 	});
 
-	it("escapes pi_grep's pattern when the frame asks for a literal search", async () => {
+	it("escapes zero2ai_grep's pattern when the frame asks for a literal search", async () => {
 		// The local tool is regex-only, so an unescaped literal turns regex
 		// metacharacters into operators and matches the wrong lines.
 		const { handlers, calls } = recordingHandlers("grep");
@@ -1893,8 +1893,8 @@ describe("CursorExecHandlers Pi frame translation", () => {
 		expect((calls[1] as { pattern: string }).pattern).toBe("a.b(c)");
 	});
 
-	it("routes pi_find to glob, not grep, joining its pattern onto the path", async () => {
-		// `pi_find` searches filenames. Routing it to `grep` would search file
+	it("routes zero2ai_find to glob, not grep, joining its pattern onto the path", async () => {
+		// `zero2ai_find` searches filenames. Routing it to `grep` would search file
 		// contents for the glob text and return nothing.
 		const { handlers, calls } = recordingHandlers("glob");
 
@@ -1912,7 +1912,7 @@ describe("CursorExecHandlers Pi frame translation", () => {
 		]);
 	});
 
-	it("renames pi_edit's camelCase replacements to the local tool's snake_case pairs", async () => {
+	it("renames zero2ai_edit's camelCase replacements to the local tool's snake_case pairs", async () => {
 		const { handlers, calls } = recordingHandlers("edit");
 
 		await handlers.piEdit({
@@ -1923,7 +1923,7 @@ describe("CursorExecHandlers Pi frame translation", () => {
 		expect(calls[0]).toEqual({ path: "a.ts", old_string: "before", new_string: "after" });
 	});
 
-	it("sends a multi-replacement pi_edit frame as one batched tool call", async () => {
+	it("sends a multi-replacement zero2ai_edit frame as one batched tool call", async () => {
 		// One frame must stay one tool lifecycle: looping per replacement would
 		// emit duplicate start/end events under the same toolCallId and return
 		// only the last replacement's diff. Multi-replacement frames therefore
@@ -1952,7 +1952,7 @@ describe("CursorExecHandlers Pi frame translation", () => {
 		]);
 	});
 
-	it("lists directories for pi_ls through read, defaulting an empty path to cwd", async () => {
+	it("lists directories for zero2ai_ls through read, defaulting an empty path to cwd", async () => {
 		const { handlers, calls } = recordingHandlers("read");
 
 		await handlers.piLs({ toolCallId: "c1", args: { path: "" } } as never);

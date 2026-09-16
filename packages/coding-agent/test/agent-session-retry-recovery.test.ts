@@ -1,20 +1,20 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as path from "node:path";
 import { scheduler } from "node:timers/promises";
-import { Agent, AgentBusyError } from "@oh-my-pi/pi-agent-core";
-import type { ApiKeyResolveContext, AssistantMessage, AssistantRetryRecovery, Usage } from "@oh-my-pi/pi-ai";
-import { createMockModel } from "@oh-my-pi/pi-ai/providers/mock";
-import * as aiStream from "@oh-my-pi/pi-ai/stream";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { resolveAssistantErrorPresentation } from "@oh-my-pi/pi-coding-agent/modes/utils/transcript-render-helpers";
-import { AgentSession, type AgentSessionEvent } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SILENT_ABORT_MARKER } from "@oh-my-pi/pi-coding-agent/session/messages";
-import type { SessionMessageEntry } from "@oh-my-pi/pi-coding-agent/session/session-entries";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { Agent, AgentBusyError } from "@zero2ai/agent-core";
+import type { ApiKeyResolveContext, AssistantMessage, AssistantRetryRecovery, Usage } from "@zero2ai/ai";
+import { createMockModel } from "@zero2ai/ai/providers/mock";
+import * as aiStream from "@zero2ai/ai/stream";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { resolveAssistantErrorPresentation } from "@zero2ai/coding-agent/modes/utils/transcript-render-helpers";
+import { AgentSession, type AgentSessionEvent } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SILENT_ABORT_MARKER } from "@zero2ai/coding-agent/session/messages";
+import type { SessionMessageEntry } from "@zero2ai/coding-agent/session/session-entries";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { TempDir } from "@zero2ai/utils";
 
 type AutoRetryEndEvent = Extract<AgentSessionEvent, { type: "auto_retry_end" }>;
 
@@ -126,13 +126,13 @@ describe("AgentSession retry recovery", () => {
 	let managers: SessionManager[];
 
 	beforeAll(async () => {
-		fixtureDir = TempDir.createSync("@pi-retry-recovery-fixture-");
+		fixtureDir = TempDir.createSync("@zero2ai-retry-recovery-fixture-");
 		authStorage = await AuthStorage.create(path.join(fixtureDir.path(), "testauth.db"));
 		modelRegistry = new ModelRegistry(authStorage, path.join(fixtureDir.path(), "models.yml"));
 	});
 
 	beforeEach(async () => {
-		tempDir = TempDir.createSync("@pi-retry-recovery-");
+		tempDir = TempDir.createSync("@zero2ai-retry-recovery-");
 		vi.spyOn(aiStream, "getEnvApiKey").mockReturnValue(undefined);
 		await authStorage.remove("anthropic");
 		authStorage.removeRuntimeApiKey("anthropic");

@@ -22,7 +22,7 @@
  * variants at a fork and jump between user turns elsewhere, Enter rewinds to
  * the outlined item, Esc cancels.
  */
-import type { AgentTool } from "@oh-my-pi/pi-agent-core";
+import type { AgentTool } from "@zero2ai/agent-core";
 import {
 	type Component,
 	matchesKey,
@@ -32,7 +32,7 @@ import {
 	sliceByColumn,
 	type TUI,
 	truncateToWidth,
-} from "@oh-my-pi/pi-tui";
+} from "@zero2ai/tui";
 import type { MessageRenderer } from "../../extensibility/extensions/types";
 import type { TranscriptEntry } from "../../session/session-context";
 import { theme } from "../theme/theme";

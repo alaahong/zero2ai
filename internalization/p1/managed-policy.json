@@ -1,0 +1,13 @@
+{
+  "approvalMode": "always-ask",
+  "approval": {
+    "*": "prompt",
+    "eval": "deny",
+    "computer": "deny",
+    "web_search": "deny",
+    "bash": "prompt"
+  },
+  "extensions": [
+    "/etc/corp/zero2ai/extensions/audit-hook.ts"
+  ]
+}

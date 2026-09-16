@@ -11,19 +11,19 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { Agent } from "@oh-my-pi/pi-agent-core";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import type { EffectiveExtensionRoots } from "@oh-my-pi/pi-coding-agent/capability/types";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import "@oh-my-pi/pi-coding-agent/discovery";
-import { setActiveSkills } from "@oh-my-pi/pi-coding-agent/extensibility/skills";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { convertToLlm } from "@oh-my-pi/pi-coding-agent/session/messages";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { discoverAgents } from "@oh-my-pi/pi-coding-agent/task/discovery";
-import { removeSyncWithRetries } from "@oh-my-pi/pi-utils";
+import { Agent } from "@zero2ai/agent-core";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import type { EffectiveExtensionRoots } from "@zero2ai/coding-agent/capability/types";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import "@zero2ai/coding-agent/discovery";
+import { setActiveSkills } from "@zero2ai/coding-agent/extensibility/skills";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { convertToLlm } from "@zero2ai/coding-agent/session/messages";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { discoverAgents } from "@zero2ai/coding-agent/task/discovery";
+import { removeSyncWithRetries } from "@zero2ai/utils";
 
 interface SessionInputs {
 	additionalExtensionPaths?: readonly string[];
@@ -56,7 +56,7 @@ describe("AgentSession extension-root discovery (post-startup)", () => {
 	let tempDir: string;
 
 	beforeEach(() => {
-		tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "omp-session-ext-"));
+		tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-session-ext-"));
 	});
 
 	afterEach(async () => {

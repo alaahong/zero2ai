@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "bun:test";
-import { connectToServer } from "@oh-my-pi/pi-coding-agent/mcp/client";
-import { MCPTransportError } from "@oh-my-pi/pi-coding-agent/mcp/errors";
-import { HttpTransport } from "@oh-my-pi/pi-coding-agent/mcp/transports/http";
-import { postmortem } from "@oh-my-pi/pi-utils";
+import { connectToServer } from "@zero2ai/coding-agent/mcp/client";
+import { MCPTransportError } from "@zero2ai/coding-agent/mcp/errors";
+import { HttpTransport } from "@zero2ai/coding-agent/mcp/transports/http";
+import { postmortem } from "@zero2ai/utils";
 
 const encoder = new TextEncoder();
 const REQUEST_TIMEOUT_MS = 50;

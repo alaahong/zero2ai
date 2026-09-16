@@ -10,11 +10,11 @@ import {
 	type AgentMessage,
 	EventLoopKeepalive,
 	ThinkingLevel,
-} from "@oh-my-pi/pi-agent-core";
-import type { CompactionOutcome } from "@oh-my-pi/pi-agent-core/compaction";
-import type { AssistantMessage, ImageContent, Message, Model, Usage, UsageReport } from "@oh-my-pi/pi-ai";
-import { modelsAreEqual } from "@oh-my-pi/pi-catalog/models";
-import { execReplace } from "@oh-my-pi/pi-natives";
+} from "@zero2ai/agent-core";
+import type { CompactionOutcome } from "@zero2ai/agent-core/compaction";
+import type { AssistantMessage, ImageContent, Message, Model, Usage, UsageReport } from "@zero2ai/ai";
+import { modelsAreEqual } from "@zero2ai/catalog/models";
+import { execReplace } from "@zero2ai/natives";
 import type {
 	AutocompleteProvider,
 	Component,
@@ -22,7 +22,7 @@ import type {
 	LoaderMessageColorFn,
 	OverlayHandle,
 	SlashCommand,
-} from "@oh-my-pi/pi-tui";
+} from "@zero2ai/tui";
 import {
 	Container,
 	clearRenderCache,
@@ -38,9 +38,9 @@ import {
 	type TUI,
 	visibleWidth,
 	wrapTextWithAnsi,
-} from "@oh-my-pi/pi-tui";
-import type { TerminalAppearanceRequestToken } from "@oh-my-pi/pi-tui/terminal";
-import { isInsideTerminalMultiplexer } from "@oh-my-pi/pi-tui/terminal-capabilities";
+} from "@zero2ai/tui";
+import type { TerminalAppearanceRequestToken } from "@zero2ai/tui/terminal";
+import { isInsideTerminalMultiplexer } from "@zero2ai/tui/terminal-capabilities";
 import {
 	$env,
 	adjustHsv,
@@ -54,8 +54,8 @@ import {
 	sanitizeText,
 	stableStringifyJson,
 	setProjectDir,
-} from "@oh-my-pi/pi-utils";
-import chalk from "@oh-my-pi/pi-utils/chalk";
+} from "@zero2ai/utils";
+import chalk from "@zero2ai/utils/chalk";
 import { reset as resetCapabilities } from "../capability";
 import { restartArgv } from "../cli/flag-tables";
 import type { CollabGuestLink } from "../collab/guest";
@@ -1154,7 +1154,7 @@ export class InteractiveMode implements InteractiveModeContext {
 		// capability (`TERMINAL.supportsTextSizing` defaults on for Kitty) so it stays off
 		// unless the user opts in, and never emits raw escapes on other terminals.
 		setTerminalTextSizing(settings.get("tui.textSizing") && TERMINAL.supportsTextSizing);
-		// Keep generic pi-tui renderers aligned with the coding-agent setting.
+		// Keep generic zero2ai-tui renderers aligned with the coding-agent setting.
 		applyHyperlinkSetting();
 		this.ui.setInlineMouseTrackingProvider(() => {
 			const on = this.#isMouseCaptureEnabled();
@@ -1542,7 +1542,7 @@ export class InteractiveMode implements InteractiveModeContext {
 		// callback requestRender(true) queued above (immediates are FIFO) — the
 		// spawn syscall never lands in the same loop turn ahead of the first paint.
 		setImmediate(() => {
-			if (!$env.PI_NO_TITLE && !this.sessionManager.getSessionName()) {
+			if (!$env.ZERO2AI_NO_TITLE && !this.sessionManager.getSessionName()) {
 				tinyTitleClient.prewarm(this.settings.get("providers.tinyModel"));
 			}
 		});
@@ -1571,7 +1571,7 @@ export class InteractiveMode implements InteractiveModeContext {
 		// custom messages, branch summaries, and compaction summaries) and the user
 		// set no explicit `mode_change` (which #reconcileModeFromSession just
 		// restored). SDK startup metadata and extension `custom` state entries are
-		// ignored. This way `omp --continue` (or auto-resume) that finds no recent
+		// ignored. This way `zero2ai --continue` (or auto-resume) that finds no recent
 		// session and creates a fresh one still honors the default, while a session
 		// with restored context or an explicit mode keeps its reconciled mode. Scoped
 		// to launch (not the switch reconciler above) so /new and the plan-approval →
@@ -5547,7 +5547,7 @@ export class InteractiveMode implements InteractiveModeContext {
 		// Do not force a final render during teardown: disposed session/UI state can
 		// collapse to an empty frame, clearing the viewport and leaving the parent
 		// shell prompt at row 0. Stop from the last committed frame so the terminal
-		// hands Bash the cursor immediately after visible OMP content.
+		// hands Bash the cursor immediately after visible ZERO2AI content.
 		// Drain any in-flight Kitty key release events before stopping.
 		// This prevents escape sequences from leaking to the parent shell over slow SSH.
 		await this.ui.terminal.drainInput(1000);

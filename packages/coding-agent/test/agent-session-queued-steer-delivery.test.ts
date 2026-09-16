@@ -15,16 +15,16 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { Agent } from "@oh-my-pi/pi-agent-core";
-import { createMockModel, type MockModel, type MockResponse } from "@oh-my-pi/pi-ai/providers/mock";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { USER_INTERRUPT_LABEL } from "@oh-my-pi/pi-coding-agent/session/messages";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { removeSyncWithRetries, Snowflake } from "@oh-my-pi/pi-utils";
+import { Agent } from "@zero2ai/agent-core";
+import { createMockModel, type MockModel, type MockResponse } from "@zero2ai/ai/providers/mock";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { USER_INTERRUPT_LABEL } from "@zero2ai/coding-agent/session/messages";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { removeSyncWithRetries, Snowflake } from "@zero2ai/utils";
 
 const COLLAB_PROMPT_TYPE = "collab-prompt";
 
@@ -42,7 +42,7 @@ describe("AgentSession queued steer delivery", () => {
 	let session: AgentSession;
 
 	beforeAll(async () => {
-		fixtureDir = path.join(os.tmpdir(), `pi-steer-strand-fixture-${Snowflake.next()}`);
+		fixtureDir = path.join(os.tmpdir(), `zero2ai-steer-strand-fixture-${Snowflake.next()}`);
 		fs.mkdirSync(fixtureDir, { recursive: true });
 		authStorage = await AuthStorage.create(path.join(fixtureDir, "auth.db"));
 		authStorage.setRuntimeApiKey("anthropic", "test-key");
@@ -50,7 +50,7 @@ describe("AgentSession queued steer delivery", () => {
 	});
 
 	beforeEach(() => {
-		tempDir = path.join(os.tmpdir(), `pi-steer-strand-${Snowflake.next()}`);
+		tempDir = path.join(os.tmpdir(), `zero2ai-steer-strand-${Snowflake.next()}`);
 		fs.mkdirSync(tempDir, { recursive: true });
 	});
 

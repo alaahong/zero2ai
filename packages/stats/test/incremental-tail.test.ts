@@ -3,18 +3,18 @@ import { beforeEach, describe, expect, it, spyOn } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { syncAllSessions } from "@oh-my-pi/omp-stats/aggregator";
-import { closeDb, getFileOffset, getOverallStats, getRecentRequests, initDb } from "@oh-my-pi/omp-stats/db";
-import { getSessionsDir, getStatsDbPath } from "@oh-my-pi/pi-utils";
+import { syncAllSessions } from "@zero2ai/stats/aggregator";
+import { closeDb, getFileOffset, getOverallStats, getRecentRequests, initDb } from "@zero2ai/stats/db";
+import { getSessionsDir, getStatsDbPath } from "@zero2ai/utils";
 import { installStatsTestIsolation } from "./helpers/temp-agent";
 
-const isolation = installStatsTestIsolation("@pi-stats-tail-");
+const isolation = installStatsTestIsolation("@zero2ai-stats-tail-");
 
 beforeEach(() => {
 	const temp = isolation.current();
 	if (
 		!temp ||
-		path.resolve(os.homedir(), process.env.PI_CONFIG_DIR ?? "") !== temp.join("config") ||
+		path.resolve(os.homedir(), process.env.ZERO2AI_CONFIG_DIR ?? "") !== temp.join("config") ||
 		!getStatsDbPath().startsWith(`${temp.path()}${path.sep}`)
 	) {
 		throw new Error("Stats tests require an isolated temporary configuration and database");

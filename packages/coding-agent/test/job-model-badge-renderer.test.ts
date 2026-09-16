@@ -1,6 +1,6 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "bun:test";
-import { ThinkingLevel } from "@oh-my-pi/pi-agent-core";
-import { visibleWidth } from "@oh-my-pi/pi-tui";
+import { ThinkingLevel } from "@zero2ai/agent-core";
+import { visibleWidth } from "@zero2ai/tui";
 import { AsyncJobManager } from "../src/async/job-manager";
 import { resetSettingsForTest, Settings, settings } from "../src/config/settings";
 import { getThemeByName, setThemeInstance, type Theme } from "../src/modes/theme/theme";

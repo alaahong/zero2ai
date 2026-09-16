@@ -11,7 +11,7 @@
   - `packages/coding-agent/src/utils/github.ts` — `gh` process wrapper (`github.run/json/text()`), non-interactive env, command deadline, bounded output capture.
   - `packages/coding-agent/src/tools/gh-common.ts` — shared helpers, current-repo resolution, result building.
   - `packages/coding-agent/src/utils/repo-lock.ts` — per-repo write serialization (`withRepoLock`).
-  - `@oh-my-pi/pi-natives/vcs` — git operations (`vcs.git()` / `vcs.requireGit()`: branch/worktree/config/push).
+  - `@zero2ai/natives/vcs` — git operations (`vcs.git()` / `vcs.requireGit()`: branch/worktree/config/push).
   - `packages/utils/src/dirs.ts` — base directory for dedicated PR worktrees.
   - `packages/coding-agent/src/sdk.ts` — session artifact allocation hook.
   - `packages/coding-agent/src/session/artifacts.ts` — artifact filename format `<id>.<toolType>.log`.
@@ -78,7 +78,7 @@ The tool returns a single text result built by `buildTextResult()` in `packages/
 5. Read-style ops (`repo_view`, `file_read`, `search_*`) fetch repository data and return text or formatted Markdown-like summaries. `file_read` uses GitHub's contents API with the raw-media accept header and preserves the response bytes as text. Single-issue and single-PR views were moved out of the tool and now resolve through the `issue://` / `pr://` internal URL schemes, which share the same SQLite cache.
 6. PR diffs moved out of the tool. `pr://<N>/diff` lists changed files, `pr://<N>/diff/<i>` slices a single file, and `pr://<N>/diff/all` returns the full unified diff — see `docs/tools/read.md`. All three variants share one `gh pr diff` invocation through the `pr-diff` cache row.
 7. `pr_checkout` resolves PR metadata first, then enters `withRepoLock()` (`packages/coding-agent/src/utils/repo-lock.ts`) before any git mutation so parallel checkout calls for the same primary repo do not race on shared `.git` state.
-8. `pr_push` reads PR head metadata back from git branch config, derives a refspec, pushes with `repository.push()` (`@oh-my-pi/pi-natives/vcs`), then invalidates the cached `pr://` rows for the pushed PR via `invalidateAllForNumber()` so the next `pr://` read reflects the push.
+8. `pr_push` reads PR head metadata back from git branch config, derives a refspec, pushes with `repository.push()` (`@zero2ai/natives/vcs`), then invalidates the cached `pr://` rows for the pushed PR via `invalidateAllForNumber()` so the next `pr://` read reflects the push.
 9. `pr_create` shells out once, then best-effort re-reads the created PR for a richer summary.
 10. `run_watch` chooses either run mode (`run` supplied) or commit mode (`run` omitted), polls GitHub Actions APIs every 3 seconds for the first minute and every 15 seconds after that, emits streaming updates, and may save a full failed-log artifact before returning.
 11. Final text goes through `toolResult().text(...)`; if `session.allocateOutputArtifact()` returns a slot, failed-log text is persisted with `Bun.write()`.
@@ -109,7 +109,7 @@ If `repo` is omitted, `gh` repository resolution is used.
 
 `repo` defaults to the current checkout's GitHub repository. Omitting `branch` asks GitHub for the repository's default branch. Every path segment is URL-encoded independently. The operation rejects an empty path or one beginning with `/`; GitHub reports missing files, directories, and invalid refs through the normal CLI error mapping. The model-facing prompt requires this operation, rather than `curl` or `wget`, for files hosted in GitHub repositories.
 
-Single-issue and single-PR reads live in the `issue://<N>` / `pr://<N>` URL schemes (see `docs/tools/read.md`). They share `~/.omp/cache/github-cache.db` (override via `OMP_GITHUB_CACHE_DB`) and the `github.cache.softTtlSec` / `github.cache.hardTtlSec` / `github.cache.enabled` settings. The cache retains rendered Markdown plus the raw JSON payload returned by `gh`, including private bodies, comments, reviews, and review comments when comments are enabled; rows are scoped by the local GitHub credential fingerprint. Root and repo-scoped reads (`issue://`, `pr://owner/repo`) issue a live `gh issue list` / `gh pr list` for browsing; query params `state`, `limit`, `author`, `label` pass through to `gh` (`issue://` accepts `state=open|closed|all`; `pr://` also accepts `merged`). PR diffs ride the same cache under `pr://<N>/diff[/…]`: the listing, full diff, and per-file slices all share one `pr-diff` row keyed by repo and PR number.
+Single-issue and single-PR reads live in the `issue://<N>` / `pr://<N>` URL schemes (see `docs/tools/read.md`). They share `~/.zero2ai/cache/github-cache.db` (override via `ZERO2AI_GITHUB_CACHE_DB`) and the `github.cache.softTtlSec` / `github.cache.hardTtlSec` / `github.cache.enabled` settings. The cache retains rendered Markdown plus the raw JSON payload returned by `gh`, including private bodies, comments, reviews, and review comments when comments are enabled; rows are scoped by the local GitHub credential fingerprint. Root and repo-scoped reads (`issue://`, `pr://owner/repo`) issue a live `gh issue list` / `gh pr list` for browsing; query params `state`, `limit`, `author`, `label` pass through to `gh` (`issue://` accepts `state=open|closed|all`; `pr://` also accepts `merged`). PR diffs ride the same cache under `pr://<N>/diff[/…]`: the listing, full diff, and per-file slices all share one `pr-diff` row keyed by repo and PR number.
 
 ### `pr_create`
 
@@ -138,18 +138,18 @@ Branches:
 
 Worktree and metadata behavior:
 - Local branch name is always `pr-<number>`.
-- Worktree path is `getWorktreeDir("<number>-<repo-hash>")` = `path.join(getWorktreesDir(), "<number>-<repo-hash>")`, where `<number>` is the PR number and `<repo-hash>` is `hashPath(primaryRepoRoot)` (a 7-hex digest of the primary repo root). `getWorktreesDir()` resolves the base in this order: a valid `OMP_WORKTREE_DIR`, the applied `worktree.base` setting, then the profile/XDG-aware data-root default (normally `~/.omp/wt`). Both overrides expand a leading `~` and must resolve to an absolute path; an invalid relative value is ignored and resolution falls through. `resolveAvailableWorktreePath()` appends a `-2`/`-3`… suffix when the resulting path is already registered with git or present on disk.
-- Existing worktree detection is by branch ref `refs/heads/pr-<number>` from `repository.worktrees()` (`@oh-my-pi/pi-natives/vcs`).
+- Worktree path is `getWorktreeDir("<number>-<repo-hash>")` = `path.join(getWorktreesDir(), "<number>-<repo-hash>")`, where `<number>` is the PR number and `<repo-hash>` is `hashPath(primaryRepoRoot)` (a 7-hex digest of the primary repo root). `getWorktreesDir()` resolves the base in this order: a valid `ZERO2AI_WORKTREE_DIR`, the applied `worktree.base` setting, then the profile/XDG-aware data-root default (normally `~/.zero2ai/wt`). Both overrides expand a leading `~` and must resolve to an absolute path; an invalid relative value is ignored and resolution falls through. `resolveAvailableWorktreePath()` appends a `-2`/`-3`… suffix when the resulting path is already registered with git or present on disk.
+- Existing worktree detection is by branch ref `refs/heads/pr-<number>` from `repository.worktrees()` (`@zero2ai/natives/vcs`).
 - New worktree creation calls `repository.worktreeAdd(finalWorktreePath, localBranch, false, signal)` after verifying the path is neither already registered nor already present on disk.
 - For same-repo PRs, remote is `origin`. For cross-repo PRs, the tool resolves a clone URL for the head repo, reuses an existing remote with the same URL when possible, or creates `fork-<owner>` / `fork-<owner>-<n>`.
 - The branch push metadata is persisted with `git config` under the repository's shared `.git/config` as:
   - `branch.pr-<number>.remote`
   - `branch.pr-<number>.merge`
   - `branch.pr-<number>.pushRemote`
-  - `branch.pr-<number>.ompPrHeadRef`
-  - `branch.pr-<number>.ompPrUrl`
-  - `branch.pr-<number>.ompPrIsCrossRepository`
-  - `branch.pr-<number>.ompPrMaintainerCanModify`
+  - `branch.pr-<number>.zero2aiPrHeadRef`
+  - `branch.pr-<number>.zero2aiPrUrl`
+  - `branch.pr-<number>.zero2aiPrIsCrossRepository`
+  - `branch.pr-<number>.zero2aiPrMaintainerCanModify`
 - If `refs/heads/pr-<number>` already exists at a different commit, checkout fails unless `force=true`, in which case `repository.createBranch(..., force=true)` resets it to the fetched PR head.
 - If a matching worktree already exists, the tool reuses it and reports `reused: true`.
 
@@ -163,7 +163,7 @@ Worktree and metadata behavior:
 | Batching | None |
 | Output | `# Pushed Pull Request Branch` summary with local branch, remote, remote branch, remote URL, PR URL, and force-with-lease flag. `sourceUrl = prUrl` when known. |
 
-Push target resolution reads the `branch.<name>.ompPrHeadRef`, `pushRemote`/`remote`, `ompPrUrl`, `ompPrMaintainerCanModify`, and `ompPrIsCrossRepository` git-config keys written by `pr_checkout`. If the current checked-out branch matches the target branch, the source ref is `HEAD`; otherwise it pushes `refs/heads/<branch>`. The refspec is `HEAD:refs/heads/<headRef>` or `refs/heads/<branch>:refs/heads/<headRef>`.
+Push target resolution reads the `branch.<name>.zero2aiPrHeadRef`, `pushRemote`/`remote`, `zero2aiPrUrl`, `zero2aiPrMaintainerCanModify`, and `zero2aiPrIsCrossRepository` git-config keys written by `pr_checkout`. If the current checked-out branch matches the target branch, the source ref is `HEAD`; otherwise it pushes `refs/heads/<branch>`. The refspec is `HEAD:refs/heads/<headRef>` or `refs/heads/<branch>:refs/heads/<headRef>`.
 
 ### `search_issues`
 
@@ -247,14 +247,14 @@ Watch flow:
 ## Side Effects
 - Filesystem
   - `pr_create` may create a temp dir under `os.tmpdir()` named `gh-pr-body-*`, write `body.md`, then remove the dir in `finally`.
-  - `pr_checkout` may create worktree directories named `<pr-number>-<repo-hash>` under the base selected by `OMP_WORKTREE_DIR`, then `worktree.base`, then the profile/XDG-aware default (normally `~/.omp/wt`), and add git worktrees there.
+  - `pr_checkout` may create worktree directories named `<pr-number>-<repo-hash>` under the base selected by `ZERO2AI_WORKTREE_DIR`, then `worktree.base`, then the profile/XDG-aware default (normally `~/.zero2ai/wt`), and add git worktrees there.
   - `run_watch` may write a session artifact with full failed-job logs.
 - Network
   - Every op shells out to `gh`, which then talks to GitHub APIs except `pr_push`.
   - `pr_push` uses git network transport to the configured remote.
 - Subprocesses / native bindings
   - All `gh` calls use `Bun.spawn(["gh", ...args])`.
-  - `pr_checkout` and `pr_push` also invoke git operations via `@oh-my-pi/pi-natives/vcs` (`vcs.requireGit()`), serialized by `withRepoLock()` from `packages/coding-agent/src/utils/repo-lock.ts`.
+  - `pr_checkout` and `pr_push` also invoke git operations via `@zero2ai/natives/vcs` (`vcs.requireGit()`), serialized by `withRepoLock()` from `packages/coding-agent/src/utils/repo-lock.ts`.
 - Session state (transcript, memory, jobs, checkpoints, registries)
   - `run_watch` consumes `session.allocateOutputArtifact()` when failed-job logs are persisted.
   - Returned `details` objects carry run/checkouts metadata for the renderer/UI.
@@ -293,7 +293,7 @@ Watch flow:
   - invalid `run` format
   - `fill` combined with `title` or `body`
   - missing git repo / branch / HEAD context for checkout, push, or watch
-  - `pr_push` on a branch without `ompPrHeadRef` metadata
+  - `pr_push` on a branch without `zero2aiPrHeadRef` metadata
   - conflicting existing worktree path or branch without `force`
   - an absolute `file_read` path (a leading `/`)
 - `run_watch` treats failed-job log fetches specially: missing log content does not fail the watch; it marks that log `available: false` and prints `Log tail unavailable.` / `Full log unavailable.`.

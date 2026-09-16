@@ -1,7 +1,7 @@
 /**
  * Regression test for issue #1234.
  *
- * `omp acp` must not auto-discover host `.mcp.json` servers when creating a
+ * `zero2ai acp` must not auto-discover host `.mcp.json` servers when creating a
  * session for an ACP client. MCP server ownership belongs entirely to the ACP
  * client (`session/new.mcpServers` → `AcpAgent#configureMcpServers`); letting
  * `createAgentSession` run on-disk discovery in parallel registers host MCP
@@ -13,12 +13,12 @@
  */
 
 import { afterAll, describe, expect, it } from "bun:test";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { createAcpSessionFactory } from "@oh-my-pi/pi-coding-agent/main";
-import type { CreateAgentSessionOptions, CreateAgentSessionResult } from "@oh-my-pi/pi-coding-agent/sdk";
-import type { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { createAcpSessionFactory } from "@zero2ai/coding-agent/main";
+import type { CreateAgentSessionOptions, CreateAgentSessionResult } from "@zero2ai/coding-agent/sdk";
+import type { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { TempDir } from "@zero2ai/utils";
 import { createInMemoryAuthStorage } from "./helpers/agent-session-setup";
 
 const authStorage = createInMemoryAuthStorage();
@@ -30,7 +30,7 @@ afterAll(() => {
 
 describe("createAcpSessionFactory MCP isolation (issue #1234)", () => {
 	it("forces enableMCP=false even when baseOptions opts in", async () => {
-		const tempDir = TempDir.createSync("@pi-acp-mcp-isolation-");
+		const tempDir = TempDir.createSync("@zero2ai-acp-mcp-isolation-");
 		try {
 			const settings = Settings.isolated({});
 			const fakeSession = {} as AgentSession;
@@ -75,7 +75,7 @@ describe("createAcpSessionFactory MCP isolation (issue #1234)", () => {
 	});
 
 	it("rejects allowlisted tools absent from the completed ACP session registry", async () => {
-		const tempDir = TempDir.createSync("@pi-acp-tool-allowlist-");
+		const tempDir = TempDir.createSync("@zero2ai-acp-tool-allowlist-");
 		try {
 			const settings = Settings.isolated({});
 			let disposed = false;
@@ -105,14 +105,14 @@ describe("createAcpSessionFactory MCP isolation (issue #1234)", () => {
 	});
 
 	it("shares the trusted extension EventBus with the ACP session", async () => {
-		const tempDir = TempDir.createSync("@pi-acp-trusted-extension-");
+		const tempDir = TempDir.createSync("@zero2ai-acp-trusted-extension-");
 		try {
 			const settings = Settings.isolated({});
 			const trustedPath = tempDir.join("trusted.ts");
 			const firedPath = tempDir.join("trusted-event-fired");
 			const ambientFiredPath = tempDir.join("ambient-extension-loaded");
 			await Bun.write(
-				tempDir.join(".omp/extensions/ambient.ts"),
+				tempDir.join(".zero2ai/extensions/ambient.ts"),
 				`import { writeFileSync } from "node:fs"; writeFileSync(${JSON.stringify(ambientFiredPath)}, "loaded"); export default function () {}`,
 			);
 			await Bun.write(
@@ -156,7 +156,7 @@ describe("createAcpSessionFactory MCP isolation (issue #1234)", () => {
 	});
 
 	it("fails before ACP session creation when a trusted extension cannot load", async () => {
-		const tempDir = TempDir.createSync("@pi-acp-trusted-extension-failure-");
+		const tempDir = TempDir.createSync("@zero2ai-acp-trusted-extension-failure-");
 		try {
 			const settings = Settings.isolated({});
 			const trustedPath = tempDir.join("throwing.ts");
@@ -189,12 +189,12 @@ describe("createAcpSessionFactory MCP isolation (issue #1234)", () => {
 
 describe("createAcpSessionFactory TITLE_SYSTEM.md per-cwd resolution (PR #3736)", () => {
 	it("re-resolves the title prompt for the per-session cwd instead of inheriting the launch cwd's override", async () => {
-		const tempDir = TempDir.createSync("@pi-acp-title-prompt-");
+		const tempDir = TempDir.createSync("@zero2ai-acp-title-prompt-");
 		try {
 			const settings = Settings.isolated({});
 
 			const projectDir = tempDir.join("project");
-			await Bun.write(`${projectDir}/.omp/TITLE_SYSTEM.md`, "Project-specific title policy.");
+			await Bun.write(`${projectDir}/.zero2ai/TITLE_SYSTEM.md`, "Project-specific title policy.");
 
 			const fakeSession = {} as AgentSession;
 			const captured: CreateAgentSessionOptions[] = [];

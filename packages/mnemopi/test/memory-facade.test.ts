@@ -20,8 +20,8 @@ import {
 	sleep,
 	sleepAllSessions,
 	update,
-} from "@oh-my-pi/pi-mnemopi/core/memory";
-import { openDatabase } from "@oh-my-pi/pi-mnemopi/db";
+} from "@zero2ai/mnemopi/core/memory";
+import { openDatabase } from "@zero2ai/mnemopi/db";
 
 const roots: string[] = [];
 let previousDataDir: string | undefined;

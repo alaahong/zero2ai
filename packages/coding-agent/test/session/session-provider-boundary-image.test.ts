@@ -2,15 +2,15 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { Api, ImageContent, Model } from "@oh-my-pi/pi-ai";
-import type { ModelSpec } from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
+import type { Api, ImageContent, Model } from "@zero2ai/ai";
+import type { ModelSpec } from "@zero2ai/ai/types";
+import { buildModel } from "@zero2ai/catalog/build";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
 import {
 	SessionProviderBoundary,
 	type SessionProviderBoundaryHost,
-} from "@oh-my-pi/pi-coding-agent/session/session-provider-boundary";
-import { removeWithRetries } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/session/session-provider-boundary";
+import { removeWithRetries } from "@zero2ai/utils";
 
 const TINY_PNG_BASE64 =
 	"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==";

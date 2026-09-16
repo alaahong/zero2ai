@@ -3,8 +3,8 @@
  * {@link UiHelpers} and the input/event controllers, so the live chat surfaces
  * construct components and reset editor state identically.
  */
-import type { AssistantMessage } from "@oh-my-pi/pi-ai";
-import { getMarkdownLinkUrls } from "@oh-my-pi/pi-tui";
+import type { AssistantMessage } from "@zero2ai/ai";
+import { getMarkdownLinkUrls } from "@zero2ai/tui";
 import type { AgentSession } from "../../session/agent-session";
 import { resolveMarkdownLinkTargets } from "../../tui/hyperlink";
 import { AssistantMessageComponent } from "../components/assistant-message";

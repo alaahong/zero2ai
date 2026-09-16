@@ -254,7 +254,7 @@ function placeholderManifest(name: string, target: NativeLeafTarget, repo: strin
 	return {
 		name,
 		version: PLACEHOLDER_VERSION,
-		description: `Placeholder for the ${target.tag} native addon of @oh-my-pi/pi-natives. The real binary is published during release.`,
+		description: `Placeholder for the ${target.tag} native addon of @zero2ai/natives. The real binary is published during release.`,
 		license: "MIT",
 		os: [target.os],
 		cpu: [target.cpu],
@@ -276,7 +276,7 @@ function placeholderReadme(name: string, target: NativeLeafTarget): string {
 	return [
 		`# ${name}`,
 		"",
-		`Placeholder package reserving the npm name for the \`${target.tag}\` native addon of \`@oh-my-pi/pi-natives\`.`,
+		`Placeholder package reserving the npm name for the \`${target.tag}\` native addon of \`@zero2ai/natives\`.`,
 		"",
 		`This \`${PLACEHOLDER_VERSION}\` release ships no binary. The real, versioned platform addon is generated during release and installed as an optional dependency of the core package.`,
 		"",
@@ -284,7 +284,7 @@ function placeholderReadme(name: string, target: NativeLeafTarget): string {
 }
 
 async function publishNativeLeafPlaceholder(name: string, target: NativeLeafTarget, repo: string): Promise<boolean> {
-	const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "omp-native-placeholder-"));
+	const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-native-placeholder-"));
 	try {
 		await Bun.write(
 			path.join(tmpDir, "package.json"),

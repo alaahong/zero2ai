@@ -1,0 +1,42 @@
+# ZERO2AI 模型接入：行内网关
+#
+# 部署位置：<PI_CONFIG_DIR>/agent/models.yml（默认 ~/.zero2ai/agent/models.yml）
+#
+# 两条路线，任选其一：
+#
+#   路线 A（零配置，最省事）：行内网关就是 LiteLLM 时，不写本文件，只设环境变量
+#       LITELLM_BASE_URL=https://llm-gw.corp.local/v1
+#       LITELLM_API_KEY=<key>
+#     内置 litellm provider 会读这两个变量，并可用 discovery 自动拉取模型清单。
+#
+#   路线 B（通用 OpenAI 兼容网关）：按下面的形状声明自定义 provider。
+#     未在此声明的 provider 一律不可用；配合 config.yml 的 disabledProviders 收敛出口。
+
+providers:
+  # 自定义 provider id，可自行命名（出现在 /model 选择器与日志中）
+  corp-gw:
+    # OpenAI 兼容端点（务必带 /v1 前缀，除非网关本身不带）
+    baseUrl: https://llm-gw.corp.local/v1
+    # 值是「环境变量名」而非密钥本身：密钥只放环境/密钥管理系统，不落磁盘
+    apiKey: CORP_LLM_API_KEY
+    # openai-completions | openai-responses | anthropic-messages | google-generative-ai
+    api: openai-completions
+    # 为 true 时注入 Authorization: Bearer <key>；网关用自定义头就删掉它改用 headers
+    authHeader: true
+    headers:
+      X-Team: platform
+    # 运行时模型发现：litellm | proxy | openai-models-list | ollama | llama.cpp | lm-studio | none
+    # litellm 会读网关的模型清单；网关无读权限时改为 none 并手工列 models
+    discovery:
+      type: litellm
+    # 手工兜底清单（discovery 不可用时使用；id 为网关上真实模型名）
+    models:
+      - id: corp-gpt-5.2
+        name: GPT-5.2（行内网关）
+      - id: corp-qwen3-coder
+        name: Qwen3 Coder（行内网关）
+
+# 提示：
+# - 模型白名单/限额/路由的正式治理入口是 KDL 规则树
+#   （packages/catalog/src/compat/rules/），改完执行 `bun run gen:compat`，全程离线。
+# - 禁止直接编辑 packages/catalog/src/models.json 与 rules.json：二者是生成物。

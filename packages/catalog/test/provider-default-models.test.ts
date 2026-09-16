@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { type GeneratedProvider, getBundledModels } from "@oh-my-pi/pi-catalog/models";
-import { providerEntries } from "@oh-my-pi/pi-catalog/compat/providers";
+import { type GeneratedProvider, getBundledModels } from "@zero2ai/catalog/models";
+import { providerEntries } from "@zero2ai/catalog/compat/providers";
 
 /**
  * Providers whose bundled slice is one account's credential-scoped snapshot

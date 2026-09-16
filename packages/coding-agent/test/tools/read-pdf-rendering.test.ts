@@ -2,13 +2,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { AgentToolResult } from "@oh-my-pi/pi-agent-core";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { ReadTool, type ReadToolDetails } from "@oh-my-pi/pi-coding-agent/tools/read";
-import * as pdfRead from "@oh-my-pi/pi-coding-agent/tools/read-pdf";
-import * as markit from "@oh-my-pi/pi-coding-agent/utils/markit";
-import { removeWithRetries } from "@oh-my-pi/pi-utils";
+import type { AgentToolResult } from "@zero2ai/agent-core";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import type { ToolSession } from "@zero2ai/coding-agent/tools";
+import { ReadTool, type ReadToolDetails } from "@zero2ai/coding-agent/tools/read";
+import * as pdfRead from "@zero2ai/coding-agent/tools/read-pdf";
+import * as markit from "@zero2ai/coding-agent/utils/markit";
+import { removeWithRetries } from "@zero2ai/utils";
 
 const ONE_PX_PNG = Buffer.from(
 	"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC",

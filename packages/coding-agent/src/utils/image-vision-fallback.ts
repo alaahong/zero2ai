@@ -17,10 +17,10 @@ import {
 	type AgentTelemetryConfig,
 	instrumentedCompleteSimple,
 	resolveTelemetry,
-} from "@oh-my-pi/pi-agent-core";
-import { sendsImageInputOnWire } from "@oh-my-pi/pi-ai/providers/vision-guard";
-import type { Api, completeSimple, ImageContent, Model, TextContent } from "@oh-my-pi/pi-ai";
-import { logger, prompt, toError } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/agent-core";
+import { sendsImageInputOnWire } from "@zero2ai/ai/providers/vision-guard";
+import type { Api, completeSimple, ImageContent, Model, TextContent } from "@zero2ai/ai";
+import { logger, prompt, toError } from "@zero2ai/utils";
 import { extractTextContent } from "../commit/utils";
 import type { ModelRegistry } from "../config/model-registry";
 import { expandRoleAlias, getModelMatchPreferences, resolveModelFromString } from "../config/model-resolver";

@@ -1,11 +1,11 @@
 import { describe, expect, spyOn, test } from "bun:test";
 import { scheduler } from "node:timers/promises";
-import { clearCustomApis, registerCustomApi } from "@oh-my-pi/pi-ai/api-registry";
-import * as AIError from "@oh-my-pi/pi-ai/error";
-import { createMockModel, type MockContent, registerMockApi } from "@oh-my-pi/pi-ai/providers/mock";
-import { complete, completeSimple, stream, streamSimple } from "@oh-my-pi/pi-ai/stream";
-import type { Api, AssistantMessage, AssistantMessageEvent, Context, Model } from "@oh-my-pi/pi-ai/types";
-import { AssistantMessageEventStream } from "@oh-my-pi/pi-ai/utils/event-stream";
+import { clearCustomApis, registerCustomApi } from "@zero2ai/ai/api-registry";
+import * as AIError from "@zero2ai/ai/error";
+import { createMockModel, type MockContent, registerMockApi } from "@zero2ai/ai/providers/mock";
+import { complete, completeSimple, stream, streamSimple } from "@zero2ai/ai/stream";
+import type { Api, AssistantMessage, AssistantMessageEvent, Context, Model } from "@zero2ai/ai/types";
+import { AssistantMessageEventStream } from "@zero2ai/ai/utils/event-stream";
 import {
 	GEMINI_HEADER_RUNAWAY_THRESHOLD,
 	GeminiHeaderRunDetector,
@@ -14,9 +14,9 @@ import {
 	THINKING_LOOP_ERROR_MARKER,
 	ThinkingLoopDetector,
 	withThinkingLoopGuard,
-} from "@oh-my-pi/pi-ai/utils/thinking-loop";
-import { classifyModel } from "@oh-my-pi/pi-catalog/compat/taxonomy";
-import { isRetryableError } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/ai/utils/thinking-loop";
+import { classifyModel } from "@zero2ai/catalog/compat/taxonomy";
+import { isRetryableError } from "@zero2ai/utils";
 
 function context(): Context {
 	return { systemPrompt: [], messages: [{ role: "user", content: "go", timestamp: 0 }] };

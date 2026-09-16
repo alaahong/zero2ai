@@ -9,24 +9,24 @@
  */
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as path from "node:path";
-import { type } from "@oh-my-pi/omptype";
-import { Agent, type AgentTool, type StreamFn } from "@oh-my-pi/pi-agent-core";
-import { AssistantMessageEventStream } from "@oh-my-pi/pi-ai/utils/event-stream";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { Skill } from "@oh-my-pi/pi-coding-agent/extensibility/skills";
-import { InteractiveMode } from "@oh-my-pi/pi-coding-agent/modes/interactive-mode";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import * as vcs from "@oh-my-pi/pi-natives/vcs";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import type { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { convertToLlm, VIBE_MODE_CONTEXT_MESSAGE_TYPE } from "@oh-my-pi/pi-coding-agent/session/messages";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { FileSessionStorage, type WriteTextAtomicOptions } from "@oh-my-pi/pi-coding-agent/session/session-storage";
-import { VIBE_TOOL_NAMES } from "@oh-my-pi/pi-coding-agent/tools/vibe";
-import { EventBus } from "@oh-my-pi/pi-coding-agent/utils/event-bus";
-import { VibeSessionRegistry } from "@oh-my-pi/pi-coding-agent/vibe/runtime";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { type } from "@zero2ai/schema";
+import { Agent, type AgentTool, type StreamFn } from "@zero2ai/agent-core";
+import { AssistantMessageEventStream } from "@zero2ai/ai/utils/event-stream";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
+import type { Skill } from "@zero2ai/coding-agent/extensibility/skills";
+import { InteractiveMode } from "@zero2ai/coding-agent/modes/interactive-mode";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import * as vcs from "@zero2ai/natives/vcs";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import type { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { convertToLlm, VIBE_MODE_CONTEXT_MESSAGE_TYPE } from "@zero2ai/coding-agent/session/messages";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { FileSessionStorage, type WriteTextAtomicOptions } from "@zero2ai/coding-agent/session/session-storage";
+import { VIBE_TOOL_NAMES } from "@zero2ai/coding-agent/tools/vibe";
+import { EventBus } from "@zero2ai/coding-agent/utils/event-bus";
+import { VibeSessionRegistry } from "@zero2ai/coding-agent/vibe/runtime";
+import { TempDir } from "@zero2ai/utils";
 import { createAssistantMessage, createInMemoryAuthStorage } from "./helpers/agent-session-setup";
 
 function stubTool(name: string): AgentTool {
@@ -148,7 +148,7 @@ describe("InteractiveMode vibe mode toggle", () => {
 
 	beforeAll(async () => {
 		await initTheme();
-		tempDir = TempDir.createSync("@pi-vibe-toggle-");
+		tempDir = TempDir.createSync("@zero2ai-vibe-toggle-");
 		authStorage = createInMemoryAuthStorage();
 		modelRegistry = new ModelRegistry(authStorage);
 	});

@@ -6,8 +6,8 @@ import {
 	sliceWithWidth,
 	truncateToWidth,
 	visibleWidth,
-} from "@oh-my-pi/pi-tui";
-import { sanitizeText } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/tui";
+import { sanitizeText } from "@zero2ai/utils";
 import { type ThemeColor, theme } from "../modes/theme/theme";
 
 /** Distinct states of a realtime call connection. */

@@ -12,14 +12,14 @@
  * id must never become a GitHub head.
  */
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { StatusLineSettings } from "@oh-my-pi/pi-coding-agent/modes/components/status-line";
-import { StatusLineComponent } from "@oh-my-pi/pi-coding-agent/modes/components/status-line";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import type { VcsGitRepo, VcsGitRepoInfo, VcsHeadState, VcsRepo } from "@oh-my-pi/pi-natives";
-import * as vcs from "@oh-my-pi/pi-natives/vcs";
-import { github } from "@oh-my-pi/pi-coding-agent/utils/github";
-import { getProjectDir, setProjectDir } from "@oh-my-pi/pi-utils";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
+import type { StatusLineSettings } from "@zero2ai/coding-agent/modes/components/status-line";
+import { StatusLineComponent } from "@zero2ai/coding-agent/modes/components/status-line";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import type { VcsGitRepo, VcsGitRepoInfo, VcsHeadState, VcsRepo } from "@zero2ai/natives";
+import * as vcs from "@zero2ai/natives/vcs";
+import { github } from "@zero2ai/coding-agent/utils/github";
+import { getProjectDir, setProjectDir } from "@zero2ai/utils";
 
 type GitStatus = { staged: number; unstaged: number; untracked: number };
 

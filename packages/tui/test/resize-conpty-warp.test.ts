@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { type TerminalFramePlan, type TerminalFrameProvider, TUI, type ViewportSize } from "@oh-my-pi/pi-tui";
+import { type TerminalFramePlan, type TerminalFrameProvider, TUI, type ViewportSize } from "@zero2ai/tui";
 import { VirtualTerminal } from "./virtual-terminal";
 
 // Regression coverage for a resize on Warp under Windows ConPTY leaving the
@@ -9,7 +9,7 @@ import { VirtualTerminal } from "./virtual-terminal";
 // The in-place resize path is default-on for Warp: it never borrows the alt
 // buffer, skips the ResizeScrollbackMode replay, and instead anchors one settled
 // repaint on a DSR (CSI 6n) round trip against a parked cursor. Both halves of
-// that contract are false under ConPTY, measured on conhost with omp 18.1.15
+// that contract are false under ConPTY, measured on conhost with zero2ai 18.1.15
 // (`PtySession` at 80x24, cursor parked at row 5 column 20):
 //
 //   - resizing the pseudoconsole makes conhost re-emit its own viewport from
@@ -28,7 +28,7 @@ const ED3 = "\x1b[3J";
 const DSR = "\x1b[6n";
 const COMMITTED = ["committed-0", "committed-1", "committed-2"];
 
-const TERMINAL_ENV = ["TERM", "TERM_PROGRAM", "PI_TUI_RESIZE_IN_PLACE", "TMUX", "STY", "ZELLIJ", "HERDR_ENV"] as const;
+const TERMINAL_ENV = ["TERM", "TERM_PROGRAM", "ZERO2AI_TUI_RESIZE_IN_PLACE", "TMUX", "STY", "ZELLIJ", "HERDR_ENV"] as const;
 
 /**
  * Windows ConPTY host: answers DSR from its own re-homed cursor (column 1
@@ -205,10 +205,10 @@ describe("resize on Warp hosted by Windows ConPTY", () => {
 		}
 	});
 
-	it("keeps the DSR probe when PI_TUI_RESIZE_IN_PLACE=1 forces in-place repaint", async () => {
+	it("keeps the DSR probe when ZERO2AI_TUI_RESIZE_IN_PLACE=1 forces in-place repaint", async () => {
 		// The escape hatch restores the whole pre-change path, anchor probe
 		// included: an in-place repaint is only as good as its anchor.
-		Bun.env.PI_TUI_RESIZE_IN_PLACE = "1";
+		Bun.env.ZERO2AI_TUI_RESIZE_IN_PLACE = "1";
 		const { terminal, tui, renderScheduler, writes } = startRig();
 		try {
 			renderScheduler.settle();

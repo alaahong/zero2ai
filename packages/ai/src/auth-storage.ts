@@ -8,8 +8,8 @@
  * - re-exported `SqliteAuthCredentialStore`: concrete SQLite-backed implementation
  */
 import { createHash } from "node:crypto";
-import { planRequirementFor } from "@oh-my-pi/pi-catalog/compat/behavior";
-import { $env, $envExact, getAgentDbPath, logger, untilAborted } from "@oh-my-pi/pi-utils";
+import { planRequirementFor } from "@zero2ai/catalog/compat/behavior";
+import { $env, $envExact, getAgentDbPath, logger, untilAborted } from "@zero2ai/utils";
 import {
 	isSqliteCorruptionError,
 	resolveCredentialIdentityKey,
@@ -186,7 +186,7 @@ export interface StoredCredentialBlock {
 /**
  * Identity slice of a disabled (soft-deleted) credential tombstone — cause and
  * account identity only, never token material. Surfaced so auto-disabled
- * accounts (e.g. an expired Anthropic OAuth grant) stay visible in `omp usage`
+ * accounts (e.g. an expired Anthropic OAuth grant) stay visible in `zero2ai usage`
  * instead of silently vanishing until the user notices missing quota.
  */
 export interface DisabledCredentialSummary {
@@ -592,7 +592,7 @@ export type AuthStorageOptions = {
 	usageLogger?: UsageLogger;
 	/**
 	 * Resolve a config value (API key, header value, etc.) to an actual value.
-	 * - coding-agent injects its resolveConfigValue (supports "!command" syntax via pi-natives)
+	 * - coding-agent injects its resolveConfigValue (supports "!command" syntax via zero2ai-natives)
 	 * - Default: checks environment variable first, then treats as literal
 	 */
 	configValueResolver?: (config: string) => Promise<string | undefined>;
@@ -625,8 +625,8 @@ export type AuthStorageOptions = {
 	 * so the TUI can show where a token came from (broker URL or local SQLite path).
 	 *
 	 * Examples:
-	 * - `"local ~/.omp/agent/agent.db"`
-	 * - `"broker http://omp.internal:8765"`
+	 * - `"local ~/.zero2ai/agent/agent.db"`
+	 * - `"broker http://zero2ai.internal:8765"`
 	 */
 	sourceLabel?: string;
 	/**
@@ -648,7 +648,7 @@ export type AuthStorageOptions = {
 
 /**
  * Default config value resolver that checks env vars and treats as literal.
- * Does NOT support "!command" syntax (that requires pi-natives).
+ * Does NOT support "!command" syntax (that requires zero2ai-natives).
  */
 async function defaultConfigValueResolver(config: string): Promise<string | undefined> {
 	const envValue = $envExact(config);
@@ -709,7 +709,7 @@ const DEFAULT_USAGE_REQUEST_TIMEOUT_MS = 10_000;
 const USAGE_REPORT_CACHE_KEY_VERSION_OVERRIDES: Partial<Record<Provider, number>> = {
 	"google-antigravity": 2,
 	zai: 2,
-	// v2: retires cached reports from the OMP-observed spend estimator (dollar
+	// v2: retires cached reports from the ZERO2AI-observed spend estimator (dollar
 	// units) now that limits come from the upstream percent-based `/usage`
 	// endpoint; the 24h last-good retention would otherwise keep serving them.
 	"opencode-go": 2,
@@ -746,7 +746,7 @@ const OAUTH_REFRESH_OPERATION_TIMEOUT_MS = 10_000;
 const MAX_PENDING_DISABLED_EVENTS = 32;
 
 // Re-exported from the error module (its new home) to preserve the public
-// `@oh-my-pi/pi-ai` entrypoint and the in-module call sites below.
+// `@zero2ai/ai` entrypoint and the in-module call sites below.
 export { isDefinitiveOAuthFailure } from "./error/auth-classify";
 
 /**
@@ -1462,7 +1462,7 @@ export class AuthStorage {
 
 	/**
 	 * Create an AuthStorage instance backed by a AuthCredentialStore.
-	 * Convenience factory for standalone use (e.g., pi-ai CLI).
+	 * Convenience factory for standalone use (e.g., zero2ai-ai CLI).
 	 * @param dbPath - Path to SQLite database
 	 */
 	static async create(dbPath: string, options: AuthStorageOptions = {}): Promise<AuthStorage> {
@@ -1501,10 +1501,10 @@ export class AuthStorage {
 	/**
 	 * Adopt credentials another process committed before selecting or rotating.
 	 *
-	 * The store is shared across every omp process, but the pool is an
+	 * The store is shared across every zero2ai process, but the pool is an
 	 * in-process cache refreshed only by this process's own writes. Without
 	 * this a long-running session ranks a stale pool for its whole lifetime:
-	 * `omp auth` in another terminal is invisible, rotation reports no usable
+	 * `zero2ai auth` in another terminal is invisible, rotation reports no usable
 	 * sibling while a freshly added account sits unblocked in SQLite, and the
 	 * turn degrades to the fallback chain. The auth-broker path already polls;
 	 * direct-store sessions had no equivalent.
@@ -7189,7 +7189,7 @@ export class AuthStorage {
 	}
 
 	/**
-	 * Disabled credential tombstones for display surfaces (`omp usage`,
+	 * Disabled credential tombstones for display surfaces (`zero2ai usage`,
 	 * broker `GET /v1/credentials/disabled`). Empty when the backing store
 	 * keeps no tombstones or the remote broker predates the endpoint.
 	 */
@@ -7202,7 +7202,7 @@ export class AuthStorage {
 	 * Force the backing store to revalidate its credential snapshot, then
 	 * reload. Remote broker stores re-fetch the snapshot; local stores are
 	 * always current, so only the reload runs. Callers that pair live
-	 * per-credential data with stored identities (`omp usage`) use this so a
+	 * per-credential data with stored identities (`zero2ai usage`) use this so a
 	 * disk-cached snapshot cannot misattribute fresh reports.
 	 */
 	async revalidateCredentials(): Promise<void> {

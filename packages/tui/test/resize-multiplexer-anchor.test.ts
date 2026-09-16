@@ -5,7 +5,7 @@ import {
 	type TerminalFrameProvider,
 	TUI,
 	type ViewportSize,
-} from "@oh-my-pi/pi-tui";
+} from "@zero2ai/tui";
 import { VirtualTerminal } from "./virtual-terminal";
 
 // Regression coverage for tmux pane zoom corrupting scrollback (duplication and
@@ -100,7 +100,7 @@ const MUX_SIGNALS = [
 	"WMUX_SURFACE_ID",
 	"TERM",
 	"TERM_PROGRAM",
-	"PI_TUI_RESIZE_IN_PLACE",
+	"ZERO2AI_TUI_RESIZE_IN_PLACE",
 ] as const;
 
 function useDirectTerminalEnv() {

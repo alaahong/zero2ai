@@ -2,23 +2,23 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { discoverAuthStorage, resolveAuthBrokerConfig } from "@oh-my-pi/pi-ai/auth-broker";
-import { writeAuthBrokerSnapshotCache } from "@oh-my-pi/pi-ai/auth-broker/snapshot-cache";
-import type { SnapshotResponse } from "@oh-my-pi/pi-ai/auth-broker/types";
+import { discoverAuthStorage, resolveAuthBrokerConfig } from "@zero2ai/ai/auth-broker";
+import { writeAuthBrokerSnapshotCache } from "@zero2ai/ai/auth-broker/snapshot-cache";
+import type { SnapshotResponse } from "@zero2ai/ai/auth-broker/types";
 import { removeWithRetries } from "../../utils/src/temp";
 import { withEnv } from "./helpers";
 
 const SUPPRESS_AUTH_BROKER_ENV = {
-	OMP_AUTH_BROKER_URL: undefined,
-	OMP_AUTH_BROKER_TOKEN: undefined,
-	OMP_AUTH_BROKER_ACCOUNT_POOL_FILE: undefined,
+	ZERO2AI_AUTH_BROKER_URL: undefined,
+	ZERO2AI_AUTH_BROKER_TOKEN: undefined,
+	ZERO2AI_AUTH_BROKER_ACCOUNT_POOL_FILE: undefined,
 } as const;
 
 describe("resolveAuthBrokerConfig config discovery", () => {
 	let agentDir = "";
 
 	beforeEach(async () => {
-		agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-ai-auth-broker-config-"));
+		agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-ai-auth-broker-config-"));
 	});
 
 	afterEach(async () => {
@@ -90,8 +90,8 @@ describe("resolveAuthBrokerConfig config discovery", () => {
 		await withEnv(
 			{
 				...SUPPRESS_AUTH_BROKER_ENV,
-				OMP_AUTH_BROKER_URL: url,
-				OMP_AUTH_BROKER_TOKEN: token,
+				ZERO2AI_AUTH_BROKER_URL: url,
+				ZERO2AI_AUTH_BROKER_TOKEN: token,
 			},
 			async () => {
 				const storage = await discoverAuthStorage({ agentDir, cachePath });
@@ -108,14 +108,14 @@ describe("resolveAuthBrokerConfig config discovery", () => {
 		const poolPath = path.join(agentDir, "account-pool.json");
 		const brokerEnv = {
 			...SUPPRESS_AUTH_BROKER_ENV,
-			OMP_AUTH_BROKER_URL: "http://127.0.0.1:1",
-			OMP_AUTH_BROKER_TOKEN: "test-token",
-			OMP_AUTH_BROKER_ACCOUNT_POOL_FILE: poolPath,
+			ZERO2AI_AUTH_BROKER_URL: "http://127.0.0.1:1",
+			ZERO2AI_AUTH_BROKER_TOKEN: "test-token",
+			ZERO2AI_AUTH_BROKER_ACCOUNT_POOL_FILE: poolPath,
 		} as const;
 
 		await withEnv(brokerEnv, async () => {
 			await expect(discoverAuthStorage({ agentDir })).rejects.toThrow(
-				"Unable to read OMP_AUTH_BROKER_ACCOUNT_POOL_FILE",
+				"Unable to read ZERO2AI_AUTH_BROKER_ACCOUNT_POOL_FILE",
 			);
 
 			const invalidFiles = [

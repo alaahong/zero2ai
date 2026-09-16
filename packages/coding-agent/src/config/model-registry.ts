@@ -1,10 +1,10 @@
 import * as path from "node:path";
-import type { ApiKeyResolver, FetchImpl, UsageProvider } from "@oh-my-pi/pi-ai";
-import { registerCustomApi, unregisterCustomApis } from "@oh-my-pi/pi-ai/api-registry";
-import { registerOAuthProvider, unregisterOAuthProvider, unregisterOAuthProviders } from "@oh-my-pi/pi-ai/oauth";
-import type { OAuthCredentials, OAuthLoginCallbacks } from "@oh-my-pi/pi-ai/oauth/types";
-import { setCodexAttestationProvider } from "@oh-my-pi/pi-ai/providers/openai-codex-responses";
-import { getProviderDefinition } from "@oh-my-pi/pi-ai/registry";
+import type { ApiKeyResolver, FetchImpl, UsageProvider } from "@zero2ai/ai";
+import { registerCustomApi, unregisterCustomApis } from "@zero2ai/ai/api-registry";
+import { registerOAuthProvider, unregisterOAuthProvider, unregisterOAuthProviders } from "@zero2ai/ai/oauth";
+import type { OAuthCredentials, OAuthLoginCallbacks } from "@zero2ai/ai/oauth/types";
+import { setCodexAttestationProvider } from "@zero2ai/ai/providers/openai-codex-responses";
+import { getProviderDefinition } from "@zero2ai/ai/registry";
 import type {
 	Api,
 	Context,
@@ -13,24 +13,24 @@ import type {
 	RemoteCompactionConfig,
 	SimpleStreamOptions,
 	ThinkingConfig,
-} from "@oh-my-pi/pi-ai/types";
-import type { AssistantMessageEventStream } from "@oh-my-pi/pi-ai/utils/event-stream";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { collapseBuiltVariants } from "@oh-my-pi/pi-catalog/compat/collapse";
+} from "@zero2ai/ai/types";
+import type { AssistantMessageEventStream } from "@zero2ai/ai/utils/event-stream";
+import { buildModel } from "@zero2ai/catalog/build";
+import { collapseBuiltVariants } from "@zero2ai/catalog/compat/collapse";
 import {
 	clampCodexContextWindow,
 	clampsContextOverride,
 	resolveMaxContextWindow,
-} from "@oh-my-pi/pi-catalog/compat/context-window";
-import { applyCatalogMetrics, CatalogMetricsIndex } from "@oh-my-pi/pi-catalog/identity/metrics";
-import { readModelCache, writeModelCache } from "@oh-my-pi/pi-catalog/model-cache";
+} from "@zero2ai/catalog/compat/context-window";
+import { applyCatalogMetrics, CatalogMetricsIndex } from "@zero2ai/catalog/identity/metrics";
+import { readModelCache, writeModelCache } from "@zero2ai/catalog/model-cache";
 import {
 	createModelManager,
 	fingerprintStaticModels,
 	type ModelManagerOptions,
 	type ModelRefreshStrategy,
-} from "@oh-my-pi/pi-catalog/model-manager";
-import { getBundledModels, getBundledProviders } from "@oh-my-pi/pi-catalog/models";
+} from "@zero2ai/catalog/model-manager";
+import { getBundledModels, getBundledProviders } from "@zero2ai/catalog/models";
 import {
 	googleAntigravityModelManagerOptions,
 	googleGeminiCliModelManagerOptions,
@@ -41,9 +41,9 @@ import {
 	PROVIDER_DESCRIPTORS,
 	resolveModelCacheProviderId,
 	resolveOllamaModelCacheProviderId,
-} from "@oh-my-pi/pi-catalog/provider-models";
-import { toModelSpec } from "@oh-my-pi/pi-catalog/provider-models/bundled-references";
-import { getAgentDir, isBunTestRuntime, logger, wrapFetchForExtraCa } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/catalog/provider-models";
+import { toModelSpec } from "@zero2ai/catalog/provider-models/bundled-references";
+import { getAgentDir, isBunTestRuntime, logger, wrapFetchForExtraCa } from "@zero2ai/utils";
 import { resolveProviderModelReference } from "../config/model-resolver";
 import { generateCodexAttestation } from "../live/attestation";
 import type { AuthStorage } from "../session/auth-storage";
@@ -127,7 +127,7 @@ import type { ModelOverride, ModelsConfig, ProviderAuthMode } from "./models-con
 import { type Settings, settings } from "./settings";
 
 // DeviceCheck attestation (`x-oai-attestation`) for ChatGPT-OAuth Codex
-// requests; the pi-ai provider resolves it just-in-time per request.
+// requests; the zero2ai-ai provider resolves it just-in-time per request.
 setCodexAttestationProvider(generateCodexAttestation);
 
 const BUILT_IN_MODEL_MANAGER_PROVIDER_IDS: Readonly<Record<string, true>> = Object.freeze(
@@ -565,7 +565,7 @@ export class ModelRegistry {
 	 *
 	 * Unlike {@link refreshProvider}, this does no static reload and never
 	 * re-fetches the other runtime managers, so restoring a saved
-	 * discovery-backed model (e.g. on `omp --resume`) cannot wait on — or
+	 * discovery-backed model (e.g. on `zero2ai --resume`) cannot wait on — or
 	 * duplicate — an unrelated provider's network/OAuth work. Ids that are not
 	 * configured discovery providers are ignored by the underlying filter.
 	 */
@@ -1399,7 +1399,7 @@ export class ModelRegistry {
 		// routing that MUST NOT reach a broker-backed gateway — applying them would
 		// send broker bearers to a configured endpoint, install config keys that
 		// shadow broker credentials (bypassing account pooling/refresh/accounting),
-		// or route a pi-native gateway back into itself.
+		// or route a zero2ai-native gateway back into itself.
 		if (this.#ignoreLocalModelConfig) {
 			return {
 				models: [],
@@ -2553,7 +2553,7 @@ export class ModelRegistry {
 
 	/**
 	 * Whether a config-declared discovery provider has not yet produced a
-	 * catalog in this process. A cold discovery cache (e.g. after `omp update`
+	 * catalog in this process. A cold discovery cache (e.g. after `zero2ai update`
 	 * bumps the cache namespace) leaves the provider in its initial `idle`
 	 * state with no models, so a selector the provider will supply looks
 	 * unknown until background discovery lands (#10048).
@@ -2574,7 +2574,7 @@ export class ModelRegistry {
 	 * discovered model that defines one.
 	 *
 	 * The overrides lead because a model-derived answer is only available once
-	 * discovery has populated the registry. `omp usage` builds a `ModelRegistry`
+	 * discovery has populated the registry. `zero2ai usage` builds a `ModelRegistry`
 	 * and probes credentials immediately, and providers whose roster is
 	 * discovery-only (no bundled rows) have no model to read a URL from at that
 	 * point — so deriving solely from models returned `undefined` cache-cold and

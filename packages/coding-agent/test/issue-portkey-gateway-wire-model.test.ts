@@ -2,12 +2,12 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { Effort } from "@oh-my-pi/pi-catalog/effort";
-import { resolveWireModelId } from "@oh-my-pi/pi-catalog/model-thinking";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { resetSettingsForTest } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { removeSyncWithRetries, Snowflake } from "@oh-my-pi/pi-utils";
+import { Effort } from "@zero2ai/catalog/effort";
+import { resolveWireModelId } from "@zero2ai/catalog/model-thinking";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { resetSettingsForTest } from "@zero2ai/coding-agent/config/settings";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { removeSyncWithRetries, Snowflake } from "@zero2ai/utils";
 
 describe("Portkey gateway custom models", () => {
 	let tempDir: string;
@@ -16,7 +16,7 @@ describe("Portkey gateway custom models", () => {
 
 	beforeEach(async () => {
 		resetSettingsForTest();
-		tempDir = path.join(os.tmpdir(), `pi-test-portkey-gateway-${Snowflake.next()}`);
+		tempDir = path.join(os.tmpdir(), `zero2ai-test-portkey-gateway-${Snowflake.next()}`);
 		fs.mkdirSync(tempDir, { recursive: true });
 		modelsPath = path.join(tempDir, "models.yml");
 		authStorage = await AuthStorage.create(":memory:");

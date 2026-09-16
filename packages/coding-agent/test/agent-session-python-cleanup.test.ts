@@ -1,15 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, type Mock, vi } from "bun:test";
 import * as fs from "node:fs";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import * as pythonExecutor from "@oh-my-pi/pi-coding-agent/eval/py/executor";
-import type { PythonKernel as PythonKernelInstance } from "@oh-my-pi/pi-coding-agent/eval/py/kernel";
-import * as pythonKernel from "@oh-my-pi/pi-coding-agent/eval/py/kernel";
-import { AgentRegistry } from "@oh-my-pi/pi-coding-agent/registry/agent-registry";
-import { createAgentSession, type ExtensionFactory, type WorkspaceTree } from "@oh-my-pi/pi-coding-agent/sdk";
-import { AgentStorage } from "@oh-my-pi/pi-coding-agent/session/agent-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { Snowflake, TempDir } from "@oh-my-pi/pi-utils";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import * as pythonExecutor from "@zero2ai/coding-agent/eval/py/executor";
+import type { PythonKernel as PythonKernelInstance } from "@zero2ai/coding-agent/eval/py/kernel";
+import * as pythonKernel from "@zero2ai/coding-agent/eval/py/kernel";
+import { AgentRegistry } from "@zero2ai/coding-agent/registry/agent-registry";
+import { createAgentSession, type ExtensionFactory, type WorkspaceTree } from "@zero2ai/coding-agent/sdk";
+import { AgentStorage } from "@zero2ai/coding-agent/session/agent-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { Snowflake, TempDir } from "@zero2ai/utils";
 
 const OK_EXECUTION = { status: "ok", cancelled: false, timedOut: false, stdinRequested: false } as const;
 
@@ -68,7 +68,7 @@ const getModel = () => {
 };
 
 const createTempProject = () => {
-	const tempDir = TempDir.createSync(`@pi-agent-session-python-cleanup-${Snowflake.next()}-`);
+	const tempDir = TempDir.createSync(`@zero2ai-agent-session-python-cleanup-${Snowflake.next()}-`);
 	const cwd = tempDir.join("project");
 	fs.mkdirSync(cwd, { recursive: true });
 	return { tempDir, cwd };
@@ -79,7 +79,7 @@ const createTempProject = () => {
 // auth.db handle doesn't keep the per-test project temp dir locked on Windows.
 const agentDirPool: TempDir[] = [];
 const createAgentDir = (): string => {
-	const dir = TempDir.createSync("@pi-python-cleanup-agentdir-");
+	const dir = TempDir.createSync("@zero2ai-python-cleanup-agentdir-");
 	agentDirPool.push(dir);
 	return dir.path();
 };

@@ -4,10 +4,10 @@
 
 import * as os from "node:os";
 import * as path from "node:path";
-import type { AgentTool } from "@oh-my-pi/pi-agent-core";
-import type { ToolExample, TSchema } from "@oh-my-pi/pi-ai";
-import { renderToolInventory } from "@oh-my-pi/pi-ai/dialect";
-import type { DelegationBias } from "@oh-my-pi/pi-catalog/compat/delegation";
+import type { AgentTool } from "@zero2ai/agent-core";
+import type { ToolExample, TSchema } from "@zero2ai/ai";
+import { renderToolInventory } from "@zero2ai/ai/dialect";
+import type { DelegationBias } from "@zero2ai/catalog/compat/delegation";
 import {
 	$env,
 	getAgentDir,
@@ -17,7 +17,7 @@ import {
 	isEnoent,
 	logger,
 	prompt,
-} from "@oh-my-pi/pi-utils";
+} from "@zero2ai/utils";
 import { contextFileCapability } from "./capability/context-file";
 import { systemPromptCapability } from "./capability/system-prompt";
 import { findConfigFile } from "./config";
@@ -48,8 +48,8 @@ const PERSONALITY_SPECS: Record<Exclude<Personality, "none">, string> = {
 
 /**
  * Load the user-level PERSONALITY.md override for the system prompt's
- * personality block from `<agentDir>/PERSONALITY.md` (`~/.omp/agent` by
- * default; profile, XDG, and `PI_CODING_AGENT_DIR` aware). Returns null when
+ * personality block from `<agentDir>/PERSONALITY.md` (`~/.zero2ai/agent` by
+ * default; profile, XDG, and `ZERO2AI_CODING_AGENT_DIR` aware). Returns null when
  * the file is absent, empty, or unreadable; callers then render the configured
  * preset. Read failures other than a missing file warn instead of failing the
  * build.

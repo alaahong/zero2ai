@@ -3,9 +3,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { FetchImpl } from "@oh-my-pi/pi-ai/types";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
+import type { FetchImpl } from "@zero2ai/ai/types";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
 import {
 	buildExaRequestBody,
 	ExaProvider,
@@ -13,8 +13,8 @@ import {
 	resetExaSearchThrottleForTest,
 	searchExa,
 	synthesizeAnswer,
-} from "@oh-my-pi/pi-coding-agent/web/search/providers/exa";
-import { isRecord, removeWithRetries } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/web/search/providers/exa";
+import { isRecord, removeWithRetries } from "@zero2ai/utils";
 
 type PostedMcpRequest = Record<string, unknown> & { id: string | number };
 

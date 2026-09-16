@@ -1,5 +1,5 @@
-import type { AgentMessage } from "@oh-my-pi/pi-agent-core";
-import { isRecord } from "@oh-my-pi/pi-utils";
+import type { AgentMessage } from "@zero2ai/agent-core";
+import { isRecord } from "@zero2ai/utils";
 
 const DEFAULT_RPC_MESSAGE_PAGE_LIMIT = 100;
 const MAX_RPC_MESSAGE_PAGE_LIMIT = 256;

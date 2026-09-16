@@ -2,10 +2,10 @@ import { afterEach, describe, expect, it, mock, spyOn } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { Skill } from "@oh-my-pi/pi-coding-agent/extensibility/skills";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { BashTool } from "@oh-my-pi/pi-coding-agent/tools/bash";
-import { Shell } from "@oh-my-pi/pi-natives";
+import type { Skill } from "@zero2ai/coding-agent/extensibility/skills";
+import type { ToolSession } from "@zero2ai/coding-agent/tools";
+import { BashTool } from "@zero2ai/coding-agent/tools/bash";
+import { Shell } from "@zero2ai/natives";
 
 afterEach(() => {
 	mock.restore();

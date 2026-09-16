@@ -3,11 +3,11 @@
  *
  * Uses brush-core via native bindings for shell execution.
  */
-import { ExponentialYield } from "@oh-my-pi/pi-agent-core/utils/yield";
-import type { ImageContent } from "@oh-my-pi/pi-ai";
-import { type MinimizerOptions, PtySession, Shell, type ShellRunResult } from "@oh-my-pi/pi-natives";
-import { $env } from "@oh-my-pi/pi-utils/env";
-import { isCmdShell, isExecutable, type ShellConfig } from "@oh-my-pi/pi-utils/procmgr";
+import { ExponentialYield } from "@zero2ai/agent-core/utils/yield";
+import type { ImageContent } from "@zero2ai/ai";
+import { type MinimizerOptions, PtySession, Shell, type ShellRunResult } from "@zero2ai/natives";
+import { $env } from "@zero2ai/utils/env";
+import { isCmdShell, isExecutable, type ShellConfig } from "@zero2ai/utils/procmgr";
 import { Settings, type ShellMinimizerSettings } from "../config/settings";
 import { type OutputArtifactError, OutputSink, type OutputSummary } from "../session/streaming-output";
 import { resolveOutputMaxColumns, resolveOutputSinkHeadBytes } from "../tools/output-meta";
@@ -477,7 +477,7 @@ export async function executeBash(command: string, options?: BashExecutorOptions
 		options?.useUserShell === true &&
 		!bashShell &&
 		supportsAutoUserShell(shell) &&
-		$env.PI_NO_PTY !== "1" &&
+		$env.ZERO2AI_NO_PTY !== "1" &&
 		!isPersistentShellCdCommand(command);
 	const snapshotPath = bashShell ? await getOrCreateSnapshot(shell, shellEnv) : null;
 
@@ -630,7 +630,7 @@ export async function executeBash(command: string, options?: BashExecutorOptions
 			? deadlineTimeoutMs + NATIVE_TIMEOUT_FALLBACK_GRACE_MS
 			: deadlineTimeoutMs;
 		timeoutTimer = setTimeout(() => {
-			// Explicit timeouts are enforced inside pi-natives via `timeoutMs`.
+			// Explicit timeouts are enforced inside zero2ai-natives via `timeoutMs`.
 			// Give native cancellation time to flush pipeline output and drain the
 			// N-API bridge before this result-only watchdog quarantines the run.
 			if (!nativeOwnsTimeout) {

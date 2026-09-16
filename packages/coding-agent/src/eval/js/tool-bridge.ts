@@ -1,7 +1,7 @@
-import type { AgentTool, AgentToolResult } from "@oh-my-pi/pi-agent-core";
-import { toolWireSchema, validateToolArguments } from "@oh-my-pi/pi-ai";
-import { isRecord } from "@oh-my-pi/pi-utils";
-import { INTENT_FIELD } from "@oh-my-pi/pi-wire";
+import type { AgentTool, AgentToolResult } from "@zero2ai/agent-core";
+import { toolWireSchema, validateToolArguments } from "@zero2ai/ai";
+import { isRecord } from "@zero2ai/utils";
+import { INTENT_FIELD } from "@zero2ai/wire";
 import type { ToolSession } from "../../tools";
 import { committedTodoPhases } from "../../tools/todo";
 import { ToolError } from "../../tools/tool-errors";

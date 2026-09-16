@@ -1,7 +1,7 @@
 /**
  * Host-side handler for the eval `agent()` helper.
  */
-import { type } from "@oh-my-pi/omptype";
+import { type } from "@zero2ai/schema";
 import { MAIN_AGENT_ID } from "../registry/agent-registry";
 import { createEvalCustomTools, describeEvalTools } from "../task/eval-tools";
 import {

@@ -7,9 +7,9 @@ import type {
 	AgentToolResult,
 	AgentToolUpdateCallback,
 	ToolLoadMode,
-} from "@oh-my-pi/pi-agent-core";
-import type { ComputerSafetyCheck, ImageContent, Static, TextContent, TSchema } from "@oh-my-pi/pi-ai";
-import { sanitizeText, untilAborted } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/agent-core";
+import type { ComputerSafetyCheck, ImageContent, Static, TextContent, TSchema } from "@zero2ai/ai";
+import { sanitizeText, untilAborted } from "@zero2ai/utils";
 import type { Theme } from "../../modes/theme/theme";
 import {
 	denyError,

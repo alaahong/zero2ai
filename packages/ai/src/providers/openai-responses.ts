@@ -1,5 +1,5 @@
 import { scheduler } from "node:timers/promises";
-import { $flag, logger, structuredCloneJSON } from "@oh-my-pi/pi-utils";
+import { $flag, logger, structuredCloneJSON } from "@zero2ai/utils";
 import * as AIError from "../error";
 import { getEnvApiKey } from "../stream";
 import type {
@@ -121,7 +121,7 @@ export interface OpenAIResponsesOptions extends StreamOptions {
 	 * Stateful turns: chain via `previous_response_id` + delta input instead of
 	 * replaying the full transcript. Forces `store: true` (the platform only
 	 * resolves stored responses). Defaults ON against the official OpenAI API
-	 * and OFF for other Responses endpoints; `PI_OPENAI_STATEFUL` overrides the
+	 * and OFF for other Responses endpoints; `ZERO2AI_OPENAI_STATEFUL` overrides the
 	 * default, and `false` here vetoes everything. Requires `sessionId` +
 	 * `providerSessionState`. Falls back to a full replay whenever history
 	 * mutates or the server reports a stale id.
@@ -270,7 +270,7 @@ function isOpenAIResponsesStatefulEnabled(
 	// Default ON only against the official OpenAI API: chaining forces
 	// `store: true`, and third-party /v1/responses proxies routinely ignore or
 	// reject `previous_response_id`.
-	return $flag("PI_OPENAI_STATEFUL", model.compat.officialEndpoint);
+	return $flag("ZERO2AI_OPENAI_STATEFUL", model.compat.officialEndpoint);
 }
 
 function getOpenAIResponsesChainState(

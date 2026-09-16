@@ -1,14 +1,14 @@
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
-import { Agent } from "@oh-my-pi/pi-agent-core";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import * as pythonExecutor from "@oh-my-pi/pi-coding-agent/eval/py/executor";
-import * as bashExecutor from "@oh-my-pi/pi-coding-agent/exec/bash-executor";
-import type { ExtensionRunner } from "@oh-my-pi/pi-coding-agent/extensibility/extensions";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { Agent } from "@zero2ai/agent-core";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import * as pythonExecutor from "@zero2ai/coding-agent/eval/py/executor";
+import * as bashExecutor from "@zero2ai/coding-agent/exec/bash-executor";
+import type { ExtensionRunner } from "@zero2ai/coding-agent/extensibility/extensions";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { TempDir } from "@zero2ai/utils";
 import { createInMemoryAuthStorage } from "./helpers/agent-session-setup";
 
 const sharedAuthStorage = createInMemoryAuthStorage();
@@ -24,7 +24,7 @@ describe("AgentSession user shortcut hooks", () => {
 	let modelRegistry: ModelRegistry;
 
 	beforeEach(() => {
-		tempDir = TempDir.createSync("@pi-user-shortcut-hooks-");
+		tempDir = TempDir.createSync("@zero2ai-user-shortcut-hooks-");
 		modelRegistry = sharedModelRegistry;
 	});
 

@@ -1,7 +1,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { OmpErrors, type Type } from "@oh-my-pi/omptype";
-import { getAgentDir, isEnoent, logger } from "@oh-my-pi/pi-utils";
+import { Zero2AiErrors, type Type } from "@zero2ai/schema";
+import { getAgentDir, isEnoent, logger } from "@zero2ai/utils";
 import { JSONC, YAML } from "bun";
 
 const YAML_MAPPING_HEADER_TRAILING_SPACE = /: +$/gm;
@@ -259,7 +259,7 @@ export class ConfigFile<T> implements IConfigFile<T> {
 			}
 
 			const checked = this.schema(parsed);
-			if (checked instanceof OmpErrors) {
+			if (checked instanceof Zero2AiErrors) {
 				const schemaErrors: ConfigSchemaError[] = checked.map(error => ({
 					instancePath: error.path.length === 0 ? "root" : error.path.join("."),
 					message: error.problem,

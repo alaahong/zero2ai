@@ -1,22 +1,22 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it, spyOn, vi } from "bun:test";
 import { stripVTControlCharacters } from "node:util";
-import { generateRoomKey, importRoomKey } from "@oh-my-pi/pi-coding-agent/collab/crypto";
-import { CollabGuestLink } from "@oh-my-pi/pi-coding-agent/collab/guest";
-import { COLLAB_PROTO, formatCollabLink } from "@oh-my-pi/pi-coding-agent/collab/protocol";
-import { CollabSocket } from "@oh-my-pi/pi-coding-agent/collab/relay-client";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
+import { generateRoomKey, importRoomKey } from "@zero2ai/coding-agent/collab/crypto";
+import { CollabGuestLink } from "@zero2ai/coding-agent/collab/guest";
+import { COLLAB_PROTO, formatCollabLink } from "@zero2ai/coding-agent/collab/protocol";
+import { CollabSocket } from "@zero2ai/coding-agent/collab/relay-client";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
 import {
 	SPINNER_RENDER_INTERVAL_MS,
 	stopSharedSpinnerTicker,
 	ToolExecutionComponent,
-} from "@oh-my-pi/pi-coding-agent/modes/components/tool-execution";
-import { TranscriptContainer } from "@oh-my-pi/pi-coding-agent/modes/components/transcript-container";
-import { EventController } from "@oh-my-pi/pi-coding-agent/modes/controllers/event-controller";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import type { InteractiveModeContext } from "@oh-my-pi/pi-coding-agent/modes/types";
-import { UiHelpers } from "@oh-my-pi/pi-coding-agent/modes/utils/ui-helpers";
-import type { AgentSessionEvent } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import type { TUI } from "@oh-my-pi/pi-tui";
+} from "@zero2ai/coding-agent/modes/components/tool-execution";
+import { TranscriptContainer } from "@zero2ai/coding-agent/modes/components/transcript-container";
+import { EventController } from "@zero2ai/coding-agent/modes/controllers/event-controller";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import type { InteractiveModeContext } from "@zero2ai/coding-agent/modes/types";
+import { UiHelpers } from "@zero2ai/coding-agent/modes/utils/ui-helpers";
+import type { AgentSessionEvent } from "@zero2ai/coding-agent/session/agent-session";
+import type { TUI } from "@zero2ai/tui";
 import { installInMemoryRelay, uninstallInMemoryRelay } from "../../collab/helpers/in-memory-relay";
 import { createInteractiveModeContext } from "../../helpers/interactive-mode-context";
 

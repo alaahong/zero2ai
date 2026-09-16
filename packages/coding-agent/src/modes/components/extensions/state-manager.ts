@@ -3,8 +3,8 @@
  * Handles data loading, tree building, filtering, and toggle persistence.
  */
 import * as path from "node:path";
-import { fuzzyMatch } from "@oh-my-pi/pi-tui";
-import { getMCPConfigPath, logger } from "@oh-my-pi/pi-utils";
+import { fuzzyMatch } from "@zero2ai/tui";
+import { getMCPConfigPath, logger } from "@zero2ai/utils";
 import type { ContextFile } from "../../../capability/context-file";
 import type { ExtensionModule } from "../../../capability/extension-module";
 import type { Hook } from "../../../capability/hook";

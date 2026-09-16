@@ -2,7 +2,7 @@
  * Check for and install updates.
  */
 
-import { Command, Flags } from "@oh-my-pi/pi-utils/cli";
+import { Command, Flags } from "@zero2ai/utils/cli";
 import { updateHelp as commandHelp } from "../cli/command-help";
 import * as pluginCli from "../cli/plugin-cli";
 import * as updateCli from "../cli/update-cli";
@@ -20,10 +20,10 @@ export default class Update extends Command {
 	};
 
 	static examples = [
-		"omp update",
-		"omp update --check",
-		"omp update --canary",
-		"# If GitHub rate-limits release metadata, set GITHUB_TOKEN or GH_TOKEN\n  GITHUB_TOKEN=... omp update",
+		"zero2ai update",
+		"zero2ai update --check",
+		"zero2ai update --canary",
+		"# If GitHub rate-limits release metadata, set GITHUB_TOKEN or GH_TOKEN\n  GITHUB_TOKEN=... zero2ai update",
 	];
 
 	async run(): Promise<void> {

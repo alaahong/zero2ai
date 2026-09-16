@@ -1,17 +1,17 @@
 import { describe, expect, it, vi } from "bun:test";
 import * as path from "node:path";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
 import {
 	CONTEXT_NOTES_ENTRY_TYPE,
 	getContextNotes,
 	MAX_CONTEXT_NOTES_BYTES,
-} from "@oh-my-pi/pi-coding-agent/session/context-notes";
-import type { ContextNotesEntry } from "@oh-my-pi/pi-coding-agent/session/context-notes";
-import type { CustomEntry, ResetBoundaryEntry, SessionEntry } from "@oh-my-pi/pi-coding-agent/session/session-entries";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { ContextNotesTool, NewContextTool } from "@oh-my-pi/pi-coding-agent/tools/context-notes";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools/index";
-import { TempDir } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/session/context-notes";
+import type { ContextNotesEntry } from "@zero2ai/coding-agent/session/context-notes";
+import type { CustomEntry, ResetBoundaryEntry, SessionEntry } from "@zero2ai/coding-agent/session/session-entries";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { ContextNotesTool, NewContextTool } from "@zero2ai/coding-agent/tools/context-notes";
+import type { ToolSession } from "@zero2ai/coding-agent/tools/index";
+import { TempDir } from "@zero2ai/utils";
 
 const NOW = "2026-09-04T00:00:00.000Z";
 
@@ -101,7 +101,7 @@ describe("experimental context notes", () => {
 	});
 
 	it("persists a replacement for resume and refuses disabled or parent-bound tool sessions", async () => {
-		using tempDir = TempDir.createSync("@omp-context-notes-");
+		using tempDir = TempDir.createSync("@zero2ai-context-notes-");
 		const sessionDir = path.join(tempDir.path(), "sessions");
 		const sessionManager = SessionManager.create(tempDir.path(), sessionDir);
 		const settings = Settings.isolated({ "compaction.experimentalContextManagement": true });

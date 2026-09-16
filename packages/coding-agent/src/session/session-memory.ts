@@ -1,7 +1,7 @@
 /** Session memory backend lifecycle and transcript resets. */
 
-import type { Agent, AgentTool } from "@oh-my-pi/pi-agent-core";
-import { logger } from "@oh-my-pi/pi-utils";
+import type { Agent, AgentTool } from "@zero2ai/agent-core";
+import { logger } from "@zero2ai/utils";
 import type { ModelRegistry } from "../config/model-registry";
 import type { Settings } from "../config/settings";
 import type { HindsightSessionState } from "../hindsight/state";

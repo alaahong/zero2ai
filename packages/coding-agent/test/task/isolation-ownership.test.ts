@@ -1,10 +1,10 @@
 import { describe, expect, it } from "bun:test";
-import * as natives from "@oh-my-pi/pi-natives";
-import { needsNativeTeardown } from "@oh-my-pi/pi-coding-agent/task/isolation-ownership";
+import * as natives from "@zero2ai/natives";
+import { needsNativeTeardown } from "@zero2ai/coding-agent/task/isolation-ownership";
 
 const { IsoBackendKind } = natives;
 
-// The sidecar set decides which retained workspaces `omp worktree clear`
+// The sidecar set decides which retained workspaces `zero2ai worktree clear`
 // routes through native `isoStop` instead of plain recursive `rm`.
 describe("retained workspace teardown set", () => {
 	it("routes mounts and subvolumes through native teardown, nothing else", () => {
@@ -15,7 +15,7 @@ describe("retained workspace teardown set", () => {
 			IsoBackendKind.Apfs,
 			// ZFS clones need dataset-aware teardown too, but isoStop locates
 			// the dataset by its recorded mountpoint property, which no longer
-			// matches after the retain rename — pi-iso mount-table support first.
+			// matches after the retain rename — zero2ai-iso mount-table support first.
 			IsoBackendKind.Zfs,
 			IsoBackendKind.LinuxReflink,
 			IsoBackendKind.WindowsBlockClone,

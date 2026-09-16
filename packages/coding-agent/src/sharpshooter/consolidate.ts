@@ -1,9 +1,9 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import { type } from "@oh-my-pi/omptype";
-import { completeSimple, Effort, retryTransientCompletion } from "@oh-my-pi/pi-ai";
-import { clampThinkingLevelForModel } from "@oh-my-pi/pi-catalog/model-thinking";
-import { prompt, withFileLock } from "@oh-my-pi/pi-utils";
+import { type } from "@zero2ai/schema";
+import { completeSimple, Effort, retryTransientCompletion } from "@zero2ai/ai";
+import { clampThinkingLevelForModel } from "@zero2ai/catalog/model-thinking";
+import { prompt, withFileLock } from "@zero2ai/utils";
 
 import type { ModelRegistry } from "../config/model-registry";
 import type { Settings } from "../config/settings";

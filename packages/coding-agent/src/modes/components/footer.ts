@@ -1,8 +1,8 @@
 import { stripVTControlCharacters } from "node:util";
-import { ThinkingLevel } from "@oh-my-pi/pi-agent-core";
-import * as vcs from "@oh-my-pi/pi-natives/vcs";
-import { type Component, padding, truncateToWidth, visibleWidth } from "@oh-my-pi/pi-tui";
-import { formatNumber, getProjectDir } from "@oh-my-pi/pi-utils";
+import { ThinkingLevel } from "@zero2ai/agent-core";
+import * as vcs from "@zero2ai/natives/vcs";
+import { type Component, padding, truncateToWidth, visibleWidth } from "@zero2ai/tui";
+import { formatNumber, getProjectDir } from "@zero2ai/utils";
 import { settings } from "../../config/settings";
 import { theme } from "../../modes/theme/theme";
 import type { AgentSession } from "../../session/agent-session";

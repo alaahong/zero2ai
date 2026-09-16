@@ -2,21 +2,21 @@ import { afterEach, describe, expect, it, vi } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { AgentToolContext } from "@oh-my-pi/pi-agent-core";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import * as evalIndex from "@oh-my-pi/pi-coding-agent/eval";
-import type { EvalToolDetails } from "@oh-my-pi/pi-coding-agent/eval/types";
-import { getThemeByName } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { EvalTool } from "@oh-my-pi/pi-coding-agent/tools/eval";
-import { evalToolRenderer } from "@oh-my-pi/pi-coding-agent/tools/eval-render";
+import type { AgentToolContext } from "@zero2ai/agent-core";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import * as evalIndex from "@zero2ai/coding-agent/eval";
+import type { EvalToolDetails } from "@zero2ai/coding-agent/eval/types";
+import { getThemeByName } from "@zero2ai/coding-agent/modes/theme/theme";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import type { ToolSession } from "@zero2ai/coding-agent/tools";
+import { EvalTool } from "@zero2ai/coding-agent/tools/eval";
+import { evalToolRenderer } from "@zero2ai/coding-agent/tools/eval-render";
 import {
 	formatOutputNotice,
 	stripOutputNotice,
 	wrapToolWithMetaNotice,
-} from "@oh-my-pi/pi-coding-agent/tools/output-meta";
-import { removeWithRetries, sanitizeText } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/tools/output-meta";
+import { removeWithRetries, sanitizeText } from "@zero2ai/utils";
 
 function makeSession(settings = Settings.isolated()): ToolSession {
 	return {

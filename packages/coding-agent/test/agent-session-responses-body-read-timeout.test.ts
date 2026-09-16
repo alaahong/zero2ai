@@ -1,19 +1,19 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import { describe, expect, it, vi } from "bun:test";
-import { Agent, type AgentMessage } from "@oh-my-pi/pi-agent-core";
-import { DEFAULT_SHAKE_CONFIG } from "@oh-my-pi/pi-agent-core/compaction";
-import { streamSimple } from "@oh-my-pi/pi-ai/stream";
-import { streamOpenAIResponses } from "@oh-my-pi/pi-ai/providers/openai-responses";
-import { createOpenAIResponsesHistoryPayload } from "@oh-my-pi/pi-ai/utils";
-import type { Context, Model, ModelSpec } from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { Agent, type AgentMessage } from "@zero2ai/agent-core";
+import { DEFAULT_SHAKE_CONFIG } from "@zero2ai/agent-core/compaction";
+import { streamSimple } from "@zero2ai/ai/stream";
+import { streamOpenAIResponses } from "@zero2ai/ai/providers/openai-responses";
+import { createOpenAIResponsesHistoryPayload } from "@zero2ai/ai/utils";
+import type { Context, Model, ModelSpec } from "@zero2ai/ai/types";
+import { buildModel } from "@zero2ai/catalog/build";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { TempDir } from "@zero2ai/utils";
 
 const NATIVE_REPLAY_BULK = "NATIVE_REPLAY_BULK_SENTINEL ".repeat(1000);
 const BODY_READ_TIMEOUT = "Timed out reading request body. Try again, or use a smaller request size.";
@@ -126,7 +126,7 @@ async function createSessionHarness(options: SessionHarnessOptions = {}): Promis
 			return await respond(body, requests.length);
 		},
 	});
-	const tempDir = TempDir.createSync("@pi-responses-body-read-");
+	const tempDir = TempDir.createSync("@zero2ai-responses-body-read-");
 	const authStorage = await AuthStorage.create(tempDir.join("auth.db"));
 	authStorage.setRuntimeApiKey("openai", "local-test-key");
 	const sessionManager = SessionManager.create(tempDir.path(), tempDir.path());

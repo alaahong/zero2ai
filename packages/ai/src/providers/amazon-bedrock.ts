@@ -7,9 +7,9 @@
  * Bun's native `HTTPS_PROXY` support.
  */
 
-import type { Effort } from "@oh-my-pi/pi-catalog/effort";
-import { mapEffortToAnthropicAdaptiveEffort, requireSupportedEffort } from "@oh-my-pi/pi-catalog/model-thinking";
-import { calculateCost } from "@oh-my-pi/pi-catalog/models";
+import type { Effort } from "@zero2ai/catalog/effort";
+import { mapEffortToAnthropicAdaptiveEffort, requireSupportedEffort } from "@zero2ai/catalog/model-thinking";
+import { calculateCost } from "@zero2ai/catalog/models";
 import {
 	$flag,
 	fetchWithRetry,
@@ -17,7 +17,7 @@ import {
 	parseStreamingJson,
 	parseStreamingJsonThrottled,
 	USER_AGENT,
-} from "@oh-my-pi/pi-utils";
+} from "@zero2ai/utils";
 import { renderDemotedThinking } from "../dialect/demotion";
 import * as AIError from "../error";
 import { resolveAwsBearerToken } from "../registry/aws";

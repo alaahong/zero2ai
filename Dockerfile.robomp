@@ -2,10 +2,10 @@
 ###############################################################################
 # robomp — GitHub triage+fix bot orchestrator.
 #
-# Extends `pi-base` (from /Dockerfile, default target oh-my-pi/pi:dev) and adds
+# Extends `zero2ai-base` (from /Dockerfile, default target oh-my-pi/pi:dev) and adds
 # the robomp Python package + a Vite-built SolidJS dashboard bundle. The pi
-# toolchain (python + bun + rustup launcher + pi-natives + omp_rpc wheel +
-# /usr/local/bin/omp shim) all comes from PI_BASE; this file only layers what's
+# toolchain (python + bun + rustup launcher + zero2ai-natives + zero2ai_rpc wheel +
+# /usr/local/bin/zero2ai shim) all comes from ZERO2AI_BASE; this file only layers what's
 # robomp-specific.
 #
 # Build (from pi root):
@@ -16,7 +16,7 @@
 #     docker compose --project-directory python/robomp build
 ###############################################################################
 
-ARG PI_BASE=oh-my-pi/pi:dev
+ARG ZERO2AI_BASE=oh-my-pi/pi:dev
 ARG BUN_VERSION=1.4.2
 
 ############################
@@ -36,17 +36,17 @@ COPY --exclude=node_modules --exclude=dist python/robomp/web/ ./python/robomp/we
 RUN bun --cwd=python/robomp/web run build
 
 ############################
-# 2) runtime — pi-base + robomp src + web bundle + pip install
+# 2) runtime — zero2ai-base + robomp src + web bundle + pip install
 ############################
-FROM ${PI_BASE} AS runtime
+FROM ${ZERO2AI_BASE} AS runtime
 
 # robomp runs against the host pi checkout mounted at /work/pi read-only.
-ENV PI_ROOT=/work/pi
+ENV ZERO2AI_ROOT=/work/pi
 
 WORKDIR /app
 
-# robomp is an MIT product; OMP's dual-license payload remains available from
-# the inherited base image under /usr/share/doc/omp.
+# robomp is an MIT product; ZERO2AI's dual-license payload remains available from
+# the inherited base image under /usr/share/doc/zero2ai.
 COPY LICENSE THIRD-PARTY-NOTICES.txt /usr/share/doc/robomp/
 
 # robomp itself. Drop the Vite-built dashboard into the package tree before
@@ -65,10 +65,10 @@ RUN pip install --no-cache-dir \
 # Host agent config is mounted read-only under /srv/agent-home-stage with
 # host-controlled permissions. The entrypoint copies it into root-owned
 # world-readable files under /srv/agent-home; the agent subprocess runs with
-# HOME=/srv/agent-home, so ~/.omp and ~/.agent resolve there without exposing
+# HOME=/srv/agent-home, so ~/.zero2ai and ~/.agent resolve there without exposing
 # mutable host mounts.
-RUN mkdir -p /srv/agent-home/.agent /srv/agent-home/.omp/agent \
-    && mkdir -p /srv/agent-home-stage/.agent /srv/agent-home-stage/.omp/agent \
+RUN mkdir -p /srv/agent-home/.agent /srv/agent-home/.zero2ai/agent \
+    && mkdir -p /srv/agent-home-stage/.agent /srv/agent-home-stage/.zero2ai/agent \
     && printf '[install]\nbackend = "copyfile"\n' > /srv/agent-home/.bunfig.toml
 
 COPY python/robomp/entrypoint.sh /usr/local/bin/robomp-entrypoint

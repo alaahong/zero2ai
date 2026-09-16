@@ -1,18 +1,18 @@
 import { afterEach, describe, expect, it, setDefaultTimeout } from "bun:test";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
 import {
 	disposeAllVmContexts,
 	executeInVmContext,
 	type JsEvalWorkerFactories,
 	type JsEvalWorkerHandle,
 	setJsEvalWorkerFactoriesForTests,
-} from "@oh-my-pi/pi-coding-agent/eval/js/context-manager";
-import type { WorkerInbound, WorkerOutbound } from "@oh-my-pi/pi-coding-agent/eval/js/worker-protocol";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
+} from "@zero2ai/coding-agent/eval/js/context-manager";
+import type { WorkerInbound, WorkerOutbound } from "@zero2ai/coding-agent/eval/js/worker-protocol";
+import type { ToolSession } from "@zero2ai/coding-agent/tools";
 
 setDefaultTimeout(2_000);
 
-const EXECUTION_MARKER = `OMP_EVAL_HOST_EXECUTION_${crypto.randomUUID().replaceAll("-", "_")}`;
+const EXECUTION_MARKER = `ZERO2AI_EVAL_HOST_EXECUTION_${crypto.randomUUID().replaceAll("-", "_")}`;
 
 interface FailingHandleState {
 	runMessages: number;

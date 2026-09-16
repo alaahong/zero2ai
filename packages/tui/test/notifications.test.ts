@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
-import * as desktopNotify from "@oh-my-pi/pi-tui/desktop-notify";
-import { ProcessTerminal } from "@oh-my-pi/pi-tui/terminal";
+import * as desktopNotify from "@zero2ai/tui/desktop-notify";
+import { ProcessTerminal } from "@zero2ai/tui/terminal";
 import {
 	getTerminalInfo,
 	isInsideTmux,
@@ -10,20 +10,20 @@ import {
 	setOsc99Supported,
 	TERMINAL,
 	wrapTmuxPassthrough,
-} from "@oh-my-pi/pi-tui/terminal-capabilities";
-import { setTerminalHeadless } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/tui/terminal-capabilities";
+import { setTerminalHeadless } from "@zero2ai/utils";
 
 const stdinIsTtyDescriptor = Object.getOwnPropertyDescriptor(process.stdin, "isTTY");
 const stdoutIsTtyDescriptor = Object.getOwnPropertyDescriptor(process.stdout, "isTTY");
 const stdinSetRawModeDescriptor = Object.getOwnPropertyDescriptor(process.stdin, "setRawMode");
-const originalOsc99Probe = Bun.env.PI_TUI_OSC99_PROBE;
+const originalOsc99Probe = Bun.env.ZERO2AI_TUI_OSC99_PROBE;
 const originalTmux = Bun.env.TMUX;
 const originalZellij = Bun.env.ZELLIJ;
 const originalHerdrEnv = Bun.env.HERDR_ENV;
 const originalHerdrPaneId = Bun.env.HERDR_PANE_ID;
 const originalHerdrTabId = Bun.env.HERDR_TAB_ID;
 const originalHerdrWorkspaceId = Bun.env.HERDR_WORKSPACE_ID;
-const originalPiNotifications = Bun.env.PI_NOTIFICATIONS;
+const originalPiNotifications = Bun.env.ZERO2AI_NOTIFICATIONS;
 const originalCmuxSurfaceId = Bun.env.CMUX_SURFACE_ID;
 const originalCmuxWorkspaceId = Bun.env.CMUX_WORKSPACE_ID;
 const originalCmuxSocketPath = Bun.env.CMUX_SOCKET_PATH;
@@ -92,10 +92,10 @@ describe("terminal notifications", () => {
 		delete Bun.env.CMUX_SOCKET_PATH;
 		delete Bun.env.WMUX;
 		delete Bun.env.WMUX_SURFACE_ID;
-		// `PI_NOTIFICATIONS=off` is set in this workspace's CI env, which would
+		// `ZERO2AI_NOTIFICATIONS=off` is set in this workspace's CI env, which would
 		// short-circuit `sendNotification` before it writes anything. Clear it
 		// so the delivery-path assertions actually observe stdout writes.
-		delete Bun.env.PI_NOTIFICATIONS;
+		delete Bun.env.ZERO2AI_NOTIFICATIONS;
 	});
 
 	afterEach(() => {
@@ -103,14 +103,14 @@ describe("terminal notifications", () => {
 		setTerminalHeadless(previousHeadless);
 		setOsc99Supported(false);
 		mutableTerminal.notifyProtocol = originalNotifyProtocol;
-		restoreEnv("PI_TUI_OSC99_PROBE", originalOsc99Probe);
+		restoreEnv("ZERO2AI_TUI_OSC99_PROBE", originalOsc99Probe);
 		restoreEnv("TMUX", originalTmux);
 		restoreEnv("ZELLIJ", originalZellij);
 		restoreEnv("HERDR_ENV", originalHerdrEnv);
 		restoreEnv("HERDR_PANE_ID", originalHerdrPaneId);
 		restoreEnv("HERDR_TAB_ID", originalHerdrTabId);
 		restoreEnv("HERDR_WORKSPACE_ID", originalHerdrWorkspaceId);
-		restoreEnv("PI_NOTIFICATIONS", originalPiNotifications);
+		restoreEnv("ZERO2AI_NOTIFICATIONS", originalPiNotifications);
 		restoreEnv("CMUX_SURFACE_ID", originalCmuxSurfaceId);
 		restoreEnv("CMUX_WORKSPACE_ID", originalCmuxWorkspaceId);
 		restoreEnv("CMUX_SOCKET_PATH", originalCmuxSocketPath);
@@ -162,11 +162,11 @@ describe("terminal notifications", () => {
 	});
 
 	it("queries and confirms OSC 99 support before rich notifications", () => {
-		Bun.env.PI_TUI_OSC99_PROBE = "1";
+		Bun.env.ZERO2AI_TUI_OSC99_PROBE = "1";
 		mutableTerminal.notifyProtocol = NotifyProtocol.Osc99;
 		const { terminal, writes, received } = setupProcessTerminal();
 		try {
-			const query = writes.find(w => w.startsWith("\x1b]99;i=omp-probe-") && w.endsWith("\x1b\\\x1b[c"));
+			const query = writes.find(w => w.startsWith("\x1b]99;i=zero2ai-probe-") && w.endsWith("\x1b\\\x1b[c"));
 			expect(query).toBeDefined();
 			const id = query!.match(/i=([^:;]+):p=\?/u)?.[1];
 			expect(id).toBeDefined();
@@ -181,7 +181,7 @@ describe("terminal notifications", () => {
 	});
 
 	it("marks OSC 99 unsupported when the DA1 sentinel wins", () => {
-		Bun.env.PI_TUI_OSC99_PROBE = "1";
+		Bun.env.ZERO2AI_TUI_OSC99_PROBE = "1";
 		mutableTerminal.notifyProtocol = NotifyProtocol.Osc99;
 		const { terminal, received } = setupProcessTerminal();
 		try {
@@ -535,7 +535,7 @@ describe("terminal notifications", () => {
 	});
 
 	it("under tmux, the OSC 99 capability probe is suppressed (reply cannot route back to the pane)", () => {
-		Bun.env.PI_TUI_OSC99_PROBE = "1";
+		Bun.env.ZERO2AI_TUI_OSC99_PROBE = "1";
 		Bun.env.TMUX = "/tmp/tmux-1000/default,1234,0";
 		mutableTerminal.notifyProtocol = NotifyProtocol.Osc99;
 		const { terminal, writes } = setupProcessTerminal();
@@ -543,7 +543,7 @@ describe("terminal notifications", () => {
 			// tmux forwards the passthrough probe to the outer terminal but cannot
 			// route the `p=?` reply back to the sending pane, so the reply would
 			// leak into the pane as text (#5582). The probe must not fire at all.
-			const probe = writes.find(w => w.includes("]99;i=omp-probe-") && w.includes(":p=?"));
+			const probe = writes.find(w => w.includes("]99;i=zero2ai-probe-") && w.includes(":p=?"));
 			expect(probe).toBeUndefined();
 			expect(isOsc99Supported()).toBe(false);
 		} finally {

@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it } from "bun:test";
 import * as path from "node:path";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { FileSessionStorage, MemorySessionStorage } from "@oh-my-pi/pi-coding-agent/session/session-storage";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { FileSessionStorage, MemorySessionStorage } from "@zero2ai/coding-agent/session/session-storage";
+import { TempDir } from "@zero2ai/utils";
 
 const tempDirs: TempDir[] = [];
 const LARGE_SESSION_BYTES = 9 * 1024 * 1024;
@@ -51,7 +51,7 @@ function assistantMessage(text: string) {
 
 describe("SessionManager.peekSessionInit", () => {
 	it("returns the latest session_init contract (tools/spawns/readSummarize) and the header cwd", async () => {
-		const cwd = makeTempDir("@pi-peek-cwd-");
+		const cwd = makeTempDir("@zero2ai-peek-cwd-");
 		const manager = SessionManager.create(cwd, path.join(cwd, "sessions"));
 		const sessionFile = manager.getSessionFile();
 		if (!sessionFile) throw new Error("Expected a persisted session file path");
@@ -79,7 +79,7 @@ describe("SessionManager.peekSessionInit", () => {
 	});
 
 	it("streams large file-backed sessions without a full read", async () => {
-		const cwd = makeTempDir("@pi-peek-stream-");
+		const cwd = makeTempDir("@zero2ai-peek-stream-");
 		const manager = SessionManager.create(cwd, path.join(cwd, "sessions"));
 		const sessionFile = manager.getSessionFile();
 		if (!sessionFile) throw new Error("Expected a persisted session file path");
@@ -94,7 +94,7 @@ describe("SessionManager.peekSessionInit", () => {
 	});
 
 	it("preserves non-file storage behavior", async () => {
-		const cwd = makeTempDir("@pi-peek-memory-");
+		const cwd = makeTempDir("@zero2ai-peek-memory-");
 		const storage = new MemorySessionStorage();
 		const manager = SessionManager.create(cwd, path.join(cwd, "sessions"), storage);
 		const sessionFile = manager.getSessionFile();
@@ -109,7 +109,7 @@ describe("SessionManager.peekSessionInit", () => {
 	});
 
 	it("returns init: null for a session file with no session_init (a main/legacy session)", async () => {
-		const cwd = makeTempDir("@pi-peek-legacy-");
+		const cwd = makeTempDir("@zero2ai-peek-legacy-");
 		const manager = SessionManager.create(cwd, path.join(cwd, "sessions"));
 		const sessionFile = manager.getSessionFile();
 		if (!sessionFile) throw new Error("Expected a persisted session file path");
@@ -121,7 +121,7 @@ describe("SessionManager.peekSessionInit", () => {
 	});
 
 	it("returns null when the first entry is not a session header", async () => {
-		const file = path.join(makeTempDir("@pi-peek-invalid-header-"), "invalid.jsonl");
+		const file = path.join(makeTempDir("@zero2ai-peek-invalid-header-"), "invalid.jsonl");
 		const content = [
 			{
 				type: "session_init",
@@ -158,7 +158,7 @@ describe("SessionManager.peekSessionInit", () => {
 	});
 
 	it("returns null for a file that cannot be read", async () => {
-		const peek = await SessionManager.peekSessionInit(path.join(makeTempDir("@pi-peek-missing-"), "nope.jsonl"));
+		const peek = await SessionManager.peekSessionInit(path.join(makeTempDir("@zero2ai-peek-missing-"), "nope.jsonl"));
 		expect(peek).toBeNull();
 	});
 });

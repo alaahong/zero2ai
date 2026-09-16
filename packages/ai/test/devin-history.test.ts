@@ -1,10 +1,10 @@
 import { describe, expect, it } from "bun:test";
 import { gunzipSync } from "node:zlib";
-import { streamDevin } from "@oh-my-pi/pi-ai/providers/devin";
-import type { AssistantMessage, Context, Model } from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { GetChatMessageRequestSchema, GetUserJwtResponseSchema } from "@oh-my-pi/pi-catalog/discovery/devin-proto";
-import { create, fromBinary, toBinary } from "@oh-my-pi/pi-catalog/discovery/protobuf";
+import { streamDevin } from "@zero2ai/ai/providers/devin";
+import type { AssistantMessage, Context, Model } from "@zero2ai/ai/types";
+import { buildModel } from "@zero2ai/catalog/build";
+import { GetChatMessageRequestSchema, GetUserJwtResponseSchema } from "@zero2ai/catalog/discovery/devin-proto";
+import { create, fromBinary, toBinary } from "@zero2ai/catalog/discovery/protobuf";
 
 const devinModel: Model<"devin-agent"> = buildModel({
 	id: "devin-test",

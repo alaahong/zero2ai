@@ -2,7 +2,7 @@
  * Interactive shell console.
  */
 
-import { Command, Flags } from "@oh-my-pi/pi-utils/cli";
+import { Command, Flags } from "@zero2ai/utils/cli";
 import { shellHelp as commandHelp } from "../cli/command-help";
 import { runShellCommand, type ShellCommandArgs } from "../cli/shell-cli";
 import { initTheme } from "../modes/theme/theme";

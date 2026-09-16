@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { stripVTControlCharacters } from "node:util";
-import { resetSettingsForTest, Settings, settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { MCPAuthorizationLinkPrompt } from "@oh-my-pi/pi-coding-agent/modes/controllers/mcp-command-controller";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { visibleWidth } from "@oh-my-pi/pi-tui";
+import { resetSettingsForTest, Settings, settings } from "@zero2ai/coding-agent/config/settings";
+import { MCPAuthorizationLinkPrompt } from "@zero2ai/coding-agent/modes/controllers/mcp-command-controller";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import { visibleWidth } from "@zero2ai/tui";
 
 const OSC = "\x1b]";
 const BEL = "\x07";

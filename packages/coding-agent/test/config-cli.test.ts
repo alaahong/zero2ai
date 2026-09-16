@@ -1,12 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as path from "node:path";
-import { runConfigCommand } from "@oh-my-pi/pi-coding-agent/cli/config-cli";
-import { resetSettingsForTest } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AgentStorage } from "@oh-my-pi/pi-coding-agent/session/agent-storage";
-import { getConfigRootDir, setAgentDir, TempDir } from "@oh-my-pi/pi-utils";
+import { runConfigCommand } from "@zero2ai/coding-agent/cli/config-cli";
+import { resetSettingsForTest } from "@zero2ai/coding-agent/config/settings";
+import { AgentStorage } from "@zero2ai/coding-agent/session/agent-storage";
+import { getConfigRootDir, setAgentDir, TempDir } from "@zero2ai/utils";
 
 let testAgentDir: TempDir | undefined;
-const originalAgentDir = process.env.PI_CODING_AGENT_DIR;
+const originalAgentDir = process.env.ZERO2AI_CODING_AGENT_DIR;
 const fallbackAgentDir = path.join(getConfigRootDir(), "agent");
 const cliEntry = path.join(import.meta.dir, "..", "src", "cli.ts");
 
@@ -30,7 +30,7 @@ async function runCliProcess(args: string[], env: NodeJS.ProcessEnv): Promise<Cl
 
 beforeEach(() => {
 	resetSettingsForTest();
-	testAgentDir = TempDir.createSync("@omp-config-cli-");
+	testAgentDir = TempDir.createSync("@zero2ai-config-cli-");
 	setAgentDir(testAgentDir.path());
 });
 
@@ -42,7 +42,7 @@ afterEach(async () => {
 		setAgentDir(originalAgentDir);
 	} else {
 		setAgentDir(fallbackAgentDir);
-		delete process.env.PI_CODING_AGENT_DIR;
+		delete process.env.ZERO2AI_CODING_AGENT_DIR;
 	}
 	if (testAgentDir) {
 		try {
@@ -209,7 +209,7 @@ describe("config CLI schema coverage", () => {
 	it("fully flushes JSON larger than a pipe buffer", async () => {
 		if (!testAgentDir) throw new Error("Test agent directory was not initialized");
 		const { exitCode, output, error } = await runCliProcess(["config", "list", "--json"], {
-			PI_CODING_AGENT_DIR: testAgentDir.path(),
+			ZERO2AI_CODING_AGENT_DIR: testAgentDir.path(),
 		});
 
 		expect(exitCode).toBe(0);
@@ -218,7 +218,7 @@ describe("config CLI schema coverage", () => {
 		const parsed: unknown = JSON.parse(output);
 		expect(parsed).toMatchObject({ modelRoles: { type: "record" } });
 	});
-	it("loads PI_CONFIG_FILES overlays in path-list order", async () => {
+	it("loads ZERO2AI_CONFIG_FILES overlays in path-list order", async () => {
 		if (!testAgentDir) throw new Error("Test agent directory was not initialized");
 		const baseOverlayPath = path.join(testAgentDir.path(), "base-overlay.yml");
 		const finalOverlayPath = path.join(testAgentDir.path(), "final-overlay.yml");
@@ -227,8 +227,8 @@ describe("config CLI schema coverage", () => {
 			Bun.write(finalOverlayPath, "defaultThinkingLevel: max\n"),
 		]);
 		const { exitCode, output, error } = await runCliProcess(["config", "get", "defaultThinkingLevel", "--json"], {
-			PI_CODING_AGENT_DIR: testAgentDir.path(),
-			PI_CONFIG_FILES: [baseOverlayPath, finalOverlayPath].join(path.delimiter),
+			ZERO2AI_CODING_AGENT_DIR: testAgentDir.path(),
+			ZERO2AI_CONFIG_FILES: [baseOverlayPath, finalOverlayPath].join(path.delimiter),
 		});
 
 		expect(exitCode).toBe(0);

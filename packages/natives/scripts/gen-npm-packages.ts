@@ -110,7 +110,7 @@ export function buildLeafManifest({ tag, os, cpu, files, version }: BuildLeafMan
 }
 
 function buildReadme(tag: string, manifest: LeafManifest): string {
-	return `# ${manifest.name}\n\nPlatform native addon package for \`@oh-my-pi/pi-natives\` on ${tag}.\n\nThis package is generated during release and installed as an optional dependency of the core package.\n`;
+	return `# ${manifest.name}\n\nPlatform native addon package for \`@zero2ai/natives\` on ${tag}.\n\nThis package is generated during release and installed as an optional dependency of the core package.\n`;
 }
 
 function selectTargets(tags: readonly string[] | undefined): readonly LeafTarget[] {

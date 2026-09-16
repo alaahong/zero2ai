@@ -1,8 +1,8 @@
 import { describe, expect, it } from "bun:test";
-import { type } from "@oh-my-pi/omptype";
-import { normalizeTools } from "@oh-my-pi/pi-agent-core/agent-loop";
-import type { AgentTool } from "@oh-my-pi/pi-agent-core/types";
-import { INTENT_FIELD } from "@oh-my-pi/pi-wire";
+import { type } from "@zero2ai/schema";
+import { normalizeTools } from "@zero2ai/agent-core/agent-loop";
+import type { AgentTool } from "@zero2ai/agent-core/types";
+import { INTENT_FIELD } from "@zero2ai/wire";
 
 const toolSchema = type({
 	path: type("string").describe("where to read"),

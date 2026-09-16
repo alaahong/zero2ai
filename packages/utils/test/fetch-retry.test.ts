@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { extractRetryHint, fetchWithRetry, isUnexpectedSocketCloseMessage } from "@oh-my-pi/pi-utils/fetch-retry";
+import { extractRetryHint, fetchWithRetry, isUnexpectedSocketCloseMessage } from "@zero2ai/utils/fetch-retry";
 
 describe("isUnexpectedSocketCloseMessage", () => {
 	it.each(["Socket is closed", "Error: Socket is closed.", "The socket connection was closed unexpectedly"])(
@@ -176,7 +176,7 @@ describe("extractRetryHint", () => {
 		expect(extractRetryHint(undefined, "Please retry in 5s. Your limit will reset in 13 minutes")).toBe(13 * 60_000);
 	});
 	// The appended header hint is already the max across response headers
-	// (getRetryAfterMsFromHeaders in pi-ai). When it outlasts the textual
+	// (getRetryAfterMsFromHeaders in zero2ai-ai). When it outlasts the textual
 	// account reset, it must win so the retry honors the provider's retry
 	// window instead of re-hitting a blocked credential.
 	it("prefers a longer appended retry hint over a shorter account reset", () => {

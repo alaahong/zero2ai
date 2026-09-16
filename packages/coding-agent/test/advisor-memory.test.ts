@@ -1,17 +1,17 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
-import type { Model } from "@oh-my-pi/pi-ai";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { getMemoryRoot } from "@oh-my-pi/pi-coding-agent/memories";
-import { AgentRegistry } from "@oh-my-pi/pi-coding-agent/registry/agent-registry";
-import { createAgentSession } from "@oh-my-pi/pi-coding-agent/sdk";
-import type { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import type { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { sharpshooterMemoryFilePath } from "@oh-my-pi/pi-coding-agent/sharpshooter/paths";
-import { getAgentDir, setAgentDir, TempDir } from "@oh-my-pi/pi-utils";
+import type { Model } from "@zero2ai/ai";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { getMemoryRoot } from "@zero2ai/coding-agent/memories";
+import { AgentRegistry } from "@zero2ai/coding-agent/registry/agent-registry";
+import { createAgentSession } from "@zero2ai/coding-agent/sdk";
+import type { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import type { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { sharpshooterMemoryFilePath } from "@zero2ai/coding-agent/sharpshooter/paths";
+import { getAgentDir, setAgentDir, TempDir } from "@zero2ai/utils";
 import { createInMemoryAuthStorage } from "./helpers/agent-session-setup";
 
 describe("advisor memory context", () => {
@@ -87,7 +87,7 @@ describe("advisor memory context", () => {
 	}
 
 	it("injects the sharpshooter summary into main and advisor prompts without a recall tool", async () => {
-		tempDir = TempDir.createSync("@pi-advisor-memory-");
+		tempDir = TempDir.createSync("@zero2ai-advisor-memory-");
 		const decision = "Keep storage project-scoped for advisor memory test.";
 		const memoryFile = sharpshooterMemoryFilePath(tempDir.path(), tempDir.path(), "architecture.md");
 		await fs.mkdir(memoryFile.slice(0, memoryFile.lastIndexOf("/")), { recursive: true });
@@ -108,7 +108,7 @@ describe("advisor memory context", () => {
 	});
 
 	it("grants the default advisor roster a recall tool when the backend builds one", async () => {
-		tempDir = TempDir.createSync("@pi-advisor-memory-");
+		tempDir = TempDir.createSync("@zero2ai-advisor-memory-");
 		// Hindsight without apiUrl is inert at runtime but still builds the recall
 		// tool (MemoryRecallTool.createIf gates on the setting alone), which is
 		// exactly what the advisor roster filter consumes.
@@ -124,7 +124,7 @@ describe("advisor memory context", () => {
 	});
 
 	it.each(["hindsight", "mnemopi"])("keeps in-memory advisor URL tools bound to the %s session", async backend => {
-		tempDir = TempDir.createSync("@pi-advisor-memory-urls-");
+		tempDir = TempDir.createSync("@zero2ai-advisor-memory-urls-");
 		const previousAgentDir = getAgentDir();
 		setAgentDir(tempDir.path());
 		try {

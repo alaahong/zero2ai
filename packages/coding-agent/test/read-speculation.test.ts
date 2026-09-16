@@ -2,15 +2,15 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { ImageContent } from "@oh-my-pi/pi-ai";
-import type { SpeculativeOperationContext } from "@oh-my-pi/pi-agent-core";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { getEditStore } from "@oh-my-pi/pi-coding-agent/edit/store";
-import { CodingAgentSpeculativeExecutionHost } from "@oh-my-pi/pi-coding-agent/speculation/host";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { getConflictHistory } from "@oh-my-pi/pi-coding-agent/tools/conflict-detect";
-import { ReadTool } from "@oh-my-pi/pi-coding-agent/tools/read";
-import { removeSyncWithRetries } from "@oh-my-pi/pi-utils";
+import type { ImageContent } from "@zero2ai/ai";
+import type { SpeculativeOperationContext } from "@zero2ai/agent-core";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { getEditStore } from "@zero2ai/coding-agent/edit/store";
+import { CodingAgentSpeculativeExecutionHost } from "@zero2ai/coding-agent/speculation/host";
+import type { ToolSession } from "@zero2ai/coding-agent/tools";
+import { getConflictHistory } from "@zero2ai/coding-agent/tools/conflict-detect";
+import { ReadTool } from "@zero2ai/coding-agent/tools/read";
+import { removeSyncWithRetries } from "@zero2ai/utils";
 
 const TINY_PNG_BASE64 =
 	"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==";

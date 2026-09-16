@@ -1,14 +1,14 @@
 /**
  * Share a saved session as an encrypted link without launching the agent.
  *
- * `omp share <session>` accepts a session id (prefix) or a path to a session
+ * `zero2ai share <session>` accepts a session id (prefix) or a path to a session
  * `.jsonl` and uploads the sealed snapshot exactly like the `/share` slash
  * command, honoring `share.serverUrl`, `share.store`, and
  * `share.redactSecrets`.
  */
 
-import { getAgentDir, isEnoent } from "@oh-my-pi/pi-utils";
-import { Args, Command, Flags } from "@oh-my-pi/pi-utils/cli";
+import { getAgentDir, isEnoent } from "@zero2ai/utils";
+import { Args, Command, Flags } from "@zero2ai/utils/cli";
 import { shareHelp as commandHelp } from "../cli/command-help";
 import { Settings } from "../config/settings";
 import { shareSession } from "../export/share";

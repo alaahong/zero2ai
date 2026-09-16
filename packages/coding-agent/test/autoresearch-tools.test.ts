@@ -1,22 +1,22 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import type { ImageContent, TextContent } from "@oh-my-pi/pi-ai";
-import { createSessionRuntime } from "@oh-my-pi/pi-coding-agent/autoresearch/state";
+import type { ImageContent, TextContent } from "@zero2ai/ai";
+import { createSessionRuntime } from "@zero2ai/coding-agent/autoresearch/state";
 import {
 	type AutoresearchStorage,
 	closeAllAutoresearchStorages,
 	openAutoresearchStorage,
 	type SessionRow,
-} from "@oh-my-pi/pi-coding-agent/autoresearch/storage";
-import { createInitExperimentTool } from "@oh-my-pi/pi-coding-agent/autoresearch/tools/init-experiment";
-import { createLogExperimentTool } from "@oh-my-pi/pi-coding-agent/autoresearch/tools/log-experiment";
-import { createRunExperimentTool } from "@oh-my-pi/pi-coding-agent/autoresearch/tools/run-experiment";
-import { createUpdateNotesTool } from "@oh-my-pi/pi-coding-agent/autoresearch/tools/update-notes";
-import type { ASIData, LogDetails, NumericMetricMap, RunDetails } from "@oh-my-pi/pi-coding-agent/autoresearch/types";
-import type { ExtensionAPI, ExtensionContext } from "@oh-my-pi/pi-coding-agent/extensibility/extensions";
-import * as vcs from "@oh-my-pi/pi-natives/vcs";
-import { TempDir } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/autoresearch/storage";
+import { createInitExperimentTool } from "@zero2ai/coding-agent/autoresearch/tools/init-experiment";
+import { createLogExperimentTool } from "@zero2ai/coding-agent/autoresearch/tools/log-experiment";
+import { createRunExperimentTool } from "@zero2ai/coding-agent/autoresearch/tools/run-experiment";
+import { createUpdateNotesTool } from "@zero2ai/coding-agent/autoresearch/tools/update-notes";
+import type { ASIData, LogDetails, NumericMetricMap, RunDetails } from "@zero2ai/coding-agent/autoresearch/types";
+import type { ExtensionAPI, ExtensionContext } from "@zero2ai/coding-agent/extensibility/extensions";
+import * as vcs from "@zero2ai/natives/vcs";
+import { TempDir } from "@zero2ai/utils";
 import { $ } from "bun";
 
 afterEach(() => {
@@ -29,7 +29,7 @@ function firstTextBlockText(content: Array<TextContent | ImageContent>): string 
 	return block.text;
 }
 
-function makeTempDir(prefix = "@pi-autoresearch-tools-"): TempDir {
+function makeTempDir(prefix = "@zero2ai-autoresearch-tools-"): TempDir {
 	return TempDir.createSync(prefix);
 }
 
@@ -81,7 +81,7 @@ let templateBranchRepo: TempDir;
 let templateBaselineCommit: string;
 
 beforeAll(async () => {
-	templateRepo = makeTempDir("@pi-autoresearch-template-");
+	templateRepo = makeTempDir("@zero2ai-autoresearch-template-");
 	await Bun.write(path.join(templateRepo.path(), "README.md"), "# baseline\n");
 	await $`git init --initial-branch=main && git config core.autocrlf false && git config core.fsmonitor false && git config user.email tester@example.com && git config user.name Tester && git add -A && git commit -m baseline`
 		.cwd(templateRepo.path())
@@ -89,7 +89,7 @@ beforeAll(async () => {
 	templateBaselineCommit = (await $`git rev-parse HEAD`.cwd(templateRepo.path()).text()).trim();
 	// Second fixture: harness committed and already on an `autoresearch/*` branch,
 	// the baseline for log_experiment's on-branch keep/discard scenarios.
-	templateBranchRepo = makeTempDir("@pi-autoresearch-template-branch-");
+	templateBranchRepo = makeTempDir("@zero2ai-autoresearch-template-branch-");
 	fs.cpSync(templateRepo.path(), templateBranchRepo.path(), { recursive: true });
 	await Bun.write(path.join(templateBranchRepo.path(), "autoresearch.sh"), "#!/usr/bin/env bash\necho METRIC m=1\n");
 	await $`git add -A && git commit -m harness && git checkout -b autoresearch/base`
@@ -167,12 +167,12 @@ describe("init_experiment", () => {
 	let dbOverride: TempDir;
 
 	beforeEach(() => {
-		dbOverride = makeTempDir("@pi-autoresearch-init-db-");
-		process.env.OMP_AUTORESEARCH_DB_DIR = dbOverride.path();
+		dbOverride = makeTempDir("@zero2ai-autoresearch-init-db-");
+		process.env.ZERO2AI_AUTORESEARCH_DB_DIR = dbOverride.path();
 	});
 
 	afterEach(async () => {
-		delete process.env.OMP_AUTORESEARCH_DB_DIR;
+		delete process.env.ZERO2AI_AUTORESEARCH_DB_DIR;
 		closeAllAutoresearchStorages();
 		await Bun.sleep(0);
 		await dbOverride.remove();
@@ -346,12 +346,12 @@ describe("run_experiment", () => {
 	let dbOverride: TempDir;
 
 	beforeEach(() => {
-		dbOverride = makeTempDir("@pi-autoresearch-run-db-");
-		process.env.OMP_AUTORESEARCH_DB_DIR = dbOverride.path();
+		dbOverride = makeTempDir("@zero2ai-autoresearch-run-db-");
+		process.env.ZERO2AI_AUTORESEARCH_DB_DIR = dbOverride.path();
 	});
 
 	afterEach(async () => {
-		delete process.env.OMP_AUTORESEARCH_DB_DIR;
+		delete process.env.ZERO2AI_AUTORESEARCH_DB_DIR;
 		closeAllAutoresearchStorages();
 		await Bun.sleep(0);
 		await dbOverride.remove();
@@ -437,12 +437,12 @@ describe("log_experiment", () => {
 	let dbOverride: TempDir;
 
 	beforeEach(() => {
-		dbOverride = makeTempDir("@pi-autoresearch-log-db-");
-		process.env.OMP_AUTORESEARCH_DB_DIR = dbOverride.path();
+		dbOverride = makeTempDir("@zero2ai-autoresearch-log-db-");
+		process.env.ZERO2AI_AUTORESEARCH_DB_DIR = dbOverride.path();
 	});
 
 	afterEach(async () => {
-		delete process.env.OMP_AUTORESEARCH_DB_DIR;
+		delete process.env.ZERO2AI_AUTORESEARCH_DB_DIR;
 		closeAllAutoresearchStorages();
 		await Bun.sleep(0);
 		await dbOverride.remove();
@@ -838,12 +838,12 @@ describe("update_notes", () => {
 	let dbOverride: TempDir;
 
 	beforeEach(() => {
-		dbOverride = makeTempDir("@pi-autoresearch-notes-db-");
-		process.env.OMP_AUTORESEARCH_DB_DIR = dbOverride.path();
+		dbOverride = makeTempDir("@zero2ai-autoresearch-notes-db-");
+		process.env.ZERO2AI_AUTORESEARCH_DB_DIR = dbOverride.path();
 	});
 
 	afterEach(async () => {
-		delete process.env.OMP_AUTORESEARCH_DB_DIR;
+		delete process.env.ZERO2AI_AUTORESEARCH_DB_DIR;
 		closeAllAutoresearchStorages();
 		await Bun.sleep(0);
 		await dbOverride.remove().catch(() => {});

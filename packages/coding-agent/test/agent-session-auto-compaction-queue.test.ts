@@ -1,20 +1,20 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "bun:test";
 import { scheduler } from "node:timers/promises";
-import { Agent, AgentBusyError } from "@oh-my-pi/pi-agent-core";
-import { CompactionCancelledError } from "@oh-my-pi/pi-agent-core/compaction";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { ExtensionRuntime, loadExtensionFromFactory } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/loader";
-import { ExtensionRunner } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/runner";
-import type { CompactOptions } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/types";
-import { AgentSession, type AgentSessionEvent } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import * as unexpectedStopClassifier from "@oh-my-pi/pi-coding-agent/session/unexpected-stop-classifier";
-import { EventBus } from "@oh-my-pi/pi-coding-agent/utils/event-bus";
-import { TempDir, withTimeout } from "@oh-my-pi/pi-utils";
-import * as logger from "@oh-my-pi/pi-utils/logger";
+import { Agent, AgentBusyError } from "@zero2ai/agent-core";
+import { CompactionCancelledError } from "@zero2ai/agent-core/compaction";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { ExtensionRuntime, loadExtensionFromFactory } from "@zero2ai/coding-agent/extensibility/extensions/loader";
+import { ExtensionRunner } from "@zero2ai/coding-agent/extensibility/extensions/runner";
+import type { CompactOptions } from "@zero2ai/coding-agent/extensibility/extensions/types";
+import { AgentSession, type AgentSessionEvent } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import * as unexpectedStopClassifier from "@zero2ai/coding-agent/session/unexpected-stop-classifier";
+import { EventBus } from "@zero2ai/coding-agent/utils/event-bus";
+import { TempDir, withTimeout } from "@zero2ai/utils";
+import * as logger from "@zero2ai/utils/logger";
 
 const runtimeSignalStoreKey = "__ompRuntimeSignals";
 
@@ -45,7 +45,7 @@ describe("AgentSession auto-compaction queue resume", () => {
 	let authStorage: AuthStorage;
 	let modelRegistry: ModelRegistry;
 	beforeAll(async () => {
-		tempDir = TempDir.createSync("@pi-auto-compaction-queue-");
+		tempDir = TempDir.createSync("@zero2ai-auto-compaction-queue-");
 		authStorage = await AuthStorage.create(":memory:");
 		authStorage.setRuntimeApiKey("anthropic", "test-key");
 		modelRegistry = new ModelRegistry(authStorage);

@@ -10,17 +10,17 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { clearCache, readFile } from "@oh-my-pi/pi-coding-agent/capability/fs";
-import type { Rule } from "@oh-my-pi/pi-coding-agent/capability/rule";
-import type { LoadContext } from "@oh-my-pi/pi-coding-agent/capability/types";
-import { getProjectPathCandidates } from "@oh-my-pi/pi-coding-agent/discovery/agents";
+import { clearCache, readFile } from "@zero2ai/coding-agent/capability/fs";
+import type { Rule } from "@zero2ai/coding-agent/capability/rule";
+import type { LoadContext } from "@zero2ai/coding-agent/capability/types";
+import { getProjectPathCandidates } from "@zero2ai/coding-agent/discovery/agents";
 import {
 	buildRuleFromMarkdown,
 	calculateDepth,
 	loadFilesFromDir,
 	scanSkillsFromDir,
-} from "@oh-my-pi/pi-coding-agent/discovery/helpers";
-import { removeSyncWithRetries } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/discovery/helpers";
+import { removeSyncWithRetries } from "@zero2ai/utils";
 
 const PROVIDER_ID = "agents";
 
@@ -46,7 +46,7 @@ describe("agents provider project-level discovery", () => {
 
 	beforeEach(() => {
 		clearCache();
-		tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "pi-agents-monorepo-"));
+		tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-agents-monorepo-"));
 		repoRoot = path.join(tempDir, "repo");
 		subProject = path.join(repoRoot, "packages", "my-app");
 		fs.mkdirSync(subProject, { recursive: true });

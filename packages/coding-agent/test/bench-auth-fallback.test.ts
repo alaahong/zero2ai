@@ -9,15 +9,15 @@ import type {
 	AssistantMessageEventStream,
 	Model,
 	SimpleStreamOptions,
-} from "@oh-my-pi/pi-ai";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import type { ModelSpec } from "@oh-my-pi/pi-catalog/types";
-import { writeModelCache } from "@oh-my-pi/pi-catalog/model-cache";
-import { resolveModelCacheProviderId } from "@oh-my-pi/pi-catalog/provider-models";
-import { type BenchSummary, runBenchCommand } from "@oh-my-pi/pi-coding-agent/cli/bench-cli";
-import { type BenchModelRegistry, resolveBenchTargets } from "@oh-my-pi/pi-coding-agent/cli/bench-runtime";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { getModelDbPath, TempDir } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/ai";
+import { buildModel } from "@zero2ai/catalog/build";
+import type { ModelSpec } from "@zero2ai/catalog/types";
+import { writeModelCache } from "@zero2ai/catalog/model-cache";
+import { resolveModelCacheProviderId } from "@zero2ai/catalog/provider-models";
+import { type BenchSummary, runBenchCommand } from "@zero2ai/coding-agent/cli/bench-cli";
+import { type BenchModelRegistry, resolveBenchTargets } from "@zero2ai/coding-agent/cli/bench-runtime";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { getModelDbPath, TempDir } from "@zero2ai/utils";
 
 function fakeModel(provider: string, id: string): Model<Api> {
 	return buildModel({
@@ -239,7 +239,7 @@ describe("bench discovery fallback", () => {
 
 describe("default bench runtime", () => {
 	it("hydrates credential-scoped model caches before selector resolution", async () => {
-		const tempDir = TempDir.createSync("@omp-bench-runtime-");
+		const tempDir = TempDir.createSync("@zero2ai-bench-runtime-");
 		const apiKey = "bench-cache-test-key";
 		const modelId = "cached-bench-model";
 		const cacheDbPath = getModelDbPath(tempDir.path());
@@ -287,7 +287,7 @@ describe("default bench runtime", () => {
 					...process.env,
 					NO_COLOR: "1",
 					OPENCODE_API_KEY: apiKey,
-					PI_CODING_AGENT_DIR: tempDir.path(),
+					ZERO2AI_CODING_AGENT_DIR: tempDir.path(),
 				},
 				stdout: "pipe",
 				stderr: "pipe",

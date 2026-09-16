@@ -13,18 +13,18 @@ services:
     build:
       # pi root: gives the web-builder stage access to the workspace
       # bun.lock + catalog (web/package.json refs `catalog:` versions).
-      # python/robomp/data and pi-root excludes are filtered via
+      # python/robomp/data and zero2ai-root excludes are filtered via
       # Dockerfile.robomp.dockerignore at the context root.
       context: ../..
       dockerfile: Dockerfile.robomp
       args:
-        # Tag of the pre-built pi-base image produced by `bun run pi:image`
+        # Tag of the pre-built zero2ai-base image produced by `bun run pi:image`
         # (sources: pi root /Dockerfile). Override per-environment as needed.
-        PI_BASE: oh-my-pi/pi:dev
+        ZERO2AI_BASE: oh-my-pi/pi:dev
     image: robomp:dev
     container_name: robomp
     # Stable hostname: os.hostname() inside the container feeds usage
-    # attribution (x-omp-hostname → broker `clients.hostname`); without this
+    # attribution (x-zero2ai-hostname → broker `clients.hostname`); without this
     # it reports the random docker container id.
     hostname: robomp
     # Phase B (graceful shutdown): gives the orchestrator at least
@@ -78,17 +78,17 @@ services:
       ROBOMP_REPLAY_TOKEN: ${ROBOMP_REPLAY_TOKEN:-}
 
       # --- container-fixed paths ---
-      ROBOMP_OMP_COMMAND: omp
+      ROBOMP_OMP_COMMAND: zero2ai
       ROBOMP_WORKSPACE_ROOT: /data/workspaces
       ROBOMP_SQLITE_PATH: /data/robomp.sqlite
       ROBOMP_LOG_DIR: /data/logs
       ROBOMP_BIND_HOST: ${ROBOMP_BIND_HOST:-0.0.0.0}
       ROBOMP_BIND_PORT: ${ROBOMP_BIND_PORT:-8080}
-      PI_ROOT: /work/pi
+      ZERO2AI_ROOT: /work/pi
     depends_on:
       gh-proxy:
         condition: service_started
-    # Resolve `llm-gateway.internal` (used in /srv/agent-home/.omp/agent/models.yml) to the
+    # Resolve `llm-gateway.internal` (used in /srv/agent-home/.zero2ai/agent/models.yml) to the
     # Docker host. The actual gateway listens on 127.0.0.1:4000 on the host;
     # `host-gateway` is Docker's alias for the host bridge IP.
     extra_hosts:
@@ -97,14 +97,14 @@ services:
       - default
       - robomp_internal
     volumes:
-      - ${PI_ROOT:-../..}:/work/pi:ro
+      - ${ZERO2AI_ROOT:-../..}:/work/pi:ro
       - robomp_data:/data
       # Host agent config is mounted read-only under /srv/agent-home-stage
       # with host-controlled permissions. The entrypoint copies it into
       # root-owned, world-readable files under /srv/agent-home; the agent
-      # subprocess runs with HOME=/srv/agent-home, so ~/.omp and ~/.agent
+      # subprocess runs with HOME=/srv/agent-home, so ~/.zero2ai and ~/.agent
       # resolve there without exposing mutable host mounts.
-      - ${HOME}/.omp/agent/models.container.yml:/srv/agent-home-stage/.omp/agent/models.yml:ro
+      - ${HOME}/.zero2ai/agent/models.container.yml:/srv/agent-home-stage/.zero2ai/agent/models.yml:ro
       - ${HOME}/.agent/AGENTS.md:/srv/agent-home-stage/.agent/AGENTS.md:ro
       - ${HOME}/.agent/rules:/srv/agent-home-stage/.agent/rules:ro
     ports:

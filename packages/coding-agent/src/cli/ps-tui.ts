@@ -1,14 +1,14 @@
 /**
- * Interactive alt-screen monitor for `omp ps` (btop idiom): a live process
+ * Interactive alt-screen monitor for `zero2ai ps` (btop idiom): a live process
  * table over every selected broker scope with in-place actions.
  *
  * Keys — table: `↑/↓`/`j/k` select, `enter`/`i` info, `l` logs, `s` stop,
  * `x` kill, `r` restart, `a` toggle all scopes, `q`/`esc`/`ctrl+c` quit.
  * Sub-views (info, logs): `esc`/`q` back.
  */
-import { type Component, matchesKey, ProcessTerminal, TUI, truncateToWidth } from "@oh-my-pi/pi-tui";
-import { formatDuration } from "@oh-my-pi/pi-utils";
-import chalk from "@oh-my-pi/pi-utils/chalk";
+import { type Component, matchesKey, ProcessTerminal, TUI, truncateToWidth } from "@zero2ai/tui";
+import { formatDuration } from "@zero2ai/utils";
+import chalk from "@zero2ai/utils/chalk";
 import { closeDaemonClients, type DaemonBrokerClient } from "../launch/client";
 import type { DaemonSnapshot, DaemonSpec } from "../launch/protocol";
 import {
@@ -282,7 +282,7 @@ class PsTopComponent implements Component {
 
 	#header(width: number, title: string): string {
 		const age = this.#lastRefresh ? `updated ${formatDuration(Date.now() - this.#lastRefresh)} ago` : "updating…";
-		const left = ` ${chalk.bold("omp ps")} ${chalk.dim("·")} ${title}`;
+		const left = ` ${chalk.bold("zero2ai ps")} ${chalk.dim("·")} ${title}`;
 		const right = chalk.dim(age);
 		const pad = Math.max(1, width - Bun.stringWidth(left) - Bun.stringWidth(right) - 1);
 		return truncateToWidth(`${left}${" ".repeat(pad)}${right}`, width);

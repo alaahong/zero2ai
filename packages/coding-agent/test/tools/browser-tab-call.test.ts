@@ -5,7 +5,7 @@ import {
 	TAB_HANDLE_METHODS,
 	TAB_PRESENCE_METHODS,
 	TAB_VALUE_METHODS,
-} from "@oh-my-pi/pi-coding-agent/tools/browser/tab-call";
+} from "@zero2ai/coding-agent/tools/browser/tab-call";
 
 function errorMessage(run: () => unknown): string {
 	try {

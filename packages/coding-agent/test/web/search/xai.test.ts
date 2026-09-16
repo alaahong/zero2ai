@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "bun:test";
-import type { AuthStorage } from "@oh-my-pi/pi-ai";
-import type { FetchImpl } from "@oh-my-pi/pi-ai/types";
-import { searchXAI } from "@oh-my-pi/pi-coding-agent/web/search/providers/xai";
+import type { AuthStorage } from "@zero2ai/ai";
+import type { FetchImpl } from "@zero2ai/ai/types";
+import { searchXAI } from "@zero2ai/coding-agent/web/search/providers/xai";
 
 const fakeAuthStorage = {
 	resolver: vi.fn(() => async () => "test-key"),

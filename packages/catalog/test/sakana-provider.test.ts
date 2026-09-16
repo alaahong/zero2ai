@@ -2,15 +2,15 @@ import { afterEach, describe, expect, test, vi } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { getOAuthProviders } from "@oh-my-pi/pi-ai/registry/oauth";
-import { getEnvApiKey } from "@oh-my-pi/pi-ai/stream";
-import { Effort } from "@oh-my-pi/pi-catalog/effort";
-import { resolveProviderModels } from "@oh-my-pi/pi-catalog/model-manager";
-import { getBundledModels } from "@oh-my-pi/pi-catalog/models";
-import { seedModels } from "@oh-my-pi/pi-catalog/compat/providers";
-import { DEFAULT_MODEL_PER_PROVIDER, PROVIDER_DESCRIPTORS } from "@oh-my-pi/pi-catalog/provider-models/descriptors";
-import { sakanaModelManagerOptions } from "@oh-my-pi/pi-catalog/provider-models/openai-compat";
-import type { FetchImpl, ModelSpec, ResolvedOpenAIResponsesCompat } from "@oh-my-pi/pi-catalog/types";
+import { getOAuthProviders } from "@zero2ai/ai/registry/oauth";
+import { getEnvApiKey } from "@zero2ai/ai/stream";
+import { Effort } from "@zero2ai/catalog/effort";
+import { resolveProviderModels } from "@zero2ai/catalog/model-manager";
+import { getBundledModels } from "@zero2ai/catalog/models";
+import { seedModels } from "@zero2ai/catalog/compat/providers";
+import { DEFAULT_MODEL_PER_PROVIDER, PROVIDER_DESCRIPTORS } from "@zero2ai/catalog/provider-models/descriptors";
+import { sakanaModelManagerOptions } from "@zero2ai/catalog/provider-models/openai-compat";
+import type { FetchImpl, ModelSpec, ResolvedOpenAIResponsesCompat } from "@zero2ai/catalog/types";
 
 const ORIGINAL_ENV = {
 	SAKANA_API_KEY: Bun.env.SAKANA_API_KEY,
@@ -105,7 +105,7 @@ describe("Sakana AI provider support", () => {
 	});
 
 	test("drops stale cached Fugu rows when bundled context metadata changes", async () => {
-		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-catalog-sakana-stale-cache-"));
+		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-catalog-sakana-stale-cache-"));
 		const dbPath = path.join(tempDir, "models.db");
 		const staleFugu: ModelSpec<"openai-responses"> = {
 			id: "fugu",

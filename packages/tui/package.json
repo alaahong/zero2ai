@@ -1,6 +1,6 @@
 {
   "type": "module",
-  "name": "@oh-my-pi/pi-tui",
+  "name": "@zero2ai/tui",
   "version": "18.2.1",
   "description": "Terminal User Interface library with differential rendering for efficient text-based applications",
   "homepage": "https://omp.sh",
@@ -37,8 +37,8 @@
     "fmt": "oxfmt --no-error-on-unmatched-pattern 'src/**/*.{ts,tsx}' '{test,bench,examples,scripts}/**/*.ts' '*.ts'"
   },
   "dependencies": {
-    "@oh-my-pi/pi-natives": "catalog:",
-    "@oh-my-pi/pi-utils": "catalog:"
+    "@zero2ai/natives": "catalog:",
+    "@zero2ai/utils": "catalog:"
   },
   "devDependencies": {
     "kitty-vt-wasm": "catalog:"

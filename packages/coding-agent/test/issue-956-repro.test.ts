@@ -2,12 +2,12 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "bun:
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import * as mcpClient from "@oh-my-pi/pi-coding-agent/mcp/client";
-import * as mcpConfigWriter from "@oh-my-pi/pi-coding-agent/mcp/config-writer";
-import { MCPCommandController } from "@oh-my-pi/pi-coding-agent/modes/controllers/mcp-command-controller";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import type { Component } from "@oh-my-pi/pi-tui";
-import { getConfigRootDir, getProjectDir, removeWithRetries, setAgentDir, setProjectDir } from "@oh-my-pi/pi-utils";
+import * as mcpClient from "@zero2ai/coding-agent/mcp/client";
+import * as mcpConfigWriter from "@zero2ai/coding-agent/mcp/config-writer";
+import { MCPCommandController } from "@zero2ai/coding-agent/modes/controllers/mcp-command-controller";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import type { Component } from "@zero2ai/tui";
+import { getConfigRootDir, getProjectDir, removeWithRetries, setAgentDir, setProjectDir } from "@zero2ai/utils";
 import {
 	createInteractiveModeContext,
 	createMcpManagerStub,
@@ -15,7 +15,7 @@ import {
 } from "./helpers/interactive-mode-context";
 
 const originalProjectDir = getProjectDir();
-const originalAgentDir = process.env.PI_CODING_AGENT_DIR;
+const originalAgentDir = process.env.ZERO2AI_CODING_AGENT_DIR;
 const fallbackAgentDir = path.join(getConfigRootDir(), "agent");
 
 type RenderableBlock = {
@@ -42,8 +42,8 @@ describe("interactive /mcp test", () => {
 	});
 
 	beforeEach(async () => {
-		projectDir = await fs.mkdtemp(path.join(os.tmpdir(), "omp-issue-956-project-"));
-		agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "omp-issue-956-agent-"));
+		projectDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-issue-956-project-"));
+		agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-issue-956-agent-"));
 		setProjectDir(projectDir);
 		setAgentDir(agentDir);
 
@@ -73,7 +73,7 @@ describe("interactive /mcp test", () => {
 			setAgentDir(originalAgentDir);
 		} else {
 			setAgentDir(fallbackAgentDir);
-			delete process.env.PI_CODING_AGENT_DIR;
+			delete process.env.ZERO2AI_CODING_AGENT_DIR;
 		}
 		await removeWithRetries(projectDir);
 		await removeWithRetries(agentDir);

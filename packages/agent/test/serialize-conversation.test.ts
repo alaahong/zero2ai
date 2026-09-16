@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { serializeConversation, serializeConversationForSummary } from "@oh-my-pi/pi-agent-core/compaction";
-import type { AssistantMessage, Message, ToolResultMessage, Usage } from "@oh-my-pi/pi-ai";
+import { serializeConversation, serializeConversationForSummary } from "@zero2ai/agent-core/compaction";
+import type { AssistantMessage, Message, ToolResultMessage, Usage } from "@zero2ai/ai";
 
 const ZERO_USAGE: Usage = {
 	input: 0,

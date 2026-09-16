@@ -12,7 +12,7 @@ import { afterEach, beforeEach, describe } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { removeSyncWithRetries, Snowflake } from "@oh-my-pi/pi-utils";
+import { removeSyncWithRetries, Snowflake } from "@zero2ai/utils";
 import { e2eApiKey } from "./utilities";
 
 // Check for auth
@@ -26,7 +26,7 @@ describe.skipIf(!HAS_ANTIGRAVITY_AUTH)("Compaction with thinking models (Antigra
 	let authStorage: { close: () => void } | undefined;
 
 	beforeEach(() => {
-		tempDir = path.join(os.tmpdir(), `pi-thinking-compaction-test-${Snowflake.next()}`);
+		tempDir = path.join(os.tmpdir(), `zero2ai-thinking-compaction-test-${Snowflake.next()}`);
 		fs.mkdirSync(tempDir, { recursive: true });
 	});
 
@@ -52,7 +52,7 @@ describe.skipIf(!HAS_ANTHROPIC_AUTH)("Compaction with thinking models (Anthropic
 	let authStorage: { close: () => void } | undefined;
 
 	beforeEach(() => {
-		tempDir = path.join(os.tmpdir(), `pi-thinking-compaction-anthropic-test-${Snowflake.next()}`);
+		tempDir = path.join(os.tmpdir(), `zero2ai-thinking-compaction-anthropic-test-${Snowflake.next()}`);
 		fs.mkdirSync(tempDir, { recursive: true });
 	});
 

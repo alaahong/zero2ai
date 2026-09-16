@@ -1,5 +1,5 @@
 /**
- * Live board and scoreboard for `omp if-bench`.
+ * Live board and scoreboard for `zero2ai if-bench`.
  *
  * Interactive terminals get one repainted row per model — a turn ladder that
  * fills as turns pass, the in-flight turn as a spinner cell, and the live
@@ -8,9 +8,9 @@
  * callers keep a parseable trace.
  */
 
-import { replaceTabs, truncateToWidth } from "@oh-my-pi/pi-tui";
-import { formatDuration, formatNumber } from "@oh-my-pi/pi-utils";
-import chalk from "@oh-my-pi/pi-utils/chalk";
+import { replaceTabs, truncateToWidth } from "@zero2ai/tui";
+import { formatDuration, formatNumber } from "@zero2ai/utils";
+import chalk from "@zero2ai/utils/chalk";
 import { createLiveBoard, type LiveBoardOutput } from "../cli/live-board";
 import type { IfBenchFailure } from "./protocol";
 import type { IfBenchModelReport, IfBenchObserver, IfBenchSummary, IfBenchTurnRecord } from "./runner";
@@ -28,7 +28,7 @@ const FAILURE_TEXT: Record<IfBenchFailure, string> = {
 	provider: "provider error",
 };
 
-/** Rendering surface for one `omp if-bench` run. */
+/** Rendering surface for one `zero2ai if-bench` run. */
 export interface IfBenchBoard extends IfBenchObserver {
 	readonly interactive: boolean;
 	/** Print a permanent line above the live rows (plain write when non-TTY). */

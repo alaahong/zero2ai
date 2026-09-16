@@ -2,14 +2,14 @@ import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from "bun:
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { parseArgs } from "@oh-my-pi/pi-coding-agent/cli/args";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { buildSessionOptions } from "@oh-my-pi/pi-coding-agent/main";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { removeSyncWithRetries, Snowflake } from "@oh-my-pi/pi-utils";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { parseArgs } from "@zero2ai/coding-agent/cli/args";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { buildSessionOptions } from "@zero2ai/coding-agent/main";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { removeSyncWithRetries, Snowflake } from "@zero2ai/utils";
 
 // Regression: `--model` used to record the `default` role without its effort,
 // so cycling back into that role with ctrl+p ran at the previous role's effort.
@@ -19,7 +19,7 @@ describe("--model role override thinking suffix", () => {
 	let modelRegistry: ModelRegistry;
 
 	beforeAll(async () => {
-		tempDir = path.join(os.tmpdir(), `pi-cli-role-thinking-${Snowflake.next()}`);
+		tempDir = path.join(os.tmpdir(), `zero2ai-cli-role-thinking-${Snowflake.next()}`);
 		fs.mkdirSync(tempDir, { recursive: true });
 		authStorage = await AuthStorage.create(path.join(tempDir, "auth.db"));
 		modelRegistry = new ModelRegistry(authStorage, path.join(tempDir, "models.yml"));

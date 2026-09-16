@@ -5,16 +5,16 @@
  */
 import { Database } from "bun:sqlite";
 import { afterEach, describe, expect, it, vi } from "bun:test";
-import { AuthStorage, SqliteAuthCredentialStore } from "@oh-my-pi/pi-ai";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { runAgenticCommit } from "@oh-my-pi/pi-coding-agent/commit/agentic";
-import * as agentModule from "@oh-my-pi/pi-coding-agent/commit/agentic/agent";
-import * as modelSelection from "@oh-my-pi/pi-coding-agent/commit/model-selection";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import * as sdkModule from "@oh-my-pi/pi-coding-agent/sdk";
-import type { VcsGitRepo } from "@oh-my-pi/pi-natives";
-import * as vcs from "@oh-my-pi/pi-natives/vcs";
+import { AuthStorage, SqliteAuthCredentialStore } from "@zero2ai/ai";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { runAgenticCommit } from "@zero2ai/coding-agent/commit/agentic";
+import * as agentModule from "@zero2ai/coding-agent/commit/agentic/agent";
+import * as modelSelection from "@zero2ai/coding-agent/commit/model-selection";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import * as sdkModule from "@zero2ai/coding-agent/sdk";
+import type { VcsGitRepo } from "@zero2ai/natives";
+import * as vcs from "@zero2ai/natives/vcs";
 
 const NUMSTAT = [{ path: "src/a.ts", added: 1, removed: 0 }];
 let authStorage: AuthStorage | undefined;
@@ -56,14 +56,14 @@ afterEach(() => {
 	authStorage?.close();
 	authStorage = undefined;
 	vi.restoreAllMocks();
-	delete process.env.PI_COMMIT_TEST_FALLBACK;
+	delete process.env.ZERO2AI_COMMIT_TEST_FALLBACK;
 });
 
 describe("runAgenticCommit fallback signalling (issue #7835)", () => {
 	it("reports usedFallback when the fallback commit path is forced", async () => {
 		mockModelResolution();
 		const commitCreateSpy = await setupRepoMocks();
-		process.env.PI_COMMIT_TEST_FALLBACK = "true";
+		process.env.ZERO2AI_COMMIT_TEST_FALLBACK = "true";
 
 		const result = await runAgenticCommit({ noChangelog: true, push: false, dryRun: false });
 

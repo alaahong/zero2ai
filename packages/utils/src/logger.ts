@@ -1,12 +1,12 @@
 /**
- * Centralized logger for omp.
+ * Centralized logger for zero2ai.
  *
- * Default: rotating `~/.omp/logs/omp.<DATE>.<PID>.log`, no console output (writing
+ * Default: rotating `~/.zero2ai/logs/zero2ai.<DATE>.<PID>.log`, no console output (writing
  * to stdout/stderr would corrupt the TUI). Long-running headless services
  * (the auth broker, etc.) call {@link setTransports} to swap in a console
  * transport so a process supervisor (pm2, journald, k8s) captures the logs.
  *
- * Each entry includes `process.pid` so concurrent omp instances stay
+ * Each entry includes `process.pid` so concurrent zero2ai instances stay
  * traceable.
  */
 import { AsyncLocalStorage } from "node:async_hooks";
@@ -43,7 +43,12 @@ export function registerLogSink(sink: LogSink): () => void {
 
 function emitToSinks(level: LogLevel, message: string, context: Record<string, unknown> | undefined): void {
 	if (logSinks.size === 0) return;
-	const event: LogEvent = { level, message, context, timestamp: new Date() };
+	const event: LogEvent = {
+		level,
+		message,
+		context: redactSecrets(context) as Record<string, unknown> | undefined,
+		timestamp: new Date(),
+	};
 	for (const sink of logSinks) {
 		try {
 			sink(event);
@@ -53,8 +58,8 @@ function emitToSinks(level: LogLevel, message: string, context: Record<string, u
 	}
 }
 
-const PROCESS_LOG_PATTERN = /^omp\.(\d{4}-\d{2}-\d{2})\.(\d+)\.log(?:\.(\d+))?$/;
-const PROCESS_AUDIT_PATTERN = /^\.omp\.(\d+)-audit\.json$/;
+const PROCESS_LOG_PATTERN = /^zero2ai\.(\d{4}-\d{2}-\d{2})\.(\d+)\.log(?:\.(\d+))?$/;
+const PROCESS_AUDIT_PATTERN = /^\.zero2ai\.(\d+)-audit\.json$/;
 const RETAINED_STALE_LOGS_PER_PROCESS_DAY = 1;
 const RETAINED_STALE_AUDIT_FILES = 0;
 const RETAINED_STALE_LOG_DAYS = 5;
@@ -218,6 +223,39 @@ function formatLocalTimestamp(date: Date): string {
 
 const FORMAT_TOKEN_PATTERN = /%[scdjifoO%]/;
 
+/** Rank used by the `ZERO2AI_LOG_LEVEL` threshold; higher = more verbose. */
+const LOG_LEVEL_RANK: Record<LogLevel, number> = { error: 0, warn: 1, info: 2, debug: 3 };
+
+/**
+ * Highest level written to the local transports. Unset keeps the historical
+ * behaviour (everything is written); set `ZERO2AI_LOG_LEVEL=info` (or `warn` /
+ * `error`) on managed hosts so debug detail stops accumulating on disk.
+ */
+function levelThreshold(): number {
+	const raw = process.env.ZERO2AI_LOG_LEVEL?.trim().toLowerCase();
+	if (!raw) return LOG_LEVEL_RANK.debug;
+	return LOG_LEVEL_RANK[raw as LogLevel] ?? LOG_LEVEL_RANK.debug;
+}
+
+/** Keys whose values must never reach a log line or an external sink. */
+const SECRET_KEY_PATTERN = /pass|secret|token|api[-_]?key|authorization|credential|cookie|private[-_]?key/i;
+const REDACTION_MAX_DEPTH = 4;
+
+/**
+ * Replace values behind secret-shaped keys (recursively, bounded) so logs never
+ * carry credentials. Returns a copy — callers keep their original object.
+ */
+export function redactSecrets(value: unknown, depth = 0): unknown {
+	if (depth > REDACTION_MAX_DEPTH) return "[truncated]";
+	if (Array.isArray(value)) return value.map(item => redactSecrets(item, depth + 1));
+	if (value === null || typeof value !== "object") return value;
+	const out: Record<string, unknown> = {};
+	for (const [key, entry] of Object.entries(value as Record<string, unknown>)) {
+		out[key] = SECRET_KEY_PATTERN.test(key) ? "[redacted]" : redactSecrets(entry, depth + 1);
+	}
+	return out;
+}
+
 function normalizeLogInfo(
 	level: LogLevel,
 	message: string,
@@ -229,7 +267,7 @@ function normalizeLogInfo(
 	if (metadata?.message) info.message = `${message} ${metadata.message}`;
 	if (metadata?.stack) info.stack = metadata.stack;
 	if (metadata?.cause) info.cause = metadata.cause;
-	return info;
+	return redactSecrets(info) as NormalizedLogInfo;
 }
 
 function formatLogInfo(info: NormalizedLogInfo): string {
@@ -253,11 +291,11 @@ function makeFileTransport(dir?: string): RotatingFileSink {
 	schedulePruneStaleProcessLogs(logsDir);
 	return new RotatingFileSink({
 		directory: logsDir,
-		filenamePrefix: "omp",
+		filenamePrefix: "zero2ai",
 		filenameSuffix: String(process.pid),
 		maxBytes: 10 * 1024 * 1024,
 		maxFiles: 5,
-		auditFile: path.join(logsDir, `.omp.${process.pid}-audit.json`),
+		auditFile: path.join(logsDir, `.zero2ai.${process.pid}-audit.json`),
 	});
 }
 
@@ -288,6 +326,7 @@ function getLocalTransports(): LocalTransports {
 }
 
 function emitLocally(level: LogLevel, message: string, context: Record<string, unknown> | undefined): void {
+	if (LOG_LEVEL_RANK[level] > levelThreshold()) return;
 	const transports = getLocalTransports();
 	if (!transports.file && !transports.console) return;
 	const info = normalizeLogInfo(level, message, context);
@@ -367,15 +406,15 @@ export function debug(message: string, context?: Record<string, unknown>): void 
 }
 
 /**
- * Streaming startup markers, enabled by `PI_DEBUG_STARTUP`. Unlike the
- * PI_TIMING tree (printed only after startup completes), these write one
+ * Streaming startup markers, enabled by `ZERO2AI_DEBUG_STARTUP`. Unlike the
+ * ZERO2AI_TIMING tree (printed only after startup completes), these write one
  * synchronous stderr line as each phase begins/ends, so a hard hang still
  * shows the last phase that started. `fs.writeSync(2)` is used deliberately:
  * it cannot be reordered or buffered past a synchronous block of the event
  * loop (dlopen, sync fs on a dead mount, spawnSync).
  */
 export function startupMarker(text: string): void {
-	if (!process.env.PI_DEBUG_STARTUP) return;
+	if (!process.env.ZERO2AI_DEBUG_STARTUP) return;
 	try {
 		fs.writeSync(2, `[startup] ${text}\n`);
 	} catch {
@@ -405,7 +444,7 @@ let gRootSpan: Span | undefined;
 let gRecordTimings = false;
 
 export function timingModeIncludes(option: "full" | "x"): boolean {
-	const value = process.env.PI_TIMING;
+	const value = process.env.ZERO2AI_TIMING;
 	if (!value) return false;
 	if (value === option) return true;
 	let start = 0;
@@ -686,7 +725,7 @@ function printModuleLoadSummary(loads: Span[], depth: number, lines: string[]): 
 		lines.push(`${grandIndent}  ${node.span.op}: body ${fmtMs(node.body)} (total ${fmtMs(durationOf(node.span))})`);
 	}
 	if (!showAll && byBody.length > MODULE_LOAD_VERBOSE_TOP) {
-		lines.push(`${grandIndent}  … ${byBody.length - MODULE_LOAD_VERBOSE_TOP} more (PI_TIMING=full to show all)`);
+		lines.push(`${grandIndent}  … ${byBody.length - MODULE_LOAD_VERBOSE_TOP} more (ZERO2AI_TIMING=full to show all)`);
 	}
 
 	const roots = nodes.filter(node => node.parents === 0);
@@ -699,7 +738,7 @@ function printModuleLoadSummary(loads: Span[], depth: number, lines: string[]): 
 	}
 	if (!showAll && treeRoots.length > MODULE_TREE_ROOT_TOP) {
 		lines.push(
-			`${grandIndent}  … ${treeRoots.length - MODULE_TREE_ROOT_TOP} more roots (PI_TIMING=full to show all)`,
+			`${grandIndent}  … ${treeRoots.length - MODULE_TREE_ROOT_TOP} more roots (ZERO2AI_TIMING=full to show all)`,
 		);
 	}
 }
@@ -758,7 +797,7 @@ function renderModuleTimingNode(
 	ancestors.add(path);
 	if (!showAll && ancestors.size >= MODULE_TREE_MAX_DEPTH) {
 		if (node.children.length > 0) {
-			lines.push(`${indent}  … ${node.children.length} imports deeper (PI_TIMING=full to show all)`);
+			lines.push(`${indent}  … ${node.children.length} imports deeper (ZERO2AI_TIMING=full to show all)`);
 		}
 		ancestors.delete(path);
 		return;
@@ -769,7 +808,7 @@ function renderModuleTimingNode(
 	}
 	if (!showAll && node.children.length > MODULE_TREE_CHILD_TOP) {
 		lines.push(
-			`${indent}  … ${node.children.length - MODULE_TREE_CHILD_TOP} more imports (PI_TIMING=full to show all)`,
+			`${indent}  … ${node.children.length - MODULE_TREE_CHILD_TOP} more imports (ZERO2AI_TIMING=full to show all)`,
 		);
 	}
 	ancestors.delete(path);
@@ -810,7 +849,7 @@ export function time<T, A extends unknown[]>(op: string, fn?: (...args: A) => T,
 		return undefined as T;
 	}
 
-	if (!recording && !process.env.PI_DEBUG_STARTUP) {
+	if (!recording && !process.env.ZERO2AI_DEBUG_STARTUP) {
 		return fn(...args);
 	}
 

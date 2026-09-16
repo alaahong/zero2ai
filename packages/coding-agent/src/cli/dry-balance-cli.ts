@@ -10,11 +10,11 @@ import type {
 	OAuthAccess,
 	OAuthAccessResolution,
 	SimpleStreamOptions,
-} from "@oh-my-pi/pi-ai";
-import { streamSimple } from "@oh-my-pi/pi-ai";
-import { replaceTabs, truncateToWidth } from "@oh-my-pi/pi-tui";
-import { formatDuration, getProjectDir } from "@oh-my-pi/pi-utils";
-import chalk from "@oh-my-pi/pi-utils/chalk";
+} from "@zero2ai/ai";
+import { streamSimple } from "@zero2ai/ai";
+import { replaceTabs, truncateToWidth } from "@zero2ai/tui";
+import { formatDuration, getProjectDir } from "@zero2ai/utils";
+import chalk from "@zero2ai/utils/chalk";
 import { ModelRegistry } from "../config/model-registry";
 import {
 	formatModelString,

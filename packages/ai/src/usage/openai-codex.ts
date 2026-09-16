@@ -1,7 +1,7 @@
 import { Buffer } from "node:buffer";
-import { quotaTierFor } from "@oh-my-pi/pi-catalog/compat/behavior";
-import { toNumber } from "@oh-my-pi/pi-catalog/utils";
-import { USER_AGENT } from "@oh-my-pi/pi-utils";
+import { quotaTierFor } from "@zero2ai/catalog/compat/behavior";
+import { toNumber } from "@zero2ai/catalog/utils";
+import { USER_AGENT } from "@zero2ai/utils";
 import type {
 	CredentialRankingContext,
 	CredentialRankingStrategy,

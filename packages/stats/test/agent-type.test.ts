@@ -2,14 +2,14 @@ import { Database } from "bun:sqlite";
 import { describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import { getOverviewStats } from "@oh-my-pi/omp-stats/aggregator";
-import { getStatsByAgentType, initDb, insertMessageStats } from "@oh-my-pi/omp-stats/db";
-import { classifyAgentType } from "@oh-my-pi/omp-stats/parser";
-import type { AgentType, MessageStats } from "@oh-my-pi/omp-stats/types";
-import { getConfigRootDir, getSessionsDir, getStatsDbPath } from "@oh-my-pi/pi-utils";
+import { getOverviewStats } from "@zero2ai/stats/aggregator";
+import { getStatsByAgentType, initDb, insertMessageStats } from "@zero2ai/stats/db";
+import { classifyAgentType } from "@zero2ai/stats/parser";
+import type { AgentType, MessageStats } from "@zero2ai/stats/types";
+import { getConfigRootDir, getSessionsDir, getStatsDbPath } from "@zero2ai/utils";
 import { installStatsTestIsolation } from "./helpers/temp-agent";
 
-installStatsTestIsolation("@pi-stats-agent-type-");
+installStatsTestIsolation("@zero2ai-stats-agent-type-");
 
 interface Tokens {
 	input: number;

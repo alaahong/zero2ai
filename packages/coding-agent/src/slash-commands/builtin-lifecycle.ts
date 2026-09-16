@@ -1,7 +1,7 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import { CompactionCancelledError } from "@oh-my-pi/pi-agent-core/compaction";
-import { logger, setProjectDir } from "@oh-my-pi/pi-utils";
+import { CompactionCancelledError } from "@zero2ai/agent-core/compaction";
+import { logger, setProjectDir } from "@zero2ai/utils";
 import { reset as resetCapabilities } from "../capability";
 import { applyProviderGlobalsFromSettings } from "../config/provider-globals";
 import { clearClaudePluginRootsCache } from "../discovery/helpers";
@@ -869,7 +869,7 @@ export const BUILTIN_LIFECYCLE_SLASH_COMMANDS: ReadonlyArray<SlashCommandSpec> =
 	{
 		name: "restart",
 		icon: "restart",
-		description: "Restart omp with the same launch flags, resuming this session",
+		description: "Restart zero2ai with the same launch flags, resuming this session",
 		handleTui: async (_command, runtime) => {
 			runtime.ctx.editor.setText("");
 			await runtime.ctx.restart();

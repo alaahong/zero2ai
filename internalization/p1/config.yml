@@ -1,0 +1,76 @@
+# ZERO2AI 项目级策略基线
+#
+# 部署位置：<目标仓库>/.zero2ai/config.yml
+#
+# ⚠ 强制力说明：本项目级配置可被「用户级配置 > --config 覆盖 > 运行时参数」逐层覆盖，
+#   因此它只是**默认收紧**，不是安全边界。真正的强制来自：
+#     1) internalization/p1/zero2ai-launch.{sh,ps1} 受控启动器（固定参数启动）
+#     2) OS 层：不把二进制暴露到普通用户 PATH、目录 ACL、终端白名单
+#
+# 键名均已在本仓库 packages/coding-agent/src/config/settings-schema.ts 中核对。
+
+# ── 工具审批：上游默认是 yolo（全部自动放行），必须收紧 ─────────────────────
+tools:
+  # always-ask | write | yolo
+  approvalMode: always-ask
+  # 逐工具策略：allow | deny | prompt。deny 优先级最高，任何模式与参数都无法绕过。
+  approval:
+    bash: prompt # 可执行任意命令；配合 bash.patterns 做基线黑名单
+    eval: deny # eval 内可 subprocess 起 shell，bash.patterns 管不到它，必须单独封
+    browser: prompt # 驱动真实浏览器
+    computer: deny # 桌面输入/截屏（默认已关，这里再显式钉死）
+    web_search: deny # 检索词会外发
+    task: prompt # 子代理以 headless yolo 运行，父级 task 是唯一授权点
+
+# ── 高危能力开关（默认关闭，按需由角色放开）────────────────────────────────
+browser:
+  enabled: false
+computer:
+  enabled: false
+web_search:
+  enabled: false
+github:
+  enabled: false
+eval:
+  py: false
+  js: false
+
+# ── bash 审批策略（非进程隔离，仅审批闸门）────────────────────────────────
+bash:
+  # 仅识别 POSIX-quoting shell 的扁平 && 链；保持关闭以免规则被拼接绕过
+  allowCompoundCommands: false
+
+# ── 能力面收敛 ───────────────────────────────────────────────────────────
+mcp:
+  # 关闭项目级 MCP 配置（用户仍可在自己目录定义，故需配合 --tools 白名单）
+  enableProjectConfig: false
+
+# ── 外发/更新面 ──────────────────────────────────────────────────────────
+startup:
+  checkUpdate: false # 关闭启动时向后端查版本（默认 true）
+marketplace:
+  autoUpdate: off # off | notify | auto，默认 notify 仍会发起网络拉取
+share:
+  redactSecrets: true
+secrets:
+  enabled: true # 占位符混淆；不开启则 share 的 redactSecrets 实际不生效
+dev:
+  autoqa: false # 关闭 Auto-QA 记录（默认 true）
+  autoqaPush:
+    endpoint: "" # 置空 = 不发送；默认指向公网 qa.omp.sh
+
+# 凭据策略不在 settings 里，而是环境变量 ZERO2AI_CREDENTIAL_STORE=broker-only：
+# 开启后本机不再落盘任何 API key / refresh token，改由 auth-broker 或环境变量注入。
+# ── 子代理工作区隔离（注意：这是 CoW 工作区，不是安全沙箱）──────────────────
+task:
+  isolation:
+    enabled: true
+
+# ── 模型出口收敛 ────────────────────────────────────────────────────────
+# 该键为「整体替换」语义：必须一次列全，漏列即仍可用。
+# 完整清单见同目录 disabled-providers.yml（由内置 provider 规则实测导出，71 项）。
+disabledProviders:
+  - anthropic
+  - openai
+  - google
+  # … 其余项请从 disabled-providers.yml 整体复制过来，避免漏列

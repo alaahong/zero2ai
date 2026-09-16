@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import * as vm from "node:vm";
-import { type Document, Element, parseHTML } from "@oh-my-pi/pi-utils/dom";
-import { Marked } from "@oh-my-pi/pi-utils/marked";
+import { type Document, Element, parseHTML } from "@zero2ai/utils/dom";
+import { Marked } from "@zero2ai/utils/marked";
 
 const [templateHtml, templateJs] = await Promise.all([
 	Bun.file(new URL("../src/export/html/template.html", import.meta.url)).text(),
@@ -177,7 +177,7 @@ function renderedBlockOrder({ assistant, context }: RenderedSession): string[] {
 			order.push(child.querySelector(".thinking-text")?.textContent?.trim() ?? "");
 		} else if (child.classList.contains("message-images")) {
 			order.push("image");
-		} else if (child.tagName.toLowerCase() === "omp-tool-view") {
+		} else if (child.tagName.toLowerCase() === "zero2ai-tool-view") {
 			order.push(toolName(child, context));
 		} else if (child.classList.contains("error-text")) {
 			order.push(child.textContent?.trim() ?? "");
@@ -236,7 +236,7 @@ describe("HTML export assistant content ordering", () => {
 		expect(renderedBlockOrder(rendered)).toEqual(["first", "read", "middle", "grep", "last"]);
 	});
 
-	test("projects interleaved assistant blocks into pi-style sidebar timeline rows", () => {
+	test("projects interleaved assistant blocks into zero2ai-style sidebar timeline rows", () => {
 		const rendered = renderAssistant(
 			[
 				{ type: "text", text: "before-read" },
@@ -300,7 +300,7 @@ describe("HTML export assistant content ordering", () => {
 		expect(renderedSidebarOrder(rendered)[0]).toBe("assistant: first line");
 	});
 
-	test("clicking a pi-style tool result row locates its assistant tool card", () => {
+	test("clicking a zero2ai-style tool result row locates its assistant tool card", () => {
 		const rendered = renderAssistant(
 			[
 				{ type: "text", text: "before-tool" },

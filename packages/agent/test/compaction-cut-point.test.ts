@@ -6,8 +6,8 @@ import {
 	findCutPoint,
 	prepareCompaction,
 	type SessionMessageEntry,
-} from "@oh-my-pi/pi-agent-core/compaction";
-import { Tokenizer } from "@oh-my-pi/pi-agent-core/tokenizer";
+} from "@zero2ai/agent-core/compaction";
+import { Tokenizer } from "@zero2ai/agent-core/tokenizer";
 import { createAssistantMessage } from "./helpers";
 
 const tokenizer = new Tokenizer();

@@ -1,11 +1,11 @@
 import { describe, expect, it } from "bun:test";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { formatModelStringWithRouting } from "@oh-my-pi/pi-coding-agent/config/model-resolver";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { formatModelStringWithRouting } from "@zero2ai/coding-agent/config/model-resolver";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
 import {
 	collectOnlineTinyCandidates,
 	expandOnlineTinyModelFallbacks,
-} from "@oh-my-pi/pi-coding-agent/tiny/online-candidates";
+} from "@zero2ai/coding-agent/tiny/online-candidates";
 
 const primary = getBundledModel("google", "gemini-2.5-flash")!;
 const secondary = getBundledModel("openai", "gpt-4o-mini")!;

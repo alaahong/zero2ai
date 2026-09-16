@@ -1,4 +1,4 @@
-import { Container, Spacer, Text } from "@oh-my-pi/pi-tui";
+import { Container, Spacer, Text } from "@zero2ai/tui";
 import { WidthAwareText } from "../../tui";
 import { theme } from "../theme/theme";
 import { DynamicBorder } from "./dynamic-border";

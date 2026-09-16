@@ -1,9 +1,9 @@
-import { type Type, type } from "@oh-my-pi/omptype";
-import type { AgentToolResult, ToolApprovalDecision } from "@oh-my-pi/pi-agent-core";
-import type { Model } from "@oh-my-pi/pi-ai";
-import { classifyModel } from "@oh-my-pi/pi-catalog/identity";
-import type { DesktopCapabilities } from "@oh-my-pi/pi-natives";
-import { once } from "@oh-my-pi/pi-utils";
+import { type Type, type } from "@zero2ai/schema";
+import type { AgentToolResult, ToolApprovalDecision } from "@zero2ai/agent-core";
+import type { Model } from "@zero2ai/ai";
+import { classifyModel } from "@zero2ai/catalog/identity";
+import type { DesktopCapabilities } from "@zero2ai/natives";
+import { once } from "@zero2ai/utils";
 import { callSessionTool } from "../eval/js/tool-bridge";
 import type { EvalPreludeContext, EvalPreludeDefinition } from "../eval/preludes";
 import { enforceInlineByteCap } from "../session/streaming-output";

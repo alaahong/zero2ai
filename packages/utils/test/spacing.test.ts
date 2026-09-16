@@ -2,9 +2,9 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { getProjectDir, setProjectDir } from "@oh-my-pi/pi-utils/dirs";
-import { Snowflake } from "@oh-my-pi/pi-utils/snowflake";
-import { getEditorConfigFormatting } from "@oh-my-pi/pi-utils/tab-spacing";
+import { getProjectDir, setProjectDir } from "@zero2ai/utils/dirs";
+import { Snowflake } from "@zero2ai/utils/snowflake";
+import { getEditorConfigFormatting } from "@zero2ai/utils/tab-spacing";
 
 describe("getEditorConfigFormatting", () => {
 	let tempDir = "";
@@ -12,7 +12,7 @@ describe("getEditorConfigFormatting", () => {
 
 	beforeEach(async () => {
 		previousProjectDir = getProjectDir();
-		tempDir = path.join(os.tmpdir(), "pi-utils-editorconfig-formatting", Snowflake.next());
+		tempDir = path.join(os.tmpdir(), "zero2ai-utils-editorconfig-formatting", Snowflake.next());
 		await fs.mkdir(tempDir, { recursive: true });
 		setProjectDir(tempDir);
 	});

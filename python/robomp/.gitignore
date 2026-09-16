@@ -1,5 +1,5 @@
 .venv/
-.pi-context/
+.zero2ai-context/
 .cache/
 data/
 __pycache__/

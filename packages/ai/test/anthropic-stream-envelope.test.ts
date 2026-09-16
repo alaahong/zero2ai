@@ -1,18 +1,18 @@
 import { afterEach, describe, expect, it, vi } from "bun:test";
 import { scheduler } from "node:timers/promises";
-import { convertAnthropicMessages, streamAnthropic } from "@oh-my-pi/pi-ai/providers/anthropic";
+import { convertAnthropicMessages, streamAnthropic } from "@zero2ai/ai/providers/anthropic";
 import {
 	AnthropicMessages,
 	type AnthropicMessagesClientLike,
 	type AnthropicRequestOptions,
-} from "@oh-my-pi/pi-ai/providers/anthropic-client";
+} from "@zero2ai/ai/providers/anthropic-client";
 import type {
 	ToolSearchToolResultBlockParam,
 	WebSearchToolResultBlockParam,
-} from "@oh-my-pi/pi-ai/providers/anthropic-wire";
-import type { AssistantMessageEvent, Context, Model, ModelSpec, ProviderSessionState } from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { structuredCloneJSON } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/ai/providers/anthropic-wire";
+import type { AssistantMessageEvent, Context, Model, ModelSpec, ProviderSessionState } from "@zero2ai/ai/types";
+import { buildModel } from "@zero2ai/catalog/build";
+import { structuredCloneJSON } from "@zero2ai/utils";
 import { withEnv, withOfficialAnthropicEndpoint } from "./helpers";
 
 const model: Model<"anthropic-messages"> = buildModel({
@@ -1915,7 +1915,7 @@ describe("anthropic stream envelope handling", () => {
 
 		await drain(model);
 		await drain(proxyModel);
-		await withEnv({ PI_CACHE_RETENTION: "long" }, () => drain(model));
+		await withEnv({ ZERO2AI_CACHE_RETENTION: "long" }, () => drain(model));
 
 		const cacheControls = payloads.map(payload => {
 			const content = payload.messages.at(-1)?.content;

@@ -1,5 +1,5 @@
 /**
- * Regression for #12008 review: `omp --no-session --resume` (bare, native) must
+ * Regression for #12008 review: `zero2ai --no-session --resume` (bare, native) must
  * fail with `--resume requires session persistence` instead of falling through
  * to the startup session picker. The picker branch runs before the deferred
  * (extension-flag-aware) persistence validation, so it has to be skipped under
@@ -7,11 +7,11 @@
  */
 import { describe, expect, it, vi } from "bun:test";
 import * as path from "node:path";
-import { parseArgs } from "@oh-my-pi/pi-coding-agent/cli/args";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { runRootCommand } from "@oh-my-pi/pi-coding-agent/main";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { parseArgs } from "@zero2ai/coding-agent/cli/args";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { runRootCommand } from "@zero2ai/coding-agent/main";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { TempDir } from "@zero2ai/utils";
 
 class ProcessExitSignal extends Error {
 	constructor(readonly code: number) {
@@ -22,7 +22,7 @@ class ProcessExitSignal extends Error {
 
 describe("runRootCommand — --no-session --resume", () => {
 	it("rejects a bare native --resume without invoking the picker", async () => {
-		using tempDir = TempDir.createSync("@omp-no-session-resume-");
+		using tempDir = TempDir.createSync("@zero2ai-no-session-resume-");
 		const sessionDir = tempDir.path();
 		// A valid session exists, so a picker fall-through would open the picker
 		// (not the "No sessions found" probe) — proving the guard, not empty state.

@@ -2,23 +2,23 @@ import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { AuthStorage } from "@oh-my-pi/pi-ai";
+import { AuthStorage } from "@zero2ai/ai";
 import type {
 	BlobBrokerDoctorResponse,
 	BlobBrokerProbeResponse,
 	BlobBrokerPurgeRequest,
 	BlobBrokerPurgeResponse,
 	BlobBrokerStatus,
-} from "@oh-my-pi/pi-coding-agent/blob-broker/protocol";
-import { ProviderFileCache } from "@oh-my-pi/pi-coding-agent/blob-broker/provider-file-types";
+} from "@zero2ai/coding-agent/blob-broker/protocol";
+import { ProviderFileCache } from "@zero2ai/coding-agent/blob-broker/provider-file-types";
 import {
 	type ImagesCliDependencies,
 	type ImagesCommandArgs,
 	type ImagesResolvedConfig,
 	runImagesCommand,
-} from "@oh-my-pi/pi-coding-agent/cli/images-cli";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { FetchImpl } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/cli/images-cli";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import type { FetchImpl } from "@zero2ai/utils";
 
 interface CapturedRequest {
 	readonly method: string;
@@ -99,7 +99,7 @@ const status: BlobBrokerStatus = {
 };
 
 beforeEach(async () => {
-	root = await fs.mkdtemp(path.join(os.tmpdir(), "omp-images-cli-"));
+	root = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-images-cli-"));
 	socketPath = path.join(root, "images.sock");
 	requests = [];
 	routes = new Map();

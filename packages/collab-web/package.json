@@ -1,9 +1,9 @@
 {
   "type": "module",
-  "name": "@oh-my-pi/collab-web",
+  "name": "@zero2ai/collab-web",
   "version": "16.3.6",
   "private": true,
-  "description": "Browser guest client and local relay tools for omp collab live sessions",
+  "description": "Browser guest client and local relay tools for zero2ai collab live sessions",
   "homepage": "https://omp.sh",
   "author": "Stencil Labs, Inc.",
   "license": "MIT",
@@ -37,8 +37,8 @@
     "fmt": "oxfmt --no-error-on-unmatched-pattern 'src/**/*.{ts,tsx}' '{test,bench,examples,scripts}/**/*.ts' '*.ts'"
   },
   "dependencies": {
-    "@oh-my-pi/pi-utils": "catalog:",
-    "@oh-my-pi/pi-wire": "catalog:",
+    "@zero2ai/utils": "catalog:",
+    "@zero2ai/wire": "catalog:",
     "lucide-react": "catalog:",
     "katex": "catalog:",
     "react": "catalog:",

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { type Component, CURSOR_MARKER, type Focusable, type OverlayFocusOwner, TUI } from "@oh-my-pi/pi-tui";
+import { type Component, CURSOR_MARKER, type Focusable, type OverlayFocusOwner, TUI } from "@zero2ai/tui";
 import { withoutTerminalMultiplexer } from "./helpers/terminal-multiplexer";
 import { VirtualTerminal } from "./virtual-terminal";
 
@@ -152,7 +152,7 @@ describe("TUI overlays", () => {
 		// assertions below deterministic on any dev machine.
 		for (const key of [
 			"TERM_PROGRAM",
-			"PI_TUI_RESIZE_IN_PLACE",
+			"ZERO2AI_TUI_RESIZE_IN_PLACE",
 			"HERDR_ENV",
 			"HERDR_PANE_ID",
 			"HERDR_TAB_ID",

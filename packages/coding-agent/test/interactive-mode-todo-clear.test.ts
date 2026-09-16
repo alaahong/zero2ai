@@ -1,18 +1,18 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
 import * as path from "node:path";
-import { Agent } from "@oh-my-pi/pi-agent-core";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { InteractiveMode } from "@oh-my-pi/pi-coding-agent/modes/interactive-mode";
-import { initTheme, theme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { AgentRegistry, MAIN_AGENT_ID } from "@oh-my-pi/pi-coding-agent/registry/agent-registry";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TASK_SUBAGENT_LIFECYCLE_CHANNEL } from "@oh-my-pi/pi-coding-agent/task";
-import type { TodoItem, TodoPhase } from "@oh-my-pi/pi-coding-agent/tools/todo";
-import { EventBus } from "@oh-my-pi/pi-coding-agent/utils/event-bus";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { Agent } from "@zero2ai/agent-core";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
+import { InteractiveMode } from "@zero2ai/coding-agent/modes/interactive-mode";
+import { initTheme, theme } from "@zero2ai/coding-agent/modes/theme/theme";
+import { AgentRegistry, MAIN_AGENT_ID } from "@zero2ai/coding-agent/registry/agent-registry";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { TASK_SUBAGENT_LIFECYCLE_CHANNEL } from "@zero2ai/coding-agent/task";
+import type { TodoItem, TodoPhase } from "@zero2ai/coding-agent/tools/todo";
+import { EventBus } from "@zero2ai/coding-agent/utils/event-bus";
+import { TempDir } from "@zero2ai/utils";
 
 function renderTodos(mode: InteractiveMode): string {
 	return Bun.stripANSI(mode.todoContainer.render(120).join("\n"));
@@ -53,7 +53,7 @@ describe("InteractiveMode todo HUD persistence", () => {
 	beforeAll(async () => {
 		await initTheme();
 		resetSettingsForTest();
-		tempDir = TempDir.createSync("@pi-todo-clear-");
+		tempDir = TempDir.createSync("@zero2ai-todo-clear-");
 		await Settings.init({ inMemory: true, cwd: tempDir.path() });
 		authStorage = await AuthStorage.create(path.join(tempDir.path(), "testauth.db"));
 		modelRegistry = new ModelRegistry(authStorage);
@@ -154,7 +154,7 @@ describe("InteractiveMode todo HUD persistence", () => {
 
 	it("reloads the visible HUD from the explicitly attached session", async () => {
 		setTodoClearDelay(-1);
-		const focusedDir = TempDir.createSync("@pi-focused-todo-");
+		const focusedDir = TempDir.createSync("@zero2ai-focused-todo-");
 		const model = modelRegistry.find("anthropic", "claude-sonnet-4-5");
 		if (!model) throw new Error("Expected claude-sonnet-4-5 to exist in registry");
 		const focusedSession = new AgentSession({
@@ -251,7 +251,7 @@ describe("InteractiveMode todo HUD persistence", () => {
 		mode.setTodos(session.getTodoPhases());
 		await mode.init();
 
-		const focusedDir = TempDir.createSync("@pi-focused-reconcile-");
+		const focusedDir = TempDir.createSync("@zero2ai-focused-reconcile-");
 		const model = modelRegistry.find("anthropic", "claude-sonnet-4-5");
 		if (!model) throw new Error("Expected claude-sonnet-4-5 to exist in registry");
 		const focusedSession = new AgentSession({
@@ -327,7 +327,7 @@ describe("InteractiveMode todo HUD persistence", () => {
 		mode.setTodos(session.getTodoPhases());
 		await mode.init();
 
-		const workerDir = TempDir.createSync("@pi-owner-reconcile-");
+		const workerDir = TempDir.createSync("@zero2ai-owner-reconcile-");
 		const model = modelRegistry.find("anthropic", "claude-sonnet-4-5");
 		if (!model) throw new Error("Expected claude-sonnet-4-5 to exist in registry");
 		const workerSession = new AgentSession({
@@ -587,7 +587,7 @@ describe("InteractiveMode todo HUD anchor", () => {
 	beforeAll(async () => {
 		await initTheme();
 		resetSettingsForTest();
-		tempDir = TempDir.createSync("@pi-todo-hud-");
+		tempDir = TempDir.createSync("@zero2ai-todo-hud-");
 		await Settings.init({ inMemory: true, cwd: tempDir.path() });
 		authStorage = await AuthStorage.create(path.join(tempDir.path(), "testauth.db"));
 		const modelRegistry = new ModelRegistry(authStorage);

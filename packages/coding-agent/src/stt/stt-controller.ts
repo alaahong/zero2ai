@@ -1,5 +1,5 @@
-import { AudioCapture } from "@oh-my-pi/pi-natives";
-import { logger } from "@oh-my-pi/pi-utils";
+import { AudioCapture } from "@zero2ai/natives";
+import { logger } from "@zero2ai/utils";
 import { settings } from "../config/settings";
 import { type SttStreamHandle, sttClient } from "./asr-client";
 import { downloadSttModel, isSttModelCached } from "./downloader";

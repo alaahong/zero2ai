@@ -27,7 +27,7 @@ export function withoutTerminalMultiplexer(): void {
 		"WMUX_SURFACE_ID",
 		"TERM",
 		"TERM_PROGRAM",
-		"PI_TUI_RESIZE_IN_PLACE",
+		"ZERO2AI_TUI_RESIZE_IN_PLACE",
 	] as const;
 	const previous = new Map<string, string | undefined>();
 

@@ -4,7 +4,7 @@
  */
 import { Database } from "bun:sqlite";
 import { renameSync } from "node:fs";
-import { getModelDbPath, isEnoent, isSqliteCorruptionError, logger, VERSION } from "@oh-my-pi/pi-utils";
+import { getModelDbPath, isEnoent, isSqliteCorruptionError, logger, VERSION } from "@zero2ai/utils";
 import RULES from "./compat/rules.json" with { type: "json" };
 import type { Api, Model } from "./types";
 

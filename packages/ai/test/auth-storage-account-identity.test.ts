@@ -2,8 +2,8 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { type AuthCredentialStore, AuthStorage, SqliteAuthCredentialStore } from "@oh-my-pi/pi-ai/auth-storage";
-import * as oauthUtils from "@oh-my-pi/pi-ai/registry/oauth";
+import { type AuthCredentialStore, AuthStorage, SqliteAuthCredentialStore } from "@zero2ai/ai/auth-storage";
+import * as oauthUtils from "@zero2ai/ai/registry/oauth";
 import { removeWithRetries } from "../../utils/src/temp";
 
 const PROVIDER = "unit-oauth-identity";
@@ -14,7 +14,7 @@ describe("AuthStorage.getOAuthAccountIdentity", () => {
 	let authStorage: AuthStorage | null = null;
 
 	beforeEach(async () => {
-		tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-ai-auth-identity-"));
+		tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-ai-auth-identity-"));
 		store = await SqliteAuthCredentialStore.open(path.join(tempDir, "agent.db"));
 		authStorage = new AuthStorage(store);
 	});

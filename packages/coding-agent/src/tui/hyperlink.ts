@@ -8,7 +8,7 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import * as url from "node:url";
-import { getMarkdownLinkUrls, setTerminalHyperlinks, TERMINAL, type TerminalId } from "@oh-my-pi/pi-tui";
+import { getMarkdownLinkUrls, setTerminalHyperlinks, TERMINAL, type TerminalId } from "@zero2ai/tui";
 import { isSettingsInitialized, settings } from "../config/settings";
 import {
 	extractUriScheme,
@@ -111,7 +111,7 @@ function resolveHyperlinkMode(mode: HyperlinkMode): boolean {
 
 /**
  * Push the resolved `tui.hyperlinks` policy into {@link TERMINAL}.hyperlinks, the
- * effective flag that pi-tui renderers gating on it directly — the Markdown
+ * effective flag that zero2ai-tui renderers gating on it directly — the Markdown
  * component's `[text](url)`/bare-URL links and the status-line PR link — consult.
  *
  * Detection stays immutable in {@link DETECTED_TERMINAL_HYPERLINKS}, so this only
@@ -225,7 +225,7 @@ export async function resolveMarkdownLinkTargets(
 			if (
 				!scheme ||
 				scheme === "file" ||
-				(/^(?:agent|artifact|history|local|memory|omp|rule|skill):\/\//i.test(href) && router.canHandle(href))
+				(/^(?:agent|artifact|history|local|memory|zero2ai|rule|skill):\/\//i.test(href) && router.canHandle(href))
 			) {
 				urls.add(href);
 			}
@@ -271,7 +271,7 @@ export async function resolveMarkdownLinkTargets(
  * during the call/streaming phase before a result lands).
  *
  * Async-resolved schemes (`artifact://`, `agent://`, `skill://`, `rule://`,
- * `omp://`) are not handled here — those rely on `details.resolvedPath` set
+ * `zero2ai://`) are not handled here — those rely on `details.resolvedPath` set
  * by the read tool's router resolution.
  */
 export function tryResolveInternalUrlSync(input: string): string | undefined {

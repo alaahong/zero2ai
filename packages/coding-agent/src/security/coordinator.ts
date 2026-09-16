@@ -1,9 +1,9 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import type { Model } from "@oh-my-pi/pi-ai";
-import type { VcsGitRepo } from "@oh-my-pi/pi-natives";
-import * as vcs from "@oh-my-pi/pi-natives/vcs";
-import { logger, prompt } from "@oh-my-pi/pi-utils";
+import type { Model } from "@zero2ai/ai";
+import type { VcsGitRepo } from "@zero2ai/natives";
+import * as vcs from "@zero2ai/natives/vcs";
+import { logger, prompt } from "@zero2ai/utils";
 import type { AsyncJobManager } from "../async/job-manager";
 import type { ModelRegistry } from "../config/model-registry";
 import type { Settings } from "../config/settings";
@@ -206,7 +206,7 @@ function initialBundle(
 	});
 	return {
 		scan: {
-			documentType: "omp-security.scan",
+			documentType: "zero2ai-security.scan",
 			schemaVersion: "1.0",
 			id: scanId,
 			projectKey: store.projectKey,
@@ -572,7 +572,7 @@ export class SecurityCoordinator {
 			if (signal.aborted) throw signal.reason ?? new Error("Security scan cancelled");
 			await prepareSecurityOutputDirectory(plan.output, record.snapshot.scanId);
 			this.#update(record, "preparing");
-			await reportProgress?.("Preparing OMP-native security scan");
+			await reportProgress?.("Preparing ZERO2AI-native security scan");
 			executionTarget = await prepareSecurityExecutionTarget(
 				plan,
 				store,
@@ -626,7 +626,7 @@ export class SecurityCoordinator {
 			try {
 				if (signal.aborted) throw signal.reason ?? new Error("Security scan cancelled");
 				this.#update(record, "reviewing");
-				await reportProgress?.("Reviewing repository with OMP security workers");
+				await reportProgress?.("Reviewing repository with ZERO2AI security workers");
 				await session.prompt(requestText(plan, executionTarget.cwd, executionTarget.diffText), {
 					expandPromptTemplates: false,
 					synthetic: true,

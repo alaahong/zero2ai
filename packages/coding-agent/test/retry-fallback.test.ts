@@ -1,12 +1,12 @@
 import { describe, expect, it } from "bun:test";
-import { ThinkingLevel } from "@oh-my-pi/pi-agent-core";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
+import { ThinkingLevel } from "@zero2ai/agent-core";
+import { getBundledModel } from "@zero2ai/catalog/models";
 import {
 	expandDefaultRetryFallbackChains,
 	findRetryFallbackCandidates,
 	type RetryFallbackResolutionContext,
 	resolveRetryFallbackChainKey,
-} from "@oh-my-pi/pi-coding-agent/session/retry-fallback-chains";
+} from "@zero2ai/coding-agent/session/retry-fallback-chains";
 
 function createContext(
 	chains: RetryFallbackResolutionContext["chains"],

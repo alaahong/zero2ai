@@ -2,14 +2,14 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { type } from "@oh-my-pi/omptype";
-import { AsyncJobManager } from "@oh-my-pi/pi-coding-agent/async/job-manager";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { createAgentSession, type ExtensionFactory } from "@oh-my-pi/pi-coding-agent/sdk";
-import type { AsyncJobSnapshot } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { removeSyncWithRetries, Snowflake } from "@oh-my-pi/pi-utils";
+import { type } from "@zero2ai/schema";
+import { AsyncJobManager } from "@zero2ai/coding-agent/async/job-manager";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { createAgentSession, type ExtensionFactory } from "@zero2ai/coding-agent/sdk";
+import type { AsyncJobSnapshot } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { removeSyncWithRetries, Snowflake } from "@zero2ai/utils";
 
 describe("AsyncJobManager singleton across concurrent top-level sessions", () => {
 	const tempDirs: string[] = [];
@@ -23,7 +23,7 @@ describe("AsyncJobManager singleton across concurrent top-level sessions", () =>
 	let sharedModelRegistry: ModelRegistry;
 
 	beforeAll(async () => {
-		sharedTempDir = fs.mkdtempSync(path.join(os.tmpdir(), "pi-sdk-async-singleton-shared-"));
+		sharedTempDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-sdk-async-singleton-shared-"));
 		sharedAuthStorage = await AuthStorage.create(path.join(sharedTempDir, "auth.db"));
 		sharedModelRegistry = new ModelRegistry(sharedAuthStorage, path.join(sharedTempDir, "models.yml"));
 	});
@@ -41,7 +41,7 @@ describe("AsyncJobManager singleton across concurrent top-level sessions", () =>
 	});
 
 	async function spawnTopLevelSession(extraSettings?: Record<string, unknown>, extensions: ExtensionFactory[] = []) {
-		const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), `pi-sdk-async-singleton-${Snowflake.next()}-`));
+		const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), `zero2ai-sdk-async-singleton-${Snowflake.next()}-`));
 		tempDirs.push(tempDir);
 		const cwd = path.join(tempDir, `project-${Snowflake.next()}`);
 		const agentDir = path.join(tempDir, "agent");
@@ -196,7 +196,7 @@ describe("AsyncJobManager singleton across concurrent top-level sessions", () =>
 	}, 60000);
 
 	it("clears a manager installed before a top-level session startup failure takes ownership", async () => {
-		const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), `pi-sdk-async-startup-failure-${Snowflake.next()}-`));
+		const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), `zero2ai-sdk-async-startup-failure-${Snowflake.next()}-`));
 		tempDirs.push(tempDir);
 		const cwd = path.join(tempDir, `project-${Snowflake.next()}`);
 		const agentDir = path.join(tempDir, "agent");

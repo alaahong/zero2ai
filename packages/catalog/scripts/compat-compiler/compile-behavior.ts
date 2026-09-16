@@ -3,7 +3,7 @@
  *
  * Ports the o2 runtime-behavior grammar (openai-responses-heuristic,
  * model-operations, cursor-effort, cursor-model-parameter, quota-tiers,
- * hosted-default) and adds the pi-only nodes: api-routes, model-limits,
+ * hosted-default) and adds the zero2ai-only nodes: api-routes, model-limits,
  * exclude-discovery-modes, exclude-models, plan-requirement, pricing-peer,
  * and retry-reset-timezone.
  * Every node kind is optional; per-node shapes are strict.

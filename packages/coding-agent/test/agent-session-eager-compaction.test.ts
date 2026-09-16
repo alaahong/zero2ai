@@ -1,20 +1,20 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as path from "node:path";
-import { type } from "@oh-my-pi/omptype";
-import { Agent, type AgentMessage, type AgentTool } from "@oh-my-pi/pi-agent-core";
-import * as compactionModule from "@oh-my-pi/pi-agent-core/compaction";
-import type { Model, TextContent } from "@oh-my-pi/pi-ai";
-import * as codexResponses from "@oh-my-pi/pi-ai/providers/openai-codex-responses";
-import { AssistantMessageEventStream } from "@oh-my-pi/pi-ai/utils/event-stream";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { convertToLlm } from "@oh-my-pi/pi-coding-agent/session/messages";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TodoTool, type ToolSession, USER_TODO_EDIT_CUSTOM_TYPE } from "@oh-my-pi/pi-coding-agent/tools";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { type } from "@zero2ai/schema";
+import { Agent, type AgentMessage, type AgentTool } from "@zero2ai/agent-core";
+import * as compactionModule from "@zero2ai/agent-core/compaction";
+import type { Model, TextContent } from "@zero2ai/ai";
+import * as codexResponses from "@zero2ai/ai/providers/openai-codex-responses";
+import { AssistantMessageEventStream } from "@zero2ai/ai/utils/event-stream";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { convertToLlm } from "@zero2ai/coding-agent/session/messages";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { TodoTool, type ToolSession, USER_TODO_EDIT_CUSTOM_TYPE } from "@zero2ai/coding-agent/tools";
+import { TempDir } from "@zero2ai/utils";
 
 // Re-injecting eager preludes after compaction: the first-message preludes are the
 // oldest messages, so compaction summarizes them away and the agent silently loses
@@ -128,7 +128,7 @@ describe("AgentSession eager prelude re-injection after compaction", () => {
 	const cleanups: Array<() => Promise<void>> = [];
 
 	beforeAll(async () => {
-		sharedDir = TempDir.createSync("@pi-agent-session-eager-compaction-shared-");
+		sharedDir = TempDir.createSync("@zero2ai-agent-session-eager-compaction-shared-");
 		sharedAuthStorage = await AuthStorage.create(path.join(sharedDir.path(), "auth.db"));
 		sharedAuthStorage.setRuntimeApiKey("anthropic", "test-key");
 		sharedAuthStorage.setRuntimeApiKey("openai-codex", "test-key");
@@ -141,7 +141,7 @@ describe("AgentSession eager prelude re-injection after compaction", () => {
 	});
 
 	beforeEach(() => {
-		tempDir = TempDir.createSync("@pi-agent-session-eager-compaction-");
+		tempDir = TempDir.createSync("@zero2ai-agent-session-eager-compaction-");
 		cleanups.length = 0;
 	});
 

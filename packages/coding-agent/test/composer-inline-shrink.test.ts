@@ -1,8 +1,8 @@
 import { beforeAll, describe, expect, it } from "bun:test";
-import { COMPOSER_DEFAULTS, Composer } from "@oh-my-pi/pi-coding-agent/modes/composer";
-import { TranscriptContainer } from "@oh-my-pi/pi-coding-agent/modes/components/transcript-container";
-import { initTheme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { type Component, Container, Text } from "@oh-my-pi/pi-tui";
+import { COMPOSER_DEFAULTS, Composer } from "@zero2ai/coding-agent/modes/composer";
+import { TranscriptContainer } from "@zero2ai/coding-agent/modes/components/transcript-container";
+import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
+import { type Component, Container, Text } from "@zero2ai/tui";
 import { VirtualRenderScheduler } from "../../tui/test/virtual-render-scheduler";
 import { VirtualTerminal } from "../../tui/test/virtual-terminal";
 import { withoutTerminalMultiplexer } from "./helpers/terminal-multiplexer";

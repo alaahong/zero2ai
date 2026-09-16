@@ -1,4 +1,4 @@
-import type { AgentTool } from "@oh-my-pi/pi-agent-core";
+import type { AgentTool } from "@zero2ai/agent-core";
 import {
 	Box,
 	type Component,
@@ -12,8 +12,8 @@ import {
 	Text,
 	type TUI,
 	truncateToWidth,
-} from "@oh-my-pi/pi-tui";
-import { getProjectDir, isRecord, logger, sanitizeText } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/tui";
+import { getProjectDir, isRecord, logger, sanitizeText } from "@zero2ai/utils";
 import { type PerFileDiffPreview, renderStreamingFallback } from "../../edit/renderer";
 import type { Theme } from "../../modes/theme/theme";
 import { ensureThemeSync, getThemeEpoch, theme } from "../../modes/theme/theme";

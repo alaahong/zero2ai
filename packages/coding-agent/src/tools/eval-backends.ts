@@ -1,4 +1,4 @@
-import { $flag } from "@oh-my-pi/pi-utils";
+import { $flag } from "@zero2ai/utils";
 import type { ToolSession } from ".";
 
 export interface EvalBackendsAllowance {
@@ -15,13 +15,13 @@ export function readEvalBackendsAllowance(session: ToolSession): EvalBackendsAll
 }
 
 /**
- * Materialize the active eval backend allowance: PI_PY / PI_JS
+ * Materialize the active eval backend allowance: ZERO2AI_PY / ZERO2AI_JS
  * env flags override the per-key settings; otherwise settings win (py/js default on).
  */
 export function resolveEvalBackends(session: ToolSession): EvalBackendsAllowance {
 	const settings = readEvalBackendsAllowance(session);
 	return {
-		python: $flag("PI_PY", settings.python),
-		js: $flag("PI_JS", settings.js),
+		python: $flag("ZERO2AI_PY", settings.python),
+		js: $flag("ZERO2AI_JS", settings.js),
 	};
 }

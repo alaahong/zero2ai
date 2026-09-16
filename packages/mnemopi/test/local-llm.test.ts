@@ -1,11 +1,11 @@
 import { afterEach, describe, expect, it } from "bun:test";
-import type { FetchImpl } from "@oh-my-pi/pi-ai";
-import { createMockModel, registerMockApi } from "@oh-my-pi/pi-ai/providers/mock";
+import type { FetchImpl } from "@zero2ai/ai";
+import { createMockModel, registerMockApi } from "@zero2ai/ai/providers/mock";
 import {
 	CallableLlmBackend,
 	resetHostLlmBackendForTests,
 	setHostLlmBackend,
-} from "@oh-my-pi/pi-mnemopi/core/llm-backends";
+} from "@zero2ai/mnemopi/core/llm-backends";
 import {
 	buildHostPrompt,
 	callLocalLlm,
@@ -16,10 +16,10 @@ import {
 	llmAvailable,
 	localGgufAvailable,
 	summarizeMemories,
-} from "@oh-my-pi/pi-mnemopi/core/local-llm";
-import { Mnemopi } from "@oh-my-pi/pi-mnemopi/core/memory";
-import { withMnemopiRuntimeOptions } from "@oh-my-pi/pi-mnemopi/core/runtime-options";
-import { TempDir } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/mnemopi/core/local-llm";
+import { Mnemopi } from "@zero2ai/mnemopi/core/memory";
+import { withMnemopiRuntimeOptions } from "@zero2ai/mnemopi/core/runtime-options";
+import { TempDir } from "@zero2ai/utils";
 
 const OLD_ENV = { ...process.env };
 
@@ -172,7 +172,7 @@ describe("local LLM TypeScript port", () => {
 		}
 	});
 
-	it("uses a constructor-scoped pi-ai Model instance", async () => {
+	it("uses a constructor-scoped zero2ai-ai Model instance", async () => {
 		const model = createMockModel({
 			handler: () => ({ content: ["model summary"] }),
 		});

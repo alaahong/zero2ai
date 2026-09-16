@@ -1,5 +1,5 @@
 /**
- * Turn engine for `omp if-bench`.
+ * Turn engine for `zero2ai if-bench`.
  *
  * One model = one growing conversation: the system prompt and every earlier
  * turn stay byte-identical, so the whole prefix is cacheable and turn N only
@@ -16,8 +16,8 @@ import type {
 	Message,
 	Model,
 	ProviderSessionState,
-} from "@oh-my-pi/pi-ai";
-import { logger } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/ai";
+import { logger } from "@zero2ai/utils";
 import type { BenchRuntime, BenchTarget, StreamSimpleFn } from "../cli/bench-runtime";
 import { formatModelSelectorValue, formatModelString } from "../config/model-resolver";
 import { shouldDisableReasoning, toReasoningEffort } from "../thinking";
@@ -186,7 +186,7 @@ async function runTarget(target: BenchTarget, options: IfBenchRunOptions): Promi
 		report.failure = {
 			turn: 0,
 			kind: "provider",
-			detail: `No credentials for provider "${model.provider}". Run \`omp\` and use /login, or set the provider API key.`,
+			detail: `No credentials for provider "${model.provider}". Run \`zero2ai\` and use /login, or set the provider API key.`,
 		};
 		options.observer?.modelFinished?.(report);
 		return report;

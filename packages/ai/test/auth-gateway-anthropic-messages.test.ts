@@ -1,16 +1,16 @@
 import { describe, expect, it } from "bun:test";
-import { convertAnthropicMessages } from "@oh-my-pi/pi-ai/providers/anthropic";
-import { encodeResponse, encodeStream, parseRequest } from "@oh-my-pi/pi-ai/providers/anthropic-messages-server";
+import { convertAnthropicMessages } from "@zero2ai/ai/providers/anthropic";
+import { encodeResponse, encodeStream, parseRequest } from "@zero2ai/ai/providers/anthropic-messages-server";
 import type {
 	ToolSearchServerToolUseBlockParam,
 	ToolSearchToolResultBlockParam,
 	WebSearchServerToolUseBlockParam,
 	WebSearchToolResultBlockParam,
-} from "@oh-my-pi/pi-ai/providers/anthropic-wire";
-import type { AssistantMessage, AssistantMessageEvent, Model, ToolResultMessage } from "@oh-my-pi/pi-ai/types";
-import { AssistantMessageEventStream } from "@oh-my-pi/pi-ai/utils/event-stream";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { Effort } from "@oh-my-pi/pi-catalog/effort";
+} from "@zero2ai/ai/providers/anthropic-wire";
+import type { AssistantMessage, AssistantMessageEvent, Model, ToolResultMessage } from "@zero2ai/ai/types";
+import { AssistantMessageEventStream } from "@zero2ai/ai/utils/event-stream";
+import { buildModel } from "@zero2ai/catalog/build";
+import { Effort } from "@zero2ai/catalog/effort";
 
 function emptyUsage(): AssistantMessage["usage"] {
 	return {

@@ -11,12 +11,12 @@
 import { describe, expect, test } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import { expandPromptTemplate, type PromptTemplate } from "@oh-my-pi/pi-coding-agent/config/prompt-templates";
-import { expandSlashCommand, type FileSlashCommand } from "@oh-my-pi/pi-coding-agent/extensibility/slash-commands";
-import { AgentRegistry, MAIN_AGENT_ID } from "@oh-my-pi/pi-coding-agent/registry/agent-registry";
-import { collectIrcPeerRoster } from "@oh-my-pi/pi-coding-agent/task/executor";
-import { parseCommandArgs, substituteArgs } from "@oh-my-pi/pi-coding-agent/utils/command-args";
-import { prompt } from "@oh-my-pi/pi-utils";
+import { expandPromptTemplate, type PromptTemplate } from "@zero2ai/coding-agent/config/prompt-templates";
+import { expandSlashCommand, type FileSlashCommand } from "@zero2ai/coding-agent/extensibility/slash-commands";
+import { AgentRegistry, MAIN_AGENT_ID } from "@zero2ai/coding-agent/registry/agent-registry";
+import { collectIrcPeerRoster } from "@zero2ai/coding-agent/task/executor";
+import { parseCommandArgs, substituteArgs } from "@zero2ai/coding-agent/utils/command-args";
+import { prompt } from "@zero2ai/utils";
 
 // ============================================================================
 // substituteArgs

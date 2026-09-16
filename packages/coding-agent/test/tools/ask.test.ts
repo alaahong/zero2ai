@@ -1,18 +1,18 @@
 import { beforeAll, describe, expect, it, spyOn, vi } from "bun:test";
 import { stripVTControlCharacters } from "node:util";
-import { type } from "@oh-my-pi/omptype";
-import type { AgentToolContext } from "@oh-my-pi/pi-agent-core";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
+import { type } from "@zero2ai/schema";
+import type { AgentToolContext } from "@zero2ai/agent-core";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
 import type {
 	ExtensionAskDialogQuestion,
 	ExtensionAskDialogResult,
 	ExtensionUISelectItem,
-} from "@oh-my-pi/pi-coding-agent/extensibility/extensions";
-import { getThemeByName, initTheme, theme, type Theme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { AskTool, askToolRenderer } from "@oh-my-pi/pi-coding-agent/tools/ask";
-import { ToolAbortError } from "@oh-my-pi/pi-coding-agent/tools/tool-errors";
-import { TERMINAL } from "@oh-my-pi/pi-tui";
+} from "@zero2ai/coding-agent/extensibility/extensions";
+import { getThemeByName, initTheme, theme, type Theme } from "@zero2ai/coding-agent/modes/theme/theme";
+import type { ToolSession } from "@zero2ai/coding-agent/tools";
+import { AskTool, askToolRenderer } from "@zero2ai/coding-agent/tools/ask";
+import { ToolAbortError } from "@zero2ai/coding-agent/tools/tool-errors";
+import { TERMINAL } from "@zero2ai/tui";
 
 function createSession(overrides: Partial<ToolSession> = {}): ToolSession {
 	return {
@@ -418,7 +418,7 @@ describe("AskTool option descriptions", () => {
 		const select = vi.fn(async (_prompt: string, options: ExtensionUISelectItem[]) => {
 			expect(options[0]).toEqual({
 				label: "Use local credentials",
-				description: "Authenticate with provider keys already configured under ~/.omp.",
+				description: "Authenticate with provider keys already configured under ~/.zero2ai.",
 			});
 			expect(options[1]).toEqual({
 				label: "Set up in terminal",
@@ -439,7 +439,7 @@ describe("AskTool option descriptions", () => {
 						options: [
 							{
 								label: "Use local credentials",
-								description: "Authenticate with provider keys already configured under ~/.omp.",
+								description: "Authenticate with provider keys already configured under ~/.zero2ai.",
 							},
 							{
 								label: "Set up in terminal",
@@ -472,7 +472,7 @@ describe("AskTool option descriptions", () => {
 				options: [
 					{
 						label: "Use local credentials",
-						description: "Authenticate with provider keys already configured under ~/.omp.",
+						description: "Authenticate with provider keys already configured under ~/.zero2ai.",
 					},
 					{
 						label: "Set up in terminal",

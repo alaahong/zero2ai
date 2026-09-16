@@ -3,18 +3,18 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test } fr
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { Effort, type FetchImpl, type Model, type OpenAICompat, type ThinkingConfig } from "@oh-my-pi/pi-ai";
-import { streamOpenAICompletions } from "@oh-my-pi/pi-ai/providers/openai-completions";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { writeModelCache } from "@oh-my-pi/pi-catalog/model-cache";
-import { fingerprintStaticModels } from "@oh-my-pi/pi-catalog/model-manager";
-import { calculateUsageCost, getBundledModels } from "@oh-my-pi/pi-catalog/models";
-import { finalizeCustomModel } from "@oh-my-pi/pi-coding-agent/config/custom-models";
-import { applyModelPatch, mergeDiscoveredModel } from "@oh-my-pi/pi-coding-agent/config/model-patch";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { resetSettingsForTest, Settings, settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { removeSyncWithRetries, Snowflake } from "@oh-my-pi/pi-utils";
+import { Effort, type FetchImpl, type Model, type OpenAICompat, type ThinkingConfig } from "@zero2ai/ai";
+import { streamOpenAICompletions } from "@zero2ai/ai/providers/openai-completions";
+import { buildModel } from "@zero2ai/catalog/build";
+import { writeModelCache } from "@zero2ai/catalog/model-cache";
+import { fingerprintStaticModels } from "@zero2ai/catalog/model-manager";
+import { calculateUsageCost, getBundledModels } from "@zero2ai/catalog/models";
+import { finalizeCustomModel } from "@zero2ai/coding-agent/config/custom-models";
+import { applyModelPatch, mergeDiscoveredModel } from "@zero2ai/coding-agent/config/model-patch";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { resetSettingsForTest, Settings, settings } from "@zero2ai/coding-agent/config/settings";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { removeSyncWithRetries, Snowflake } from "@zero2ai/utils";
 
 describe("ModelRegistry", () => {
 	let tempDir: string;
@@ -44,7 +44,7 @@ describe("ModelRegistry", () => {
 		delete Bun.env.OLLAMA_BASE_URL;
 		delete Bun.env.OLLAMA_HOST;
 		delete Bun.env.OLLAMA_CONTEXT_LENGTH;
-		tempDir = path.join(os.tmpdir(), `pi-test-model-registry-${Snowflake.next()}`);
+		tempDir = path.join(os.tmpdir(), `zero2ai-test-model-registry-${Snowflake.next()}`);
 		fs.mkdirSync(tempDir, { recursive: true });
 		modelsJsonPath = path.join(tempDir, "models.json");
 		// In-memory auth DB: tests need a fresh, isolated credential store per case but
@@ -87,7 +87,7 @@ describe("ModelRegistry", () => {
 		delete Bun.env.OLLAMA_HOST;
 		delete Bun.env.OLLAMA_CONTEXT_LENGTH;
 		sharedAuth = await AuthStorage.create(":memory:");
-		sharedDir = fs.mkdtempSync(path.join(os.tmpdir(), "pi-test-mr-shared-"));
+		sharedDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-test-mr-shared-"));
 		// Unmodified bundled catalog (no custom config); reused by built-in-only
 		// read-only assertions across describe blocks. Exercising the read paths
 		// here pays one-time lazy query/grammar init off every test's body clock.
@@ -503,11 +503,11 @@ describe("ModelRegistry", () => {
 		});
 
 		test("refresh keeps transport override on built-in provider (#2555 openrouter gateway)", async () => {
-			// Reporter ran `omp` with the auth-gateway broker proxying OpenRouter.
+			// Reporter ran `zero2ai` with the auth-gateway broker proxying OpenRouter.
 			// Default model worked; switching via `/model` produced
 			// `404 No route: POST /chat/completions` until restart. Root cause:
 			// background discovery refresh re-fetched the openrouter catalog and
-			// `mergeDiscoveredModel` dropped `transport: pi-native` (raw catalog
+			// `mergeDiscoveredModel` dropped `transport: zero2ai-native` (raw catalog
 			// rows carry no transport), so the next stream went out as plain
 			// openai-completions to `${baseUrl}/chat/completions` instead of the
 			// gateway's `/v1/pi/stream`.
@@ -515,7 +515,7 @@ describe("ModelRegistry", () => {
 				openrouter: {
 					baseUrl: "http://localhost:4000",
 					apiKey: "gateway-token",
-					transport: "pi-native",
+					transport: "zero2ai-native",
 				},
 			});
 
@@ -542,18 +542,18 @@ describe("ModelRegistry", () => {
 			// Pre-refresh: every bundled openrouter model already carries the override.
 			const preRefresh = getModelsForProvider(registry, "openrouter");
 			expect(preRefresh.length).toBeGreaterThan(0);
-			expect(preRefresh.every(m => m.transport === "pi-native")).toBe(true);
+			expect(preRefresh.every(m => m.transport === "zero2ai-native")).toBe(true);
 			expect(preRefresh.every(m => m.baseUrl === "http://localhost:4000")).toBe(true);
 
 			await registry.refreshProvider("openrouter", "online");
 			expect(requestedUrls).toContain("http://localhost:4000/models");
 
 			// Post-refresh: every openrouter model — bundled or freshly
-			// discovered — must still route through the pi-native transport.
+			// discovered — must still route through the zero2ai-native transport.
 			const postRefresh = getModelsForProvider(registry, "openrouter");
 			expect(postRefresh.length).toBeGreaterThan(0);
 			for (const model of postRefresh) {
-				expect(model.transport).toBe("pi-native");
+				expect(model.transport).toBe("zero2ai-native");
 				expect(model.baseUrl).toBe("http://localhost:4000");
 			}
 		});
@@ -1041,13 +1041,13 @@ describe("ModelRegistry", () => {
 			expect(flash).toMatchObject({ baseUrl: "https://api.z.ai/api/anthropic" });
 		});
 
-		test("refresh keeps pi-native gateway baseUrl across APIs", async () => {
+		test("refresh keeps zero2ai-native gateway baseUrl across APIs", async () => {
 			writeRawModelsJson({
 				zai: {
 					baseUrl: "http://localhost:4000",
 					apiKey: "gateway-token",
 					api: "anthropic-messages",
-					transport: "pi-native",
+					transport: "zero2ai-native",
 					models: [
 						{
 							id: "glm-anthropic",
@@ -1069,7 +1069,7 @@ describe("ModelRegistry", () => {
 			expect(flash).toMatchObject({
 				api: "openai-completions",
 				baseUrl: "http://localhost:4000",
-				transport: "pi-native",
+				transport: "zero2ai-native",
 			});
 			const glmAnthropic = registry.find("zai", "glm-anthropic");
 			expect(glmAnthropic).toMatchObject({
@@ -2475,7 +2475,7 @@ describe("ModelRegistry", () => {
 			const transportOverride = readonlyRegistry({
 				providers: {
 					"amazon-bedrock": {
-						transport: "pi-native",
+						transport: "zero2ai-native",
 						headers: { "X-Custom-Header": "custom-value" },
 						guardrailIdentifier: "arn:aws:bedrock:eu-west-2:123456789012:guardrail/abcd1234",
 					},
@@ -2484,7 +2484,7 @@ describe("ModelRegistry", () => {
 			const profileArn = "arn:aws:bedrock:us-east-2:123456789012:application-inference-profile/company-opus-48";
 			const model = transportOverride.find("amazon-bedrock", profileArn);
 			expect(model).toBeDefined();
-			expect(model?.transport).toBe("pi-native");
+			expect(model?.transport).toBe("zero2ai-native");
 			expect(model?.headers).toEqual({ "X-Custom-Header": "custom-value" });
 			expect(model?.guardrailIdentifier).toBe("arn:aws:bedrock:eu-west-2:123456789012:guardrail/abcd1234");
 		});

@@ -1,21 +1,21 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as path from "node:path";
-import { Agent } from "@oh-my-pi/pi-agent-core";
-import { Effort } from "@oh-my-pi/pi-ai";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import * as autoThinkingClassifier from "@oh-my-pi/pi-coding-agent/auto-thinking/classifier";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SKILL_PROMPT_MESSAGE_TYPE } from "@oh-my-pi/pi-coding-agent/session/messages";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
+import { Agent } from "@zero2ai/agent-core";
+import { Effort } from "@zero2ai/ai";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import * as autoThinkingClassifier from "@zero2ai/coding-agent/auto-thinking/classifier";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SKILL_PROMPT_MESSAGE_TYPE } from "@zero2ai/coding-agent/session/messages";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
 import {
 	AUTO_THINKING,
 	clampAutoThinkingEffort,
 	resolveProvisionalAutoLevel,
-} from "@oh-my-pi/pi-coding-agent/thinking";
-import { TempDir } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/thinking";
+import { TempDir } from "@zero2ai/utils";
 import { createAssistantMessage } from "./helpers/agent-session-setup";
 
 describe("AgentSession role model thinking behavior", () => {
@@ -27,7 +27,7 @@ describe("AgentSession role model thinking behavior", () => {
 	let sessionSettings: Settings;
 
 	beforeAll(async () => {
-		fixtureDir = TempDir.createSync("@pi-role-thinking-fixture-");
+		fixtureDir = TempDir.createSync("@zero2ai-role-thinking-fixture-");
 		authStorage = await AuthStorage.create(path.join(fixtureDir.path(), "testauth.db"));
 		authStorage.setRuntimeApiKey("anthropic", "test-key");
 		authStorage.setRuntimeApiKey("openai", "test-key");
@@ -35,7 +35,7 @@ describe("AgentSession role model thinking behavior", () => {
 	});
 
 	beforeEach(() => {
-		tempDir = TempDir.createSync("@pi-role-thinking-");
+		tempDir = TempDir.createSync("@zero2ai-role-thinking-");
 	});
 
 	afterEach(async () => {

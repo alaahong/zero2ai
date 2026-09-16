@@ -6,33 +6,33 @@
  */
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as path from "node:path";
-import { Agent, ThinkingLevel } from "@oh-my-pi/pi-agent-core";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { PINNED_HUD_TOGGLE_ID } from "@oh-my-pi/pi-coding-agent/modes/composer";
+import { Agent, ThinkingLevel } from "@zero2ai/agent-core";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { resetSettingsForTest, Settings } from "@zero2ai/coding-agent/config/settings";
+import { PINNED_HUD_TOGGLE_ID } from "@zero2ai/coding-agent/modes/composer";
 import {
 	InteractiveMode,
 	layoutPinnedHud,
 	renderSubagentHudLines,
 	SubagentHudComponent,
-} from "@oh-my-pi/pi-coding-agent/modes/interactive-mode";
+} from "@zero2ai/coding-agent/modes/interactive-mode";
 import {
 	type ObservableSession,
 	SessionObserverRegistry,
-} from "@oh-my-pi/pi-coding-agent/modes/session-observer-registry";
-import { initTheme, theme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
+} from "@zero2ai/coding-agent/modes/session-observer-registry";
+import { initTheme, theme } from "@zero2ai/coding-agent/modes/theme/theme";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
 import {
 	type AgentProgress,
 	type SubagentLifecyclePayload,
 	type SubagentProgressPayload,
 	TASK_SUBAGENT_LIFECYCLE_CHANNEL,
 	TASK_SUBAGENT_PROGRESS_CHANNEL,
-} from "@oh-my-pi/pi-coding-agent/task";
-import { EventBus } from "@oh-my-pi/pi-coding-agent/utils/event-bus";
-import { TempDir } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/task";
+import { EventBus } from "@zero2ai/coding-agent/utils/event-bus";
+import { TempDir } from "@zero2ai/utils";
 
 function makeSession(overrides: Partial<ObservableSession> & { id: string }): ObservableSession {
 	return {
@@ -560,7 +560,7 @@ describe("InteractiveMode subagent observer UI sync", () => {
 
 	beforeEach(async () => {
 		resetSettingsForTest();
-		tempDir = TempDir.createSync("@pi-subagent-observer-");
+		tempDir = TempDir.createSync("@zero2ai-subagent-observer-");
 		await Settings.init({
 			inMemory: true,
 			cwd: tempDir.path(),

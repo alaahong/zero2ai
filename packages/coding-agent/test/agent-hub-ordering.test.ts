@@ -6,15 +6,15 @@
  * agents that appear while the hub is open are appended at the end.
  */
 import { afterEach, beforeAll, describe, expect, it, setSystemTime, vi } from "bun:test";
-import { ThinkingLevel } from "@oh-my-pi/pi-agent-core";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { IrcBus } from "@oh-my-pi/pi-coding-agent/irc/bus";
-import { type AgentHubDeps, AgentHubOverlayComponent } from "@oh-my-pi/pi-coding-agent/modes/components/agent-hub";
-import { SessionObserverRegistry } from "@oh-my-pi/pi-coding-agent/modes/session-observer-registry";
-import { initTheme, theme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { AgentRegistry } from "@oh-my-pi/pi-coding-agent/registry/agent-registry";
-import type { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { visibleWidth } from "@oh-my-pi/pi-tui/utils";
+import { ThinkingLevel } from "@zero2ai/agent-core";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { IrcBus } from "@zero2ai/coding-agent/irc/bus";
+import { type AgentHubDeps, AgentHubOverlayComponent } from "@zero2ai/coding-agent/modes/components/agent-hub";
+import { SessionObserverRegistry } from "@zero2ai/coding-agent/modes/session-observer-registry";
+import { initTheme, theme } from "@zero2ai/coding-agent/modes/theme/theme";
+import { AgentRegistry } from "@zero2ai/coding-agent/registry/agent-registry";
+import type { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { visibleWidth } from "@zero2ai/tui/utils";
 import { AgentActivityIndex, type AgentActivityRow } from "../src/activity";
 
 interface GeometryStub {
@@ -147,7 +147,7 @@ describe("Agent hub row ordering", () => {
 			const rendered = Bun.stripANSI(hub.render(120).join("\n"));
 			expect(rendered).toContain("No agents in this session");
 			expect(rendered).toContain("Finished, parked, and killed subagents remain with the session");
-			expect(rendered).toContain("Resume that session with omp-dev --continue, or spawn a task here.");
+			expect(rendered).toContain("Resume that session with zero2ai-dev --continue, or spawn a task here.");
 		} finally {
 			hub.dispose();
 		}
@@ -646,7 +646,7 @@ describe("Agent hub row ordering", () => {
 			history: {
 				outputPath: "/tmp/Reviewer.md",
 				patchPath: "/tmp/Reviewer.patch",
-				branchName: "omp/task/Reviewer",
+				branchName: "zero2ai/task/Reviewer",
 			},
 			createdAt,
 		});
@@ -713,7 +713,7 @@ describe("Agent hub row ordering", () => {
 			expect(rendered).toContain("Output /tmp/Reviewer.md");
 			expect(rendered).toContain("Patch /tmp/Reviewer.patch");
 			hub.handleInput("\x1b[6~");
-			expect(Bun.stripANSI(hub.render(140).join("\n"))).toContain("Worktree branch omp/task/Reviewer");
+			expect(Bun.stripANSI(hub.render(140).join("\n"))).toContain("Worktree branch zero2ai/task/Reviewer");
 		} finally {
 			hub.dispose();
 		}

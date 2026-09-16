@@ -2,12 +2,12 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { type completeSimple, Effort, type ImageContent, type Model } from "@oh-my-pi/pi-ai";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { ImageAttachmentEntry, ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { ReadTool } from "@oh-my-pi/pi-coding-agent/tools/read";
-import { removeSyncWithRetries } from "@oh-my-pi/pi-utils";
+import { type completeSimple, Effort, type ImageContent, type Model } from "@zero2ai/ai";
+import { buildModel } from "@zero2ai/catalog/build";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import type { ImageAttachmentEntry, ToolSession } from "@zero2ai/coding-agent/tools";
+import { ReadTool } from "@zero2ai/coding-agent/tools/read";
+import { removeSyncWithRetries } from "@zero2ai/utils";
 
 const TINY_PNG_BASE64 =
 	"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==";
@@ -166,7 +166,7 @@ describe("read image questions", () => {
 	let imagePath: string;
 
 	beforeAll(() => {
-		testDir = fs.mkdtempSync(path.join(os.tmpdir(), "omp-read-image-question-"));
+		testDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-read-image-question-"));
 		imagePath = path.join(testDir, "screen.png");
 		fs.writeFileSync(imagePath, Buffer.from(TINY_PNG_BASE64, "base64"));
 	});

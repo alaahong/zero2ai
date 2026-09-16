@@ -2,13 +2,13 @@ import { afterEach, beforeEach, describe, expect, it, spyOn } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { AgentToolResult } from "@oh-my-pi/pi-agent-core";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { ClientBridge } from "@oh-my-pi/pi-coding-agent/session/client-bridge";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import type { ReadToolDetails } from "@oh-my-pi/pi-coding-agent/tools/read";
-import { ReadTool } from "@oh-my-pi/pi-coding-agent/tools/read";
-import { removeWithRetries } from "@oh-my-pi/pi-utils";
+import type { AgentToolResult } from "@zero2ai/agent-core";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import type { ClientBridge } from "@zero2ai/coding-agent/session/client-bridge";
+import type { ToolSession } from "@zero2ai/coding-agent/tools";
+import type { ReadToolDetails } from "@zero2ai/coding-agent/tools/read";
+import { ReadTool } from "@zero2ai/coding-agent/tools/read";
+import { removeWithRetries } from "@zero2ai/utils";
 
 const BRIDGE_CONTENT = "// content from editor buffer\nexport function greet() { return 'bridge'; }\n";
 

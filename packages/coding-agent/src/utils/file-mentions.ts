@@ -7,10 +7,10 @@
  */
 import * as fs from "node:fs/promises";
 import path from "node:path";
-import type { EditStore } from "@oh-my-pi/pi-natives";
-import type { AgentMessage } from "@oh-my-pi/pi-agent-core";
-import type { ImageContent } from "@oh-my-pi/pi-ai";
-import { formatAge, formatBytes, isProbablyBinary, readImageMetadata } from "@oh-my-pi/pi-utils";
+import type { EditStore } from "@zero2ai/natives";
+import type { AgentMessage } from "@zero2ai/agent-core";
+import type { ImageContent } from "@zero2ai/ai";
+import { formatAge, formatBytes, isProbablyBinary, readImageMetadata } from "@zero2ai/utils";
 import { formatHashlineHeader, formatNumberedLines, splitAddressableFileLines } from "../tools/hashline-format";
 import { normalizeToLF } from "../edit/normalize";
 import type { FileMentionMessage } from "../session/messages";

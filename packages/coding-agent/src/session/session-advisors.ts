@@ -10,7 +10,7 @@ import {
 	type StreamFn,
 	ThinkingLevel,
 	type Tokenizer,
-} from "@oh-my-pi/pi-agent-core";
+} from "@zero2ai/agent-core";
 import {
 	canReplayRemoteCompaction,
 	type CompactionResult,
@@ -25,7 +25,7 @@ import {
 	type SessionMessageEntry,
 	shouldCompact,
 	shouldUseProviderNativeCompaction,
-} from "@oh-my-pi/pi-agent-core/compaction";
+} from "@zero2ai/agent-core/compaction";
 import type {
 	AssistantMessage,
 	CodexCompactionContext,
@@ -35,12 +35,12 @@ import type {
 	ProviderSessionState,
 	ServiceTier,
 	SimpleStreamOptions,
-} from "@oh-my-pi/pi-ai";
-import { isUsageLimitOutcome, resolveModelServiceTier, streamSimple } from "@oh-my-pi/pi-ai";
-import * as AIError from "@oh-my-pi/pi-ai/error";
-import { extractProviderRetryHint } from "@oh-my-pi/pi-ai/utils/retry-after";
-import { modelsAreEqual } from "@oh-my-pi/pi-catalog/models";
-import { extractHttpStatusFromError, logger, prompt } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/ai";
+import { isUsageLimitOutcome, resolveModelServiceTier, streamSimple } from "@zero2ai/ai";
+import * as AIError from "@zero2ai/ai/error";
+import { extractProviderRetryHint } from "@zero2ai/ai/utils/retry-after";
+import { modelsAreEqual } from "@zero2ai/catalog/models";
+import { extractHttpStatusFromError, logger, prompt } from "@zero2ai/utils";
 import {
 	ADVISOR_DEFAULT_TOOL_NAMES,
 	ADVISOR_DEFAULT_BUDGET_PER_UPDATE,
@@ -297,14 +297,14 @@ export interface SessionAdvisorsOptions {
 	enabled: boolean;
 	tools?: AgentTool[];
 	/**
-	 * Build a `grep` honoring a Cursor `pi_grep` frame's own context width and
+	 * Build a `grep` honoring a Cursor `zero2ai_grep` frame's own context width and
 	 * match cap. The advisor's tools are fixed instances carrying session
 	 * defaults, so without this an advisor running against Cursor silently
 	 * drops both fields — the same gap the primary bridge closes.
 	 */
 	createGrepTool?(options: { context?: number; totalMatchLimit?: number }): AgentTool | undefined;
 	/**
-	 * Build the `replace`-mode `edit` a Cursor `pi_edit` frame needs. The
+	 * Build the `replace`-mode `edit` a Cursor `zero2ai_edit` frame needs. The
 	 * advisor's own instance follows the configured `edit.mode` (`hashline` by
 	 * default), whose schema the frame's `old_string`/`new_string` args do not
 	 * match, so without this every native advisor edit fails validation.
@@ -1071,7 +1071,7 @@ export class SessionAdvisors {
 			// tool. A default read-only advisor (advise/read/grep/glob) never gets
 			// to delete workspace files it was never granted (issue #5680 review).
 			const advisorCanMutateFiles = advisorToolMap.has("write") || advisorToolMap.has("edit");
-			// `pi_edit` speaks `replace`'s `old_string`/`new_string` schema, which the
+			// `zero2ai_edit` speaks `replace`'s `old_string`/`new_string` schema, which the
 			// advisor's ordinary `EditTool` (built at the session's configured
 			// `edit.mode`, `hashline` by default) does not accept. The bridge map
 			// swaps in a `replace` instance for the exec channel only — the

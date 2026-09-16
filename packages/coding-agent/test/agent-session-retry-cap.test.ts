@@ -2,8 +2,8 @@ import { Database } from "bun:sqlite";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as path from "node:path";
 import { scheduler } from "node:timers/promises";
-import { type } from "@oh-my-pi/omptype";
-import { Agent, type AgentTool } from "@oh-my-pi/pi-agent-core";
+import { type } from "@zero2ai/schema";
+import { Agent, type AgentTool } from "@zero2ai/agent-core";
 import type {
 	ApiKeyResolveContext,
 	AssistantMessage,
@@ -11,24 +11,24 @@ import type {
 	ThinkingContent,
 	ToolCall,
 	ToolResultMessage,
-} from "@oh-my-pi/pi-ai";
-import { unregisterCustomApis } from "@oh-my-pi/pi-ai/api-registry";
-import * as AIError from "@oh-my-pi/pi-ai/error";
-import { createMockModel, type MockResponse, registerMockApi } from "@oh-my-pi/pi-ai/providers/mock";
-import * as aiStream from "@oh-my-pi/pi-ai/stream";
-import { kCursorExecResolved, kStreamingPartialJson } from "@oh-my-pi/pi-ai/utils/block-symbols";
-import { AssistantMessageEventStream } from "@oh-my-pi/pi-ai/utils/event-stream";
-import { SqliteAuthCredentialStore } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { opencodeGoUsageProvider } from "@oh-my-pi/pi-ai/usage/opencode-go";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import type { Model } from "@oh-my-pi/pi-catalog/types";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { ExtensionRunner } from "@oh-my-pi/pi-coding-agent/extensibility/extensions";
-import { AgentSession, type AgentSessionEvent } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TempDir } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/ai";
+import { unregisterCustomApis } from "@zero2ai/ai/api-registry";
+import * as AIError from "@zero2ai/ai/error";
+import { createMockModel, type MockResponse, registerMockApi } from "@zero2ai/ai/providers/mock";
+import * as aiStream from "@zero2ai/ai/stream";
+import { kCursorExecResolved, kStreamingPartialJson } from "@zero2ai/ai/utils/block-symbols";
+import { AssistantMessageEventStream } from "@zero2ai/ai/utils/event-stream";
+import { SqliteAuthCredentialStore } from "@zero2ai/coding-agent/session/auth-storage";
+import { opencodeGoUsageProvider } from "@zero2ai/ai/usage/opencode-go";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import type { Model } from "@zero2ai/catalog/types";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import type { ExtensionRunner } from "@zero2ai/coding-agent/extensibility/extensions";
+import { AgentSession, type AgentSessionEvent } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { TempDir } from "@zero2ai/utils";
 
 type AutoRetryEndEvent = Extract<AgentSessionEvent, { type: "auto_retry_end" }>;
 type AutoRetryStartEvent = Extract<AgentSessionEvent, { type: "auto_retry_start" }>;
@@ -80,7 +80,7 @@ describe("AgentSession retry delay cap", () => {
 	let session: AgentSession | undefined;
 
 	beforeAll(async () => {
-		tempDir = TempDir.createSync("@pi-retry-cap-");
+		tempDir = TempDir.createSync("@zero2ai-retry-cap-");
 		authStorage = await AuthStorage.create(path.join(tempDir.path(), "testauth.db"));
 		modelRegistry = new ModelRegistry(authStorage, path.join(tempDir.path(), "models.yml"));
 	});
@@ -2615,9 +2615,9 @@ describe("AgentSession retry delay cap", () => {
 			undefined,
 		],
 		[
-			"pi-native premature close",
+			"zero2ai-native premature close",
 			"error",
-			"pi-native stream read error: stream closed before a terminal response event",
+			"zero2ai-native stream read error: stream closed before a terminal response event",
 			undefined,
 		],
 		[
@@ -3234,7 +3234,7 @@ describe("AgentSession retry delay cap", () => {
 	it.each([
 		["verbose socket close", "The socket connection was closed unexpectedly"],
 		["bare socket close", "Socket is closed"],
-		["pi-native premature close", "pi-native stream read error: stream closed before a terminal response event"],
+		["zero2ai-native premature close", "zero2ai-native stream read error: stream closed before a terminal response event"],
 		["gateway 500", "auth-gateway 500: <none>"],
 		["gateway 524", "auth-gateway 524: <none>"],
 	])("retries a transient %s after partial text and thinking", async (_label, errorMessage) => {

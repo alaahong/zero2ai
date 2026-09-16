@@ -14,12 +14,12 @@
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import type { ChildProcess } from "node:child_process";
 import { execSync, spawn } from "node:child_process";
-import { isContextOverflow as originalIsContextOverflow } from "@oh-my-pi/pi-ai/error";
-import { complete } from "@oh-my-pi/pi-ai/stream";
-import type { AssistantMessage, Context, Model, Usage } from "@oh-my-pi/pi-ai/types";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { $which } from "@oh-my-pi/pi-utils";
+import { isContextOverflow as originalIsContextOverflow } from "@zero2ai/ai/error";
+import { complete } from "@zero2ai/ai/stream";
+import type { AssistantMessage, Context, Model, Usage } from "@zero2ai/ai/types";
+import { buildModel } from "@zero2ai/catalog/build";
+import { getBundledModel } from "@zero2ai/catalog/models";
+import { $which } from "@zero2ai/utils";
 
 function isContextOverflow(message: AssistantMessage, contextWindow: number | null): boolean {
 	return originalIsContextOverflow(message, contextWindow ?? 0);
@@ -164,7 +164,7 @@ function toPositiveInteger(value: unknown): number | undefined {
 }
 
 async function discoverLmStudioModel(): Promise<LmStudioDiscoveredModel | undefined> {
-	if (!Bun.env.PI_LOCAL_LLM || Bun.env.PI_NO_LOCAL_LLM) return undefined;
+	if (!Bun.env.ZERO2AI_LOCAL_LLM || Bun.env.ZERO2AI_NO_LOCAL_LLM) return undefined;
 
 	const baseUrl = normalizeLmStudioBaseUrl(Bun.env.LM_STUDIO_BASE_URL);
 	const openAIModels = getModelRecords(await fetchLmStudioJson(`${baseUrl}/models`))
@@ -555,8 +555,8 @@ describe("Context overflow error handling", () => {
 	// Ollama (local)
 	// =============================================================================
 
-	// Ollama tests require PI_LOCAL_LLM=1 and ollama installed
-	const ollamaInstalled = !!Bun.env.PI_LOCAL_LLM && !!$which("ollama");
+	// Ollama tests require ZERO2AI_LOCAL_LLM=1 and ollama installed
+	const ollamaInstalled = !!Bun.env.ZERO2AI_LOCAL_LLM && !!$which("ollama");
 
 	describe.skipIf(!ollamaInstalled)("Ollama (local)", () => {
 		let ollamaProcess: ChildProcess | null = null;
@@ -640,7 +640,7 @@ describe("Context overflow error handling", () => {
 	});
 
 	// =============================================================================
-	// LM Studio (local) - requires PI_LOCAL_LLM=1 and a visible local model
+	// LM Studio (local) - requires ZERO2AI_LOCAL_LLM=1 and a visible local model
 	// =============================================================================
 
 	describe.skipIf(lmStudioModel === undefined)("LM Studio (local)", () => {

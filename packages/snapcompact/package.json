@@ -1,6 +1,6 @@
 {
   "type": "module",
-  "name": "@oh-my-pi/snapcompact",
+  "name": "@zero2ai/snapcompact",
   "version": "18.2.1",
   "description": "Bitmap-frame context compression for vision-capable LLMs",
   "homepage": "https://omp.sh",
@@ -31,11 +31,11 @@
     "fmt": "oxfmt --no-error-on-unmatched-pattern 'src/**/*.{ts,tsx}' '{test,bench,examples,scripts}/**/*.ts' '*.ts'"
   },
   "dependencies": {
-    "@oh-my-pi/pi-ai": "catalog:",
-    "@oh-my-pi/pi-catalog": "catalog:",
-    "@oh-my-pi/pi-natives": "catalog:",
-    "@oh-my-pi/pi-utils": "catalog:",
-    "@oh-my-pi/pi-wire": "catalog:"
+    "@zero2ai/ai": "catalog:",
+    "@zero2ai/catalog": "catalog:",
+    "@zero2ai/natives": "catalog:",
+    "@zero2ai/utils": "catalog:",
+    "@zero2ai/wire": "catalog:"
   },
   "devDependencies": {
     "@types/bun": "catalog:"

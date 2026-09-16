@@ -7,9 +7,9 @@ import {
 	setSessionTerminalTitle,
 	setTerminalTitleSpinnerStyle,
 	setTerminalTitleState,
-} from "@oh-my-pi/pi-coding-agent/utils/title-generator";
-import { isConPTYHosted } from "@oh-my-pi/pi-tui";
-import { setTerminalHeadless } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/coding-agent/utils/title-generator";
+import { isConPTYHosted } from "@zero2ai/tui";
+import { setTerminalHeadless } from "@zero2ai/utils";
 import { mockWindowsConsoleTitle, type WindowsConsoleTitleMock } from "./terminal-title-test-utils";
 
 const LABEL = "my-project";

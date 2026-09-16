@@ -1,9 +1,9 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { type } from "@oh-my-pi/omptype";
-import * as vcs from "@oh-my-pi/pi-natives/vcs";
-import { Text } from "@oh-my-pi/pi-tui";
-import { formatBytes } from "@oh-my-pi/pi-utils";
+import { type } from "@zero2ai/schema";
+import * as vcs from "@zero2ai/natives/vcs";
+import { Text } from "@zero2ai/tui";
+import { formatBytes } from "@zero2ai/utils";
 import { executeBash } from "../../exec/bash-executor";
 import type { ToolDefinition } from "../../extensibility/extensions";
 import type { Theme } from "../../modes/theme/theme";

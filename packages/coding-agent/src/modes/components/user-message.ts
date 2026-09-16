@@ -1,5 +1,5 @@
-import { applyBackgroundToLine, type Component, Container, Markdown, padding, visibleWidth } from "@oh-my-pi/pi-tui";
-import { formatBytes } from "@oh-my-pi/pi-utils";
+import { applyBackgroundToLine, type Component, Container, Markdown, padding, visibleWidth } from "@zero2ai/tui";
+import { formatBytes } from "@zero2ai/utils";
 import { ensureThemeSync, getMarkdownTheme, theme } from "../../modes/theme/theme";
 import { attachmentSgr, collapseImageMarkers, renderPlaceholders, skillChipStyle } from "../composer-attachments";
 import { fileHyperlink } from "../../tui";
@@ -15,7 +15,7 @@ import type { ReactionTarget } from "./reaction";
 // `cursorIsAtPrompt()` permanently true and tags every subsequently painted
 // cell as `.input`. Combined with `cursor-click-to-move = true` (Ghostty's
 // default) that turns every left-click inside the pane into a burst of
-// synthesized arrow keys on omp's pty, slamming the editor caret to column 0
+// synthesized arrow keys on zero2ai's pty, slamming the editor caret to column 0
 // (#8030, #6115).
 //
 // `133;C` is therefore emitted immediately followed by `133;D;0` at the end of

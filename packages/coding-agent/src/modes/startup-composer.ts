@@ -1,6 +1,6 @@
 import { scheduler } from "node:timers/promises";
-import type { Terminal } from "@oh-my-pi/pi-tui";
-import * as logger from "@oh-my-pi/pi-utils/logger";
+import type { Terminal } from "@zero2ai/tui";
+import * as logger from "@zero2ai/utils/logger";
 import type { LspServerInfo, RecentSession } from "./components/welcome";
 import { COMPOSER_DEFAULTS, Composer, type ComposerPreferences, type ComposerWelcomeUpdate } from "./composer";
 import {

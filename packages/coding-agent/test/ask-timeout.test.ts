@@ -1,6 +1,6 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
-import type { AgentToolContext, AgentToolResult } from "@oh-my-pi/pi-agent-core";
-import type { TUI } from "@oh-my-pi/pi-tui";
+import type { AgentToolContext, AgentToolResult } from "@zero2ai/agent-core";
+import type { TUI } from "@zero2ai/tui";
 import type { ExtensionUIDialogOptions, ExtensionUISelectItem } from "../src/extensibility/extensions";
 import { HookSelectorComponent } from "../src/modes/components/hook-selector";
 import { getThemeByName, setThemeInstance } from "../src/modes/theme/theme";

@@ -7,12 +7,12 @@ import {
 	Markdown,
 	renderInlineMarkdown,
 	urlTokenPossible,
-} from "@oh-my-pi/pi-tui/components/markdown";
-import { setTerminalTextSizing, TERMINAL } from "@oh-my-pi/pi-tui/terminal-capabilities";
-import { type Component, TUI } from "@oh-my-pi/pi-tui/tui";
-import { visibleWidth } from "@oh-my-pi/pi-tui/utils";
-import { Chalk } from "@oh-my-pi/pi-utils/chalk";
-import { mathStartIndex } from "@oh-my-pi/pi-utils/math-delimiters";
+} from "@zero2ai/tui/components/markdown";
+import { setTerminalTextSizing, TERMINAL } from "@zero2ai/tui/terminal-capabilities";
+import { type Component, TUI } from "@zero2ai/tui/tui";
+import { visibleWidth } from "@zero2ai/tui/utils";
+import { Chalk } from "@zero2ai/utils/chalk";
+import { mathStartIndex } from "@zero2ai/utils/math-delimiters";
 import { defaultMarkdownTheme } from "./test-themes.js";
 import { VirtualTerminal } from "./virtual-terminal.js";
 

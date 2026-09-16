@@ -2,12 +2,12 @@ import * as nodeCrypto from "node:crypto";
 import * as fs from "node:fs";
 import { scheduler } from "node:timers/promises";
 import * as tls from "node:tls";
-import { isAnthropicSigningProxyUrl, isOfficialAnthropicApiUrl } from "@oh-my-pi/pi-catalog/compat/anthropic";
-import { hostMatchesUrl, isVertexRawPredictUrl } from "@oh-my-pi/pi-catalog/hosts";
-import { mapEffortToAnthropicAdaptiveEffort } from "@oh-my-pi/pi-catalog/model-thinking";
-import { calculateCost, getBundledModel } from "@oh-my-pi/pi-catalog/models";
-import { isAnthropicOAuthToken } from "@oh-my-pi/pi-catalog/utils";
-import { parseGitHubCopilotApiKey } from "@oh-my-pi/pi-catalog/wire/github-copilot";
+import { isAnthropicSigningProxyUrl, isOfficialAnthropicApiUrl } from "@zero2ai/catalog/compat/anthropic";
+import { hostMatchesUrl, isVertexRawPredictUrl } from "@zero2ai/catalog/hosts";
+import { mapEffortToAnthropicAdaptiveEffort } from "@zero2ai/catalog/model-thinking";
+import { calculateCost, getBundledModel } from "@zero2ai/catalog/models";
+import { isAnthropicOAuthToken } from "@zero2ai/catalog/utils";
+import { parseGitHubCopilotApiKey } from "@zero2ai/catalog/wire/github-copilot";
 import {
 	$env,
 	getInstallId,
@@ -16,7 +16,7 @@ import {
 	parseJsonWithRepair,
 	parseStreamingJsonThrottled,
 	readSseEvents,
-} from "@oh-my-pi/pi-utils";
+} from "@zero2ai/utils";
 import { renderDemotedThinking } from "../dialect/demotion";
 import * as AIError from "../error";
 import { getEnvApiKey, OUTPUT_FALLBACK_BUFFER } from "../stream";
@@ -419,7 +419,7 @@ let warnedStopSequencesTrim = false;
 const ANTHROPIC_PROVIDER_SESSION_STATE_KEY = "anthropic-messages";
 
 /**
- * A mid-conversation `role: "system"` message omp inserts at a fixed slot in
+ * A mid-conversation `role: "system"` message zero2ai inserts at a fixed slot in
  * the wire history so top-level `tools` and `output_config.effort` can stay
  * byte-stable for preserved thinking and the prompt cache. `messageCount` is
  * the number of wire messages preceding the control; `anchor` fingerprints the
@@ -592,7 +592,7 @@ function getCacheControl(
 	// Five-minute writes are the cheapest cache population strategy for pay-per-token API keys.
 	// For OAuth (Claude Code subscriber seats), match Claude Code's native policy by defaulting
 	// to 1h retention where supported, avoiding cold cache re-writes after 15m idle intervals.
-	// An explicit cacheRetention ('short', 'long', 'none') or PI_CACHE_RETENTION always takes precedence.
+	// An explicit cacheRetention ('short', 'long', 'none') or ZERO2AI_CACHE_RETENTION always takes precedence.
 	const defaultRetention = isOAuthToken && model.compat.supportsLongCacheRetention ? "long" : "short";
 	const retention = resolveCacheRetention(cacheRetention, defaultRetention);
 	if (retention === "none") {
@@ -811,8 +811,8 @@ export function generateClaudeCloakingUserId(): string {
 	return `user_${userHash}_account_${accountId}_session_${sessionId}`;
 }
 
-const CLAUDE_DEVICE_ID_INSTALL_HASH_DOMAIN = "omp-claude-device-id-v1:";
-const CLAUDE_DEVICE_ID_ACCOUNT_HASH_DOMAIN = "omp-claude-device-id-v2";
+const CLAUDE_DEVICE_ID_INSTALL_HASH_DOMAIN = "zero2ai-claude-device-id-v1:";
+const CLAUDE_DEVICE_ID_ACCOUNT_HASH_DOMAIN = "zero2ai-claude-device-id-v2";
 
 export function deriveClaudeDeviceId(installId: string, accountId?: string): string {
 	const hash = nodeCrypto.createHash("sha256");
@@ -1815,7 +1815,7 @@ export function supportsAnthropicCompaction(model: Model<"anthropic-messages">, 
 	// First-party provider is catalog policy (`first-party-provider` on the
 	// provider rules), never a provider-id literal. It reads its own axis
 	// rather than `officialEndpoint`, which stays URL-derived.
-	// A `transport: "pi-native"` baseUrl names the auth gateway, not the
+	// A `transport: "zero2ai-native"` baseUrl names the auth gateway, not the
 	// upstream model server: the gateway resolves the model's own provider
 	// server-side, so the upstream URL check cannot apply to the model's own
 	// transport URL — but only for the KDL-owned first-party deployment. A
@@ -1824,7 +1824,7 @@ export function supportsAnthropicCompaction(model: Model<"anthropic-messages">, 
 	// route in above). An explicitly supplied foreign endpoint (e.g. a
 	// caller-owned client's URL) is still judged on its own merits below.
 	if (
-		model.transport === "pi-native" &&
+		model.transport === "zero2ai-native" &&
 		model.compat.firstPartyProvider === true &&
 		(effectiveBaseUrl === undefined || effectiveBaseUrl === normalizeAnthropicBaseUrl(model.baseUrl))
 	) {
@@ -4203,7 +4203,7 @@ function syncAnthropicControlState(state: AnthropicControlState, messages: reado
  * captured on the first request are replayed verbatim (with the current
  * request's cache breakpoints) while their text is unchanged. A text change
  * re-baselines instead of duplicating the prompt as a mid-conversation
- * system message: omp's system prompt is one rendered segment that embeds
+ * system message: zero2ai's system prompt is one rendered segment that embeds
  * the tool roster, so replaying a second copy on every later request would
  * cost the full prompt again per change. The prefix rewrite is absorbed by
  * `prefix_mismatch_behavior: "drop_block"` and one cache miss.
@@ -4787,7 +4787,7 @@ function toWellFormedDeep(value: unknown): unknown {
 }
 
 /**
- * Serialize omp {@link Message}s to Anthropic wire messages.
+ * Serialize zero2ai {@link Message}s to Anthropic wire messages.
  *
  * `opts.serverSideFallbackEnabled` — when the CURRENT request itself
  * opts into the server-side-fallback beta chain. Only then may a persisted

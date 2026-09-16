@@ -6,13 +6,13 @@
  * sticky `strictToolsDisabled` / `fastModeDisabled` /
  * `replayUnsignedThinkingDisabled` flags and dropped-thinking-prefix set,
  * OpenAI's strict-tools and reasoning-effort fallbacks, Codex's WebSocket and
- * turn-state sessions. An in-process omp session owns that `Map` for its whole
+ * turn-state sessions. An in-process zero2ai session owns that `Map` for its whole
  * lifetime, so a grammar-too-large 400 or a fast-mode rejection costs one
  * wasted round-trip per session rather than one per turn.
  *
  * The map is deliberately non-serializable — `Set`/`Map` fields, live sockets,
- * a `close()` method — so `pi-native-client` strips it from the wire and
- * `pi-native-server` never accepts it. Gateway clients therefore cannot bring
+ * a `close()` method — so `zero2ai-native-client` strips it from the wire and
+ * `zero2ai-native-server` never accepts it. Gateway clients therefore cannot bring
  * their own, and without a server-side owner every containerized / robomp turn
  * re-learns every lesson from a fresh upstream rejection.
  *
@@ -22,8 +22,8 @@
  * and on everything it still holds at shutdown.
  */
 
-import { logger } from "@oh-my-pi/pi-utils";
-import { type DisposeReason, LRUCache } from "@oh-my-pi/pi-utils/lru";
+import { logger } from "@zero2ai/utils";
+import { type DisposeReason, LRUCache } from "@zero2ai/utils/lru";
 import type { Api, Model, ProviderSessionState } from "../types";
 
 /**

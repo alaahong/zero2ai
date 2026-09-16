@@ -10,9 +10,9 @@
  * - Events: AgentSessionEvent objects streamed as they occur
  * - Extension UI: Extension UI requests are emitted, client responds with extension_ui_response
  */
-import { getOAuthProviders } from "@oh-my-pi/pi-ai/oauth";
-import { toolWireSchema } from "@oh-my-pi/pi-ai/utils/schema";
-import { $env, isRecord, logger, Snowflake } from "@oh-my-pi/pi-utils";
+import { getOAuthProviders } from "@zero2ai/ai/oauth";
+import { toolWireSchema } from "@zero2ai/ai/utils/schema";
+import { $env, isRecord, logger, Snowflake } from "@zero2ai/utils";
 import { reset as resetCapabilities } from "../../capability";
 import { clearPluginRootsAndCaches, resolveActiveProjectRegistryPath } from "../../discovery/helpers";
 import {
@@ -611,7 +611,7 @@ function parseValueDialogResponse(
 }
 
 function shouldEmitRpcTitles(): boolean {
-	const raw = $env.PI_RPC_EMIT_TITLE;
+	const raw = $env.ZERO2AI_RPC_EMIT_TITLE;
 	if (!raw) return false;
 	const normalized = raw.trim().toLowerCase();
 	return normalized === "1" || normalized === "true" || normalized === "yes" || normalized === "on";
@@ -829,7 +829,7 @@ export async function runRpcMode(
 	// process.stdout with no newline, which the reader merges with the next JSON line and
 	// breaks JSON.parse. In RPC mode stdout is the JSON protocol channel — nothing else
 	// may write there.
-	process.env.PI_NOTIFICATIONS = "off";
+	process.env.ZERO2AI_NOTIFICATIONS = "off";
 
 	const frameEncoder = new RpcFrameEncoder();
 	const outputWriter = new RpcOutputWriter(process.stdout, failure => {
@@ -982,7 +982,7 @@ export async function runRpcMode(
 		}
 
 		setTitle(title: string): void {
-			// Title updates are low-value noise for most RPC hosts; opt in via PI_RPC_EMIT_TITLE=1.
+			// Title updates are low-value noise for most RPC hosts; opt in via ZERO2AI_RPC_EMIT_TITLE=1.
 			if (!emitRpcTitles) return;
 			this.output({
 				type: "extension_ui_request",
@@ -1668,7 +1668,7 @@ export async function runRpcMode(
 			// reaper (releaseTabsForOwner) and other bounded teardown run before
 			// the process exits. dispose() also emits `session_shutdown`, so we
 			// must NOT emit it separately here or the event fires twice. Skipping
-			// dispose left OMP-owned Chromium alive after RPC shutdown (#5643).
+			// dispose left ZERO2AI-owned Chromium alive after RPC shutdown (#5643).
 			await disposeAndExit();
 		},
 	});

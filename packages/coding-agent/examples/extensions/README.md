@@ -1,6 +1,6 @@
 # Extension Examples
 
-Example extensions for pi-coding-agent.
+Example extensions for zero2ai-coding-agent.
 
 ## Usage
 
@@ -9,7 +9,7 @@ Example extensions for pi-coding-agent.
 pi --extension examples/extensions/permission-gate.ts
 
 # Or copy to extensions directory for auto-discovery
-cp permission-gate.ts ~/.omp/agent/extensions/
+cp permission-gate.ts ~/.zero2ai/agent/extensions/
 ```
 
 ## Examples
@@ -71,7 +71,7 @@ cp permission-gate.ts ~/.omp/agent/extensions/
 See [docs/extensions.md](../../docs/extensions.md) for full documentation.
 
 ```typescript
-import type { ExtensionAPI } from "@oh-my-pi/pi-coding-agent";
+import type { ExtensionAPI } from "@zero2ai/coding-agent";
 
 export default function (pi: ExtensionAPI) {
 	const z = pi.zod;

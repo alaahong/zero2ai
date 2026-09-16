@@ -1,15 +1,15 @@
 import { afterEach, describe, expect, it, vi } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import type { Api, Model, ModelSpec } from "@oh-my-pi/pi-ai";
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { createAgentSession } from "@oh-my-pi/pi-coding-agent/sdk";
-import type { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import type { Api, Model, ModelSpec } from "@zero2ai/ai";
+import { buildModel } from "@zero2ai/catalog/build";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { createAgentSession } from "@zero2ai/coding-agent/sdk";
+import type { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { TempDir } from "@zero2ai/utils";
 
 function buildLocalModel(api: string): Model<Api> {
 	return buildModel({
@@ -27,7 +27,7 @@ function buildLocalModel(api: string): Model<Api> {
 }
 
 async function expectContextReload(reset: (session: AgentSession) => Promise<unknown>): Promise<void> {
-	using tempDir = TempDir.createSync("@pi-context-reload-");
+	using tempDir = TempDir.createSync("@zero2ai-context-reload-");
 	const marker = Bun.nanoseconds().toString(36);
 	const original = `ORIGINAL_RULES_${marker}`;
 	const updated = `UPDATED_RULES_${marker}`;

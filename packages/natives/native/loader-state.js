@@ -9,7 +9,7 @@ import { embeddedAddon } from "./embedded-addon.js";
 import { containsVersionSentinel, versionSentinelFor } from "./version-sentinel.js";
 
 /**
- * Native addon loader for `@oh-my-pi/pi-natives`.
+ * Native addon loader for `@zero2ai/natives`.
  *
  * Owns every step between "Node imports `native/index.js`" and "the right
  * `pi_natives.<platform>-<arch>*.node` is required, validated, and returned":
@@ -23,8 +23,8 @@ import { containsVersionSentinel, versionSentinelFor } from "./version-sentinel.
  * `scripts/gen-enums.ts`); everything else lives here so the pure helpers stay
  * unit-testable without triggering the side-effectful module-load path.
  *
- * Background (issue #823): `bun build --compile --define PI_COMPILED=true`
- * substitutes the bare identifier `PI_COMPILED`, NOT `process.env.PI_COMPILED`,
+ * Background (issue #823): `bun build --compile --define ZERO2AI_COMPILED=true`
+ * substitutes the bare identifier `ZERO2AI_COMPILED`, NOT `process.env.ZERO2AI_COMPILED`,
  * so a runtime read of the env var returns `undefined`. Older CommonJS loader
  * code also saw the original build-host absolute path in `__filename`; ESM
  * `import.meta.url` is rewritten to the bunfs URL. The embedded-addon
@@ -42,13 +42,13 @@ const SUPPORTED_PLATFORMS = [
 ];
 
 /**
- * Streaming startup marker, enabled by `PI_DEBUG_STARTUP`. Local copy of the
- * pi-utils helper (this loader cannot depend on pi-utils). Synchronous on
+ * Streaming startup marker, enabled by `ZERO2AI_DEBUG_STARTUP`. Local copy of the
+ * zero2ai-utils helper (this loader cannot depend on zero2ai-utils). Synchronous on
  * purpose: extraction/dlopen hangs must still leave the `:start` marker.
  * @param {string} text
  */
 function startupMarker(text) {
-	if (!process.env.PI_DEBUG_STARTUP) return;
+	if (!process.env.ZERO2AI_DEBUG_STARTUP) return;
 	try {
 		fs.writeSync(2, `[startup] ${text}\n`);
 	} catch {
@@ -58,10 +58,10 @@ function startupMarker(text) {
 
 function getNativesDir() {
 	const xdgDataHome = process.env.XDG_DATA_HOME;
-	if (xdgDataHome && fs.existsSync(path.join(xdgDataHome, "omp"))) {
-		return path.join(xdgDataHome, "omp", "natives");
+	if (xdgDataHome && fs.existsSync(path.join(xdgDataHome, "zero2ai"))) {
+		return path.join(xdgDataHome, "zero2ai", "natives");
 	}
-	return path.join(os.homedir(), ".omp", "natives");
+	return path.join(os.homedir(), ".zero2ai", "natives");
 }
 
 function resolveLeafPackageDir(platformTag) {
@@ -87,7 +87,7 @@ function resolveLeafPackageDir(platformTag) {
  */
 export function detectCompiledBinary({ embeddedAddon, env, importMetaUrl }) {
 	if (embeddedAddon) return true;
-	if (env && env.PI_COMPILED) return true;
+	if (env && env.ZERO2AI_COMPILED) return true;
 	if (typeof importMetaUrl === "string") {
 		if (importMetaUrl.includes("$bunfs")) return true;
 		if (importMetaUrl.includes("~BUN")) return true;
@@ -112,14 +112,14 @@ export function getAddonFilenames({ tag, arch, variant }) {
 
 /**
  * Decide whether the loader should mirror the package's `native/<filename>.node`
- * into the per-version cache directory (`~/.omp/natives/<version>/`) before loading.
+ * into the per-version cache directory (`~/.zero2ai/natives/<version>/`) before loading.
  *
- * Windows-only safety net for `bun install -g` updates: when a previous `omp`
+ * Windows-only safety net for `bun install -g` updates: when a previous `zero2ai`
  * process is running, bun cannot overwrite the locked `.node` inside
- * `node_modules/@oh-my-pi/pi-natives/native/`, leaving an old binary next to a
+ * `node_modules/@zero2ai/natives/native/`, leaving an old binary next to a
  * newer `index.js` and producing `<sym> is not a function` crashes on the next
  * launch. Staging into the version-pinned cache:
- *   1. Gives every package version its own filesystem path, so concurrent omp
+ *   1. Gives every package version its own filesystem path, so concurrent zero2ai
  *      processes never collide on the same file.
  *   2. Makes the running process keep its handle on the cache copy, freeing bun
  *      to overwrite the `node_modules` copy on subsequent updates.
@@ -203,7 +203,7 @@ function isOlderReleaseVersion(candidate, current) {
 	return false;
 }
 
-// A concurrently starting older OMP binary creates or refreshes this directory
+// A concurrently starting older ZERO2AI binary creates or refreshes this directory
 // before extracting its addon. Keep fresh directories long enough for that
 // startup to finish; a later launch can reclaim them once they are genuinely
 // stale.
@@ -298,7 +298,7 @@ function runCommand(command, args) {
 }
 
 function getVariantOverride() {
-	const value = process.env.PI_NATIVE_VARIANT;
+	const value = process.env.ZERO2AI_NATIVE_VARIANT;
 	if (!value) return null;
 	if (value === "modern" || value === "baseline") return value;
 	return null;
@@ -372,7 +372,7 @@ function detectAvx2Support() {
 /**
  * Pure variant-selection helper, exposed for unit tests. Resolution order:
  *
- *   1. `override` (user-facing `PI_NATIVE_VARIANT` env var). Always wins.
+ *   1. `override` (user-facing `ZERO2AI_NATIVE_VARIANT` env var). Always wins.
  *   2. The private `__PI_NATIVE_VARIANT_CACHE` env var, populated by the first
  *      context that detected at runtime. Lets child workers / subprocesses
  *      inherit the main thread's verdict instead of re-spawning `sysctl` etc.
@@ -713,16 +713,16 @@ export function validateLoadedBindings(ctx, bindings, candidate) {
 	if (residentSentinel && diskHasExpectedSentinel) {
 		const residentVersion = residentSentinel.slice("__piNativesV".length).replace(/_/g, ".");
 		throw new Error(
-			`Loaded ${candidate}, which exposes the @oh-my-pi/pi-natives@${residentVersion} version ` +
+			`Loaded ${candidate}, which exposes the @zero2ai/natives@${residentVersion} version ` +
 				`sentinel \`${residentSentinel}\` but not the @${ctx.packageVersion} sentinel ` +
-				`\`${ctx.versionSentinelExport}\` this loader expects. omp was upgraded to ` +
+				`\`${ctx.versionSentinelExport}\` this loader expects. zero2ai was upgraded to ` +
 				`${ctx.packageVersion} while this session was running; the ${residentVersion} addon is ` +
-				"still resident in this process. Disk is already consistent — restart omp to pick up " +
+				"still resident in this process. Disk is already consistent — restart zero2ai to pick up " +
 				`${ctx.packageVersion} (reinstalling changes nothing).`,
 		);
 	}
 	throw new Error(
-		`Loaded ${candidate} but it does not expose the @oh-my-pi/pi-natives@${ctx.packageVersion} ` +
+		`Loaded ${candidate} but it does not expose the @zero2ai/natives@${ctx.packageVersion} ` +
 			`version sentinel \`${ctx.versionSentinelExport}\`. The .node file on disk is from a different ` +
 			"release than this loader — reinstall to re-sync.",
 	);
@@ -764,7 +764,7 @@ function buildHelpMessage(ctx) {
 		);
 	}
 	return (
-		"If installed via npm/bun, try reinstalling: bun install @oh-my-pi/pi-natives\n" +
+		"If installed via npm/bun, try reinstalling: bun install @zero2ai/natives\n" +
 		"If developing locally, build with: bun --cwd=packages/natives run build\n" +
 		"Explicit targets: bun scripts/bazel-natives.ts <target> --dest packages/natives/native"
 	);
@@ -789,7 +789,7 @@ export function initLoaderContext(overrides = {}) {
 	const versionedDir = path.join(nativesDir, packageVersion);
 	const userDataDir =
 		platform === "win32"
-			? path.join(process.env.LOCALAPPDATA || path.join(os.homedir(), "AppData", "Local"), "omp")
+			? path.join(process.env.LOCALAPPDATA || path.join(os.homedir(), "AppData", "Local"), "zero2ai")
 			: path.join(os.homedir(), ".local", "bin");
 
 	const isCompiledBinary =
@@ -833,7 +833,7 @@ export function initLoaderContext(overrides = {}) {
 
 	// Version sentinel emitted by the Rust addon under a `js_name` that encodes
 	// the package version (`__piNativesV{major}_{minor}_{patch}`).
-	// `scripts/release.ts` bumps the name in `crates/pi-natives/src/lib.rs` in
+	// `scripts/release.ts` bumps the name in `crates/zero2ai-natives/src/lib.rs` in
 	// lock-step with the version, so a `.node` from a different release
 	// physically cannot expose the symbol this loader is looking for. That
 	// turns the silent `<sym> is not a function` crash from a Windows

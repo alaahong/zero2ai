@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import type { Tool as AiTool } from "@oh-my-pi/pi-ai";
-import { toolWireSchema } from "@oh-my-pi/pi-ai/utils/schema";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import type { EvalPreludeDefinition } from "@oh-my-pi/pi-coding-agent/eval/preludes";
-import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
-import { EvalTool, getEvalToolDescription } from "@oh-my-pi/pi-coding-agent/tools/eval";
+import type { Tool as AiTool } from "@zero2ai/ai";
+import { toolWireSchema } from "@zero2ai/ai/utils/schema";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import type { EvalPreludeDefinition } from "@zero2ai/coding-agent/eval/preludes";
+import type { ToolSession } from "@zero2ai/coding-agent/tools";
+import { EvalTool, getEvalToolDescription } from "@zero2ai/coding-agent/tools/eval";
 
 function makeSession(opts: {
 	spawns?: string | null;
@@ -120,7 +120,7 @@ describe("eval tool description", () => {
 describe("eval tool dynamic schema", () => {
 	// resolveEvalBackends lets PI_* env flags override settings; neutralize them per-test
 	// so the schema is driven purely by the isolated settings (and restore to avoid leaks).
-	const EVAL_ENV_FLAGS = ["PI_PY", "PI_JS"] as const;
+	const EVAL_ENV_FLAGS = ["ZERO2AI_PY", "ZERO2AI_JS"] as const;
 	let savedEnv: Record<string, string | undefined>;
 	beforeEach(() => {
 		savedEnv = {};

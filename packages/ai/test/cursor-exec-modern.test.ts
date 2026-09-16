@@ -7,10 +7,10 @@ import {
 	handleServerMessage,
 	processInteractionUpdate,
 	type ToolCallState,
-} from "@oh-my-pi/pi-ai/providers/cursor";
-import type { AssistantMessage, CursorExecHandlers, ToolResultMessage } from "@oh-my-pi/pi-ai/types";
-import { kCursorExecResolved, setStreamingPartialJson } from "@oh-my-pi/pi-ai/utils/block-symbols";
-import { AssistantMessageEventStream } from "@oh-my-pi/pi-ai/utils/event-stream";
+} from "@zero2ai/ai/providers/cursor";
+import type { AssistantMessage, CursorExecHandlers, ToolResultMessage } from "@zero2ai/ai/types";
+import { kCursorExecResolved, setStreamingPartialJson } from "@zero2ai/ai/utils/block-symbols";
+import { AssistantMessageEventStream } from "@zero2ai/ai/utils/event-stream";
 import {
 	type AgentClientMessage,
 	AgentClientMessageSchema,
@@ -66,8 +66,8 @@ import {
 	SubagentAwaitArgsSchema,
 	ToolCallSchema,
 	WebFetchAllowlistPrecheckArgsSchema,
-} from "@oh-my-pi/pi-catalog/discovery/cursor-proto";
-import { create, fromBinary, toBinary } from "@oh-my-pi/pi-catalog/discovery/protobuf";
+} from "@zero2ai/catalog/discovery/cursor-proto";
+import { create, fromBinary, toBinary } from "@zero2ai/catalog/discovery/protobuf";
 
 /**
  * Drive one `ExecServerMessage` through the real dispatcher and decode every
@@ -897,7 +897,7 @@ describe("Cursor modern exec frames: status and precheck answers", () => {
 		const mcp = await dispatchExec(
 			buildExecMessage({
 				case: "mcpAllowlistPrecheckArgs",
-				value: create(McpAllowlistPrecheckArgsSchema, { providerIdentifier: "pi-agent", toolName: "task" }),
+				value: create(McpAllowlistPrecheckArgsSchema, { providerIdentifier: "zero2ai-agent", toolName: "task" }),
 			}),
 		);
 		const mcpAnswer = soleResult(mcp.frames);
@@ -993,8 +993,8 @@ describe("Cursor modern exec frames: MCP state", () => {
 			buildExecMessage({ case: "mcpStateExecArgs", value: create(McpStateExecArgsSchema, {}) }),
 			{
 				requestContextTools: [
-					mcpTool("task", "pi-agent"),
-					mcpTool("hub", "pi-agent"),
+					mcpTool("task", "zero2ai-agent"),
+					mcpTool("hub", "zero2ai-agent"),
 					mcpTool("mcp__fixture_report", "fixture"),
 				],
 			},
@@ -1004,8 +1004,8 @@ describe("Cursor modern exec frames: MCP state", () => {
 		if (answer.case !== "mcpStateExecResult") throw new Error(`got ${answer.case}`);
 		if (answer.value.result.case !== "success") throw new Error("expected success");
 		const servers = answer.value.result.value.servers;
-		expect(servers.map(server => server.serverIdentifier).sort()).toEqual(["fixture", "pi-agent"]);
-		const piAgent = servers.find(server => server.serverIdentifier === "pi-agent");
+		expect(servers.map(server => server.serverIdentifier).sort()).toEqual(["fixture", "zero2ai-agent"]);
+		const piAgent = servers.find(server => server.serverIdentifier === "zero2ai-agent");
 		expect(piAgent?.tools.map(t => t.name)).toEqual(["task", "hub"]);
 	});
 
@@ -1015,7 +1015,7 @@ describe("Cursor modern exec frames: MCP state", () => {
 				case: "mcpStateExecArgs",
 				value: create(McpStateExecArgsSchema, { serverIdentifiers: ["fixture"] }),
 			}),
-			{ requestContextTools: [mcpTool("task", "pi-agent"), mcpTool("mcp__fixture_report", "fixture")] },
+			{ requestContextTools: [mcpTool("task", "zero2ai-agent"), mcpTool("mcp__fixture_report", "fixture")] },
 		);
 
 		const answer = soleResult(frames);
@@ -1665,7 +1665,7 @@ describe("Cursor modern exec frames: server-resolved tool calls leave a paired b
 				message: {
 					case: "toolCallStarted",
 					value: {
-						callId: "call-pi-read",
+						callId: "call-zero2ai-read",
 						toolCall: { tool: { case: "piReadToolCall", value: { args: { path: "/a.ts" } } } },
 					},
 				},

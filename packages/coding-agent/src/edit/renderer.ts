@@ -2,10 +2,10 @@
  * Edit tool renderer and LSP batching helpers.
  */
 
-import { editInspect } from "@oh-my-pi/pi-natives";
-import type { Component } from "@oh-my-pi/pi-tui";
-import { sliceWithWidth, visibleWidth, wrapTextWithAnsi } from "@oh-my-pi/pi-tui";
-import { sanitizeText } from "@oh-my-pi/pi-utils";
+import { editInspect } from "@zero2ai/natives";
+import type { Component } from "@zero2ai/tui";
+import { sliceWithWidth, visibleWidth, wrapTextWithAnsi } from "@zero2ai/tui";
+import { sanitizeText } from "@zero2ai/utils";
 import type { RenderResultOptions } from "../extensibility/custom-tools/types";
 import type { FileDiagnosticsResult } from "../lsp";
 import { renderDiff as renderDiffColored } from "../modes/components/diff";

@@ -1,10 +1,10 @@
 import { describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import type { AssistantMessage, ImageContent } from "@oh-my-pi/pi-ai";
-import type { SessionMessageEntry } from "@oh-my-pi/pi-coding-agent/session/session-entries";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { getBlobsDir, TempDir } from "@oh-my-pi/pi-utils";
+import type { AssistantMessage, ImageContent } from "@zero2ai/ai";
+import type { SessionMessageEntry } from "@zero2ai/coding-agent/session/session-entries";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { getBlobsDir, TempDir } from "@zero2ai/utils";
 
 function isAssistantSessionEntry(entry: unknown): entry is SessionMessageEntry & { message: AssistantMessage } {
 	return (
@@ -28,7 +28,7 @@ function getAssistantMessage(session: SessionManager): AssistantMessage {
 
 describe("SessionManager signature persistence", () => {
 	it("externalizes provider image data URLs and restores preserved history payloads across reload", async () => {
-		using tempDir = TempDir.createSync("@pi-session-provider-image-persistence-");
+		using tempDir = TempDir.createSync("@zero2ai-session-provider-image-persistence-");
 		const session = SessionManager.create(tempDir.path(), tempDir.path());
 		const largeImageUrl = `data:image/png;base64,${"a".repeat(600_000)}`;
 
@@ -99,7 +99,7 @@ describe("SessionManager signature persistence", () => {
 	});
 
 	it("externalizes and restores tool result image blocks across reload", async () => {
-		using tempDir = TempDir.createSync("@pi-session-tool-image-persistence-");
+		using tempDir = TempDir.createSync("@zero2ai-session-tool-image-persistence-");
 		const session = SessionManager.create(tempDir.path(), tempDir.path());
 		const contentImage: ImageContent = {
 			type: "image",
@@ -164,7 +164,7 @@ describe("SessionManager signature persistence", () => {
 	});
 
 	it("rehydrates assistant replay metadata in memory without rewriting the session file", async () => {
-		using tempDir = TempDir.createSync("@pi-session-rehydrate-persistence-");
+		using tempDir = TempDir.createSync("@zero2ai-session-rehydrate-persistence-");
 		const session = SessionManager.create(tempDir.path(), tempDir.path());
 		const providerPayload = {
 			type: "openaiResponsesHistory" as const,
@@ -227,7 +227,7 @@ describe("SessionManager signature persistence", () => {
 	}, 15_000);
 
 	it("drops a reasoning signature duplicated by the provider payload and keeps the payload on reload", async () => {
-		using tempDir = TempDir.createSync("@pi-session-reasoning-dedup-e2e-");
+		using tempDir = TempDir.createSync("@zero2ai-session-reasoning-dedup-e2e-");
 		const session = SessionManager.create(tempDir.path(), tempDir.path());
 		// >MAX_PERSIST_CHARS: regresses persistence truncating providerPayload reasoning items.
 		const encrypted = `ENCRYPTED_REASONING_BLOB_UNIQUE_TOKEN_${"E".repeat(600_000)}`;
@@ -279,7 +279,7 @@ describe("SessionManager signature persistence", () => {
 	}, 15_000);
 
 	it("preserves oversized Anthropic server-tool results byte-for-byte across reload", async () => {
-		using tempDir = TempDir.createSync("@pi-session-anthropic-server-tool-persistence-");
+		using tempDir = TempDir.createSync("@zero2ai-session-anthropic-server-tool-persistence-");
 		const session = SessionManager.create(tempDir.path(), tempDir.path());
 		const oversizedPayload = "W".repeat(600_000);
 		const serverToolContent: AssistantMessage["content"] = [
@@ -350,7 +350,7 @@ describe("SessionManager signature persistence", () => {
 	}, 15_000);
 
 	it("preserves oversized native compaction state byte-for-byte across reload", async () => {
-		using tempDir = TempDir.createSync("@pi-session-anthropic-compaction-persistence-");
+		using tempDir = TempDir.createSync("@zero2ai-session-anthropic-compaction-persistence-");
 		const session = SessionManager.create(tempDir.path(), tempDir.path());
 		// >MAX_PERSIST_CHARS: the opaque block must survive persistence verbatim —
 		// replaying modified state breaks the byte-identical contract.

@@ -1,11 +1,11 @@
 import { describe, expect, it } from "bun:test";
-import { parseArgs } from "@oh-my-pi/pi-coding-agent/cli/args";
-import { applyExtensionFlags, type ExtensionFlagSink } from "@oh-my-pi/pi-coding-agent/cli/extension-flags";
-import { buildInitialMessage } from "@oh-my-pi/pi-coding-agent/cli/initial-message";
-import { ExtensionRuntime, loadExtensionFromFactory } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/loader";
-import { ExtensionRunner } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/runner";
-import { normalizeContinueSessionArgs } from "@oh-my-pi/pi-coding-agent/main";
-import { EventBus } from "@oh-my-pi/pi-coding-agent/utils/event-bus";
+import { parseArgs } from "@zero2ai/coding-agent/cli/args";
+import { applyExtensionFlags, type ExtensionFlagSink } from "@zero2ai/coding-agent/cli/extension-flags";
+import { buildInitialMessage } from "@zero2ai/coding-agent/cli/initial-message";
+import { ExtensionRuntime, loadExtensionFromFactory } from "@zero2ai/coding-agent/extensibility/extensions/loader";
+import { ExtensionRunner } from "@zero2ai/coding-agent/extensibility/extensions/runner";
+import { normalizeContinueSessionArgs } from "@zero2ai/coding-agent/main";
+import { EventBus } from "@zero2ai/coding-agent/utils/event-bus";
 
 // Regression coverage for extension-registered flags leaking into the initial
 // prompt. The CLI parses argv twice: once at startup (before extensions load,

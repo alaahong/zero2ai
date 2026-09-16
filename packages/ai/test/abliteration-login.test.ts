@@ -1,9 +1,9 @@
 import { Database } from "bun:sqlite";
 import { afterEach, describe, expect, test, vi } from "bun:test";
-import { AuthStorage, SqliteAuthCredentialStore } from "@oh-my-pi/pi-ai/auth-storage";
-import { getOAuthProviders } from "@oh-my-pi/pi-ai/registry/oauth";
-import { getEnvApiKey } from "@oh-my-pi/pi-ai/stream";
-import type { FetchImpl } from "@oh-my-pi/pi-ai/types";
+import { AuthStorage, SqliteAuthCredentialStore } from "@zero2ai/ai/auth-storage";
+import { getOAuthProviders } from "@zero2ai/ai/registry/oauth";
+import { getEnvApiKey } from "@zero2ai/ai/stream";
+import type { FetchImpl } from "@zero2ai/ai/types";
 
 const ORIGINAL_ENV = {
 	ABLITERATION_API_KEY: Bun.env.ABLITERATION_API_KEY,

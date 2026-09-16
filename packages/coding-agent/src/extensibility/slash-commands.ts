@@ -1,4 +1,4 @@
-import { parseFrontmatter, prompt } from "@oh-my-pi/pi-utils";
+import { parseFrontmatter, prompt } from "@zero2ai/utils";
 import { slashCommandCapability, slashCommandFrontmatterDisplay } from "../capability/slash-command";
 import type { EffectiveExtensionRoots } from "../capability/types";
 import { appendInlineArgsFallback, templateUsesInlineArgPlaceholders } from "../config/prompt-templates";

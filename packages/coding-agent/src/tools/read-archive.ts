@@ -1,11 +1,11 @@
-import type { AgentToolResult } from "@oh-my-pi/pi-agent-core";
-import type { TextContent } from "@oh-my-pi/pi-ai";
+import type { AgentToolResult } from "@zero2ai/agent-core";
+import type { TextContent } from "@zero2ai/ai";
 import {
 	type ArchiveReader,
 	formatArchiveEntryLines,
 	openArchive,
 	parseArchivePathCandidates,
-} from "@oh-my-pi/pi-utils/ar";
+} from "@zero2ai/utils/ar";
 import type { ToolSession } from "../sdk";
 import { truncateHead } from "../session/streaming-output";
 import { applyListLimit } from "./list-limit";

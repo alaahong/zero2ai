@@ -1,15 +1,15 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
-import { type } from "@oh-my-pi/omptype";
-import { Agent, type AgentMessage, type AgentTool } from "@oh-my-pi/pi-agent-core";
-import type { AssistantMessage } from "@oh-my-pi/pi-ai";
-import { createMockModel, type MockResponse } from "@oh-my-pi/pi-ai/providers/mock";
-import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
-import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
-import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
-import { convertToLlm } from "@oh-my-pi/pi-coding-agent/session/messages";
-import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import { type } from "@zero2ai/schema";
+import { Agent, type AgentMessage, type AgentTool } from "@zero2ai/agent-core";
+import type { AssistantMessage } from "@zero2ai/ai";
+import { createMockModel, type MockResponse } from "@zero2ai/ai/providers/mock";
+import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
+import { Settings } from "@zero2ai/coding-agent/config/settings";
+import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
+import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
+import { convertToLlm } from "@zero2ai/coding-agent/session/messages";
+import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
+import { TempDir } from "@zero2ai/utils";
 
 const failingToolSchema = type({ value: type("string") });
 const failingTool: AgentTool<typeof failingToolSchema, Record<string, never>> = {
@@ -38,7 +38,7 @@ afterAll(() => {
 });
 
 async function createHarness(responses: MockResponse[]): Promise<Harness & { sessionManager: SessionManager }> {
-	const tempDir = TempDir.createSync("@pi-terminal-error-persistence-");
+	const tempDir = TempDir.createSync("@zero2ai-terminal-error-persistence-");
 	const mock = createMockModel({ responses });
 	const settings = Settings.isolated({
 		"compaction.enabled": false,

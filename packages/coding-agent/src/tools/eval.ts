@@ -1,13 +1,13 @@
-import { type } from "@oh-my-pi/omptype";
+import { type } from "@zero2ai/schema";
 import type {
 	AgentTool,
 	AgentToolContext,
 	AgentToolResult,
 	AgentToolUpdateCallback,
 	ToolSpeculationPolicy,
-} from "@oh-my-pi/pi-agent-core";
-import type { ImageContent, ToolExample } from "@oh-my-pi/pi-ai";
-import { prompt } from "@oh-my-pi/pi-utils";
+} from "@zero2ai/agent-core";
+import type { ImageContent, ToolExample } from "@zero2ai/ai";
+import { prompt } from "@zero2ai/utils";
 import {
 	DEFAULT_AUTO_BACKGROUND_THRESHOLD_MS,
 	formatBackgroundNotice,
@@ -268,7 +268,7 @@ async function resolveBackend(
 	const allowJs = backends.js;
 
 	if (language === "python") {
-		if (!allowPy) throw new ToolError("Python backend is disabled (PI_PY=0 or eval.py = false).");
+		if (!allowPy) throw new ToolError("Python backend is disabled (ZERO2AI_PY=0 or eval.py = false).");
 		const available = await pythonBackend.isAvailable(session, probeOpts);
 		throwIfAborted(probeOpts?.signal);
 		if (!available) {
@@ -280,7 +280,7 @@ async function resolveBackend(
 		}
 		return { backend: pythonBackend };
 	}
-	if (!allowJs) throw new ToolError("JavaScript backend is disabled (PI_JS=0 or eval.js = false).");
+	if (!allowJs) throw new ToolError("JavaScript backend is disabled (ZERO2AI_JS=0 or eval.js = false).");
 	return { backend: jsBackend };
 }
 function formatEvalInputLanguage(value: string): string {

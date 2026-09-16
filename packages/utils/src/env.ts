@@ -71,7 +71,7 @@ export function filterProcessEnv(env: Record<string, string | undefined>): Recor
  * so forwarding them to a child shell makes `git` ignore the command's `cwd`
  * and mutate the wrong worktree or index. Stripped from child shell envs so git
  * rediscovers the repository from the working directory. Mirrors the
- * `env_remove` list in `crates/pi-vcs/src/git/cli.rs`.
+ * `env_remove` list in `crates/zero2ai-vcs/src/git/cli.rs`.
  */
 const GIT_REPO_LOCATION_ENV_NAMES = [
 	"GIT_DIR",
@@ -209,7 +209,7 @@ export function filterChildShellEnv(
 		}
 		if (runtimeLaunchEnvValues || projectEnvNamesLoadedByOmp.has(key)) {
 			// Strong provenance: the launch environment is known and this name is
-			// absent from it, or OMP itself injected the value — either way it came
+			// absent from it, or ZERO2AI itself injected the value — either way it came
 			// from a project dotenv file, not the parent shell.
 			delete result[key];
 		} else if (
@@ -232,7 +232,7 @@ export function filterChildShellEnv(
 /**
  * Parses a complete .env file with the runtime's dotenv grammar, then retains
  * only shell-identifier names and spawn-safe values before mirroring valid
- * `OMP_` variables to their `PI_` aliases.
+ * `ZERO2AI_` variables to their `ZERO2AI_` aliases.
  */
 export function parseEnvFile(filePath: string): Record<string, string> {
 	const result: Record<string, string> = {};
@@ -244,13 +244,6 @@ export function parseEnvFile(filePath: string): Record<string, string> {
 		}
 	} catch {
 		// File doesn't exist or can't be read - return empty result
-	}
-
-	// OMP_ overrides PI_
-	for (const k in result) {
-		if (k.startsWith("OMP_")) {
-			result[`PI_${k.slice(4)}`] = result[k];
-		}
 	}
 
 	return result;
@@ -278,7 +271,7 @@ for (const file of [projectEnv, agentEnv, piEnv, homeEnv]) {
 	}
 }
 
-// Directory-affecting keys (XDG_*_HOME, and in default mode PI_CODING_AGENT_DIR)
+// Directory-affecting keys (XDG_*_HOME, and in default mode ZERO2AI_CODING_AGENT_DIR)
 // may have just arrived from the profile/agent `.env` applied above. The dirs
 // resolver cached its paths at module load — before this file ran — so rebuild
 // it now from the updated env. `getAgentDir()` already located the `.env` from
@@ -288,7 +281,7 @@ refreshDirsFromEnv();
 /**
  * Intentional re-export of Bun.env.
  *
- * All users should import this env module (import { $env } from "@oh-my-pi/pi-utils")
+ * All users should import this env module (import { $env } from "@zero2ai/utils")
  * before using environment variables. This ensures that .env files have been loaded and
  * overrides (project, home) have been applied, so $env always reflects the correct values.
  */
@@ -354,7 +347,7 @@ const BUN_TEST_ENTRY_PATTERN = /[._](?:test|spec)\.[cm]?[jt]sx?$/;
 
 /** True when the process is an explicitly marked test child or Bun is running a test entrypoint. */
 export function isBunTestRuntime(): boolean {
-	if (Bun.env.PI_TEST_RUNTIME === "1") return true;
+	if (Bun.env.ZERO2AI_TEST_RUNTIME === "1") return true;
 	const hasTestEnvironment = Bun.env.BUN_ENV === "test" || Bun.env.NODE_ENV === "test";
 	return hasTestEnvironment && BUN_TEST_ENTRY_PATTERN.test(Bun.main);
 }
@@ -432,11 +425,11 @@ export function getDbBusyTimeoutMs(): number {
  * binary. Detects via the embedded virtual-filesystem path markers
  * (`$bunfs`, `~BUN`, or its URL-encoded form `%7EBUN`) in `import.meta.url`,
  * which Bun rewrites for every module bundled into the executable. The
- * `PI_COMPILED` env var (set by the build script's `--define`) is checked
+ * `ZERO2AI_COMPILED` env var (set by the build script's `--define`) is checked
  * first for cheap fast-path detection.
  */
 export function isCompiledBinary(): boolean {
-	if (process.env.PI_COMPILED || Bun.env.PI_COMPILED) return true;
+	if (process.env.ZERO2AI_COMPILED || Bun.env.ZERO2AI_COMPILED) return true;
 	const url = import.meta.url;
 	return url.includes("$bunfs") || url.includes("~BUN") || url.includes("%7EBUN");
 }

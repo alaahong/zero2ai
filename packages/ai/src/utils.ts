@@ -1,4 +1,4 @@
-import { $env } from "@oh-my-pi/pi-utils";
+import { $env } from "@zero2ai/utils";
 import type { ResponseInput, ResponseInputItem } from "./providers/openai-responses-wire";
 import { redactSensitiveCredentials } from "./providers/transform-messages";
 import type { CacheRetention, OpenAIResponsesHistoryPayload, ProviderPayload } from "./types";
@@ -6,7 +6,7 @@ import type { CacheRetention, OpenAIResponsesHistoryPayload, ProviderPayload } f
 type OpenAIResponsesReplayItem = ResponseInput[number];
 const NON_WHITESPACE_RE = /\S/;
 
-export { isRecord } from "@oh-my-pi/pi-utils";
+export { isRecord } from "@zero2ai/utils";
 /**
  * Read a header value ignoring key casing. HTTP header names are
  * case-insensitive, but `Record<string, string>` header bags are not, so a
@@ -334,7 +334,7 @@ export function stripUnpairedOpenAIResponsesComputerReasoningIdsForReplay(items:
  * the model then fills - `""` → `"\n\n"` → stray words → non-Latin residue -
  * and each contaminated item is replayed in turn, so the drift compounds until
  * the visible answer collapses. Codex CLI replays the empty item too
- * (openai/codex#32389); this is the layer where omp can refuse to.
+ * (openai/codex#32389); this is the layer where zero2ai can refuse to.
  */
 export function sanitizeOpenAIResponsesAssistantHistoryItemsForReplay(
 	items: Array<Record<string, unknown>>,
@@ -532,7 +532,7 @@ export function getOpenAIResponsesHistoryItems(
 
 /**
  * Resolve cache retention preference: explicit request option first, then the
- * `PI_CACHE_RETENTION` env override (`long` | `short` | `none`), then the
+ * `ZERO2AI_CACHE_RETENTION` env override (`long` | `short` | `none`), then the
  * provider-supplied fallback.
  */
 export function resolveCacheRetention(
@@ -540,7 +540,7 @@ export function resolveCacheRetention(
 	fallback: CacheRetention = "short",
 ): CacheRetention {
 	if (cacheRetention) return cacheRetention;
-	const env = $env.PI_CACHE_RETENTION;
+	const env = $env.ZERO2AI_CACHE_RETENTION;
 	if (env === "long" || env === "short" || env === "none") return env;
 	return fallback;
 }

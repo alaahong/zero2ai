@@ -6,8 +6,8 @@ The critical distinction: **notebook support is file conversion/editing, not not
 
 ## Implementation files
 
-- [`crates/pi-edit/src/notebook.rs`](../crates/pi-edit/src/notebook.rs)
-- [`crates/pi-edit/src/files.rs`](../crates/pi-edit/src/files.rs)
+- [`crates/zero2ai-edit/src/notebook.rs`](../crates/zero2ai-edit/src/notebook.rs)
+- [`crates/zero2ai-edit/src/files.rs`](../crates/zero2ai-edit/src/files.rs)
 - [`src/tools/read.ts`](../packages/coding-agent/src/tools/read.ts)
 - [`src/tools/eval.ts`](../packages/coding-agent/src/tools/eval.ts)
 - [`src/eval/py/executor.ts`](../packages/coding-agent/src/eval/py/executor.ts)
@@ -16,7 +16,7 @@ The critical distinction: **notebook support is file conversion/editing, not not
 
 ## 1) Runtime boundary: editing vs executing
 
-## `.ipynb` file conversion (`crates/pi-edit/src/notebook.rs`)
+## `.ipynb` file conversion (`crates/zero2ai-edit/src/notebook.rs`)
 
 - `read` treats `.ipynb` files as notebooks unless the selector is `:raw`.
 - The default notebook view is editable text with markers:
@@ -115,12 +115,12 @@ In session mode:
 
 Kernel startup and per-execution environment patching can receive:
 
-- `PI_SESSION_FILE`
-- `PI_ARTIFACTS_DIR`
-- `PI_TOOL_BRIDGE_URL`
-- `PI_TOOL_BRIDGE_TOKEN`
-- `PI_TOOL_BRIDGE_SESSION`
-- `PI_EVAL_LOCAL_ROOTS`
+- `ZERO2AI_SESSION_FILE`
+- `ZERO2AI_ARTIFACTS_DIR`
+- `ZERO2AI_TOOL_BRIDGE_URL`
+- `ZERO2AI_TOOL_BRIDGE_TOKEN`
+- `ZERO2AI_TOOL_BRIDGE_SESSION`
+- `ZERO2AI_EVAL_LOCAL_ROOTS`
 
 The runner initializes process state so code executes in the requested cwd, managed env entries are reflected in `os.environ`, and cwd is available on `sys.path`.
 
@@ -143,7 +143,7 @@ Structured outputs captured separately include:
 
 - `application/json` -> JSON display output
 - `image/png` / `image/jpeg` -> image output
-- `application/x-omp-status` -> status event
+- `application/x-zero2ai-status` -> status event
 
 Cancellation/timeout:
 

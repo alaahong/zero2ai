@@ -2,14 +2,14 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { readImageMetadata, removeSyncWithRetries } from "@oh-my-pi/pi-utils";
+import { readImageMetadata, removeSyncWithRetries } from "@zero2ai/utils";
 import { InvalidImageDataError, loadImageInput } from "../src/utils/image-loading";
 
 describe("readImageMetadata", () => {
 	let testDir: string;
 
 	beforeEach(() => {
-		testDir = fs.mkdtempSync(path.join(os.tmpdir(), "omp-image-input-"));
+		testDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-image-input-"));
 	});
 
 	afterEach(() => {

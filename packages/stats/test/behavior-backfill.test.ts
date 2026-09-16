@@ -2,12 +2,12 @@ import { Database } from "bun:sqlite";
 import { describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import { syncAllSessions } from "@oh-my-pi/omp-stats/aggregator";
-import { closeDb, getBehaviorOverall, getFileOffset, initDb } from "@oh-my-pi/omp-stats/db";
-import { getAgentDir, getStatsDbPath } from "@oh-my-pi/pi-utils";
+import { syncAllSessions } from "@zero2ai/stats/aggregator";
+import { closeDb, getBehaviorOverall, getFileOffset, initDb } from "@zero2ai/stats/db";
+import { getAgentDir, getStatsDbPath } from "@zero2ai/utils";
 import { installStatsTestIsolation } from "./helpers/temp-agent";
 
-installStatsTestIsolation("@pi-stats-behavior-backfill-");
+installStatsTestIsolation("@zero2ai-stats-behavior-backfill-");
 
 async function writeSessionFile(): Promise<string> {
 	const sessionDir = path.join(getAgentDir(), "sessions", "--tmp--behavior-backfill");
