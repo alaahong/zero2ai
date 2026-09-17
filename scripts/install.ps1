@@ -24,7 +24,7 @@ if ($PSVersionTable.PSVersion -lt [version]"5.1") {
     throw "Windows PowerShell 5.1 or newer is required (found $($PSVersionTable.PSVersion)). Install PowerShell 7 from https://aka.ms/powershell and re-run the installer."
 }
 
-$Repo = "can1357/oh-my-pi"
+$Repo = "alaahong/zero2ai"
 $Package = "@zero2ai/coding-agent"
 $InstallDir = if ($env:ZERO2AI_INSTALL_DIR) { $env:ZERO2AI_INSTALL_DIR } else { "$env:LOCALAPPDATA\zero2ai" }
 # Windows PowerShell 5.1 (.NET Framework) does not reliably resolve

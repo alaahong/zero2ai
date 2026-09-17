@@ -10,7 +10,7 @@ set -e
 #   --ref <ref>    Install specific tag/commit/branch
 #   -r <ref>       Shorthand for --ref
 
-REPO="can1357/oh-my-pi"
+REPO="alaahong/zero2ai"
 PACKAGE="@zero2ai/coding-agent"
 INSTALL_DIR="${ZERO2AI_INSTALL_DIR:-$HOME/.local/bin}"
 MIN_BUN_VERSION="1.3.14"

@@ -23,10 +23,10 @@ import {
 	withTimeoutSignal,
 } from "../utils/fetch-timeout";
 
-const REPO = process.env.ZERO2AI_UPDATE_GITHUB_REPO?.trim() || "can1357/oh-my-pi";
+const REPO = process.env.ZERO2AI_UPDATE_GITHUB_REPO?.trim() || "alaahong/zero2ai";
 const PACKAGE = "@zero2ai/coding-agent";
-const HOMEBREW_FORMULA = "can1357/tap/zero2ai";
-const MISE_TOOL = "github:can1357/oh-my-pi";
+const HOMEBREW_FORMULA = "alaahong/tap/zero2ai";
+const MISE_TOOL = "github:alaahong/zero2ai";
 const NIX_STORE_DIR = "/nix/store";
 /**
  * Official npm registry origin.
@@ -51,6 +51,18 @@ const BINARY_DOWNLOAD_TIMEOUT_MS = 15 * 60_000;
  * explicitly rather than inherited as a transitive dependency.
  */
 const NATIVES_PACKAGE = "@zero2ai/natives";
+
+/**
+ * Platform leaf base name the loader resolves the addon from.
+ *
+ * Deliberately upstream's scope: the fork consumes upstream's published
+ * `@oh-my-pi/pi-natives-<tag>` prebuilds (see `docs/internalization-plan.md`,
+ * "原生身份不改名"), and the loader's version sentinel is keyed on the natives
+ * version only — so a leaf built for the same natives version loads under this
+ * package. Mirrors `resolveLeafPackageDir` in
+ * `packages/natives/native/loader-state.js`.
+ */
+const NATIVES_LEAF_PACKAGE = "@oh-my-pi/pi-natives";
 
 /**
  * Platform tags the release pipeline publishes as
@@ -80,6 +92,12 @@ export type UpdateChannel = "stable" | "canary";
 export interface ReleasePackages {
 	pkg: string;
 	natives: string;
+	/**
+	 * Base name of the platform addon leaf packages. Omitted means "same base as
+	 * {@link natives}"; the fork's default points at upstream's scope
+	 * ({@link NATIVES_LEAF_PACKAGE}) because that is where the addons come from.
+	 */
+	nativesLeaf?: string;
 }
 
 /** Parsed `zero2ai.rename` pointer: the new agent package name and optional new natives name. */
@@ -88,11 +106,22 @@ export interface ReleaseRename {
 	natives?: string;
 }
 
-const CURRENT_PACKAGES: ReleasePackages = { pkg: PACKAGE, natives: NATIVES_PACKAGE };
+const CURRENT_PACKAGES: ReleasePackages = {
+	pkg: PACKAGE,
+	natives: NATIVES_PACKAGE,
+	nativesLeaf: NATIVES_LEAF_PACKAGE,
+};
 
 export interface ReleaseInfo {
 	tag: string;
 	version: string;
+	/**
+	 * Version the natives core and its platform leaf are pinned to. The natives
+	 * package versions itself independently of the agent package (its version is
+	 * the native identity the loader's sentinel checks), so this is read from the
+	 * registry rather than assumed equal to {@link version}; omitted means equal.
+	 */
+	nativesVersion?: string;
 	/** Parsed `zero2ai.dist` from the registry manifest; undefined when absent. */
 	dist?: ReleaseDist;
 	/** npm names to install, resolved after following any `zero2ai.rename` pointers. */
@@ -839,6 +868,24 @@ async function fetchLatestManifest(
 }
 
 /**
+ * Version to pin the natives core and its platform leaf to.
+ *
+ * The natives package versions itself independently of the agent package: its
+ * version *is* the native identity the loader's version sentinel checks, and in
+ * this fork it tracks the upstream addons it consumes. So the pin is read from
+ * the registry rather than assumed equal to the agent version; a registry that
+ * cannot answer (mirror lag, canary-only release) falls back to the agent
+ * version, which is what an upstream-shaped release wants anyway.
+ */
+async function resolveNativesVersion(pkg: string, timeoutMs: number, fallback: string): Promise<string> {
+	try {
+		return (await fetchLatestManifest(pkg, timeoutMs, "stable")).version;
+	} catch {
+		return fallback;
+	}
+}
+
+/**
  * Get the latest release info from the npm registry, following `zero2ai.rename`
  * pointers ({@link resolveReleaseRename}) when the package has moved to a new
  * npm name. Version, dist, and install names all come from the final manifest
@@ -865,6 +912,7 @@ export async function getLatestRelease(
 	return {
 		tag: `v${latest.version}`,
 		version: latest.version,
+		nativesVersion: await resolveNativesVersion(packages.natives, timeoutMs, latest.version),
 		dist: resolveReleaseDist(latest.manifest),
 		packages,
 	};
@@ -1410,14 +1458,28 @@ export async function replaceBinaryForUpdate(options: BinaryReplacementOptions):
 	}
 }
 
+/**
+ * Base name of the platform leaf packages a release installs.
+ *
+ * Upstream's scope while the natives core is this fork's own package: that core
+ * consumes upstream's prebuilt addons and its loader looks them up by that name,
+ * so the leaves a fork release installs are upstream's. A rename that moves the
+ * natives package elsewhere carries its own leaf naming instead.
+ */
+function nativesLeafBase(packages: ReleasePackages): string {
+	if (packages.nativesLeaf) return packages.nativesLeaf;
+	return packages.natives === NATIVES_PACKAGE ? NATIVES_LEAF_PACKAGE : packages.natives;
+}
+
 function buildVersionedPackageInstallArgs(
 	expectedVersion: string,
 	nativeTag: string,
 	packages: ReleasePackages,
+	nativesVersion: string,
 ): string[] {
-	const args = [`${packages.pkg}@${expectedVersion}`, `${packages.natives}@${expectedVersion}`];
+	const args = [`${packages.pkg}@${expectedVersion}`, `${packages.natives}@${nativesVersion}`];
 	if (SUPPORTED_NATIVE_TAGS.has(nativeTag)) {
-		args.push(`${packages.natives}-${nativeTag}@${expectedVersion}`);
+		args.push(`${nativesLeafBase(packages)}-${nativeTag}@${nativesVersion}`);
 	}
 	return args;
 }
@@ -1456,13 +1518,19 @@ export function buildBunInstallArgs(
 	expectedVersion: string,
 	nativeTag: string = currentNativeTag(),
 	packages: ReleasePackages = CURRENT_PACKAGES,
+	options: { nativesVersion?: string } = {},
 ): string[] {
 	return [
 		"install",
 		"-g",
 		"--no-cache",
 		`--registry=${NPM_REGISTRY}`,
-		...buildVersionedPackageInstallArgs(expectedVersion, nativeTag, packages),
+		...buildVersionedPackageInstallArgs(
+			expectedVersion,
+			nativeTag,
+			packages,
+			options.nativesVersion ?? expectedVersion,
+		),
 	];
 }
 
@@ -1478,14 +1546,19 @@ export function buildNpmInstallArgs(
 	expectedVersion: string,
 	nativeTag: string = currentNativeTag(),
 	packages: ReleasePackages = CURRENT_PACKAGES,
-	flags: { force?: boolean } = {},
+	flags: { force?: boolean; nativesVersion?: string } = {},
 ): string[] {
 	return [
 		"install",
 		"-g",
 		...(flags.force ? ["--force"] : []),
 		`--registry=${NPM_REGISTRY}`,
-		...buildVersionedPackageInstallArgs(expectedVersion, nativeTag, packages),
+		...buildVersionedPackageInstallArgs(
+			expectedVersion,
+			nativeTag,
+			packages,
+			flags.nativesVersion ?? expectedVersion,
+		),
 	];
 }
 
@@ -1532,9 +1605,9 @@ export function buildRenameCleanupPackages(
 ): string[] {
 	const old = [PACKAGE, NATIVES_PACKAGE];
 	if (SUPPORTED_NATIVE_TAGS.has(nativeTag)) {
-		old.push(`${NATIVES_PACKAGE}-${nativeTag}`);
+		old.push(`${NATIVES_LEAF_PACKAGE}-${nativeTag}`);
 	}
-	const newLeaf = `${packages.natives}-${nativeTag}`;
+	const newLeaf = `${nativesLeafBase(packages)}-${nativeTag}`;
 	return old.filter(name => name !== packages.pkg && name !== packages.natives && name !== newLeaf);
 }
 
@@ -1554,10 +1627,15 @@ function packageManagerMigrationSteps(manager: "bun" | "npm", release: ReleaseIn
 	return {
 		async install() {
 			if (manager === "bun") {
-				const args = buildBunInstallArgs(release.version, nativeTag, release.packages);
+				const args = buildBunInstallArgs(release.version, nativeTag, release.packages, {
+					nativesVersion: release.nativesVersion ?? release.version,
+				});
 				return (await $`bun ${args}`.nothrow()).exitCode;
 			}
-			const args = buildNpmInstallArgs(release.version, nativeTag, release.packages, { force: true });
+			const args = buildNpmInstallArgs(release.version, nativeTag, release.packages, {
+				force: true,
+				nativesVersion: release.nativesVersion ?? release.version,
+			});
 			return (await $`npm ${args}`.nothrow()).exitCode;
 		},
 		async removeOld() {
@@ -1633,7 +1711,9 @@ async function updateViaBun(release: ReleaseInfo): Promise<InstalledVersionVerif
 	if (release.packages.pkg !== PACKAGE) {
 		await migrateRenamedInstall(release, packageManagerMigrationSteps("bun", release));
 	} else {
-		const args = buildBunInstallArgs(release.version, currentNativeTag(), release.packages);
+		const args = buildBunInstallArgs(release.version, currentNativeTag(), release.packages, {
+			nativesVersion: release.nativesVersion ?? release.version,
+		});
 		const result = await $`bun ${args}`.nothrow();
 		if (result.exitCode !== 0) {
 			throw new Error(`bun install failed with exit code ${result.exitCode}`);
@@ -2035,8 +2115,8 @@ export async function updateViaShimTakeover(
  */
 function installerHint(): string {
 	return process.platform === "win32"
-		? "& ([scriptblock]::Create((irm https://omp.sh/install.ps1))) -Binary"
-		: "curl -fsSL https://omp.sh/install | sh -s -- --binary";
+		? `& ([scriptblock]::Create((irm https://raw.githubusercontent.com/${REPO}/main/scripts/install.ps1))) -Binary`
+		: `curl -fsSL https://raw.githubusercontent.com/${REPO}/main/scripts/install.sh | sh -s -- --binary`;
 }
 
 /** Persisted channel, or undefined when settings are unavailable (SDK/test embedding without `Settings.init()`). */

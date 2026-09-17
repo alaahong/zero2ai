@@ -1,0 +1,148 @@
+name: Fork binary release
+
+# Builds this fork's standalone binaries on GitHub-hosted runners and publishes
+# them as a GitHub Release, so `zero2ai update` and `scripts/install.sh|ps1` have
+# something to download.
+#
+# Why a dedicated workflow again: the factory chain
+# (`release_binary` → `release_gate` → `release_github`) needs jobs pinned to the
+# self-hosted `zero2ai-kata` pool, which a fork does not have.
+#
+# Why no native build: the addon is taken from upstream's published leaf for the
+# same natives version (`@oh-my-pi/pi-natives-<tag>`) — the identity this fork
+# deliberately reuses (docs/internalization-plan.md, "原生身份不改名"). The
+# version sentinel is version-only, so an upstream addon built for
+# `packages/natives/package.json`'s version passes
+# `packages/natives/scripts/embed-native.ts`, and one leg per platform suffices
+# with no Rust, no bazel and no MSVC.
+#
+# The release contract the updater enforces (packages/coding-agent/src/cli/update-cli.ts):
+#   - tag exactly `v<version>` (`resolveReleaseBinaryAsset` → `getReleaseBinaryAsset`);
+#   - published (not draft, not prerelease on the stable channel);
+#   - exactly one asset per platform, named `zero2ai-<os>-<arch>[.exe]`;
+#   - the asset must carry a `sha256:` digest (GitHub attaches one to API uploads).
+# `SHA256SUMS.txt` is generated for humans and for `sha256sum -c`; the updater
+# verifies the digest it reads from the GitHub API instead.
+#
+# Trigger: workflow_dispatch (defaults to a build-only run). Set `publish` to
+# create/refresh the release for `tag`; the tag is created by this workflow, and
+# because `ci.yml` only listens to `main` pushes, tagging does not trigger the
+# factory release chain.
+
+on:
+   workflow_dispatch:
+      inputs:
+         publish:
+            description: "Create/refresh the GitHub Release for `tag`"
+            type: boolean
+            default: false
+         tag:
+            description: "Release tag (must be v<package version>)"
+            type: string
+            default: "v1.0.0"
+
+permissions:
+   contents: read
+
+concurrency:
+   group: fork-binary-release
+   cancel-in-progress: false
+
+jobs:
+   binary:
+      name: "Binary: ${{ matrix.target }}"
+      runs-on: ${{ matrix.os }}
+      timeout-minutes: 90
+      strategy:
+         fail-fast: false
+         matrix:
+            include:
+               # The addon is a file copy, so tags are `LEAF_TARGETS` names from
+               # packages/natives/scripts/gen-npm-packages.ts.
+               - { os: windows-latest, target: win32-x64, leaf: win32-x64, binary: zero2ai-windows-x64.exe }
+               - { os: macos-14, target: darwin-arm64, leaf: darwin-arm64, binary: zero2ai-darwin-arm64 }
+               - { os: macos-15-intel, target: darwin-x64, leaf: darwin-x64, binary: zero2ai-darwin-x64 }
+               - { os: ubuntu-22.04, target: linux-x64, leaf: linux-x64, binary: zero2ai-linux-x64 }
+      steps:
+         - uses: actions/checkout@v4
+         - uses: oven-sh/setup-bun@v2
+         - name: Cache bun dependencies
+           uses: actions/cache@v4
+           with:
+              path: ~/.bun/install/cache
+              key: bun-${{ runner.os }}-${{ hashFiles('**/bun.lock') }}
+         - run: bun install --frozen-lockfile
+         # The natives version is the addon contract: the leaf must be built for
+         # exactly this version or `gen:native` rejects it on the sentinel.
+         - name: Fetch the upstream native addon
+           shell: bash
+           run: |
+              set -euo pipefail
+              native_version="$(bun -e 'process.stdout.write(require("./packages/natives/package.json").version)')"
+              tarball="$(npm view "@oh-my-pi/pi-natives-${{ matrix.leaf }}@${native_version}" dist.tarball)"
+              echo "Fetching $tarball"
+              curl -fsSL --retry 3 "$tarball" | tar -xz -C "$RUNNER_TEMP"
+              mkdir -p packages/natives/native
+              cp "$RUNNER_TEMP"/package/pi_natives.${{ matrix.leaf }}*.node packages/natives/native/
+              ls -l packages/natives/native
+         # Compiles with the addon embedded (`gen:native` → `bun --compile`), so the
+         # resulting binary needs no leaf package at runtime.
+         - name: Build binary
+           env:
+              RELEASE_TARGETS: ${{ matrix.target }}
+           run: bun run ci:release:build-binaries
+         - name: Smoke the binary
+           shell: bash
+           run: |
+              set -euo pipefail
+              "${{ github.workspace }}/packages/coding-agent/binaries/${{ matrix.binary }}" --version
+              "${{ github.workspace }}/packages/coding-agent/binaries/${{ matrix.binary }}" --smoke-test
+         - uses: actions/upload-artifact@v4
+           with:
+              name: zero2ai-binary-${{ matrix.target }}
+              path: packages/coding-agent/binaries/zero2ai-*
+              if-no-files-found: error
+              retention-days: 14
+
+   release:
+      name: Publish GitHub release
+      needs: binary
+      if: ${{ inputs.publish }}
+      runs-on: ubuntu-22.04
+      permissions:
+         contents: write
+      steps:
+         - uses: actions/checkout@v4
+         - uses: oven-sh/setup-bun@v2
+         - uses: actions/download-artifact@v4
+           with:
+              pattern: zero2ai-binary-*
+              path: packages/coding-agent/binaries
+              merge-multiple: true
+         - name: Check the tag matches the package version
+           shell: bash
+           run: |
+              set -euo pipefail
+              version="$(bun -e 'process.stdout.write(require("./packages/coding-agent/package.json").version)')"
+              if [ "${{ inputs.tag }}" != "v${version}" ]; then
+                echo "::error::tag ${{ inputs.tag }} does not match package version v${version}"
+                exit 1
+              fi
+         - name: Generate checksums
+           run: |
+              bun run ci:release:checksums SHA256SUMS.txt \
+                packages/coding-agent/binaries/zero2ai-* \
+                LICENSE THIRD-PARTY-NOTICES.txt
+              cat SHA256SUMS.txt
+         - uses: softprops/action-gh-release@v2
+           with:
+              tag_name: ${{ inputs.tag }}
+              name: ${{ inputs.tag }}
+              make_latest: true
+              draft: false
+              prerelease: false
+              files: |
+                 packages/coding-agent/binaries/zero2ai-*
+                 LICENSE
+                 THIRD-PARTY-NOTICES.txt
+                 SHA256SUMS.txt
