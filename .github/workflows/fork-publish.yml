@@ -84,6 +84,37 @@ jobs:
               path: ~/.bun/install/cache
               key: bun-${{ runner.os }}-${{ hashFiles('**/bun.lock') }}
          - run: bun install --frozen-lockfile
+         # The CLI's prepack bundle loads the native addon, so packing it needs a
+         # real `.node` in the workspace. Fetch the upstream prebuild for this
+         # runner's platform at the version the core pins — the same source
+         # ci.yml uses for pull requests, and the same addon that installing the
+         # published core resolves.
+         - name: Fetch the upstream native addon
+           shell: bash
+           run: |
+              set -euo pipefail
+              native_version="$(bun -e 'process.stdout.write(require("./packages/natives/package.json").version)')"
+              tarball="$(npm view "@oh-my-pi/pi-natives-linux-x64@${native_version}" dist.tarball)"
+              echo "Fetching $tarball"
+              curl -fsSL --retry 3 "$tarball" | tar -xz -C "$RUNNER_TEMP"
+              mkdir -p packages/natives/native
+              cp "$RUNNER_TEMP/package/pi_natives.linux-x64-baseline.node" packages/natives/native/
+              cp "$RUNNER_TEMP/package/pi_natives.linux-x64-modern.node" packages/natives/native/
+         # A corrupt download must fail here, not as a confusing dlopen error
+         # halfway through packing. `bun -e 'require("./x.node")'` swallows
+         # dlopen failures, so the check runs from a script file.
+         - name: Smoke the fetched addon
+           shell: bash
+           run: |
+              set -euo pipefail
+              cat > "$RUNNER_TEMP/smoke-addon.js" <<'EOF'
+              const bindings = require(process.argv[2]);
+              if (typeof bindings.countTokens !== "function") throw new Error("addon is missing countTokens");
+              const sentinel = Object.keys(bindings).find(key => key.startsWith("__piNativesV"));
+              if (!sentinel) throw new Error("addon exposes no version sentinel");
+              console.log("addon ok:", sentinel);
+              EOF
+              bun "$RUNNER_TEMP/smoke-addon.js" "$PWD/packages/natives/native/pi_natives.linux-x64-modern.node"
          - name: Who is publishing
            env:
               NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
