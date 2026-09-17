@@ -22,7 +22,7 @@
     },
     "packages/agent": {
       "name": "@zero2ai/agent-core",
-      "version": "18.2.1",
+      "version": "1.0.0",
       "dependencies": {
         "@opentelemetry/api": "catalog:",
         "@zero2ai/ai": "catalog:",
@@ -41,7 +41,7 @@
     },
     "packages/ai": {
       "name": "@zero2ai/ai",
-      "version": "18.2.1",
+      "version": "1.0.0",
       "dependencies": {
         "@zero2ai/catalog": "catalog:",
         "@zero2ai/natives": "catalog:",
@@ -63,7 +63,7 @@
     },
     "packages/catalog": {
       "name": "@zero2ai/catalog",
-      "version": "18.2.1",
+      "version": "1.0.0",
       "dependencies": {
         "@zero2ai/schema": "catalog:",
         "@zero2ai/utils": "catalog:",
@@ -76,7 +76,7 @@
     },
     "packages/coding-agent": {
       "name": "@zero2ai/coding-agent",
-      "version": "18.2.1",
+      "version": "1.0.0",
       "bin": {
         "zero2ai": "src/cli.ts",
       },
@@ -166,7 +166,7 @@
     },
     "packages/mnemopi": {
       "name": "@zero2ai/mnemopi",
-      "version": "18.2.1",
+      "version": "1.0.0",
       "bin": {
         "mnemopi": "src/cli.ts",
       },
@@ -207,7 +207,7 @@
     },
     "packages/schema": {
       "name": "@zero2ai/schema",
-      "version": "18.2.1",
+      "version": "1.0.0",
       "devDependencies": {
         "@ark/attest": "0.56.3",
         "@ark/schema": "0.56.2",
@@ -220,7 +220,7 @@
     },
     "packages/snapcompact": {
       "name": "@zero2ai/snapcompact",
-      "version": "18.2.1",
+      "version": "1.0.0",
       "dependencies": {
         "@zero2ai/ai": "catalog:",
         "@zero2ai/catalog": "catalog:",
@@ -234,7 +234,7 @@
     },
     "packages/stats": {
       "name": "@zero2ai/stats",
-      "version": "18.2.1",
+      "version": "1.0.0",
       "bin": {
         "zero2ai-stats": "./src/index.ts",
       },
@@ -259,7 +259,7 @@
     },
     "packages/tui": {
       "name": "@zero2ai/tui",
-      "version": "18.2.1",
+      "version": "1.0.0",
       "dependencies": {
         "@zero2ai/natives": "catalog:",
         "@zero2ai/utils": "catalog:",
@@ -294,7 +294,7 @@
     },
     "packages/utils": {
       "name": "@zero2ai/utils",
-      "version": "18.2.1",
+      "version": "1.0.0",
       "dependencies": {
         "@zero2ai/natives": "catalog:",
       },
@@ -304,7 +304,7 @@
     },
     "packages/wire": {
       "name": "@zero2ai/wire",
-      "version": "18.2.1",
+      "version": "1.0.0",
       "devDependencies": {
         "@types/bun": "catalog:",
       },
@@ -358,18 +358,18 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@typescript/native-preview": "7.0.0-dev.20260707.2",
-    "@zero2ai/agent-core": "18.2.1",
-    "@zero2ai/ai": "18.2.1",
-    "@zero2ai/catalog": "18.2.1",
-    "@zero2ai/coding-agent": "18.2.1",
-    "@zero2ai/mnemopi": "18.2.1",
+    "@zero2ai/agent-core": "1.0.0",
+    "@zero2ai/ai": "1.0.0",
+    "@zero2ai/catalog": "1.0.0",
+    "@zero2ai/coding-agent": "1.0.0",
+    "@zero2ai/mnemopi": "1.0.0",
     "@zero2ai/natives": "18.2.1",
-    "@zero2ai/schema": "18.2.1",
-    "@zero2ai/snapcompact": "18.2.1",
-    "@zero2ai/stats": "18.2.1",
-    "@zero2ai/tui": "18.2.1",
-    "@zero2ai/utils": "18.2.1",
-    "@zero2ai/wire": "18.2.1",
+    "@zero2ai/schema": "1.0.0",
+    "@zero2ai/snapcompact": "1.0.0",
+    "@zero2ai/stats": "1.0.0",
+    "@zero2ai/tui": "1.0.0",
+    "@zero2ai/utils": "1.0.0",
+    "@zero2ai/wire": "1.0.0",
     "chart.js": "^4.5.1",
     "diff": "^9.0.0",
     "fastembed": "2.1.0",
