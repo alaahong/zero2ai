@@ -63,6 +63,8 @@ jobs:
                - { os: macos-14, target: darwin-arm64, leaf: darwin-arm64, binary: zero2ai-darwin-arm64 }
                - { os: macos-15-intel, target: darwin-x64, leaf: darwin-x64, binary: zero2ai-darwin-x64 }
                - { os: ubuntu-22.04, target: linux-x64, leaf: linux-x64, binary: zero2ai-linux-x64 }
+               # The Homebrew formula covers linux arm64 too, so the release must ship it.
+               - { os: ubuntu-24.04-arm, target: linux-arm64, leaf: linux-arm64, binary: zero2ai-linux-arm64 }
       steps:
          - uses: actions/checkout@v4
          - uses: oven-sh/setup-bun@v2
@@ -148,3 +150,51 @@ jobs:
                  LICENSE
                  THIRD-PARTY-NOTICES.txt
                  SHA256SUMS.txt
+
+   # Regenerates alaahong/homebrew-tap's formula from the release that was just
+   # published. No-ops unless HOMEBREW_TAP_TOKEN is set — a PAT with `contents:
+   # write` on the tap (`GITHUB_TOKEN` cannot push to another repository), mirroring
+   # how the factory gates its `release_brew` job. Gated the same way there (job env
+   # + step conditions) because `secrets` is not dependable in a job-level `if`.
+   brew:
+      name: Refresh the Homebrew tap
+      needs: release
+      if: ${{ inputs.publish && !cancelled() }}
+      runs-on: ubuntu-22.04
+      permissions:
+         contents: read
+      env:
+         HAS_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN != '' }}
+      steps:
+         - uses: actions/checkout@v4
+           if: env.HAS_TAP_TOKEN == 'true'
+         - uses: oven-sh/setup-bun@v2
+           if: env.HAS_TAP_TOKEN == 'true'
+         - name: Check out the tap
+           if: env.HAS_TAP_TOKEN == 'true'
+           uses: actions/checkout@v4
+           with:
+              repository: alaahong/homebrew-tap
+              token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+              path: homebrew-tap
+         - name: Regenerate and push the formula
+           if: env.HAS_TAP_TOKEN == 'true'
+           env:
+              # `gh release view` reads the release this job just published.
+              GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              ZERO2AI_REPO: alaahong/zero2ai
+           run: |
+              set -euo pipefail
+              bun scripts/ci-update-brew-formula.ts "${{ inputs.tag }}" --out homebrew-tap/Formula/zero2ai.rb
+              cd homebrew-tap
+              if git diff --quiet -- Formula/zero2ai.rb; then
+                echo "formula already up to date for ${{ inputs.tag }}"
+                exit 0
+              fi
+              git -c user.name="github-actions[bot]" \
+                  -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+                  commit -m "zero2ai ${{ inputs.tag }}" -- Formula/zero2ai.rb
+              git push origin HEAD:main
+         - name: Note the missing token
+           if: env.HAS_TAP_TOKEN != 'true'
+           run: echo "::notice::HOMEBREW_TAP_TOKEN is not set; the tap was not refreshed (see .github/workflows/fork-release.yml)"

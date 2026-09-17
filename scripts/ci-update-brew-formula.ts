@@ -11,8 +11,8 @@
 
 import { $ } from "bun";
 
-const REPO = process.env.ZERO2AI_REPO ?? "can1357/oh-my-pi";
-const HOMEPAGE = "https://omp.sh";
+const REPO = process.env.ZERO2AI_REPO ?? "alaahong/zero2ai";
+const HOMEPAGE = "https://github.com/alaahong/zero2ai";
 const DESC = "Coding agent with the IDE wired in";
 
 interface ReleaseAsset {
