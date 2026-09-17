@@ -22,9 +22,12 @@ export default class Esdlc extends Command {
 		model: Flags.string({ description: "Model override for document phases" }),
 		command: Flags.string({ description: "Test phase: command to run (default: project test script)" }),
 		json: Flags.boolean({ description: "Output JSON (status)" }),
+		web: Flags.boolean({ description: "Serve the workspace as a local web UI" }),
+		port: Flags.integer({ description: "Web UI port (default 3848)" }),
 	};
 
 	static examples = [
+		"# Open the workspace in a browser (loopback only)\n  zero2ai esdlc --web",
 		"# Show the workspace status\n  zero2ai esdlc",
 		"# Capture a discussion recording (ASR) or an existing transcript\n  zero2ai esdlc run requirements --input ./meeting.m4a",
 		"# Capture notes without audio\n  zero2ai esdlc run requirements --prompt \"row-level reconciliation scope\"",
@@ -43,6 +46,8 @@ export default class Esdlc extends Command {
 			...(flags.model ? { model: flags.model } : {}),
 			...(flags.command ? { command: flags.command } : {}),
 			...(flags.json ? { json: true } : {}),
+			...(flags.web ? { web: true } : {}),
+			...(flags.port ? { port: flags.port } : {}),
 		});
 		process.exitCode = code;
 	}

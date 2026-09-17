@@ -2,13 +2,20 @@
  * ESDLC workspace: phase orchestration, status rendering and the banner shared
  * by the CLI and the interactive screen.
  */
-import { ESDLC_PHASES, ESDLC_PHASE_TITLES, type EsdlcPhaseId, type EsdlcPhaseRun, type EsdlcState } from "./types";
+import {
+	ESDLC_PHASES,
+	ESDLC_PHASE_LABELS,
+	ESDLC_PHASE_TITLES,
+	type EsdlcPhaseId,
+	type EsdlcPhaseRun,
+	type EsdlcState,
+} from "./types";
 import { readEsdlcState, recordPhaseRun } from "./state";
 import * as phases from "./phases";
 import type { EsdlcPhaseOutcome, EsdlcRunOptions } from "./phases";
 
 export type { EsdlcRunOptions, EsdlcPhaseOutcome };
-export { ESDLC_PHASES, ESDLC_PHASE_TITLES, readEsdlcState };
+export { ESDLC_PHASES, ESDLC_PHASE_LABELS, ESDLC_PHASE_TITLES, readEsdlcState };
 export type { EsdlcPhaseId, EsdlcPhaseRun, EsdlcState };
 
 const RUNNERS: Readonly<Record<EsdlcPhaseId, (options: EsdlcRunOptions) => Promise<EsdlcPhaseOutcome>>> = {
@@ -62,7 +69,12 @@ const BANNER_LINES: readonly string[] = [
 	"/____||_____|_| \\_\\\\___/|_____| /_/   \\_\\___|",
 ];
 
-const FLOW = "REQUIREMENTS -> ANALYSIS & DESIGN -> BUILD -> TEST -> DEPLOY -> RELEASE";
+const FLOW = ESDLC_PHASES.map(phase => ESDLC_PHASE_LABELS[phase]).join(" -> ");
+
+/** Banner art only (no flow line): callers decide how to present the flow. */
+export function renderEsdlcBannerArt(): readonly string[] {
+	return [...BANNER_LINES];
+}
 
 /** Banner as individual lines: the TUI renders one array element per row. */
 export function renderEsdlcBannerLines(): readonly string[] {

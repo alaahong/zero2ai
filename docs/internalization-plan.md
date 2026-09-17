@@ -464,9 +464,13 @@ zero2ai --config /etc/corp/zero2ai/baseline.yml \
 
 **复用而非新造**：模型解析走 `resolvePrimaryModel`，一次性生成走 `completeSimple`，改动快照走 `@zero2ai/natives/vcs`（`diffText`/`changedFiles`），音频走既有 `sttClient`。
 
-**交互界面（已实现并实测）**：`zero2ai esdlc` 在 TTY 下打开全屏屏幕——ZERO2AI 字标 + 流程行（REQUIREMENTS → ANALYSIS & DESIGN → BUILD → TEST → DEPLOY → RELEASE）、六阶段列表（pending `.` / running `~` / completed `+` / failed `x`）、选中阶段展开其产物路径；按键：↑↓（或 j/k）选择、Enter 触发（requirements 无 `--prompt/--input` 时就地输入讨论要点）、r 刷新、q 退出；管道/CI 场景自动回落到静态输出。
+**界面（已实现并实测）**：两种形态共用同一套阶段引擎与同一份工作区（`<project>/.zero2ai/esdlc/`）。
 
-**实测证据（真实 PTY）**：`hub` 起 `bun cli.ts esdlc` → 屏幕渲染正确；Enter 进入输入态 → 输入 “row-level reconciliation scope, batch cutoff 18:00” → Enter 执行 → 状态翻为 `+` 并显示 `captured notes.md` 与产物路径；磁盘上 `notes.md` 与 `state.json`（`requirements: completed`）同步落盘；`q` 退出码 0。
+- **Web 工作台（推荐）**：`zero2ai esdlc --web [--port 3848]` → 浏览器打开 `http://127.0.0.1:3848`。页面含 ZERO2AI 字标、流程行（REQUIREMENTS → ANALYSIS & DESIGN → BUILD → TEST → DEPLOY → RELEASE）、六阶段卡片（状态徽标 + 说明 + 摘要/报错 + 产物按钮），右侧为产物预览面板；requirements 卡片内可直接写讨论要点后点“运行”。
+  - **安全设计**：仅绑定回环、校验 `Host`（拒绝非回环，防 DNS rebinding）、无 CORS 头、产物读取按路径前缀限制在工作区内、请求体与产物大小上限；页面为**单文件内联**（无构建、无 CDN、无第三方资源），可在断网主机运行且可直接阅读评审。
+  - **HTTP 契约**：`GET /`（页面）、`GET /api/state`、`POST /api/run`（`{phase,input?,prompt?,model?,command?}`；阶段失败仍返回 200 + 该阶段状态，便于界面渲染原因）、`GET /api/artifact?path=`。
+  - **实测证据**：契约测试 **7/7 通过**（含路径穿越拒绝、伪造 Host 拒绝、未知阶段拒绝、阶段运行落盘）；浏览器实测：页面渲染正确 → 点 `deploy` 显示可操作报错（本机未配置模型）→ 点 `test` 完成并显示 `exit 1 in 227 ms` 与 `report.md` 产物 → 点产物在右侧面板看到报告全文（含降级说明与原始输出）。
+- **终端屏幕（轻量替代）**：TTY 下 `zero2ai esdlc`（不带 `--web`）打开全屏屏幕——同一状态、同一按键方式（↑↓/j/k 选择、Enter 触发、r 刷新、q 退出）；管道与 CI 自动回落到静态输出，保持可脚本化。
 
 **待做**：① 把 ESDLC 本轮改动纳入基线补丁序列（当前补丁至 12）；② `build` 阶段目前以 `-p` 子进程驱动 agent，后续可改为进程内 SDK 调用省一次冷启动；③ 阶段产物可加“在编辑器中打开”快捷键。
 

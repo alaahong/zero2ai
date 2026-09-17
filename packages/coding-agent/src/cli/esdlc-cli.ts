@@ -5,6 +5,7 @@ import { getProjectDir } from "@zero2ai/utils";
 import { ESDLC_PHASES, type EsdlcPhaseId, readEsdlcState, renderEsdlcStatus, runEsdlcPhase } from "../esdlc";
 import { isEsdlcPhaseId } from "../esdlc/types";
 import { openEsdlcScreen } from "../esdlc/screen";
+import { DEFAULT_ESDLC_WEB_PORT, startEsdlcWeb } from "../esdlc/web";
 
 export interface EsdlcCommandArgs {
 	readonly action?: string;
@@ -14,6 +15,8 @@ export interface EsdlcCommandArgs {
 	readonly model?: string;
 	readonly command?: string;
 	readonly json?: boolean;
+	readonly web?: boolean;
+	readonly port?: number;
 }
 
 export async function runEsdlcCommand(args: EsdlcCommandArgs): Promise<number> {
@@ -25,6 +28,20 @@ export async function runEsdlcCommand(args: EsdlcCommandArgs): Promise<number> {
 		if (args.json) {
 			process.stdout.write(`${JSON.stringify(state, null, 2)}\n`);
 			return 0;
+		}
+		// Browser workspace: the primary interactive surface for people who
+		// prefer a web page over a terminal screen.
+		if (args.web) {
+			const server = startEsdlcWeb({ projectRoot, port: args.port ?? DEFAULT_ESDLC_WEB_PORT });
+			process.stdout.write(`ESDLC workspace: ${server.url}\n(loopback only — Ctrl+C to stop)\n`);
+			const { promise, resolve } = Promise.withResolvers<number>();
+			const shutdown = (): void => {
+				server.stop();
+				resolve(0);
+			};
+			process.once("SIGINT", shutdown);
+			process.once("SIGTERM", shutdown);
+			return await promise;
 		}
 		// Interactive terminal: the screen is the primary surface; pipes and CI
 		// keep the static rendering so `esdlc` stays scriptable.

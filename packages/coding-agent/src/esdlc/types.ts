@@ -38,6 +38,16 @@ export interface EsdlcState {
 	readonly phases: Readonly<Record<EsdlcPhaseId, EsdlcPhaseRun>>;
 }
 
+/** Short flow labels — the ids alone lose "& DESIGN", so labels are explicit. */
+export const ESDLC_PHASE_LABELS: Readonly<Record<EsdlcPhaseId, string>> = {
+	requirements: "REQUIREMENTS",
+	analysis: "ANALYSIS & DESIGN",
+	build: "BUILD",
+	test: "TEST",
+	deploy: "DEPLOY",
+	release: "RELEASE",
+};
+
 export const ESDLC_PHASE_TITLES: Readonly<Record<EsdlcPhaseId, string>> = {
 	requirements: "Requirements — capture discussion, transcribe with ASR",
 	analysis: "Analysis & Design — BRD / FSD from the requirements",
