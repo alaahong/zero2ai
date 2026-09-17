@@ -54,19 +54,23 @@ export async function runEsdlcPhase(
 	}
 }
 
-const BANNER = [
-	"  ______ _____  _____  _____    ____   ___   _____",
-	" |___  /|  ___||  __ \\|  ___|  |___ \\ / _ \\ |_   _|",
-	"    / / | |__  | |  | | |__      __) |/ /_\\ \\ | |  ",
-	"   / /  |  __| | |  | |  __|    |__ <|  _  | | |   ",
-	"  / /__ | |___ | |__| | |___    ___) | | | | | |   ",
-	" /_____||_____||_____/|_____|  |____/|_| |_| |_|   ",
-].join("\n");
+const BANNER_LINES: readonly string[] = [
+	" _____ _____ ____   ___  ____      _    ___ ",
+	"|__  /| ____|  _ \\ / _ \\|___ \\    / \\  |_ _|",
+	"  / / |  _| | |_) | | | | __) |  / _ \\  | | ",
+	" / /_ | |___|  _ <| |_| |/ __/  / ___ \\ | | ",
+	"/____||_____|_| \\_\\\\___/|_____| /_/   \\_\\___|",
+];
 
 const FLOW = "REQUIREMENTS -> ANALYSIS & DESIGN -> BUILD -> TEST -> DEPLOY -> RELEASE";
 
+/** Banner as individual lines: the TUI renders one array element per row. */
+export function renderEsdlcBannerLines(): readonly string[] {
+	return [...BANNER_LINES, `  ${FLOW}`, ""];
+}
+
 export function renderEsdlcBanner(): string {
-	return `${BANNER}\n  ${FLOW}\n`;
+	return `${BANNER_LINES.join("\n")}\n  ${FLOW}\n`;
 }
 
 const STATUS_MARK: Readonly<Record<EsdlcPhaseRun["status"], string>> = {

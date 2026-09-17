@@ -437,6 +437,12 @@ zero2ai --config /etc/corp/zero2ai/baseline.yml \
 2. **直接取用上游预编译插件**：`@oh-my-pi/pi-natives-win32-x64@18.2.2` 含 `pi_natives.win32-x64-baseline.node`，放入 `packages/natives/native/` 即可运行（171 MB，已被 `.gitignore` 的 `*.node` 排除，不进版本库）。
 3. 若需自建：`bun --cwd=packages/natives run build` 需 Rust 工具链（`rust-toolchain.toml` 固定版本）+ Windows 侧 MSVC Build Tools。
 
+**改名副作用与迁移（实测）**
+
+- **配置根变更**：CLI 默认配置根由 `~/.omp` 变为 `~/.zero2ai`。改名前的会话仍留在 `~/.omp/agent/sessions/`，因此 `zero2ai --resume <id>` 默认**找不到**它们。两种处理：① 单次执行用 `ZERO2AI_CONFIG_DIR=.omp zero2ai --resume <id>` 指回旧根；② 一次性迁移 `cp -r ~/.omp/agent/sessions/* ~/.zero2ai/agent/sessions/`。
+- 旧命令 `omp` 若曾全局安装（如 `~/.bun/bin/omp.exe`）仍可用，但那是**改名前的 CLI**，不要与新的 `zero2ai` 混用同一份会话目录。
+- 环境变量前缀由 `PI_*` 变为 `ZERO2AI_*`，行内既有脚本/CI 需同步（方案 §8 已记录）。
+
 **内化要点（P1）**：行内应在内网制品库自建 `@oh-my-pi/pi-natives-<tag>` 同名叶子（或统一走内网构建 + 签名分发），既保留"名字可复用"的便利，又去掉对外部 registry 的依赖。**用户可见面**（CLI、目录、环境变量、品牌、文档）保持 zero2ai，**构建/原生身份**保持上游命名——这条边界已写入本方案。
 
 ---
@@ -458,7 +464,11 @@ zero2ai --config /etc/corp/zero2ai/baseline.yml \
 
 **复用而非新造**：模型解析走 `resolvePrimaryModel`，一次性生成走 `completeSimple`，改动快照走 `@zero2ai/natives/vcs`（`diffText`/`changedFiles`），音频走既有 `sttClient`。
 
-**待做**：① 交互式 TUI 屏幕（banner + 阶段列表 + 快捷键触发/查看，复用 `packages/tui` 组件与被测过的状态渲染）；② 把本轮改动纳入基线补丁序列；③ `build` 阶段目前以 `-p` 子进程驱动 agent，后续可改为进程内 SDK 调用以省一次冷启动。
+**交互界面（已实现并实测）**：`zero2ai esdlc` 在 TTY 下打开全屏屏幕——ZERO2AI 字标 + 流程行（REQUIREMENTS → ANALYSIS & DESIGN → BUILD → TEST → DEPLOY → RELEASE）、六阶段列表（pending `.` / running `~` / completed `+` / failed `x`）、选中阶段展开其产物路径；按键：↑↓（或 j/k）选择、Enter 触发（requirements 无 `--prompt/--input` 时就地输入讨论要点）、r 刷新、q 退出；管道/CI 场景自动回落到静态输出。
+
+**实测证据（真实 PTY）**：`hub` 起 `bun cli.ts esdlc` → 屏幕渲染正确；Enter 进入输入态 → 输入 “row-level reconciliation scope, batch cutoff 18:00” → Enter 执行 → 状态翻为 `+` 并显示 `captured notes.md` 与产物路径；磁盘上 `notes.md` 与 `state.json`（`requirements: completed`）同步落盘；`q` 退出码 0。
+
+**待做**：① 把 ESDLC 本轮改动纳入基线补丁序列（当前补丁至 12）；② `build` 阶段目前以 `-p` 子进程驱动 agent，后续可改为进程内 SDK 调用省一次冷启动；③ 阶段产物可加“在编辑器中打开”快捷键。
 
 ---
 

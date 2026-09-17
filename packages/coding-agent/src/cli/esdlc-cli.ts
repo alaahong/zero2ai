@@ -4,6 +4,7 @@
 import { getProjectDir } from "@zero2ai/utils";
 import { ESDLC_PHASES, type EsdlcPhaseId, readEsdlcState, renderEsdlcStatus, runEsdlcPhase } from "../esdlc";
 import { isEsdlcPhaseId } from "../esdlc/types";
+import { openEsdlcScreen } from "../esdlc/screen";
 
 export interface EsdlcCommandArgs {
 	readonly action?: string;
@@ -21,7 +22,22 @@ export async function runEsdlcCommand(args: EsdlcCommandArgs): Promise<number> {
 
 	if (action === "status") {
 		const state = await readEsdlcState(projectRoot);
-		process.stdout.write(args.json ? `${JSON.stringify(state, null, 2)}\n` : `${renderEsdlcStatus(state)}\n`);
+		if (args.json) {
+			process.stdout.write(`${JSON.stringify(state, null, 2)}\n`);
+			return 0;
+		}
+		// Interactive terminal: the screen is the primary surface; pipes and CI
+		// keep the static rendering so `esdlc` stays scriptable.
+		if (process.stdout.isTTY) {
+			return await openEsdlcScreen({
+				projectRoot,
+				...(args.input ? { input: args.input } : {}),
+				...(args.prompt ? { prompt: args.prompt } : {}),
+				...(args.model ? { model: args.model } : {}),
+				...(args.command ? { command: args.command } : {}),
+			}).done;
+		}
+		process.stdout.write(`${renderEsdlcStatus(state)}\n`);
 		return 0;
 	}
 
