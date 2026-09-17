@@ -1,0 +1,102 @@
+name: Fork npm publish
+
+# Publishes this fork's packages to npm under its own scope, on GitHub-hosted
+# runners.
+#
+# Why this workflow exists instead of `scripts/release.ts` + ci.yml:
+#   - The factory release path gates publishing on `release_gate`, which needs
+#     `native_addons` and the `test_*` fan-out — jobs pinned to the self-hosted
+#     `zero2ai-kata` pool, which a fork does not have. Those jobs never leave the
+#     queue here, so `release_npm`/`release_native_leaves` are unreachable.
+#   - The fork does not build native addons. `@zero2ai/natives` resolves its
+#     platform addon from the upstream `@oh-my-pi/pi-natives-<tag>` leaf, and the
+#     version sentinel is version-only (`__piNativesV<version>`, see
+#     `packages/natives/native/version-sentinel.js`), so an upstream leaf built
+#     for the same version satisfies this loader. That is why nothing here renames
+#     or republishes the native leaves (see docs/internalization-plan.md,
+#     "原生身份不改名") — the published core keeps upstream's leaf names in
+#     `optionalDependencies` and installs their prebuilds.
+#   - Publishing therefore needs one thing: `bun scripts/ci-release-publish.ts`,
+#     which emits types, rewrites the published manifests, packs with `bun pm pack`
+#     (the only step that resolves `catalog:`/`workspace:` protocols) and hands the
+#     tarball to `npm publish`.
+#
+# Requirements on the repository:
+#   - `NPM_TOKEN` — a granular npm token whose account owns the target scope. A
+#     scope that does not exist as an org fails with `404 Scope not found`; create
+#     the org first and add the publishing account as an owner.
+#   - The version being published must exist as an upstream native leaf version
+#     too (18.2.x does). A future bump needs a matching upstream leaf release,
+#     otherwise installed addons fail the sentinel check.
+#
+# Trigger:
+#   - Push a `fork-v*` tag (e.g. `git tag fork-v18.2.1 && git push origin fork-v18.2.1`).
+#   - Or run it from the Actions UI, where `dry_run` defaults to true.
+#
+# The publish script skips versions already on the registry, so re-running is
+# safe; publishing a new version means bumping the manifests first.
+
+on:
+   workflow_dispatch:
+      inputs:
+         dry_run:
+            description: "Report what would be published without writing to the registry"
+            type: boolean
+            default: true
+   push:
+      tags: ["fork-v*"]
+
+permissions:
+   contents: read
+
+# One publish at a time, and never cancel one that is mid-upload.
+concurrency:
+   group: fork-npm-publish
+   cancel-in-progress: false
+
+jobs:
+   publish:
+      name: Publish workspace packages
+      runs-on: ubuntu-22.04
+      timeout-minutes: 90
+      # Copy the factory publish job's auth shape: id-token lets npm mint an OIDC
+      # token for packages that declare a trusted publisher, NODE_AUTH_TOKEN is the
+      # fallback (and the only path for a first-ever publish of a package).
+      permissions:
+         id-token: write
+         contents: read
+      env:
+         DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}
+      steps:
+         - uses: actions/checkout@v4
+         - uses: oven-sh/setup-bun@v2
+         - uses: actions/setup-node@v4
+           with:
+              node-version: "24"
+              registry-url: "https://registry.npmjs.org"
+         # npm runs under Bun when it is invoked by the publish script; npm 12 needs
+         # a newer emulated Node than Bun 1.3 provides.
+         - name: Ensure npm supports trusted publishing
+           run: npm install -g npm@11.17.0
+         - name: Cache bun dependencies
+           uses: actions/cache@v4
+           with:
+              path: ~/.bun/install/cache
+              key: bun-${{ runner.os }}-${{ hashFiles('**/bun.lock') }}
+         - run: bun install --frozen-lockfile
+         - name: Who is publishing
+           env:
+              NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+           run: |
+              echo "token present: $([ -n "$NODE_AUTH_TOKEN" ] && echo yes || echo NO)"
+              npm whoami || echo "(npm whoami failed — check NPM_TOKEN)"
+         - name: Publish (dry run)
+           if: env.DRY_RUN == 'true'
+           env:
+              NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+           run: bun scripts/ci-release-publish.ts --dry-run
+         - name: Publish
+           if: env.DRY_RUN != 'true'
+           env:
+              NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+           run: bun scripts/ci-release-publish.ts
