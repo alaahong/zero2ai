@@ -6,6 +6,10 @@
  * and the model registry — so the web UI never asks for credentials the CLI
  * would not also use.
  */
+import * as fs from "node:fs";
+import * as os from "node:os";
+import * as path from "node:path";
+import { getConfigDirName } from "@zero2ai/utils";
 import { resolvePrimaryModel } from "../commit/model-selection";
 import { ModelRegistry } from "../config/model-registry";
 import { Settings } from "../config/settings";
@@ -24,6 +28,27 @@ export interface BoundModels {
 	readonly defaultLabel: string;
 	/** Every model whose provider has usable credentials on this host. */
 	readonly available: readonly BoundModelSummary[];
+	/** Config root the credentials were read from (e.g. `.zero2ai`). */
+	readonly configRoot: string;
+	/**
+	 * Pre-rename root when this host still has one. Credentials bound there are
+	 * invisible to the current root, which is the usual reason a custom provider
+	 * "disappears" after the rename — surface it instead of leaving users guessing.
+	 */
+	readonly legacyRoot: { readonly dirName: string; readonly hasConfig: boolean } | null;
+}
+
+const LEGACY_CONFIG_DIR_NAME = ".omp";
+
+function detectLegacyRoot(activeDirName: string): BoundModels["legacyRoot"] {
+	if (activeDirName === LEGACY_CONFIG_DIR_NAME) return null;
+	try {
+		const dir = path.join(os.homedir(), LEGACY_CONFIG_DIR_NAME);
+		if (!fs.existsSync(dir)) return null;
+		return { dirName: LEGACY_CONFIG_DIR_NAME, hasConfig: fs.existsSync(path.join(dir, "agent", "config.yml")) };
+	} catch {
+		return null;
+	}
 }
 
 const DEFAULT_LABEL = "默认（commit → smol → 任一已绑定）";
@@ -47,5 +72,12 @@ export async function listBoundModels(cwd: string): Promise<BoundModels> {
 		const fallback = registry.getAvailable()[0];
 		resolved = fallback ? summarize(fallback) : null;
 	}
-	return { default: resolved, defaultLabel: DEFAULT_LABEL, available };
+	const configRoot = getConfigDirName();
+	return {
+		default: resolved,
+		defaultLabel: DEFAULT_LABEL,
+		available,
+		configRoot,
+		legacyRoot: detectLegacyRoot(configRoot),
+	};
 }

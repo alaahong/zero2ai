@@ -232,10 +232,15 @@ async function loadModels() {
     select.appendChild(option);
   }
   if (saved) select.value = saved;
-  document.getElementById("model-hint").textContent =
-    models.available.length === 0
-      ? "未检测到可用凭据：先在命令行配置 provider（zero2ai models）"
-      : models.available.length + " 个已绑定模型";
+  const parts = [];
+  parts.push(models.available.length === 0
+    ? "未检测到可用凭据：先在命令行配置 provider（zero2ai models）"
+    : models.available.length + " 个已绑定模型");
+  parts.push("配置根 " + models.configRoot);
+  if (models.legacyRoot && models.legacyRoot.hasConfig) {
+    parts.push("检测到旧配置根 ~/" + models.legacyRoot.dirName + "：若 provider 绑在那里，请用 ZERO2AI_CONFIG_DIR=" + models.legacyRoot.dirName + " 启动或迁移");
+  }
+  document.getElementById("model-hint").textContent = parts.join(" · ");
   select.onchange = () => localStorage.setItem("esdlc.model", select.value);
 }
 

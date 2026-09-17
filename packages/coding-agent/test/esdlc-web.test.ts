@@ -111,6 +111,13 @@ describe("bound models API", () => {
 			available: { label: string; provider: string; id: string }[];
 		};
 		expect(typeof payload.defaultLabel).toBe("string");
+		const scoped = payload as unknown as {
+			configRoot: string;
+			legacyRoot: { dirName: string; hasConfig: boolean } | null;
+		};
+		expect(typeof scoped.configRoot).toBe("string");
+		expect(scoped.configRoot.length).toBeGreaterThan(0);
+		if (scoped.legacyRoot) expect(typeof scoped.legacyRoot.dirName).toBe("string");
 		expect(Array.isArray(payload.available)).toBe(true);
 		// Every listed model must be addressable as provider/id, which is what the
 		// picker sends back as `model`.

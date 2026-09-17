@@ -439,6 +439,9 @@ zero2ai --config /etc/corp/zero2ai/baseline.yml \
 
 **改名副作用与迁移（实测）**
 
+- **自定义 provider 会"消失"**：凭据库随配置根迁移，改名后 `opencode-go` 这类绑定仍在 `~/.omp/agent/agent.db`，而新根 `~/.zero2ai` 为空 → 新 CLI 与 Web 选择器只看到内置/本地 provider（本机实测：默认新根 8 个 ollama；`ZERO2AI_CONFIG_DIR=.omp` 时 **43 个**，含绑定的 `opencode-go/deepseek-v4.1-flash`）。界面现已直接显示活动配置根，并在探测到旧根有 `agent/config.yml` 时给出迁移提示。
+
+
 - **配置根变更**：CLI 默认配置根由 `~/.omp` 变为 `~/.zero2ai`。改名前的会话仍留在 `~/.omp/agent/sessions/`，因此 `zero2ai --resume <id>` 默认**找不到**它们。两种处理：① 单次执行用 `ZERO2AI_CONFIG_DIR=.omp zero2ai --resume <id>` 指回旧根；② 一次性迁移 `cp -r ~/.omp/agent/sessions/* ~/.zero2ai/agent/sessions/`。
 - 旧命令 `omp` 若曾全局安装（如 `~/.bun/bin/omp.exe`）仍可用，但那是**改名前的 CLI**，不要与新的 `zero2ai` 混用同一份会话目录。
 - 环境变量前缀由 `PI_*` 变为 `ZERO2AI_*`，行内既有脚本/CI 需同步（方案 §8 已记录）。
