@@ -13,7 +13,16 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import { ESDLC_PHASES, ESDLC_PHASE_LABELS, readEsdlcState, renderEsdlcBannerArt, runEsdlcPhase } from "./index";
 import { esdlcCatalogs, isEsdlcLocale } from "./i18n";
-import { readPhaseEvents, readProjectTree, writeWorkspaceLocale, writeWorkspaceNotes } from "./state";
+import type { EsdlcDeployFacts, EsdlcQualityReport, EsdlcScaffoldResult } from "./types";
+import {
+	readPhaseEvents,
+	readPhaseJson,
+	readProjectTree,
+	readQualityHistory,
+	writeWorkspaceConfig,
+	writeWorkspaceLocale,
+	writeWorkspaceNotes,
+} from "./state";
 import { listBoundModels } from "./models";
 import { isEsdlcPhaseId, type EsdlcPhaseId } from "./types";
 
@@ -29,6 +38,8 @@ const LOOPBACK_HOSTS: Readonly<Record<string, true>> = {
 const MAX_BODY_BYTES = 4 * 1024 * 1024;
 const MAX_ARTIFACT_BYTES = 512 * 1024;
 const MAX_WRITE_BYTES = 1024 * 1024;
+const MAX_SPEC_SOURCES = 20;
+const MAX_CONFIG_FIELD_CHARS = 500;
 
 export interface EsdlcWebOptions {
 	readonly projectRoot: string;
@@ -192,6 +203,27 @@ async function handleArtifact(projectRoot: string, url: URL): Promise<Response> 
 	}
 }
 
+/**
+ * Structured phase data for the workspace UI: quality signals, deployment facts and the build
+ * scaffold record. The JSON files are the source of truth; this endpoint only parses them.
+ */
+async function handleReport(projectRoot: string, url: URL): Promise<Response> {
+	const phase = url.searchParams.get("phase") ?? "";
+	if (!isEsdlcPhaseId(phase)) return json({ error: `phase must be one of: ${ESDLC_PHASES.join(", ")}` }, 400);
+	if (phase === "test") {
+		const quality = await readPhaseJson<EsdlcQualityReport>(projectRoot, "test", "quality.json");
+		const history = await readQualityHistory(projectRoot);
+		return json({ quality, history: history.slice(-20) });
+	}
+	if (phase === "deploy") {
+		return json({ facts: await readPhaseJson<EsdlcDeployFacts>(projectRoot, "deploy", "deploy-facts.json") });
+	}
+	if (phase === "build") {
+		return json({ scaffold: await readPhaseJson<EsdlcScaffoldResult>(projectRoot, "build", "scaffold.json") });
+	}
+	return json({});
+}
+
 async function handleEvents(projectRoot: string, url: URL): Promise<Response> {
 	const phase = url.searchParams.get("phase") ?? "";
 	if (!isEsdlcPhaseId(phase)) return json({ error: `phase must be one of: ${ESDLC_PHASES.join(", ")}` }, 400);
@@ -217,6 +249,33 @@ export function startEsdlcWeb(options: EsdlcWebOptions): EsdlcWebHandle {
 			if (url.pathname === "/api/models") return json(await listBoundModels(projectRoot));
 			if (url.pathname === "/api/tree") return json(await readProjectTree(projectRoot));
 			if (url.pathname === "/api/events") return await handleEvents(projectRoot, url);
+			if (url.pathname === "/api/report") return await handleReport(projectRoot, url);
+			if (url.pathname === "/api/config" && request.method === "POST") {
+				const body = await parseBody(request);
+				if (body instanceof Response) return body;
+				const patch: { specSources?: string[]; scaffoldCommand?: string; scaffoldTemplate?: string } = {};
+				if (body.specSources !== undefined) {
+					if (!Array.isArray(body.specSources) || body.specSources.some(entry => typeof entry !== "string")) {
+						return json({ error: "specSources must be an array of strings" }, 400);
+					}
+					if (body.specSources.length > MAX_SPEC_SOURCES) {
+						return json({ error: `specSources accepts at most ${MAX_SPEC_SOURCES} entries` }, 400);
+					}
+					const sources = (body.specSources as string[]).map(entry => entry.trim()).filter(Boolean);
+					if (sources.some(entry => entry.length > MAX_CONFIG_FIELD_CHARS)) {
+						return json({ error: "a spec source is too long" }, 400);
+					}
+					patch.specSources = sources;
+				}
+				for (const field of ["scaffoldCommand", "scaffoldTemplate"] as const) {
+					const value = body[field];
+					if (value === undefined) continue;
+					if (typeof value !== "string") return json({ error: `${field} must be a string` }, 400);
+					if (value.length > MAX_CONFIG_FIELD_CHARS) return json({ error: `${field} is too long` }, 400);
+					patch[field] = value.trim();
+				}
+				return json(await writeWorkspaceConfig(projectRoot, patch));
+			}
 			if (url.pathname === "/api/artifact") return await handleArtifact(projectRoot, url);
 			if (url.pathname === "/api/file" && request.method === "PUT") {
 				const body = await parseBody(request);
@@ -316,8 +375,8 @@ const PAGE = `<!DOCTYPE html>
   .actions textarea { flex:1; min-height:36px; background:#0e1013; color:var(--fg); border:1px solid var(--line);
                       border-radius:6px; padding:6px 8px; font:12px ui-monospace,monospace; resize:vertical; }
   .chips { display:flex; flex-wrap:wrap; gap:6px; }
-  .chip { background:#1b1e23; border:1px solid var(--line); border-radius:999px; padding:3px 11px; font:11.5px ui-monospace,monospace;
-          cursor:pointer; }
+  .chip { background:#1b1e23; color:var(--fg); border:1px solid var(--line); border-radius:999px; padding:3px 11px;
+          font:11.5px ui-monospace,monospace; cursor:pointer; }
   .chip:hover { border-color:var(--accent); }
   .hitl { margin:12px 0; padding:12px 14px; border:1px solid #4a2c12; background:#1c1509; border-radius:8px; }
   .hitl h3 { margin:0 0 6px; font-size:13px; color:var(--warn); text-transform:none; letter-spacing:0; }
@@ -352,6 +411,41 @@ const PAGE = `<!DOCTYPE html>
   textarea.editor { width:100%; min-height:calc(100vh - 420px); background:#0e1013; color:var(--fg);
                     border:1px solid var(--line); border-radius:6px; padding:10px;
                     font:12.5px/1.6 ui-monospace,Consolas,monospace; resize:vertical; }
+  .flow-svg { width:100%; height:auto; }
+  .flow-label { fill:var(--fg); font:600 13px ui-sans-serif,-apple-system,"Segoe UI",sans-serif; }
+  .flow-state { font:600 11px ui-monospace,Consolas,monospace; letter-spacing:.5px; }
+  .flow-meta { fill:var(--dim); font:10.5px ui-monospace,Consolas,monospace; }
+  .flow-arrow { stroke:var(--line); stroke-width:2; fill:none; }
+  .flow-arrow-active { stroke:var(--accent); }
+  .flow-node-current rect { filter:drop-shadow(0 0 8px rgba(249,115,22,.55)); animation:flow-pulse 1.6s ease-in-out infinite; }
+  @keyframes flow-pulse { 0%,100% { opacity:1; } 50% { opacity:.65; } }
+  .flow-timeline { margin-top:16px; }
+  .flow-row { display:grid; grid-template-columns:120px 1fr 78px; align-items:center; gap:10px; margin:5px 0; }
+  .flow-row-name { color:var(--dim); font:11px ui-monospace,Consolas,monospace; }
+  .flow-row-duration { color:var(--dim); font:11px ui-monospace,Consolas,monospace; text-align:right; }
+  .flow-track { position:relative; height:14px; background:#0e1013; border:1px solid var(--line); border-radius:4px; overflow:hidden; }
+  .flow-bar { position:absolute; top:0; bottom:0; border-radius:3px; background:#3b3f46; }
+  .flow-bar[data-status="completed"] { background:var(--ok); }
+  .flow-bar[data-status="failed"] { background:var(--err); }
+  .flow-bar[data-status="running"], .flow-bar[data-status="awaiting-input"] { background:var(--accent); }
+  .quality-meter { width:220px; height:10px; background:#0e1013; border:1px solid var(--line); border-radius:6px; overflow:hidden; }
+  .quality-meter-fill { height:100%; background:var(--accent); }
+  .quality-meter-fill[data-band="high"] { background:var(--ok); }
+  .quality-meter-fill[data-band="mid"] { background:var(--warn); }
+  .quality-meter-fill[data-band="low"] { background:var(--err); }
+  .quality-table { margin-top:10px; }
+  tr[data-state="fail"] td { color:var(--err); }
+  tr[data-state="unknown"] td { color:var(--dim); }
+  .quality-history { display:flex; align-items:flex-end; gap:3px; height:64px; margin-top:6px; }
+  .quality-history-bar { flex:0 0 12px; height:100%; display:flex; align-items:flex-end; background:#0e1013; border-radius:3px; }
+  .quality-history-fill { width:100%; background:var(--accent); border-radius:3px; }
+  .quality-history-fill[data-band="high"] { background:var(--ok); }
+  .quality-history-fill[data-band="mid"] { background:var(--warn); }
+  .quality-history-fill[data-band="low"] { background:var(--err); }
+  .scaffold-lines { display:flex; flex-direction:column; gap:3px; font:12px ui-monospace,Consolas,monospace; }
+  .facts-list { display:flex; flex-wrap:wrap; gap:6px; font:12px ui-monospace,Consolas,monospace; color:var(--fg); }
+  input.editor-mini, textarea.editor-mini { width:100%; margin-top:4px; background:#0e1013; color:var(--fg);
+      border:1px solid var(--line); border-radius:6px; padding:7px 9px; font:12px ui-monospace,Consolas,monospace; }
   .md { font-size:13.5px; line-height:1.65; max-height:calc(100vh - 300px); overflow:auto; }
   .md h1, .md h2, .md h3, .md h4, .md h5, .md h6 { margin:16px 0 8px; line-height:1.3; }
   .md h1 { font-size:20px; border-bottom:1px solid var(--line); padding-bottom:6px; }
@@ -477,8 +571,10 @@ async function refreshState() {
   const busy = ORDER.find(p => status(p) === "running" || status(p) === "awaiting-input");
   if (!picked) {
     picked = true;
+    // Land on the flow diagram: it answers "where is this project?" before any detail.
     const latest = busy || ORDER.slice().reverse().find(p => status(p) !== "pending");
     if (latest) tab = "phase:" + latest;
+    else tab = "flow";
   }
   renderTabs();
   // The viewed phase owns the trail; a busy phase is refreshed every poll, a settled one only
@@ -505,7 +601,7 @@ async function refreshState() {
 function renderTabs() {
   const nav = el("stages");
   nav.textContent = "";
-  const items = [{ tab:"tree", label:t("nav.tree") }].concat(ORDER.map((p, i) => ({ tab:"phase:" + p, label:(i+1) + ". " + LABELS[p], phase:p })));
+  const items = [{ tab:"flow", label:t("flow.title") }, { tab:"tree", label:t("nav.tree") }].concat(ORDER.map((p, i) => ({ tab:"phase:" + p, label:(i+1) + ". " + LABELS[p], phase:p })));
   for (const item of items) {
     const button = document.createElement("button");
     button.textContent = item.label;
@@ -550,6 +646,7 @@ function renderHitl() {
 }
 
 function renderView() {
+  if (tab === "flow") return renderFlow();
   if (tab === "tree") return renderTree();
   return renderPhase(tab.slice(6));
 }
@@ -629,6 +726,20 @@ function renderPhase(phase) {
   controls.appendChild(start);
   card.appendChild(controls);
   view.appendChild(card);
+
+  // Phase-specific panels: configuration for analysis/build, measured results for test/deploy.
+  const report = reports[phase];
+  if (phase === "analysis") card.parentElement.appendChild(configCard());
+  if (phase === "build") {
+    card.parentElement.appendChild(configCard());
+    if (report) card.parentElement.appendChild(scaffoldCard(report.scaffold));
+  }
+  if (phase === "test" && report) card.parentElement.appendChild(qualityCard(report.quality ? { ...report.quality, history: report.history } : null));
+  if (phase === "deploy" && report) card.parentElement.appendChild(factsCard(report.facts));
+  if (["build", "test", "deploy"].includes(phase) && !report) {
+    void loadReport(phase).then(() => { if (tab === "phase:" + phase) renderPhase(phase); });
+  }
+
 
   if (phase === "build") renderChanged(card);
   renderCalls(card, phase);
@@ -745,6 +856,321 @@ async function callPanels(record) {
   }
   void show(active);
   return wrap;
+}
+
+/* ---------- 流程视图（实时状态流转） ---------- */
+
+const STATUS_ORDER = { pending: 0, running: 1, "awaiting-input": 2, completed: 3, failed: 4 };
+const NODE_COLORS = {
+  pending: "#3b3f46", running: "#f97316", "awaiting-input": "#facc15", completed: "#22c55e", failed: "#ef4444",
+};
+
+function fmtDuration(ms) {
+  if (!Number.isFinite(ms) || ms < 0) return "—";
+  if (ms < 1000) return ms + " ms";
+  if (ms < 60_000) return (ms / 1000).toFixed(1) + " s";
+  const minutes = Math.floor(ms / 60_000);
+  return minutes + " m " + Math.round((ms % 60_000) / 1000) + " s";
+}
+
+function phaseSpan(phase) {
+  const run = state.phases[phase];
+  if (!run.startedAt) return null;
+  const start = Date.parse(run.startedAt);
+  const end = run.finishedAt ? Date.parse(run.finishedAt) : Date.now();
+  return { start, end, ms: Math.max(0, end - start) };
+}
+
+function renderFlow() {
+  const view = el("view");
+  view.textContent = "";
+  const done = ORDER.filter(p => status(p) === "completed").length;
+  const blocked = ORDER.filter(p => status(p) === "failed").length;
+  const active = ORDER.find(p => status(p) === "running" || status(p) === "awaiting-input");
+
+  const summary = document.createElement("div"); summary.className = "card";
+  const head = document.createElement("h3"); head.textContent = t("flow.title");
+  const strip = document.createElement("div"); strip.className = "row"; strip.style.gap = "18px";
+  strip.append(
+    makeSpan(t("flow.summary", { done: done, total: ORDER.length, blocked: blocked })),
+  );
+  if (active) {
+    const chip = document.createElement("span"); chip.className = "badge chg";
+    chip.textContent = t("flow.current", { phase: LABELS[active] }) + " · " + statusText(status(active));
+    strip.appendChild(chip);
+  }
+  const traveled = ORDER.map(phaseSpan).filter(Boolean);
+  if (traveled.length) {
+    const span = Math.max(...traveled.map(s => s.end)) - Math.min(...traveled.map(s => s.start));
+    strip.appendChild(makeSpan(t("flow.elapsed", { duration: fmtDuration(span) })));
+  }
+  const hint = document.createElement("div"); hint.className = "hint"; hint.textContent = t("flow.hint");
+  summary.append(head, strip, hint);
+
+  const diagram = document.createElement("div"); diagram.className = "card";
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 1000 168");
+  svg.setAttribute("class", "flow-svg");
+  const nodeWidth = 148, nodeHeight = 84, gap = 22, top = 42;
+  ORDER.forEach((phase, index) => {
+    const x = 16 + index * (nodeWidth + gap);
+    const run = state.phases[phase];
+    const current = status(phase) === "running" || status(phase) === "awaiting-input";
+    if (index > 0) {
+      const arrow = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      const from = 16 + (index - 1) * (nodeWidth + gap) + nodeWidth;
+      arrow.setAttribute("d", "M " + from + " " + (top + nodeHeight / 2) + " L " + (x - 4) + " " + (top + nodeHeight / 2));
+      arrow.setAttribute("class", "flow-arrow" + (STATUS_ORDER[status(phase)] >= STATUS_ORDER.running ? " flow-arrow-active" : ""));
+      svg.appendChild(arrow);
+    }
+    const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    group.setAttribute("class", "flow-node" + (current ? " flow-node-current" : ""));
+    group.style.cursor = "pointer";
+    group.addEventListener("click", () => { tab = "phase:" + phase; eventsPhase = null; viewSignature = ""; renderTabs(); renderView(); });
+    const box = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    box.setAttribute("x", String(x)); box.setAttribute("y", String(top));
+    box.setAttribute("width", String(nodeWidth)); box.setAttribute("height", String(nodeHeight));
+    box.setAttribute("rx", "10");
+    box.setAttribute("fill", "#14161a");
+    box.setAttribute("stroke", NODE_COLORS[status(phase)] || "#3b3f46");
+    box.setAttribute("stroke-width", current ? "2.5" : "1.5");
+    const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    label.setAttribute("x", String(x + 14)); label.setAttribute("y", String(top + 28));
+    label.setAttribute("class", "flow-label");
+    label.textContent = (index + 1) + ". " + LABELS[phase];
+    const stateText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    stateText.setAttribute("x", String(x + 14)); stateText.setAttribute("y", String(top + 50));
+    stateText.setAttribute("class", "flow-state");
+    stateText.setAttribute("fill", NODE_COLORS[status(phase)]);
+    stateText.textContent = statusText(status(phase));
+    const meta = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    meta.setAttribute("x", String(x + 14)); meta.setAttribute("y", String(top + 70));
+    meta.setAttribute("class", "flow-meta");
+    const span = phaseSpan(phase);
+    meta.textContent = t("flow.artifacts", { count: (run.artifacts || []).length }) + (span ? " · " + fmtDuration(span.ms) : "");
+    group.append(box, label, stateText, meta);
+    svg.appendChild(group);
+  });
+  diagram.appendChild(svg);
+
+  const timeline = document.createElement("div"); timeline.className = "flow-timeline";
+  const first = Math.min(...ORDER.map(p => phaseSpan(p)?.start ?? Number.POSITIVE_INFINITY));
+  const last = Math.max(...ORDER.map(p => phaseSpan(p)?.end ?? 0));
+  const total = Number.isFinite(first) && last > first ? last - first : 0;
+  const heading = document.createElement("h3"); heading.textContent = t("flow.timeline");
+  timeline.appendChild(heading);
+  for (const phase of ORDER) {
+    const span = phaseSpan(phase);
+    const row = document.createElement("div"); row.className = "flow-row";
+    const name = document.createElement("span"); name.className = "flow-row-name"; name.textContent = LABELS[phase];
+    const track = document.createElement("div"); track.className = "flow-track";
+    const bar = document.createElement("div"); bar.className = "flow-bar";
+    bar.dataset.status = status(phase);
+    if (span && total > 0) {
+      bar.style.left = ((span.start - first) / total) * 100 + "%";
+      bar.style.width = Math.max(1.2, (span.ms / total) * 100) + "%";
+    } else {
+      bar.style.left = "0%"; bar.style.width = "0%";
+    }
+    bar.title = span ? fmtDuration(span.ms) : t("flow.notStarted");
+    track.appendChild(bar);
+    const duration = document.createElement("span"); duration.className = "flow-row-duration";
+    duration.textContent = span ? fmtDuration(span.ms) : "—";
+    row.append(name, track, duration);
+    timeline.appendChild(row);
+  }
+  diagram.appendChild(timeline);
+
+  view.append(summary, diagram);
+}
+
+/* ---------- 阶段配置、质量报告、部署事实 ---------- */
+
+const reports = {};
+async function loadReport(phase) {
+  const signature = JSON.stringify(state.phases[phase]);
+  if (reports[phase] && reports[phase].signature === signature) return reports[phase];
+  let payload = {};
+  try { payload = await api("/api/report?phase=" + phase); } catch (err) { payload = {}; }
+  reports[phase] = { signature, ...payload };
+  return reports[phase];
+}
+
+function configCard(onSaved) {
+  const box = document.createElement("div"); box.className = "card";
+  const title = document.createElement("h3"); title.textContent = t("config.specsTitle");
+  const help = document.createElement("div"); help.className = "hint"; help.style.marginBottom = "6px";
+  help.textContent = t("config.specsHelp");
+  const specs = document.createElement("textarea"); specs.id = "config-specs"; specs.rows = 4;
+  specs.className = "editor-mini";
+  specs.value = (state.specSources || []).join("\\n");
+  specs.placeholder = "https://wiki.corp/spec/api.md\\ndocs/standards.md";
+  box.append(title, help, specs);
+
+  const scaffoldTitle = document.createElement("h3"); scaffoldTitle.textContent = t("config.scaffoldTitle");
+  scaffoldTitle.style.marginTop = "14px";
+  const command = document.createElement("input"); command.id = "config-scaffold"; command.className = "editor-mini";
+  command.value = state.scaffoldCommand || "";
+  command.placeholder = t("config.scaffoldCommand");
+  const template = document.createElement("input"); template.id = "config-template"; template.className = "editor-mini";
+  template.value = state.scaffoldTemplate || "";
+  template.placeholder = t("config.scaffoldTemplate");
+  const labels = document.createElement("div"); labels.className = "hint";
+  labels.textContent = t("config.scaffoldCommand") + " / " + t("config.scaffoldTemplate");
+  box.append(scaffoldTitle, labels, command, template);
+
+  const row = document.createElement("div"); row.className = "row"; row.style.marginTop = "10px";
+  const save = document.createElement("button"); save.textContent = t("home.save");
+  const statusNote = document.createElement("span"); statusNote.className = "hint";
+  save.onclick = async () => {
+    save.disabled = true;
+    try {
+      await api("/api/config", {
+        method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          specSources: el("config-specs").value.split("\\n").map(line => line.trim()).filter(Boolean),
+          scaffoldCommand: el("config-scaffold").value,
+          scaffoldTemplate: el("config-template").value,
+        }),
+      });
+      statusNote.textContent = t("config.saved");
+      await refreshState();
+      onSaved?.();
+    } catch (err) { alert(err.message); }
+    save.disabled = false;
+  };
+  row.append(save, statusNote);
+  box.appendChild(row);
+  return box;
+}
+
+function qualityCard(report) {
+  const box = document.createElement("div"); box.className = "card";
+  const title = document.createElement("h3"); title.textContent = t("quality.title");
+  box.appendChild(title);
+  if (!report) {
+    box.appendChild(Object.assign(document.createElement("div"), { className: "empty", textContent: t("quality.empty") }));
+    return box;
+  }
+  const scoreRow = document.createElement("div"); scoreRow.className = "row"; scoreRow.style.gap = "12px";
+  const score = makeSpan(t("quality.score", { score: report.score }));
+  score.style.fontWeight = "600";
+  const meter = document.createElement("div"); meter.className = "quality-meter";
+  const fill = document.createElement("div"); fill.className = "quality-meter-fill";
+  fill.style.width = Math.max(2, Math.min(100, report.score)) + "%";
+  fill.dataset.band = report.score >= 85 ? "high" : report.score >= 60 ? "mid" : "low";
+  meter.appendChild(fill);
+  scoreRow.append(score, meter);
+  const weights = document.createElement("span"); weights.className = "hint";
+  weights.textContent = t("quality.weights", {
+    weights: Object.entries(report.weights || {}).map(([name, weight]) => name + " " + weight).join(", ") || "—",
+  });
+  scoreRow.appendChild(weights);
+  box.appendChild(scoreRow);
+
+  const table = document.createElement("table"); table.className = "quality-table";
+  const head = document.createElement("thead");
+  head.innerHTML = "<tr><th>" + t("quality.signal") + "</th><th>" + t("quality.result") + "</th><th>" +
+    t("calls.duration") + "</th><th>" + t("quality.counts", { passed: "…", failed: "…" }).replace(/^[^:：]*[:：]\\s*/, "") + "</th></tr>";
+  const body = document.createElement("tbody");
+  for (const signal of report.signals || []) {
+    const row = document.createElement("tr");
+    const state = signal.exitCode === null ? "unknown" : signal.exitCode === 0 ? "pass" : "fail";
+    const cells = [
+      signal.name,
+      state === "unknown" ? t("quality.notMeasured") : state === "pass" ? t("quality.passed") : t("quality.failed") + " (" + signal.exitCode + ")",
+      signal.exitCode === null ? "—" : fmtDuration(signal.durationMs),
+      [
+        signal.passed !== undefined ? t("quality.counts", { passed: signal.passed, failed: signal.failed || 0 }) : null,
+        signal.percent !== undefined ? t("quality.coverage", { percent: signal.percent }) : null,
+        signal.note || null,
+      ].filter(Boolean).join("; ") || "—",
+    ];
+    cells.forEach(value => { const cell = document.createElement("td"); cell.textContent = value; row.appendChild(cell); });
+    row.dataset.state = state;
+    body.appendChild(row);
+  }
+  table.append(head, body);
+  box.appendChild(table);
+
+  const history = report.history || [];
+  if (history.length) {
+    const heading = document.createElement("h3"); heading.textContent = t("quality.history", { count: history.length });
+    heading.style.marginTop = "14px";
+    const chart = document.createElement("div"); chart.className = "quality-history";
+    for (const entry of history) {
+      const bar = document.createElement("div"); bar.className = "quality-history-bar";
+      const value = document.createElement("div"); value.className = "quality-history-fill";
+      value.style.height = Math.max(4, Math.min(100, entry.score)) + "%";
+      value.dataset.band = entry.score >= 85 ? "high" : entry.score >= 60 ? "mid" : "low";
+      value.title = new Date(entry.at).toLocaleString() + " · " + entry.score + "/100";
+      bar.appendChild(value);
+      chart.appendChild(bar);
+    }
+    box.append(heading, chart);
+  }
+  return box;
+}
+
+function factsCard(facts) {
+  const box = document.createElement("div"); box.className = "card";
+  const title = document.createElement("h3"); title.textContent = t("facts.title");
+  box.appendChild(title);
+  if (!facts) {
+    box.appendChild(Object.assign(document.createElement("div"), { className: "empty", textContent: t("facts.empty") }));
+    return box;
+  }
+  const section = (heading, values) => {
+    if (!values.length) return;
+    const h = document.createElement("h3"); h.textContent = heading; h.style.marginTop = "12px";
+    const list = document.createElement("div"); list.className = "facts-list";
+    for (const value of values) {
+      if (typeof value === "object" && value.path) {
+        const chip = document.createElement("button"); chip.className = "chip";
+        chip.textContent = value.kind ? value.path + " · " + value.kind : value.path;
+        chip.title = value.bytes + " bytes";
+        chip.onclick = () => openPreview(value.path);
+        list.appendChild(chip);
+      } else {
+        list.appendChild(makeSpan(String(value)));
+      }
+    }
+    box.append(h, list);
+  };
+  section(t("facts.configs"), facts.configs || []);
+  section(t("facts.scripts"), Object.entries(facts.scripts || {}).map(([name, script]) => name + " — " + script));
+  section(t("facts.entrypoints"), facts.entrypoints || []);
+  section(t("facts.env"), facts.envVars || []);
+  section(t("facts.ports"), facts.ports || []);
+  section(t("facts.evidence"), (facts.evidence || []).map(path => ({ path })));
+  return box;
+}
+
+function scaffoldCard(scaffold) {
+  const box = document.createElement("div"); box.className = "card";
+  const title = document.createElement("h3"); title.textContent = t("scaffold.title");
+  box.appendChild(title);
+  if (!scaffold) {
+    box.appendChild(Object.assign(document.createElement("div"), { className: "empty", textContent: t("scaffold.none") }));
+    return box;
+  }
+  const lines = [
+    scaffold.template ? t("scaffold.templateLabel") + ": " + scaffold.template : null,
+    scaffold.command ? t("scaffold.commandLabel") + ": " + scaffold.command : null,
+    scaffold.exitCode !== null && scaffold.exitCode !== 0 ? "exit " + scaffold.exitCode : null,
+    t("scaffold.created", { count: (scaffold.created || []).length }),
+  ].filter(Boolean);
+  const list = document.createElement("div"); list.className = "scaffold-lines";
+  for (const line of lines) list.appendChild(makeSpan(line));
+  box.appendChild(list);
+  const chips = document.createElement("div"); chips.className = "chips"; chips.style.marginTop = "8px";
+  for (const file of (scaffold.created || []).slice(0, 30)) {
+    const chip = document.createElement("button"); chip.className = "chip"; chip.textContent = file;
+    chip.onclick = () => openPreview(file);
+    chips.appendChild(chip);
+  }
+  box.appendChild(chips);
+  return box;
 }
 
 /* ---------- 产物树 ---------- */

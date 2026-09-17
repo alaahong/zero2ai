@@ -26,6 +26,12 @@ export default class Esdlc extends Command {
 		port: Flags.integer({ description: "Web UI port (default 3848)" }),
 		dir: Flags.string({ description: "Project directory (default: current directory)" }),
 		lang: Flags.string({ description: "Interface language (zh|en)", options: ["zh", "en"] }),
+		spec: Flags.string({
+			description: "Spec/skill source for the analysis phases (URL or project-relative path); repeatable",
+			multiple: true,
+		}),
+		scaffold: Flags.string({ description: "Build pre-step: command that creates the project skeleton" }),
+		template: Flags.string({ description: "Build pre-step: template directory copied into the project" }),
 	};
 
 	static examples = [
@@ -33,6 +39,8 @@ export default class Esdlc extends Command {
 		"# Point the workspace at another project\n  zero2ai esdlc --dir D:/work/corp-service --web",
 		"# Show the workspace status\n  zero2ai esdlc",
 		"# Serve the workspace in Chinese or English\n  zero2ai esdlc --web --lang zh",
+		"# Ground the design in your own standards\n  zero2ai esdlc run analysis --spec https://wiki.corp/spec/api.md --spec docs/standards.md",
+		'# Seed a skeleton before the agent writes code\n  zero2ai esdlc run build --scaffold "bun create vite app --template react-ts"',
 		"# Capture a discussion recording (ASR) or an existing transcript\n  zero2ai esdlc run requirements --input ./meeting.m4a",
 		'# Capture notes without audio\n  zero2ai esdlc run requirements --prompt "row-level reconciliation scope"',
 		"# Generate BRD + FSD from the captured requirements\n  zero2ai esdlc run analysis",
@@ -54,6 +62,9 @@ export default class Esdlc extends Command {
 			...(flags.port ? { port: flags.port } : {}),
 			...(flags.dir ? { dir: flags.dir } : {}),
 			...(flags.lang ? { lang: flags.lang } : {}),
+			...(flags.spec?.length ? { spec: flags.spec } : {}),
+			...(flags.scaffold ? { scaffold: flags.scaffold } : {}),
+			...(flags.template ? { template: flags.template } : {}),
 		});
 		process.exitCode = code;
 	}

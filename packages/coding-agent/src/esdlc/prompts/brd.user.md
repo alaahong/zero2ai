@@ -15,3 +15,10 @@ Material:
 ---
 {{requirements}}
 ---
+
+Governing specifications & skills (from the workspace configuration). Treat these as binding
+rules for vocabulary, required sections and control language; when a specification and the
+material disagree, follow the specification and record the conflict:
+---
+{{specs}}
+---

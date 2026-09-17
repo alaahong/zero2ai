@@ -25,13 +25,21 @@ import {
 } from "./i18n";
 
 export type { EsdlcRunOptions, EsdlcPhaseOutcome };
+export { runScaffoldPreStep } from "./phases";
 
 /**
  * Options accepted by {@link runEsdlcPhase}: the phase options minus the ones the runner
  * owns, plus an optional transport for answering a phase's question.
  */
-export type EsdlcPhaseRequest = Omit<EsdlcRunOptions, "cwd" | "notes" | "requestInput" | "onEvent"> & {
+export type EsdlcPhaseRequest = Omit<
+	EsdlcRunOptions,
+	"cwd" | "notes" | "requestInput" | "onEvent" | "specSources" | "scaffoldCommand" | "scaffoldTemplate"
+> & {
 	readonly requestInput?: (question: EsdlcQuestion) => Promise<string>;
+	/** Overrides for the workspace configuration; a caller that omits them uses the stored values. */
+	readonly specSources?: readonly string[];
+	readonly scaffoldCommand?: string;
+	readonly scaffoldTemplate?: string;
 };
 export { ESDLC_PHASES, ESDLC_PHASE_LABELS, ESDLC_PHASE_TITLES, readEsdlcState };
 export { ESDLC_LOCALES, esdlcCatalogs, esdlcMessages, isEsdlcLocale, resolveEsdlcLocale, tEsdlc };
@@ -70,12 +78,16 @@ export async function runEsdlcPhase(
 	};
 	await recordPhaseRun(projectRoot, phase, running);
 	const state = await readEsdlcState(projectRoot);
-	const { requestInput, ...phaseOptions } = options;
+	const { requestInput, specSources, scaffoldCommand, scaffoldTemplate, ...phaseOptions } = options;
 	try {
 		const outcome = await RUNNERS[phase]({
 			...phaseOptions,
 			cwd: projectRoot,
 			notes: state.notes,
+			// Configuration lives in the workspace; an explicit argument for this run wins.
+			specSources: specSources ?? state.specSources,
+			scaffoldCommand: scaffoldCommand ?? state.scaffoldCommand,
+			scaffoldTemplate: scaffoldTemplate ?? state.scaffoldTemplate,
 			// The runner owns the persisted question; the caller owns the transport (web page or
 			// interactive terminal). Without a transport there is no human to wait for, so the
 			// phase proceeds rather than parking forever on a question nobody can answer.

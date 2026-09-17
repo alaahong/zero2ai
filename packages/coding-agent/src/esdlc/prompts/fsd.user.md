@@ -20,3 +20,9 @@ Business requirements document (may be empty when the material is raw discussion
 ---
 {{brd}}
 ---
+
+Governing specifications & skills (binding for technical conventions, naming and required
+interfaces; cite the ones that shape each decision):
+---
+{{specs}}
+---

@@ -32,6 +32,12 @@ export interface EsdlcCommandArgs {
 	readonly dir?: string;
 	/** Interface language override (`zh` | `en`). */
 	readonly lang?: string;
+	/** Spec/skill sources for the analysis phases (URL or project-relative path). */
+	readonly spec?: readonly string[];
+	/** Build pre-step command that creates the project skeleton. */
+	readonly scaffold?: string;
+	/** Build pre-step template directory copied into the project. */
+	readonly template?: string;
 }
 
 /**
@@ -118,6 +124,9 @@ export async function runEsdlcCommand(args: EsdlcCommandArgs): Promise<number> {
 		...(args.prompt ? { prompt: args.prompt } : {}),
 		...(args.model ? { model: args.model } : {}),
 		...(args.command ? { command: args.command } : {}),
+		...(args.spec?.length ? { specSources: args.spec } : {}),
+		...(args.scaffold ? { scaffoldCommand: args.scaffold } : {}),
+		...(args.template ? { scaffoldTemplate: args.template } : {}),
 		onProgress: message => process.stdout.write(`  - ${message}\n`),
 	});
 	const run = state.phases[phase as EsdlcPhaseId];

@@ -438,6 +438,111 @@ describe("language API", () => {
 	});
 });
 
+describe("workspace configuration API", () => {
+	it("stores the spec sources and the build scaffold, and rejects malformed input", async () => {
+		const saved = await fetch(api("/api/config"), {
+			method: "POST",
+			headers: { "content-type": "application/json" },
+			body: JSON.stringify({
+				specSources: [" https://wiki.corp/spec.md ", "docs/standards.md", ""],
+				scaffoldCommand: "bun create app",
+				scaffoldTemplate: "templates/api",
+			}),
+		});
+		expect(saved.status).toBe(200);
+		const state = (await (await fetch(api("/api/state"))).json()) as {
+			specSources: string[];
+			scaffoldCommand: string;
+			scaffoldTemplate: string;
+		};
+		// Whitespace is trimmed and empty lines dropped — the editor sends one source per line.
+		expect(state.specSources).toEqual(["https://wiki.corp/spec.md", "docs/standards.md"]);
+		expect(state.scaffoldCommand).toBe("bun create app");
+		expect(state.scaffoldTemplate).toBe("templates/api");
+
+		for (const payload of [
+			{ specSources: "not-an-array" },
+			{ specSources: Array.from({ length: 21 }, (_, index) => `s${index}`) },
+			{ specSources: ["x".repeat(501)] },
+			{ scaffoldCommand: 7 },
+		]) {
+			const response = await fetch(api("/api/config"), {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify(payload),
+			});
+			expect(response.status).toBe(400);
+		}
+	});
+});
+
+describe("phase report API", () => {
+	it("returns the parsed quality report and its history", async () => {
+		const dir = path.join(projectRoot, ".zero2ai", "esdlc", "test");
+		fs.mkdirSync(dir, { recursive: true });
+		const report = {
+			at: "2026-01-01T00:00:00.000Z",
+			score: 88,
+			weights: { tests: 0.625, signals: 0.375 },
+			signals: [{ name: "test", command: "bun test", exitCode: 0, durationMs: 120, passed: 4, failed: 0 }],
+		};
+		fs.writeFileSync(path.join(dir, "quality.json"), JSON.stringify(report));
+		fs.writeFileSync(
+			path.join(dir, "quality-history.jsonl"),
+			`${JSON.stringify(report)}\n${JSON.stringify({ ...report, score: 70 })}\n`,
+		);
+		const payload = (await (await fetch(api("/api/report?phase=test"))).json()) as {
+			quality: { score: number };
+			history: { score: number }[];
+		};
+		expect(payload.quality.score).toBe(88);
+		expect(payload.history.map(entry => entry.score)).toEqual([88, 70]);
+	});
+
+	it("returns deployment facts and the build scaffold record", async () => {
+		const deployDir = path.join(projectRoot, ".zero2ai", "esdlc", "deploy");
+		fs.mkdirSync(deployDir, { recursive: true });
+		fs.writeFileSync(
+			path.join(deployDir, "deploy-facts.json"),
+			JSON.stringify({
+				at: "x",
+				configs: [{ path: "Dockerfile", kind: "container image", bytes: 10 }],
+				scripts: {},
+				entrypoints: [],
+				envVars: ["API_BASE_URL"],
+				ports: ["8080"],
+				evidence: ["Dockerfile"],
+			}),
+		);
+		const facts = (await (await fetch(api("/api/report?phase=deploy"))).json()) as {
+			facts: { envVars: string[] };
+		};
+		expect(facts.facts.envVars).toEqual(["API_BASE_URL"]);
+
+		const buildDir = path.join(projectRoot, ".zero2ai", "esdlc", "build");
+		fs.mkdirSync(buildDir, { recursive: true });
+		fs.writeFileSync(
+			path.join(buildDir, "scaffold.json"),
+			JSON.stringify({
+				command: "bun create app",
+				template: "",
+				exitCode: 0,
+				durationMs: 12,
+				created: ["app/index.ts"],
+			}),
+		);
+		const scaffold = (await (await fetch(api("/api/report?phase=build"))).json()) as {
+			scaffold: { created: string[] };
+		};
+		expect(scaffold.scaffold.created).toEqual(["app/index.ts"]);
+	});
+
+	it("reports nothing for a phase without structured data, and rejects an unknown phase", async () => {
+		expect(await (await fetch(api("/api/report?phase=release"))).json()).toEqual({});
+		expect((await fetch(api("/api/report?phase=nope"))).status).toBe(400);
+	});
+});
+
 describe("rebinding guard", () => {
 	it("refuses a request whose Host is not loopback", async () => {
 		const response = await fetch(api("/api/state"), { headers: { host: "attacker.example" } });

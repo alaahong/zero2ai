@@ -58,7 +58,18 @@ describe("fresh workspace", () => {
 				question: null,
 			};
 		}
-		return { version: 1, projectRoot, createdAt: "", updatedAt: "", phases, notes: "", locale: "" };
+		return {
+			version: 1,
+			projectRoot,
+			createdAt: "",
+			updatedAt: "",
+			phases,
+			notes: "",
+			locale: "",
+			specSources: [],
+			scaffoldCommand: "",
+			scaffoldTemplate: "",
+		};
 	}
 });
 

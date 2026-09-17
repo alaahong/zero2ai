@@ -13,6 +13,7 @@ import {
 	type EsdlcCallRecord,
 	type EsdlcPhaseId,
 	type EsdlcPhaseRun,
+	type EsdlcQualityReport,
 	type EsdlcState,
 	emptyPhaseRun,
 } from "./types";
@@ -40,7 +41,18 @@ function emptyState(projectRoot: string, now: string): EsdlcState {
 		EsdlcPhaseId,
 		EsdlcPhaseRun
 	>;
-	return { version: 1, projectRoot, createdAt: now, updatedAt: now, phases, notes: "", locale: "" };
+	return {
+		version: 1,
+		projectRoot,
+		createdAt: now,
+		updatedAt: now,
+		phases,
+		notes: "",
+		locale: "",
+		specSources: [],
+		scaffoldCommand: "",
+		scaffoldTemplate: "",
+	};
 }
 
 /** Read the workspace, or an empty one when the project has never been run. */
@@ -58,6 +70,11 @@ export async function readEsdlcState(projectRoot: string): Promise<EsdlcState> {
 			phases,
 			notes: typeof parsed.notes === "string" ? parsed.notes : "",
 			locale: typeof parsed.locale === "string" ? parsed.locale : "",
+			specSources: Array.isArray(parsed.specSources)
+				? parsed.specSources.filter((entry: unknown): entry is string => typeof entry === "string")
+				: [],
+			scaffoldCommand: typeof parsed.scaffoldCommand === "string" ? parsed.scaffoldCommand : "",
+			scaffoldTemplate: typeof parsed.scaffoldTemplate === "string" ? parsed.scaffoldTemplate : "",
 		};
 	} catch (error) {
 		if (!isEnoent(error)) throw error;
@@ -94,13 +111,30 @@ export async function writeWorkspaceNotes(projectRoot: string, notes: string): P
 	return await updateWorkspace(projectRoot, { notes });
 }
 
+/** Persist the analysis/build configuration (spec sources, scaffold pre-step). */
+export async function writeWorkspaceConfig(
+	projectRoot: string,
+	patch: { specSources?: readonly string[]; scaffoldCommand?: string; scaffoldTemplate?: string },
+): Promise<EsdlcState> {
+	return await updateWorkspace(projectRoot, patch);
+}
+
 /** Persist the interface language chosen in the workspace. */
 export async function writeWorkspaceLocale(projectRoot: string, locale: string): Promise<EsdlcState> {
 	return await updateWorkspace(projectRoot, { locale });
 }
 
 /** Apply a workspace-level setting and persist it. */
-async function updateWorkspace(projectRoot: string, patch: { notes?: string; locale?: string }): Promise<EsdlcState> {
+async function updateWorkspace(
+	projectRoot: string,
+	patch: {
+		notes?: string;
+		locale?: string;
+		specSources?: readonly string[];
+		scaffoldCommand?: string;
+		scaffoldTemplate?: string;
+	},
+): Promise<EsdlcState> {
 	const state = await readEsdlcState(projectRoot);
 	const next: EsdlcState = { ...state, ...patch, updatedAt: new Date().toISOString() };
 	await writeEsdlcState(next);
@@ -303,4 +337,47 @@ export async function readChangedFiles(projectRoot: string): Promise<string[]> {
 		if (isEnoent(error)) return [];
 		throw error;
 	}
+}
+
+/** Read a JSON artifact a phase wrote, or null when it has not run yet. */
+export async function readPhaseJson<T>(projectRoot: string, phase: EsdlcPhaseId, name: string): Promise<T | null> {
+	try {
+		return (await Bun.file(path.join(phaseDir(projectRoot, phase), name)).json()) as T;
+	} catch (error) {
+		if (isEnoent(error)) return null;
+		return null;
+	}
+}
+
+/** Quality reports across runs, oldest first — the UI charts the trend from these. */
+export async function readQualityHistory(projectRoot: string): Promise<EsdlcQualityReport[]> {
+	try {
+		const text = await Bun.file(path.join(phaseDir(projectRoot, "test"), "quality-history.jsonl")).text();
+		return text
+			.split("\n")
+			.filter(Boolean)
+			.flatMap(line => {
+				try {
+					return [JSON.parse(line) as EsdlcQualityReport];
+				} catch {
+					return [];
+				}
+			});
+	} catch (error) {
+		if (isEnoent(error)) return [];
+		return [];
+	}
+}
+
+/** Append one quality report to the history file. */
+export async function appendQualityHistory(projectRoot: string, report: EsdlcQualityReport): Promise<void> {
+	const file = path.join(phaseDir(projectRoot, "test"), "quality-history.jsonl");
+	await fs.mkdir(path.dirname(file), { recursive: true });
+	let existing = "";
+	try {
+		existing = await Bun.file(file).text();
+	} catch (error) {
+		if (!isEnoent(error)) throw error;
+	}
+	await Bun.write(file, `${existing}${JSON.stringify(report)}\n`);
 }

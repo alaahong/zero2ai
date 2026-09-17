@@ -70,6 +70,15 @@ export interface EsdlcState {
 	readonly notes: string;
 	/** Interface language chosen in the workspace (`""` = follow the client/environment). */
 	readonly locale: string;
+	/**
+	 * Specification/skill sources folded into the analysis & design prompts. Each entry is an
+	 * `http(s)` URL or a path inside the project; the phase records what it actually loaded.
+	 */
+	readonly specSources: readonly string[];
+	/** Build pre-step: a command that creates the project skeleton before the agent runs. */
+	readonly scaffoldCommand: string;
+	/** Build pre-step: a directory copied into the project as the starting skeleton. */
+	readonly scaffoldTemplate: string;
 }
 
 /** Short flow labels — the ids alone lose "& DESIGN", so labels are explicit. */
@@ -105,4 +114,59 @@ export function emptyPhaseRun(): EsdlcPhaseRun {
 		artifacts: [],
 		question: null,
 	};
+}
+
+/** One quality signal the test phase measured. Absent numbers mean "not measured". */
+export interface EsdlcQualitySignal {
+	/** `test` | `typecheck` | `lint` | `coverage`. */
+	readonly name: string;
+	readonly command: string;
+	readonly exitCode: number | null;
+	readonly durationMs: number;
+	readonly passed?: number;
+	readonly failed?: number;
+	readonly skipped?: number;
+	/** Coverage percentage, when the signal reported one. */
+	readonly percent?: number;
+	/** Why a signal is absent, or how its numbers were read. */
+	readonly note?: string;
+}
+
+/** What the test phase measured, machine-readable so the UI can chart it. */
+export interface EsdlcQualityReport {
+	readonly at: string;
+	/** 0–100 over the signals that were actually available; see `weights`. */
+	readonly score: number;
+	readonly weights: Readonly<Record<string, number>>;
+	readonly signals: readonly EsdlcQualitySignal[];
+}
+
+/** A deployment-relevant file the deploy phase found, with the evidence path it read. */
+export interface EsdlcDeployConfig {
+	readonly path: string;
+	readonly kind: string;
+	readonly bytes: number;
+}
+
+/** Repository facts the deploy phase derived, so the document cites reality. */
+export interface EsdlcDeployFacts {
+	readonly at: string;
+	readonly configs: readonly EsdlcDeployConfig[];
+	readonly scripts: Readonly<Record<string, string>>;
+	readonly entrypoints: readonly string[];
+	/** Environment variables the source actually reads. */
+	readonly envVars: readonly string[];
+	readonly ports: readonly string[];
+	/** Paths the reader can open to verify each fact. */
+	readonly evidence: readonly string[];
+}
+
+/** What the build phase's scaffold pre-step did. */
+export interface EsdlcScaffoldResult {
+	readonly command: string;
+	readonly template: string;
+	readonly exitCode: number | null;
+	readonly durationMs: number;
+	readonly created: readonly string[];
+	readonly note?: string;
 }

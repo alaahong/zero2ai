@@ -12,8 +12,11 @@ import * as vcs from "@zero2ai/natives/vcs";
 import { asRecord, isEnoent, prompt } from "@zero2ai/utils";
 import { type EsdlcCallSummary, generateText } from "./llm";
 import { transcribeRecording } from "./audio";
-import { phaseDir } from "./state";
-import type { EsdlcArtifact, EsdlcPhaseId } from "./types";
+import { collectDeployFacts, renderDeployFactsArtifact, renderDeployFactsForPrompt } from "./deploy-facts";
+import { parseCoveragePercent, parseTestCounts, renderQualityArtifact, scoreQuality } from "./quality";
+import { loadSpecSources, renderSpecsArtifact, renderSpecsForPrompt } from "./specs";
+import { appendQualityHistory, phaseDir } from "./state";
+import type { EsdlcArtifact, EsdlcPhaseId, EsdlcQualityReport, EsdlcQualitySignal, EsdlcScaffoldResult } from "./types";
 
 import systemAnalyst from "./prompts/system-analyst.md" with { type: "text" };
 import systemEngineer from "./prompts/system-engineer.md" with { type: "text" };
@@ -45,6 +48,12 @@ export interface EsdlcRunOptions {
 	readonly onProgress?: (message: string) => void;
 	/** Workspace 补充说明, injected into every model prompt. */
 	readonly notes?: string;
+	/** Spec/skill sources to load for the analysis phases (URL or project-relative path). */
+	readonly specSources?: readonly string[];
+	/** Build pre-step: command that creates the project skeleton. */
+	readonly scaffoldCommand?: string;
+	/** Build pre-step: directory copied into the project as the starting skeleton. */
+	readonly scaffoldTemplate?: string;
 	/** Ask the human a question and wait for the answer. */
 	readonly requestInput?: (question: string) => Promise<string>;
 	/** Execution trail: one record per model call, awaited so transcripts land in order. */
@@ -122,33 +131,6 @@ async function worktreeDiff(cwd: string): Promise<{ patch: string; files: readon
 	}
 }
 
-async function collectRepoFacts(cwd: string): Promise<string> {
-	const parts: string[] = [];
-	const packageJson = Bun.file(path.join(cwd, "package.json"));
-	if (await packageJson.exists()) {
-		const parsed = asRecord(await packageJson.json()) ?? {};
-		parts.push(
-			`package.json: name=${String(parsed.name ?? "?")} version=${String(parsed.version ?? "?")}\n` +
-				`scripts: ${Object.keys(asRecord(parsed.scripts) ?? {}).join(", ") || "(none)"}\n` +
-				`bin: ${Object.keys(asRecord(parsed.bin) ?? {}).join(", ") || "(none)"}\n` +
-				`engines: ${JSON.stringify(parsed.engines ?? {})}`,
-		);
-	}
-	for (const candidate of ["Dockerfile", "docker-compose.yml", "compose.yml", "Cargo.toml"]) {
-		const file = Bun.file(path.join(cwd, candidate));
-		if (await file.exists()) parts.push(`${candidate}: present (${Math.round(file.size / 1024)} KiB)`);
-	}
-	for (const dir of ["infra", ".github/workflows", "deploy", "k8s"]) {
-		try {
-			const entries = await fs.readdir(path.join(cwd, dir));
-			parts.push(`${dir}/: ${entries.slice(0, 20).join(", ")}`);
-		} catch (error) {
-			if (!isEnoent(error)) throw error;
-		}
-	}
-	return parts.join("\n\n") || "(no repository facts found)";
-}
-
 /**
  * Every document phase goes through here: the workspace notes are appended to
  * the prompt (they are operator context, not part of the source material) and
@@ -214,6 +196,20 @@ export async function runAnalysisPhase(options: EsdlcRunOptions): Promise<EsdlcP
 	if (!material)
 		throw new Error("no requirements captured yet: run `zero2ai esdlc run requirements --input <file>` first");
 	const artifacts: EsdlcArtifact[] = [];
+	// Spec/skill sources: the operator's own standards ground the documents. Loaded first and
+	// persisted as an artifact, so the run is auditable even if the model call then fails.
+	const specs = await loadSpecSources({
+		projectRoot: options.cwd,
+		sources: options.specSources ?? [],
+		...(options.signal ? { signal: options.signal } : {}),
+	});
+	if (specs.loaded.length || specs.skipped.length) {
+		artifacts.push(await writeArtifact(options.cwd, "analysis", "specs-loaded.md", renderSpecsArtifact(specs)));
+		options.onProgress?.(
+			`specs: ${specs.loaded.length} loaded${specs.skipped.length ? `, ${specs.skipped.length} skipped` : ""}`,
+		);
+	}
+	const specsSection = renderSpecsForPrompt(specs);
 	// Human-in-the-loop: a one-line requirement cannot support a BRD, so ask for
 	// the missing context instead of letting the model invent it.
 	if (options.requestInput && material.length < CLARIFICATION_THRESHOLD_CHARS) {
@@ -227,28 +223,121 @@ export async function runAnalysisPhase(options: EsdlcRunOptions): Promise<EsdlcP
 			);
 		}
 	}
+	const specArgs = {
+		requirements: material,
+		specs: specsSection || "(no spec sources configured — state assumptions explicitly)",
+	};
 	const brd = await callModel(options, "brd", {
 		systemPrompt: systemAnalyst,
-		userPrompt: prompt.render(brdUser, { requirements: material }),
+		userPrompt: prompt.render(brdUser, specArgs),
 	});
 	const brdArtifact = await writeArtifact(options.cwd, "analysis", "BRD.md", brd.text);
 	const fsd = await callModel(options, "fsd", {
 		systemPrompt: systemAnalyst,
-		userPrompt: prompt.render(fsdUser, { requirements: material, brd: brd.text }),
+		userPrompt: prompt.render(fsdUser, { ...specArgs, brd: brd.text }),
 	});
 	const fsdArtifact = await writeArtifact(options.cwd, "analysis", "FSD.md", fsd.text);
 	artifacts.push(brdArtifact, fsdArtifact);
-	return { summary: `BRD + FSD generated with ${brd.model}`, artifacts };
+	const specNote = specs.loaded.length ? `, ${specs.loaded.length} spec source(s)` : "";
+	return { summary: `BRD + FSD generated with ${brd.model}${specNote}`, artifacts };
 }
 
-/** 3) Build — drive the agent on the design and capture what changed. */
+/** Copy a template directory into the project, skipping the workspace and any VCS metadata. */
+async function copyScaffoldTemplate(cwd: string, template: string): Promise<string[]> {
+	const source = path.resolve(cwd, template);
+	const stat = await fs.stat(source).catch(() => null);
+	if (!stat?.isDirectory()) throw new Error(`scaffold template is not a directory: ${template}`);
+	const created: string[] = [];
+	const walk = async (dir: string, relative: string): Promise<void> => {
+		for (const entry of await fs.readdir(dir, { withFileTypes: true })) {
+			if (entry.name === ".git" || entry.name === ".zero2ai" || entry.name === "node_modules") continue;
+			const from = path.join(dir, entry.name);
+			const to = path.join(cwd, relative, entry.name);
+			const display = path.join(relative, entry.name).replaceAll("\\", "/");
+			if (entry.isDirectory()) {
+				await fs.mkdir(to, { recursive: true });
+				await walk(from, path.join(relative, entry.name));
+				continue;
+			}
+			// Never overwrite work already in the repository: a scaffold seeds, it does not clobber.
+			if (await Bun.file(to).exists()) continue;
+			await fs.mkdir(path.dirname(to), { recursive: true });
+			await Bun.write(to, Bun.file(from));
+			created.push(display);
+		}
+	};
+	await walk(source, "");
+	return created;
+}
+
+/**
+ * The scaffold pre-step: seed a skeleton before the agent writes code.
+ *
+ * Separated (and exported) because it is the one part of `build` that is verifiable without a
+ * model: it either created files and said so, or it failed loudly with a log to read.
+ */
+export async function runScaffoldPreStep(options: EsdlcRunOptions): Promise<{
+	readonly notes: string[];
+	readonly created: string[];
+	readonly record: EsdlcScaffoldResult | null;
+}> {
+	const template = options.scaffoldTemplate?.trim() ?? "";
+	const command = options.scaffoldCommand?.trim() ?? "";
+	const notes: string[] = [];
+	const created: string[] = [];
+	let exitCode: number | null = null;
+	let durationMs = 0;
+
+	if (template) {
+		const startedAt = Date.now();
+		created.push(...(await copyScaffoldTemplate(options.cwd, template)));
+		durationMs += Date.now() - startedAt;
+		notes.push(`template ${template} seeded ${created.length} file(s)`);
+		await writeArtifact(
+			options.cwd,
+			"build",
+			"scaffold-files.txt",
+			created.length ? created.join("\n") : "(template contributed no new files)",
+		);
+	}
+	if (command) {
+		options.onProgress?.(`scaffold: ${command}`);
+		const argv = command.split(/\s+/).filter(Boolean);
+		const run = await runCommand(options.cwd, argv, options.signal);
+		exitCode = run.exitCode;
+		durationMs += run.durationMs;
+		notes.push(`command \`${command}\` exited ${run.exitCode} in ${run.durationMs} ms`);
+		await writeArtifact(
+			options.cwd,
+			"build",
+			"scaffold.log",
+			`# Scaffold\n\ncommand: ${command}\nexit code: ${run.exitCode}\nduration: ${run.durationMs} ms\n\n${run.output || "(no output)"}`,
+		);
+		if (run.exitCode !== 0) {
+			throw new Error(`scaffold command failed (exit ${run.exitCode}); see .zero2ai/esdlc/build/scaffold.log`);
+		}
+	}
+	if (!notes.length) return { notes, created, record: null };
+	const record: EsdlcScaffoldResult = { command, template, exitCode, durationMs, created };
+	await writeArtifact(options.cwd, "build", "scaffold.json", `${JSON.stringify(record, null, 2)}\n`);
+	return { notes, created, record };
+}
+
+/** 3) Build — optional scaffold, then the agent, then the change record. */
 export async function runBuildPhase(options: EsdlcRunOptions): Promise<EsdlcPhaseOutcome> {
 	const design = await readArtifacts(options.cwd, "analysis", ["FSD.md", "BRD.md"]);
+	const scaffold = await runScaffoldPreStep(options);
+	const { notes: scaffoldNotes, created } = scaffold;
+	const scaffoldSection = scaffoldNotes.length
+		? `\n\nThe project skeleton was prepared before you started: ${scaffoldNotes.join("; ")}.${
+				created.length ? ` New files:\n${created.slice(0, 40).join("\n")}` : ""
+			}\nContinue from this skeleton instead of replacing it.`
+		: "";
 	const instruction =
-		options.prompt?.trim() ||
-		(design
-			? "Implement the functional specification in this repository. Work in small, verifiable steps and run the project's checks."
-			: "Implement the requested change in this repository, then run the project's checks.");
+		(options.prompt?.trim() ||
+			(design
+				? "Implement the functional specification in this repository. Work in small, verifiable steps and run the project's checks."
+				: "Implement the requested change in this repository, then run the project's checks.")) + scaffoldSection;
 	const entry = Bun.main;
 	const argv = [process.execPath, entry, "-p", instruction];
 	// Honour the caller's model choice (web picker / --model) for the agent run too.
@@ -270,10 +359,23 @@ export async function runBuildPhase(options: EsdlcRunOptions): Promise<EsdlcPhas
 			`the patch above is a working-tree snapshot taken by this phase.`,
 	);
 	if (run.exitCode !== 0) throw new Error(`build run failed (exit ${run.exitCode}); see ${artifacts[0]!.path}`);
+	const scaffoldFiles = scaffoldNotes.length
+		? [
+				{ label: "scaffold.json", file: "scaffold.json" },
+				...(created.length ? [{ label: "scaffold-files.txt", file: "scaffold-files.txt" }] : []),
+				...(scaffold.record?.command ? [{ label: "scaffold.log", file: "scaffold.log" }] : []),
+			].map(entry => ({
+				label: entry.label,
+				path: path
+					.relative(options.cwd, path.join(phaseDir(options.cwd, "build"), entry.file))
+					.replaceAll("\\", "/"),
+			}))
+		: [];
 	return {
-		summary: `exit 0, ${files.length} file(s) changed`,
+		summary: `exit 0, ${files.length} file(s) changed${scaffoldNotes.length ? " (scaffolded first)" : ""}`,
 		artifacts: [
 			...artifacts,
+			...scaffoldFiles,
 			{
 				label: "BUILD-NOTES.md",
 				path: path
@@ -284,35 +386,149 @@ export async function runBuildPhase(options: EsdlcRunOptions): Promise<EsdlcPhas
 	};
 }
 
-/** 4) Test — run the suite and summarise quality. */
+/** 4) Test — measure quality, chart it, and summarise it. */
 export async function runTestPhase(options: EsdlcRunOptions): Promise<EsdlcPhaseOutcome> {
-	const command = options.command?.trim() || (await detectTestCommand(options.cwd));
-	const argv = command.split(/\s+/).filter(Boolean);
-	const run = await runCommand(options.cwd, argv, options.signal);
+	const testCommand = options.command?.trim() || (await detectTestCommand(options.cwd));
+	const signals: EsdlcQualitySignal[] = [];
+	const outputs: string[] = [];
+
+	const runSignal = async (
+		name: string,
+		command: string,
+	): Promise<{ exitCode: number; output: string; durationMs: number }> => {
+		const argv = command.split(/\s+/).filter(Boolean);
+		options.onProgress?.(`quality: ${name} (${command})`);
+		const run = await runCommand(options.cwd, argv, options.signal);
+		outputs.push(`$ ${command}\n${run.output || "(no output)"}`);
+		return { exitCode: run.exitCode, output: run.output, durationMs: run.durationMs };
+	};
+
+	const tests = await runSignal("test", testCommand);
+	const counts = parseTestCounts(tests.output);
+	signals.push({
+		name: "test",
+		command: testCommand,
+		exitCode: tests.exitCode,
+		durationMs: tests.durationMs,
+		...counts,
+	});
+
+	// Coverage: only when the project's own test command already reports it, or when a dedicated
+	// script exists. The phase never invents a toolchain the repository does not configure.
+	const scripts = await readPackageScripts(options.cwd);
+	const coverageScript = Object.keys(scripts).find(name => /^coverage$|^test:cov/i.test(name));
+	const coveragePercent = parseCoveragePercent(tests.output);
+	if (coveragePercent !== undefined) {
+		signals.push({
+			name: "coverage",
+			command: testCommand,
+			exitCode: tests.exitCode,
+			durationMs: tests.durationMs,
+			percent: coveragePercent,
+			note: "read from the test command's own output",
+		});
+	} else if (coverageScript) {
+		const coverage = await runSignal("coverage", `bun run ${coverageScript}`);
+		signals.push({
+			name: "coverage",
+			command: `bun run ${coverageScript}`,
+			exitCode: coverage.exitCode,
+			durationMs: coverage.durationMs,
+			...(parseCoveragePercent(coverage.output) !== undefined
+				? { percent: parseCoveragePercent(coverage.output) as number }
+				: { note: "no percentage found in the reporter output" }),
+		});
+	} else {
+		signals.push({
+			name: "coverage",
+			command: "(none)",
+			exitCode: null,
+			durationMs: 0,
+			note: "no coverage script in the project",
+		});
+	}
+
+	// Static checks: run exactly the scripts this project defines, never a toolchain we picked.
+	for (const [signal, pattern] of [
+		["typecheck", /^(typecheck|check:types|check:ts|type-check)$/i],
+		["lint", /^(lint|check:lint|eslint)$/i],
+	] as const) {
+		const script = Object.keys(scripts).find(name => pattern.test(name));
+		if (!script) {
+			signals.push({
+				name: signal,
+				command: "(none)",
+				exitCode: null,
+				durationMs: 0,
+				note: "no such script in the project",
+			});
+			continue;
+		}
+		const result = await runSignal(signal, `bun run ${script}`);
+		signals.push({
+			name: signal,
+			command: `bun run ${script}`,
+			exitCode: result.exitCode,
+			durationMs: result.durationMs,
+		});
+	}
+
+	const { score, weights } = scoreQuality(signals);
+	const report: EsdlcQualityReport = { at: new Date().toISOString(), score, weights, signals };
+	const raw = outputs.join("\n\n") || "(no output)";
+	const qualityArtifact = await writeArtifact(options.cwd, "test", "QUALITY.md", renderQualityArtifact(report, raw));
+	const jsonArtifact = await writeArtifact(
+		options.cwd,
+		"test",
+		"quality.json",
+		`${JSON.stringify(report, null, 2)}\n`,
+	);
+	await appendQualityHistory(options.cwd, report);
+
 	let summary =
-		`**Verdict:** ${run.exitCode === 0 ? "the configured suite passed" : "the configured suite failed"} ` +
-		`(exit ${run.exitCode}, ${run.durationMs} ms)\n\n> Automated narrative summary unavailable:\n> {{error}}`;
+		`**Score ${score}/100** — ${signals
+			.filter(signal => signal.exitCode !== null)
+			.map(signal => `${signal.name} ${signal.exitCode === 0 ? "ok" : `exit ${signal.exitCode}`}`)
+			.join(", ")}` + `\n\n> Automated narrative summary unavailable:\n> {{error}}`;
 	try {
 		const analysis = await callModel(options, "test-summary", {
 			systemPrompt: systemEngineer,
 			userPrompt: prompt.render(testUser, {
-				command,
-				exitCode: String(run.exitCode),
-				durationMs: String(run.durationMs),
-				output: run.output || "(no output)",
+				command: testCommand,
+				exitCode: String(tests.exitCode),
+				durationMs: String(tests.durationMs),
+				output: `${JSON.stringify(report, null, 2)}\n\n${raw}`,
 			}),
 		});
 		summary = analysis.text;
 	} catch (error) {
 		summary = summary.replace("{{error}}", (error as Error).message);
 	}
-	const artifact = await writeArtifact(
+	const reportArtifact = await writeArtifact(
 		options.cwd,
 		"test",
 		"report.md",
-		`# Test report\n\n${summary}\n\n## Raw output\n\n\`\`\`\n${run.output || "(no output)"}\n\`\`\`\n`,
+		`# Test report\n\n${summary}\n\n## Quality signals\n\n${JSON.stringify(report, null, 2)}\n\n## Raw output\n\n\`\`\`\n${raw}\n\`\`\`\n`,
 	);
-	return { summary: `exit ${run.exitCode} in ${run.durationMs} ms`, artifacts: [artifact] };
+	const passed = signals.find(signal => signal.name === "test")?.passed;
+	return {
+		summary: `score ${score}/100${passed !== undefined ? `, ${passed} test(s) passed` : ""}`,
+		artifacts: [reportArtifact, qualityArtifact, jsonArtifact],
+	};
+}
+
+/** The project's own scripts, so a phase only runs checks the repository defines. */
+async function readPackageScripts(cwd: string): Promise<Record<string, string>> {
+	try {
+		const parsed = asRecord(await Bun.file(path.join(cwd, "package.json")).json());
+		const scripts = asRecord(parsed?.scripts) ?? {};
+		return Object.fromEntries(
+			Object.entries(scripts).filter((entry): entry is [string, string] => typeof entry[1] === "string"),
+		);
+	} catch (error) {
+		if (isEnoent(error)) return {};
+		throw error;
+	}
 }
 
 async function detectTestCommand(cwd: string): Promise<string> {
@@ -326,20 +542,37 @@ async function detectTestCommand(cwd: string): Promise<string> {
 	return "bun test";
 }
 
-/** 5) Deploy — deployment documentation from repository facts. */
+/** 5) Deploy — a document built from facts the repository actually carries. */
 export async function runDeployPhase(options: EsdlcRunOptions): Promise<EsdlcPhaseOutcome> {
-	const facts = await collectRepoFacts(options.cwd);
+	const facts = await collectDeployFacts(options.cwd);
+	const factsArtifact = await writeArtifact(
+		options.cwd,
+		"deploy",
+		"deploy-facts.json",
+		`${JSON.stringify(facts, null, 2)}\n`,
+	);
+	const evidenceArtifact = await writeArtifact(
+		options.cwd,
+		"deploy",
+		"DEPLOY-FACTS.md",
+		renderDeployFactsArtifact(facts),
+	);
 	const { text, model } = await callModel(options, "deploy-doc", {
 		systemPrompt: systemEngineer,
-		userPrompt: prompt.render(deployUser, { facts }),
+		userPrompt: prompt.render(deployUser, { facts: renderDeployFactsForPrompt(facts) }),
 	});
 	const artifact = await writeArtifact(options.cwd, "deploy", "DEPLOY.md", text);
-	return { summary: `deployment document generated with ${model}`, artifacts: [artifact] };
+	return {
+		summary:
+			`deployment document generated with ${model} — ${facts.configs.length} config(s), ` +
+			`${facts.envVars.length} env var(s) cited`,
+		artifacts: [artifact, evidenceArtifact, factsArtifact],
+	};
 }
 
 /** 6) Release — project-level release documentation. */
 export async function runReleasePhase(options: EsdlcRunOptions): Promise<EsdlcPhaseOutcome> {
-	const facts = await collectRepoFacts(options.cwd);
+	const facts = renderDeployFactsForPrompt(await collectDeployFacts(options.cwd));
 	const { patch, files } = await worktreeDiff(options.cwd);
 	const history = [
 		files.length ? `Uncommitted changes (${files.length}):\n${files.join("\n")}` : "No uncommitted changes.",
