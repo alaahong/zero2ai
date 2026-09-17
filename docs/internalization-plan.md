@@ -439,7 +439,7 @@ zero2ai --config /etc/corp/zero2ai/baseline.yml \
 
 **改名副作用与迁移（实测）**
 
-- **自定义 provider 会"消失"**：凭据库随配置根迁移，改名后 `opencode-go` 这类绑定仍在 `~/.omp/agent/agent.db`，而新根 `~/.zero2ai` 为空 → 新 CLI 与 Web 选择器只看到内置/本地 provider（本机实测：默认新根 8 个 ollama；`ZERO2AI_CONFIG_DIR=.omp` 时 **43 个**，含绑定的 `opencode-go/deepseek-v4.1-flash`）。界面现已直接显示活动配置根，并在探测到旧根有 `agent/config.yml` 时给出迁移提示。
+- **自定义 provider 会"消失"**：凭据库随配置根迁移，改名后 `opencode-go` 这类绑定仍在 `~/.omp/agent/agent.db`，而新根 `~/.zero2ai` 为空 → 新 CLI 与 Web 选择器只看到内置/本地 provider（本机实测：默认新根 8 个 ollama；`ZERO2AI_CONFIG_DIR=.omp` 时 **43 个**，含绑定的 `opencode-go/deepseek-v4.1-flash`）。界面现已直接显示活动配置根，并在**活动根没有任何凭据、而旧根有**时给出迁移提示（迁移完成后自动静默）。迁移实测：备份新根库 → 复制 `config.yml` → 用 SQLite 备份 API 迁移 `agent.db`（WAL 安全）；迁移后默认根即可见 43 个已绑定模型，`analysis` 阶段经 Web API 调用 `opencode-go/deepseek-v4.1-flash` 生成 14KB BRD 与 44KB FSD。
 
 
 - **配置根变更**：CLI 默认配置根由 `~/.omp` 变为 `~/.zero2ai`。改名前的会话仍留在 `~/.omp/agent/sessions/`，因此 `zero2ai --resume <id>` 默认**找不到**它们。两种处理：① 单次执行用 `ZERO2AI_CONFIG_DIR=.omp zero2ai --resume <id>` 指回旧根；② 一次性迁移 `cp -r ~/.omp/agent/sessions/* ~/.zero2ai/agent/sessions/`。
