@@ -130,7 +130,7 @@ export interface LspServerInfo {
 }
 
 /**
- * Premium welcome screen with block-based ZERO2AI logo and two-column layout.
+ * Premium welcome screen with a gradient brand wordmark and two-column layout.
  */
 export class WelcomeComponent implements Component {
 	#animStart: number | null = null;
@@ -477,8 +477,8 @@ export class WelcomeComponent implements Component {
 	}
 }
 
-/** Block-grid brand mark shared by the welcome and setup surfaces. */
-export const ZERO2AI_LOGO = ["████████████", "   ██  ██   ", "   ██  ██   ", "   ▒▒  ██   ", "       ██   "];
+/** Brand wordmark shared by the welcome and setup surfaces. */
+export const ZERO2AI_LOGO = ["zero2ai"];
 
 /** Multi-stop palette for the diagonal gradient. */
 const GRADIENT_STOPS: ReadonlyArray<readonly [number, number, number]> = [

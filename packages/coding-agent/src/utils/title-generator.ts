@@ -14,7 +14,7 @@ import {
 } from "@zero2ai/ai";
 import { StreamMarkupHealing } from "@zero2ai/ai/utils/stream-markup-healing";
 import { isConPTYHosted, writeThroughActiveTerminal } from "@zero2ai/tui";
-import { isTerminalHeadless, logger, prompt } from "@zero2ai/utils";
+import { APP_NAME, isTerminalHeadless, logger, prompt } from "@zero2ai/utils";
 import type { ModelRegistry } from "../config/model-registry";
 
 import { formatModelStringWithRouting } from "../config/model-resolver";
@@ -30,9 +30,9 @@ import { tinyTitleClient } from "../tiny/title-client";
 const TITLE_SYSTEM_PROMPT = prompt.render(titleSystemPrompt);
 const TITLE_MARKER_INSTRUCTION = prompt.render(titleMarkerInstruction);
 
-// Plain π, not the nerd-font `icon.zero2ai` glyph: window/tab titles render in the
-// OS UI font, which has no nerd-font PUA coverage.
-const DEFAULT_TERMINAL_TITLE = "π";
+// The ASCII app name, not a nerd-font `icon.*` glyph: window/tab titles render
+// in the OS UI font, which has no nerd-font PUA coverage.
+const TITLE_BRAND = APP_NAME;
 const TERMINAL_TITLE_CONTROL_CHARS = /[\u0000-\u001f\u007f-\u009f]/g;
 /**
  * Emit a raw title escape sequence. While the TUI owns stdout its frames are
@@ -555,7 +555,7 @@ function getFallbackTerminalTitle(cwd: string | undefined): string | undefined {
 
 export function formatSessionTerminalTitle(sessionName: string | undefined, cwd?: string): string {
 	const label = sanitizeTerminalTitlePart(sessionName) ?? getFallbackTerminalTitle(cwd);
-	return label ? `${DEFAULT_TERMINAL_TITLE}: ${label}` : DEFAULT_TERMINAL_TITLE;
+	return label ? `${TITLE_BRAND}: ${label}` : TITLE_BRAND;
 }
 
 /**
@@ -571,7 +571,7 @@ export function setTerminalTitle(title: string): void {
 	// parent shell's tab whose title teardown just restored.
 	if (terminalTitleRuntime.disposed) return;
 	if (!process.stdout.isTTY || isTerminalHeadless()) return;
-	const next = sanitizeTerminalTitlePart(title) ?? DEFAULT_TERMINAL_TITLE;
+	const next = sanitizeTerminalTitlePart(title) ?? TITLE_BRAND;
 	if (next === lastTerminalTitle) return;
 	if (!setWindowsConsoleTitle(next)) writeTitleSequence(`\x1b]0;${next}\x07`);
 	lastTerminalTitle = next;
@@ -663,13 +663,14 @@ const terminalTitleRuntime: {
 };
 
 /**
- * Compose the terminal title from the `π` brand, a state-carrying separator, and
- * the session label. Pure (no I/O) so the state→separator contract is testable:
- *   - `idle` (user's turn):  `π > label`;
- *   - `working`:             `π ⠋ label` (`π : label` on Windows);
- *   - `attention`:           `π ! label`;
- *   - disabled:              `π: label`.
- * Without a label the separator trails the brand (`π >`) so the state stays visible.
+ * Compose the terminal title from the `zero2ai` brand, a state-carrying
+ * separator, and the session label. Pure (no I/O) so the state→separator
+ * contract is testable:
+ *   - `idle` (user's turn):  `zero2ai > label`;
+ *   - `working`:             `zero2ai ⠋ label` (`zero2ai : label` on Windows);
+ *   - `attention`:           `zero2ai ! label`;
+ *   - disabled:              `zero2ai: label`.
+ * Without a label the separator trails the brand (`zero2ai >`) so the state stays visible.
  * The `working` separator cycles `TERMINAL_TITLE_SPINNER_STYLES[style]`; `style`
  * defaults to `braille` so existing 5-arg callers keep the historical frames.
  */
@@ -681,7 +682,7 @@ export function buildTerminalTitleWithState(
 	platform: NodeJS.Platform = process.platform,
 	style: TerminalTitleSpinnerStyle = "braille",
 ): string {
-	if (!enabled) return label ? `${DEFAULT_TERMINAL_TITLE}: ${label}` : DEFAULT_TERMINAL_TITLE;
+	if (!enabled) return label ? `${TITLE_BRAND}: ${label}` : TITLE_BRAND;
 	const frames = TERMINAL_TITLE_SPINNER_STYLES[style] ?? TERMINAL_TITLE_SPINNER_STYLES.braille;
 	const separator =
 		state === "working"
@@ -691,7 +692,7 @@ export function buildTerminalTitleWithState(
 			: state === "attention"
 				? TITLE_ATTENTION_SEPARATOR
 				: TITLE_IDLE_SEPARATOR;
-	return label ? `${DEFAULT_TERMINAL_TITLE} ${separator} ${label}` : `${DEFAULT_TERMINAL_TITLE} ${separator}`;
+	return label ? `${TITLE_BRAND} ${separator} ${label}` : `${TITLE_BRAND} ${separator}`;
 }
 
 function emitTerminalTitle(): void {
@@ -790,7 +791,7 @@ export function initTerminalTitleState(): void {
  * Stop the spinner timer and latch the runtime off; call on session/UI teardown.
  * The latch is the load-bearing half: `shutdown()` disposes and restores the shell
  * title BEFORE it unsubscribes the session, so a live `#handleAgentStart` in that
- * window would otherwise re-arm the spinner and write `π ⠋ …` into the parent
+ * window would otherwise re-arm the spinner and write `zero2ai ⠋ …` into the parent
  * shell's tab. Released only by {@link initTerminalTitleState}.
  */
 export function disposeTerminalTitleState(): void {

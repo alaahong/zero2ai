@@ -8,7 +8,6 @@ import {
 	truncateToWidth,
 	visibleWidth,
 } from "@zero2ai/tui";
-import { APP_NAME } from "@zero2ai/utils";
 import { gradientLogo, ZERO2AI_LOGO } from "../components/welcome";
 import { theme } from "../theme/theme";
 import type { InteractiveModeContext } from "../types";
@@ -205,7 +204,6 @@ export class SetupWizardComponent implements Component, OverlayFocusOwner {
 		const header = [
 			"",
 			...logo.map(line => centerLine(line, width)),
-			centerLine(theme.bold(theme.fg("accent", APP_NAME)), width),
 			centerLine(theme.fg("muted", `Setup step ${this.#sceneIndex + 1} of ${this.scenes.length}`), width),
 			"",
 			indentLine(theme.bold(title), width, SCENE_MARGIN_X),

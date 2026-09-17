@@ -32,7 +32,7 @@ export function ConnectScreen({ defaultName, error, onConnect }: ConnectScreenPr
 				<div className="sh-connect-head">
 					<div className="sh-lockup">
 						<span className="sh-lockup-mark" aria-hidden="true" />
-						<span className="sh-lockup-pi">π</span> zero2ai collab
+						zero2ai collab
 					</div>
 					<ThemeToggle />
 				</div>

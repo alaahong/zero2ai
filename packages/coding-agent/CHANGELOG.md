@@ -17,6 +17,10 @@
 - ESDLC now records every model call's prompt, provider reasoning and full output as transcripts under `<workspace>/<phase>/calls/`, so the execution trail expands to the actual work instead of a size tally. Workspace notes are injected into every phase prompt, and a human-in-the-loop prompt parks a phase as `awaiting-input` until answered in the page; callers without an answer transport (CI, SDK, pipelines) never park.
 - Added `tui.titleSpinner` (`braille` | `dots` | `line`, default `braille`) to pick the terminal-title working-state spinner glyphs alongside the existing `tui.titleState` on/off toggle.
 
+### Changed
+
+- Replaced the `π` brand mark with the `zero2ai` wordmark: the welcome box, setup splash/outro and setup header render the name, the status line's brand segment shows `zero2ai` (swapping to the spinner + turn timer while a turn runs), and the terminal title is prefixed with `zero2ai`. The `icon.zero2ai` theme symbol is removed from every symbol preset.
+
 ## [18.2.1] - 2026-09-15
 
 ### Breaking Changes

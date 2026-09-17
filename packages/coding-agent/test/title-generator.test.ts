@@ -854,7 +854,7 @@ describe("title generator", () => {
 
 // The terminal title runtime is a module-global. `emitTerminalTitle()` composes
 // the emitted OSC title from three inputs — an extension override, a run-state
-// separator (spinner frame, static Windows `:`, `>`, or `!` between the `π`
+// separator (spinner frame, static Windows `:`, `>`, or `!` between the `zero2ai`
 // brand and the session label), and the session label — and writes it to
 // `process.stdout` as `ESC]0;<title>BEL`. These tests pin the observable
 // contract at that sink: what string actually reaches the terminal after a
@@ -878,7 +878,7 @@ const SPINNER_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", 
 // skipping the platform: the contract under test — the override was released, so
 // the run state drives the title again — holds identically on both.
 function expectWorkingSeparator(title: string | undefined, label: string): void {
-	if (isConPTYHosted()) expect(title).toBe(`π : ${label}`);
+	if (isConPTYHosted()) expect(title).toBe(`zero2ai : ${label}`);
 	else expect(SPINNER_FRAMES.some(frame => title?.includes(frame))).toBe(true);
 }
 
@@ -1005,7 +1005,7 @@ describe("terminal title runtime", () => {
 			writes.length = 0;
 
 			setTerminalTitleState("working");
-			expect(emittedTitles()).toEqual(["π : windows-project"]);
+			expect(emittedTitles()).toEqual(["zero2ai : windows-project"]);
 
 			writes.length = 0;
 			vi.advanceTimersByTime(400);
@@ -1025,7 +1025,7 @@ describe("terminal title runtime", () => {
 			writes.length = 0;
 
 			setTerminalTitleState("working");
-			expect(emittedTitles()).toEqual(["π : wsl-project"]);
+			expect(emittedTitles()).toEqual(["zero2ai : wsl-project"]);
 
 			writes.length = 0;
 			vi.advanceTimersByTime(400);
@@ -1065,7 +1065,7 @@ describe("terminal title runtime", () => {
 
 		setExtensionTerminalTitle("");
 
-		// The composed run-state title is back, not the bare `π` default.
+		// The composed run-state title is back, not the bare `zero2ai` default.
 		const last = emittedTitles().at(-1);
 		expect(last).toBeDefined();
 		expect(last).toContain("my-session");
@@ -1092,7 +1092,7 @@ describe("terminal title runtime", () => {
 	it("releases the override for a blank title, not just an empty string", () => {
 		// CONTRACT: release is defined by what the title RENDERS to, not by JS
 		// falsiness. `setTerminalTitle` sanitizes with `sanitizeTerminalTitlePart`,
-		// which trims — so `"   "` renders as the bare `π` default while being
+		// which trims — so `"   "` renders as the bare `zero2ai` default while being
 		// truthy. Storing it verbatim would latch it as a live override and strand
 		// the run state exactly as `""` did.
 		setSessionTerminalTitle("my-session");

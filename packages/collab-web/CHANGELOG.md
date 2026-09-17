@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- The connect screen lockup reads `zero2ai collab` without the `π` glyph prefix.
+
 ## [18.2.1] - 2026-09-15
 
 ### Fixed
