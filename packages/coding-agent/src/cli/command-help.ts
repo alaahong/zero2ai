@@ -54,8 +54,12 @@ export const esdlcHelp = {
 	description: "Engineering lifecycle workspace: requirements (ASR) -> BRD/FSD -> build -> test -> deploy -> release",
 } satisfies CommandMetadata;
 
-export const sdlcWebHelp = {
+export const esdlcWebHelp = {
 	description: "Engineering lifecycle workspace in the browser (shortcut for `esdlc --web`)",
+} satisfies CommandMetadata;
+
+export const syncHelp = {
+	description: "Sync model configuration (models.yml, model settings, credentials) from another agent root",
 } satisfies CommandMetadata;
 
 export const galleryHelp = {

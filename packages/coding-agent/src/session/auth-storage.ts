@@ -7,6 +7,7 @@ export type {
 	ApiKeyCredential,
 	AuthCredential,
 	AuthCredentialEntry,
+	AuthCredentialRow,
 	AuthCredentialStore,
 	AuthStorageData,
 	AuthStorageOptions,
@@ -21,5 +22,5 @@ export type {
 	SerializedAuthStorage,
 	StoredAuthCredential,
 } from "@zero2ai/ai";
-export { AuthStorage, REMOTE_REFRESH_SENTINEL, SqliteAuthCredentialStore } from "@zero2ai/ai";
+export { AuthStorage, readAuthCredentialRows, REMOTE_REFRESH_SENTINEL, SqliteAuthCredentialStore } from "@zero2ai/ai";
 export type { SnapshotResponse } from "@zero2ai/ai/auth-broker/types";

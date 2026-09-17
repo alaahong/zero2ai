@@ -13,7 +13,7 @@ export default class Esdlc extends Command {
 	static description = commandHelp.description;
 
 	/**
-	 * Set by the `sdlc-web` shortcut (see `./sdlc-web`) so that entrypoint opens
+	 * Set by the `esdlc-web` shortcut (see `./esdlc-web`) so that entrypoint opens
 	 * the browser workspace without the operator passing `--web`.
 	 */
 	webByDefault = false;
@@ -43,8 +43,8 @@ export default class Esdlc extends Command {
 	};
 
 	static examples = [
-		"# Shortcut: open the terminal workspace (same as `zero2ai esdlc`)\n  zero2ai sdlc",
-		"# Shortcut: open the browser workspace (same as `zero2ai esdlc --web`)\n  zero2ai sdlc-web",
+		"# Shortcut: open the terminal workspace (same as `zero2ai esdlc`)\n  zero2ai esdlc-work",
+		"# Shortcut: open the browser workspace (same as `zero2ai esdlc --web`)\n  zero2ai esdlc-web",
 		"# Open the workspace in a browser (loopback only)\n  zero2ai esdlc --web",
 		"# Point the workspace at another project\n  zero2ai esdlc --dir D:/work/corp-service --web",
 		"# Show the workspace status\n  zero2ai esdlc",

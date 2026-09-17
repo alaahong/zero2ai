@@ -161,6 +161,56 @@ function toStoredAuthCredential(row: AuthRow, credential: AuthCredential): Store
 	return { id: row.id, provider: row.provider, credential, disabledCause: row.disabled_cause };
 }
 
+/** One active credential read from a store file, with its stored identity key. */
+export interface AuthCredentialRow {
+	readonly provider: string;
+	readonly credential: AuthCredential;
+	/** Stored OAuth identity key (account/org scope); null for API keys. */
+	readonly identityKey: string | null;
+}
+
+/**
+ * Read a store file's active credentials without taking ownership of it.
+ *
+ * {@link SqliteAuthCredentialStore.open} runs schema maintenance — correct for
+ * the root this process runs from, wrong for a file it must not modify: another
+ * installation's root, a profile, a backup, a legacy `~/.omp`. This opens
+ * readonly, skips rows it cannot decode exactly like the store does, and answers
+ * an empty list for a missing file or a database without the credential table.
+ */
+export function readAuthCredentialRows(dbPath: string): AuthCredentialRow[] {
+	let db: Database;
+	try {
+		db = new Database(dbPath, { readonly: true });
+	} catch {
+		// Missing file, unreadable path, or not a SQLite database.
+		return [];
+	}
+	try {
+		const rows = db
+			.query(
+				"SELECT id, provider, credential_type, data, disabled_cause, identity_key FROM auth_credentials WHERE disabled_cause IS NULL ORDER BY id ASC",
+			)
+			.all() as AuthRow[];
+		const results: AuthCredentialRow[] = [];
+		for (const row of rows) {
+			const credential = deserializeCredential(row);
+			if (!credential) continue;
+			results.push({
+				provider: row.provider,
+				credential,
+				identityKey: normalizeStoredIdentityKey(row.identity_key),
+			});
+		}
+		return results;
+	} catch {
+		// No auth_credentials table: a store predating credential auth.
+		return [];
+	} finally {
+		db.close();
+	}
+}
+
 function resolveProviderCredentialIdentityKey(provider: string, identifiers: string[]): string | null {
 	const emailIdentifier = identifiers.find(identifier => identifier.startsWith("email:"));
 	if (provider === "anthropic" || provider === "openai-codex") {

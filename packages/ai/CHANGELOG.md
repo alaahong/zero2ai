@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added `readAuthCredentialRows()`: read a credential store file's active rows without taking ownership of it (readonly, no schema maintenance), for tools that inspect another install's root, a profile, or a backup.
+
 ## [18.2.1] - 2026-09-15
 
 ### Added

@@ -117,13 +117,18 @@ export const commands: CommandEntry[] = [
 	{
 		name: "esdlc",
 		load: () => import("./commands/esdlc").then(m => m.default),
-		aliases: ["sdlc"],
+		aliases: ["esdlc-work"],
 		help: commandHelp.esdlcHelp,
 	},
 	{
-		name: "sdlc-web",
-		load: () => import("./commands/sdlc-web").then(m => m.default),
-		help: commandHelp.sdlcWebHelp,
+		name: "esdlc-web",
+		load: () => import("./commands/esdlc-web").then(m => m.default),
+		help: commandHelp.esdlcWebHelp,
+	},
+	{
+		name: "sync",
+		load: () => import("./commands/sync").then(m => m.default),
+		help: commandHelp.syncHelp,
 	},
 	{
 		name: "gallery",
@@ -299,7 +304,15 @@ const RESERVED_TOP_LEVEL_WORDS: Record<string, string> = {
 		'`zero2ai enable` is not a top-level command. Use `zero2ai plugin enable <name@marketplace>` to enable a plugin, or run `zero2ai launch enable` if you meant to send "enable" as a prompt.',
 	disable:
 		'`zero2ai disable` is not a top-level command. Use `zero2ai plugin disable <name@marketplace>` to disable a plugin, or run `zero2ai launch disable` if you meant to send "disable" as a prompt.',
+	sdlc: '`zero2ai sdlc` was renamed. Use `zero2ai esdlc-work` for the terminal workspace, `zero2ai esdlc-web` for the browser one, or run `zero2ai launch sdlc` if you meant to send "sdlc" as a prompt.',
+	"sdlc-web":
+		'`zero2ai sdlc-web` was renamed to `zero2ai esdlc-web`, or run `zero2ai launch sdlc-web` if you meant to send "sdlc-web" as a prompt.',
 };
+
+// Names this CLI used to accept. Unlike the plugin verbs above, no argument
+// shape turns these into a prompt — `zero2ai sdlc --web` is a stale command, not
+// a sentence — so their hint wins for any argv that starts with one.
+const RENAMED_TOP_LEVEL_WORDS: Record<string, true> = { sdlc: true, "sdlc-web": true };
 
 // Sub-actions that make `zero2ai marketplace <sub>` unambiguously a management
 // command even when multi-word (the reporter's `zero2ai marketplace add xyz`,
@@ -326,6 +339,7 @@ export function reservedTopLevelWordMessage(argv: readonly string[]): string | u
 	if (!hint) return undefined;
 	const second = argv[1];
 	if (second === undefined) return hint;
+	if (RENAMED_TOP_LEVEL_WORDS[first]) return hint;
 	if (first === "marketplace" && MARKETPLACE_SUBCOMMANDS[second]) return hint;
 	for (let index = 1; index < argv.length; index += 1) {
 		const arg = argv[index];

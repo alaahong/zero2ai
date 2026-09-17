@@ -1,12 +1,12 @@
 /**
- * `sdlc` / `sdlc-web` shortcuts.
+ * `esdlc-work` / `esdlc-web` shortcuts.
  *
- * Two contracts matter to an operator, and both are the kind that breaks
- * silently: an unregistered shortcut is rewritten to `launch` and forwarded to
- * the model as a prompt (the #1496 leak class), and `sdlc-web` must open the
- * browser workspace without `--web`. The second is asserted against the real
- * CLI — spawning it and fetching the URL it prints — because that is the only
- * place the "browser by default" decision is observable.
+ * Two contracts matter to an operator, and both break silently: an unregistered
+ * shortcut is rewritten to `launch` and forwarded to the model as a prompt (the
+ * #1496 leak class), and `esdlc-web` must open the browser workspace without
+ * `--web`. The second is asserted against the real CLI — spawning it and fetching
+ * the URL it prints — because that is the only place the "browser by default"
+ * decision is observable.
  */
 import { afterEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs";
@@ -34,7 +34,7 @@ afterEach(async () => {
 });
 
 function tempProject(): string {
-	projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-sdlc-shortcut-"));
+	projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), "zero2ai-esdlc-shortcut-"));
 	return projectRoot;
 }
 
@@ -50,8 +50,8 @@ function spawnCli(argv: string[]): Cli {
 
 /**
  * Read stdout until `pattern` matches, then return the capture. Awaiting the
- * stream (not a timer) is what makes this both fast and race-free; a stream
- * that closes first fails with everything the command said.
+ * stream (not a timer) is what makes this both fast and race-free; a stream that
+ * closes first fails with everything the command said.
  */
 async function readUntilMatch(stream: ReadableStream<Uint8Array>, pattern: RegExp): Promise<string> {
 	const decoder = new TextDecoder();
@@ -64,24 +64,33 @@ async function readUntilMatch(stream: ReadableStream<Uint8Array>, pattern: RegEx
 	throw new Error(`never saw ${pattern} in: ${JSON.stringify(text)}`);
 }
 
-describe("sdlc shortcuts", () => {
+describe("esdlc shortcuts", () => {
 	it("registers both shortcuts so their argv never reaches the model", () => {
-		expect(isSubcommand("sdlc")).toBe(true);
-		expect(isSubcommand("sdlc-web")).toBe(true);
-		expect(resolveCliArgv(["sdlc"])).toEqual({ argv: ["sdlc"] });
-		expect(resolveCliArgv(["sdlc-web", "--dir", "."])).toEqual({ argv: ["sdlc-web", "--dir", "."] });
+		expect(isSubcommand("esdlc-work")).toBe(true);
+		expect(isSubcommand("esdlc-web")).toBe(true);
+		expect(resolveCliArgv(["esdlc-work"])).toEqual({ argv: ["esdlc-work"] });
+		expect(resolveCliArgv(["esdlc-web", "--dir", "."])).toEqual({ argv: ["esdlc-web", "--dir", "."] });
 	});
 
-	it("routes `sdlc` to the esdlc workspace command", () => {
-		expect(commands.find(entry => entry.aliases?.includes("sdlc"))?.name).toBe("esdlc");
-		expect(commands.some(entry => entry.name === "sdlc-web")).toBe(true);
+	it("points the dropped `sdlc` names at the new ones instead of launching a prompt", () => {
+		expect(isSubcommand("sdlc")).toBe(false);
+		expect(isSubcommand("sdlc-web")).toBe(false);
+		const bare = resolveCliArgv(["sdlc"]);
+		expect("error" in bare && bare.error).toContain("zero2ai esdlc-work");
+		const withFlags = resolveCliArgv(["sdlc-web", "--port", "4000"]);
+		expect("error" in withFlags && withFlags.error).toContain("zero2ai esdlc-web");
+	});
+
+	it("routes `esdlc-work` to the esdlc workspace command", () => {
+		expect(commands.find(entry => entry.aliases?.includes("esdlc-work"))?.name).toBe("esdlc");
+		expect(commands.some(entry => entry.name === "esdlc-web")).toBe(true);
 	});
 
 	it(
-		"runs the workspace status for `sdlc`",
+		"runs the workspace status for `esdlc-work`",
 		async () => {
 			const dir = tempProject();
-			const cli = spawnCli(["sdlc", "--dir", dir, "--json"]);
+			const cli = spawnCli(["esdlc-work", "--dir", dir, "--json"]);
 			const [exitCode, stdout] = await Promise.all([cli.exited, new Response(cli.stdout).text()]);
 			expect(exitCode).toBe(0);
 			const state = JSON.parse(stdout) as { projectRoot: string; phases: Record<string, { status: string }> };
@@ -92,10 +101,10 @@ describe("sdlc shortcuts", () => {
 	);
 
 	it(
-		"opens the browser workspace for `sdlc-web` without `--web`",
+		"opens the browser workspace for `esdlc-web` without `--web`",
 		async () => {
 			const dir = tempProject();
-			const cli = spawnCli(["sdlc-web", "--dir", dir, "--port", "0"]);
+			const cli = spawnCli(["esdlc-web", "--dir", dir, "--port", "0"]);
 			const url = await readUntilMatch(cli.stdout as ReadableStream<Uint8Array>, /ESDLC workspace: (http:\/\/\S+)/);
 			const response = await fetch(url);
 			expect(response.status).toBe(200);
