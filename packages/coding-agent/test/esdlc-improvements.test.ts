@@ -9,6 +9,7 @@ import * as os from "node:os";
 import * as path from "node:path";
 import { runEsdlcPhase, runScaffoldPreStep } from "../src/esdlc";
 import { collectDeployFacts } from "../src/esdlc/deploy-facts";
+import { writePhaseConfig } from "../src/esdlc/state";
 import { parseCoveragePercent, parseTestCounts, renderQualityArtifact, scoreQuality } from "../src/esdlc/quality";
 import { loadSpecSources } from "../src/esdlc/specs";
 
@@ -149,6 +150,74 @@ describe("build scaffold", () => {
 		const result = await runScaffoldPreStep({ cwd: projectRoot });
 		expect(result.record).toBeNull();
 		expect(result.notes).toEqual([]);
+	});
+});
+
+describe("externalized phase configuration", () => {
+	it("drives analysis from the workspace config with no flags at all", async () => {
+		write("docs/standards.md", "All amounts are integers.");
+		fs.mkdirSync(path.join(projectRoot, ".zero2ai", "esdlc", "requirements"), { recursive: true });
+		fs.writeFileSync(path.join(projectRoot, ".zero2ai", "esdlc", "requirements", "notes.md"), "x".repeat(500));
+		await writePhaseConfig(projectRoot, "analysis", { sources: ["docs/standards.md"] });
+		const state = await runEsdlcPhase(projectRoot, "analysis", { model: "does-not-exist/model" });
+		expect(state.phases.analysis.status).toBe("failed");
+		const loaded = fs.readFileSync(
+			path.join(projectRoot, ".zero2ai", "esdlc", "analysis", "specs-loaded.md"),
+			"utf-8",
+		);
+		expect(loaded).toContain("docs/standards.md");
+		expect(loaded).toContain("All amounts are integers.");
+	});
+
+	it("drives the test stage's command and the build stage's scaffold from the config", async () => {
+		write("fake-test.ts", 'console.log("7 pass");\nconsole.log("0 fail");\n');
+		await writePhaseConfig(projectRoot, "test", { command: "bun run fake-test.ts" });
+		await runEsdlcPhase(projectRoot, "test", { model: "does-not-exist/model" });
+		const report = JSON.parse(
+			fs.readFileSync(path.join(projectRoot, ".zero2ai", "esdlc", "test", "quality.json"), "utf-8"),
+		) as { signals: Array<{ name: string; command: string; passed?: number }> };
+		const test = report.signals.find(signal => signal.name === "test");
+		expect(test?.command).toBe("bun run fake-test.ts");
+		expect(test?.passed).toBe(7);
+
+		write("templates/api/index.ts", "export const index = 1;");
+		await writePhaseConfig(projectRoot, "build", { sources: ["templates/api"] });
+		await runEsdlcPhase(projectRoot, "build", { model: "does-not-exist/model" });
+		const scaffold = JSON.parse(
+			fs.readFileSync(path.join(projectRoot, ".zero2ai", "esdlc", "build", "scaffold.json"), "utf-8"),
+		) as { template: string; created: string[] };
+		expect(scaffold.template).toBe("templates/api");
+		expect(scaffold.created).toEqual(["index.ts"]);
+	});
+
+	it("takes the requirements material and its attachments from the config", async () => {
+		write("meeting.txt", "对账口径需要统一。");
+		write("docs/extra.md", "现有系统每 15 分钟批量一次。");
+		await writePhaseConfig(projectRoot, "requirements", { sources: ["meeting.txt", "docs/extra.md"] });
+		const state = await runEsdlcPhase(projectRoot, "requirements");
+		expect(state.phases.requirements.status).toBe("completed");
+		// sources[0] is the material (transcribed/read), the rest are attachments.
+		const transcript = fs.readFileSync(
+			path.join(projectRoot, ".zero2ai", "esdlc", "requirements", "transcript.md"),
+			"utf-8",
+		);
+		expect(transcript).toContain("对账口径需要统一。");
+		const attachments = fs.readFileSync(
+			path.join(projectRoot, ".zero2ai", "esdlc", "requirements", "attachments.md"),
+			"utf-8",
+		);
+		expect(attachments).toContain("docs/extra.md");
+		expect(attachments).toContain("每 15 分钟批量一次");
+	});
+
+	it("lets a caller override the stored configuration for one run", async () => {
+		await writePhaseConfig(projectRoot, "test", { command: "bun run missing.ts" });
+		write("real-test.ts", 'console.log("2 pass");\nconsole.log("0 fail");\n');
+		await runEsdlcPhase(projectRoot, "test", { command: "bun run real-test.ts", model: "does-not-exist/model" });
+		const report = JSON.parse(
+			fs.readFileSync(path.join(projectRoot, ".zero2ai", "esdlc", "test", "quality.json"), "utf-8"),
+		) as { signals: Array<{ name: string; command: string; passed?: number }> };
+		expect(report.signals.find(signal => signal.name === "test")?.passed).toBe(2);
 	});
 });
 

@@ -11,10 +11,12 @@ import { isEnoent } from "@zero2ai/utils";
 import {
 	ESDLC_PHASES,
 	type EsdlcCallRecord,
+	type EsdlcPhaseConfig,
 	type EsdlcPhaseId,
 	type EsdlcPhaseRun,
 	type EsdlcQualityReport,
 	type EsdlcState,
+	emptyPhaseConfig,
 	emptyPhaseRun,
 } from "./types";
 
@@ -49,9 +51,10 @@ function emptyState(projectRoot: string, now: string): EsdlcState {
 		phases,
 		notes: "",
 		locale: "",
-		specSources: [],
-		scaffoldCommand: "",
-		scaffoldTemplate: "",
+		config: Object.fromEntries(ESDLC_PHASES.map(phase => [phase, emptyPhaseConfig()])) as Record<
+			EsdlcPhaseId,
+			EsdlcPhaseConfig
+		>,
 	};
 }
 
@@ -70,11 +73,7 @@ export async function readEsdlcState(projectRoot: string): Promise<EsdlcState> {
 			phases,
 			notes: typeof parsed.notes === "string" ? parsed.notes : "",
 			locale: typeof parsed.locale === "string" ? parsed.locale : "",
-			specSources: Array.isArray(parsed.specSources)
-				? parsed.specSources.filter((entry: unknown): entry is string => typeof entry === "string")
-				: [],
-			scaffoldCommand: typeof parsed.scaffoldCommand === "string" ? parsed.scaffoldCommand : "",
-			scaffoldTemplate: typeof parsed.scaffoldTemplate === "string" ? parsed.scaffoldTemplate : "",
+			config: normalizeConfig(parsed),
 		};
 	} catch (error) {
 		if (!isEnoent(error)) throw error;
@@ -111,12 +110,62 @@ export async function writeWorkspaceNotes(projectRoot: string, notes: string): P
 	return await updateWorkspace(projectRoot, { notes });
 }
 
-/** Persist the analysis/build configuration (spec sources, scaffold pre-step). */
-export async function writeWorkspaceConfig(
+/**
+ * Persist one phase's externalized configuration.
+ *
+ * Fields are replaced wholesale rather than merged: the editor sends the complete state of the
+ * form, and a merge would make clearing a value impossible.
+ */
+export async function writePhaseConfig(
 	projectRoot: string,
-	patch: { specSources?: readonly string[]; scaffoldCommand?: string; scaffoldTemplate?: string },
+	phase: EsdlcPhaseId,
+	patch: { sources?: readonly string[]; prompt?: string; command?: string },
 ): Promise<EsdlcState> {
-	return await updateWorkspace(projectRoot, patch);
+	const state = await readEsdlcState(projectRoot);
+	const next: EsdlcPhaseConfig = {
+		sources: patch.sources ?? state.config[phase].sources,
+		prompt: patch.prompt ?? state.config[phase].prompt,
+		command: patch.command ?? state.config[phase].command,
+	};
+	return await updateWorkspace(projectRoot, { config: { ...state.config, [phase]: next } });
+}
+
+/**
+ * Read the per-phase configuration, tolerating the older flat fields (`specSources`,
+ * `scaffoldCommand`, `scaffoldTemplate`) that an existing workspace may still carry.
+ */
+function normalizeConfig(
+	parsed: EsdlcState & { specSources?: unknown; scaffoldCommand?: unknown; scaffoldTemplate?: unknown },
+): Record<EsdlcPhaseId, EsdlcPhaseConfig> {
+	const config = Object.fromEntries(ESDLC_PHASES.map(phase => [phase, emptyPhaseConfig()])) as Record<
+		EsdlcPhaseId,
+		EsdlcPhaseConfig
+	>;
+	const stored = parsed.config as Partial<Record<EsdlcPhaseId, Partial<EsdlcPhaseConfig>>> | undefined;
+	for (const phase of ESDLC_PHASES) {
+		const entry = stored?.[phase];
+		if (!entry) continue;
+		config[phase] = {
+			sources: Array.isArray(entry.sources)
+				? entry.sources.filter((value: unknown): value is string => typeof value === "string")
+				: [],
+			prompt: typeof entry.prompt === "string" ? entry.prompt : "",
+			command: typeof entry.command === "string" ? entry.command : "",
+		};
+	}
+	const legacySpecs = Array.isArray(parsed.specSources)
+		? parsed.specSources.filter((value): value is string => typeof value === "string")
+		: [];
+	if (legacySpecs.length && !config.analysis.sources.length) {
+		config.analysis = { ...config.analysis, sources: legacySpecs };
+	}
+	if (!config.build.command && typeof parsed.scaffoldCommand === "string") {
+		config.build = { ...config.build, command: parsed.scaffoldCommand };
+	}
+	if (!config.build.sources.length && typeof parsed.scaffoldTemplate === "string" && parsed.scaffoldTemplate) {
+		config.build = { ...config.build, sources: [parsed.scaffoldTemplate] };
+	}
+	return config;
 }
 
 /** Persist the interface language chosen in the workspace. */
@@ -127,13 +176,7 @@ export async function writeWorkspaceLocale(projectRoot: string, locale: string):
 /** Apply a workspace-level setting and persist it. */
 async function updateWorkspace(
 	projectRoot: string,
-	patch: {
-		notes?: string;
-		locale?: string;
-		specSources?: readonly string[];
-		scaffoldCommand?: string;
-		scaffoldTemplate?: string;
-	},
+	patch: { notes?: string; locale?: string; config?: Record<EsdlcPhaseId, EsdlcPhaseConfig> },
 ): Promise<EsdlcState> {
 	const state = await readEsdlcState(projectRoot);
 	const next: EsdlcState = { ...state, ...patch, updatedAt: new Date().toISOString() };

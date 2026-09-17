@@ -48,6 +48,8 @@ export interface EsdlcRunOptions {
 	readonly onProgress?: (message: string) => void;
 	/** Workspace 补充说明, injected into every model prompt. */
 	readonly notes?: string;
+	/** Documents appended to the requirements material, after the recording/transcript. */
+	readonly attachments?: readonly string[];
 	/** Spec/skill sources to load for the analysis phases (URL or project-relative path). */
 	readonly specSources?: readonly string[];
 	/** Build pre-step: command that creates the project skeleton. */
@@ -142,9 +144,14 @@ async function callModel(
 	request: { systemPrompt: string; userPrompt: string; maxTokens?: number },
 ): Promise<{ text: string; model: string }> {
 	const notes = options.notes?.trim();
-	const userPrompt = notes
-		? `${request.userPrompt}\n\n---\n工作区补充说明（来自使用者，视为需求约束）：\n${notes}`
-		: request.userPrompt;
+	const stagePrompt = options.prompt?.trim();
+	const extra = [
+		notes ? `工作区补充说明（来自使用者，视为需求约束）：\n${notes}` : "",
+		stagePrompt ? `本阶段附加指令（来自工作区配置）：\n${stagePrompt}` : "",
+	]
+		.filter(Boolean)
+		.join("\n\n");
+	const userPrompt = extra ? `${request.userPrompt}\n\n---\n${extra}` : request.userPrompt;
 	const result = await generateText({
 		cwd: options.cwd,
 		systemPrompt: request.systemPrompt,
@@ -161,7 +168,10 @@ async function callModel(
 
 /** 1) Requirements — capture a discussion and turn it into text. */
 export async function runRequirementsPhase(options: EsdlcRunOptions): Promise<EsdlcPhaseOutcome> {
-	const input = options.input?.trim();
+	// Configured material is a path *inside the project*, so it resolves against the project
+	// root — not the process working directory, which is unrelated when `--dir` is used.
+	const rawInput = options.input?.trim();
+	const input = rawInput ? (path.isAbsolute(rawInput) ? rawInput : path.resolve(options.cwd, rawInput)) : undefined;
 	const notes = options.prompt?.trim();
 	if (!input && !notes) {
 		throw new Error(
@@ -186,6 +196,16 @@ export async function runRequirementsPhase(options: EsdlcRunOptions): Promise<Es
 	}
 	if (notes) {
 		artifacts.push(await writeArtifact(options.cwd, "requirements", "notes.md", `# Requirements notes\n\n${notes}`));
+	}
+	// Attached documents are part of the material, not a separate phase: they are what the
+	// requirements phase was told to consider, and they are recorded as such.
+	const attachments = options.attachments ?? [];
+	if (attachments.length) {
+		const bundle = await loadSpecSources({ projectRoot: options.cwd, sources: attachments });
+		artifacts.push(await writeArtifact(options.cwd, "requirements", "attachments.md", renderSpecsArtifact(bundle)));
+		options.onProgress?.(
+			`attachments: ${bundle.loaded.length} loaded${bundle.skipped.length ? `, ${bundle.skipped.length} skipped` : ""}`,
+		);
 	}
 	return { summary: `captured ${artifacts.map(a => a.label).join(" + ")}`, artifacts };
 }

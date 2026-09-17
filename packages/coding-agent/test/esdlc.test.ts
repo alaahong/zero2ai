@@ -11,6 +11,7 @@ import * as os from "node:os";
 import * as path from "node:path";
 import {
 	ESDLC_PHASES,
+	emptyPhaseConfig,
 	esdlcMessages,
 	readEsdlcState,
 	renderEsdlcStatus,
@@ -66,9 +67,7 @@ describe("fresh workspace", () => {
 			phases,
 			notes: "",
 			locale: "",
-			specSources: [],
-			scaffoldCommand: "",
-			scaffoldTemplate: "",
+			config: Object.fromEntries(ESDLC_PHASES.map(phase => [phase, emptyPhaseConfig()])) as EsdlcState["config"],
 		};
 	}
 });

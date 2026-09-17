@@ -30,14 +30,21 @@ const api = (pathname: string) => `${server.url}${pathname}`;
 /** Poll the workspace until a phase reaches a terminal state. */
 async function waitForPhase(phase: string, status: string, timeoutMs = 15_000) {
 	const deadline = Date.now() + timeoutMs;
+	let lastError = "no attempt";
 	while (Date.now() < deadline) {
-		const state = (await (await fetch(api("/api/state"))).json()) as {
-			phases: Record<string, { status: string; summary: string | null; error: string | null }>;
-		};
-		if (state.phases[phase]?.status === status) return state.phases[phase];
+		try {
+			const state = (await (await fetch(api("/api/state"))).json()) as {
+				phases: Record<string, { status: string; summary: string | null; error: string | null }>;
+			};
+			if (state.phases[phase]?.status === status) return state.phases[phase];
+		} catch (error) {
+			// A detached run can outlive its test's server; retry within the deadline rather than
+			// failing the poll on a transient connection error.
+			lastError = (error as Error).message;
+		}
 		await Bun.sleep(50);
 	}
-	throw new Error(`phase ${phase} never reached ${status}`);
+	throw new Error(`phase ${phase} never reached ${status} (last error: ${lastError})`);
 }
 
 describe("page", () => {
@@ -438,41 +445,80 @@ describe("language API", () => {
 	});
 });
 
-describe("workspace configuration API", () => {
-	it("stores the spec sources and the build scaffold, and rejects malformed input", async () => {
-		const saved = await fetch(api("/api/config"), {
-			method: "POST",
-			headers: { "content-type": "application/json" },
-			body: JSON.stringify({
-				specSources: [" https://wiki.corp/spec.md ", "docs/standards.md", ""],
-				scaffoldCommand: "bun create app",
-				scaffoldTemplate: "templates/api",
-			}),
-		});
-		expect(saved.status).toBe(200);
-		const state = (await (await fetch(api("/api/state"))).json()) as {
-			specSources: string[];
-			scaffoldCommand: string;
-			scaffoldTemplate: string;
-		};
-		// Whitespace is trimmed and empty lines dropped — the editor sends one source per line.
-		expect(state.specSources).toEqual(["https://wiki.corp/spec.md", "docs/standards.md"]);
-		expect(state.scaffoldCommand).toBe("bun create app");
-		expect(state.scaffoldTemplate).toBe("templates/api");
-
-		for (const payload of [
-			{ specSources: "not-an-array" },
-			{ specSources: Array.from({ length: 21 }, (_, index) => `s${index}`) },
-			{ specSources: ["x".repeat(501)] },
-			{ scaffoldCommand: 7 },
-		]) {
-			const response = await fetch(api("/api/config"), {
+describe("phase configuration API", () => {
+	it("stores what each stage depends on, per phase", async () => {
+		const save = async (body: unknown) =>
+			await fetch(api("/api/config"), {
 				method: "POST",
 				headers: { "content-type": "application/json" },
-				body: JSON.stringify(payload),
+				body: JSON.stringify(body),
 			});
-			expect(response.status).toBe(400);
+		// Whitespace is trimmed and empty lines dropped — the editor sends one entry per line.
+		expect(
+			(await save({ phase: "analysis", sources: [" https://wiki.corp/spec.md ", "docs/standards.md", ""] })).status,
+		).toBe(200);
+		expect((await save({ phase: "build", sources: ["templates/api"], command: "bun run seed" })).status).toBe(200);
+		expect((await save({ phase: "test", command: "bun run test", prompt: "重点看边界" })).status).toBe(200);
+
+		const state = (await (await fetch(api("/api/state"))).json()) as {
+			config: Record<string, { sources: string[]; prompt: string; command: string }>;
+		};
+		expect(state.config.analysis.sources).toEqual(["https://wiki.corp/spec.md", "docs/standards.md"]);
+		expect(state.config.analysis.command).toBe("");
+		expect(state.config.build.sources).toEqual(["templates/api"]);
+		expect(state.config.build.command).toBe("bun run seed");
+		expect(state.config.test.command).toBe("bun run test");
+		expect(state.config.test.prompt).toBe("重点看边界");
+	});
+
+	it("rejects a malformed configuration without touching the stored one", async () => {
+		const save = async (body: unknown) =>
+			await fetch(api("/api/config"), {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify(body),
+			});
+		await save({ phase: "analysis", sources: ["keep.md"] });
+		for (const payload of [
+			{ phase: "nope", sources: [] },
+			{ phase: "analysis", sources: "not-an-array" },
+			{ phase: "analysis", sources: Array.from({ length: 21 }, (_, index) => `s${index}`) },
+			{ phase: "analysis", sources: ["x".repeat(501)] },
+			{ phase: "analysis", prompt: 7 },
+			{ phase: "analysis", prompt: "x".repeat(4001) },
+			{ phase: "build", command: "x".repeat(501) },
+		]) {
+			expect((await save(payload)).status).toBe(400);
 		}
+		const state = (await (await fetch(api("/api/state"))).json()) as {
+			config: Record<string, { sources: string[] }>;
+		};
+		expect(state.config.analysis.sources).toEqual(["keep.md"]);
+	});
+
+	it("reads a workspace written before the per-phase shape existed", async () => {
+		fs.mkdirSync(path.join(projectRoot, ".zero2ai", "esdlc"), { recursive: true });
+		fs.writeFileSync(
+			path.join(projectRoot, ".zero2ai", "esdlc", "state.json"),
+			JSON.stringify({
+				version: 1,
+				projectRoot: "",
+				createdAt: "2026-01-01T00:00:00.000Z",
+				updatedAt: "2026-01-01T00:00:00.000Z",
+				phases: {},
+				notes: "",
+				locale: "",
+				specSources: ["legacy-spec.md"],
+				scaffoldCommand: "bun run seed",
+				scaffoldTemplate: "templates/legacy",
+			}),
+		);
+		const state = (await (await fetch(api("/api/state"))).json()) as {
+			config: Record<string, { sources: string[]; command: string }>;
+		};
+		expect(state.config.analysis.sources).toEqual(["legacy-spec.md"]);
+		expect(state.config.build.command).toBe("bun run seed");
+		expect(state.config.build.sources).toEqual(["templates/legacy"]);
 	});
 });
 

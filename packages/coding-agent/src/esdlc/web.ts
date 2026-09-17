@@ -19,7 +19,7 @@ import {
 	readPhaseJson,
 	readProjectTree,
 	readQualityHistory,
-	writeWorkspaceConfig,
+	writePhaseConfig,
 	writeWorkspaceLocale,
 	writeWorkspaceNotes,
 } from "./state";
@@ -40,6 +40,7 @@ const MAX_ARTIFACT_BYTES = 512 * 1024;
 const MAX_WRITE_BYTES = 1024 * 1024;
 const MAX_SPEC_SOURCES = 20;
 const MAX_CONFIG_FIELD_CHARS = 500;
+const MAX_PROMPT_CHARS = 4000;
 
 export interface EsdlcWebOptions {
 	readonly projectRoot: string;
@@ -253,28 +254,33 @@ export function startEsdlcWeb(options: EsdlcWebOptions): EsdlcWebHandle {
 			if (url.pathname === "/api/config" && request.method === "POST") {
 				const body = await parseBody(request);
 				if (body instanceof Response) return body;
-				const patch: { specSources?: string[]; scaffoldCommand?: string; scaffoldTemplate?: string } = {};
-				if (body.specSources !== undefined) {
-					if (!Array.isArray(body.specSources) || body.specSources.some(entry => typeof entry !== "string")) {
-						return json({ error: "specSources must be an array of strings" }, 400);
+				const phase = stringField(body, "phase") ?? "";
+				if (!isEsdlcPhaseId(phase)) return json({ error: `phase must be one of: ${ESDLC_PHASES.join(", ")}` }, 400);
+				const patch: { sources?: string[]; prompt?: string; command?: string } = {};
+				if (body.sources !== undefined) {
+					if (!Array.isArray(body.sources) || body.sources.some(entry => typeof entry !== "string")) {
+						return json({ error: "sources must be an array of strings" }, 400);
 					}
-					if (body.specSources.length > MAX_SPEC_SOURCES) {
-						return json({ error: `specSources accepts at most ${MAX_SPEC_SOURCES} entries` }, 400);
+					if (body.sources.length > MAX_SPEC_SOURCES) {
+						return json({ error: `sources accepts at most ${MAX_SPEC_SOURCES} entries` }, 400);
 					}
-					const sources = (body.specSources as string[]).map(entry => entry.trim()).filter(Boolean);
+					const sources = (body.sources as string[]).map(entry => entry.trim()).filter(Boolean);
 					if (sources.some(entry => entry.length > MAX_CONFIG_FIELD_CHARS)) {
-						return json({ error: "a spec source is too long" }, 400);
+						return json({ error: "a source is too long" }, 400);
 					}
-					patch.specSources = sources;
+					patch.sources = sources;
 				}
-				for (const field of ["scaffoldCommand", "scaffoldTemplate"] as const) {
+				for (const [field, limit] of [
+					["prompt", MAX_PROMPT_CHARS],
+					["command", MAX_CONFIG_FIELD_CHARS],
+				] as const) {
 					const value = body[field];
 					if (value === undefined) continue;
 					if (typeof value !== "string") return json({ error: `${field} must be a string` }, 400);
-					if (value.length > MAX_CONFIG_FIELD_CHARS) return json({ error: `${field} is too long` }, 400);
+					if (value.length > limit) return json({ error: `${field} is too long` }, 400);
 					patch[field] = value.trim();
 				}
-				return json(await writeWorkspaceConfig(projectRoot, patch));
+				return json(await writePhaseConfig(projectRoot, phase as EsdlcPhaseId, patch));
 			}
 			if (url.pathname === "/api/artifact") return await handleArtifact(projectRoot, url);
 			if (url.pathname === "/api/file" && request.method === "PUT") {
@@ -601,7 +607,7 @@ async function refreshState() {
 function renderTabs() {
   const nav = el("stages");
   nav.textContent = "";
-  const items = [{ tab:"flow", label:t("flow.title") }, { tab:"tree", label:t("nav.tree") }].concat(ORDER.map((p, i) => ({ tab:"phase:" + p, label:(i+1) + ". " + LABELS[p], phase:p })));
+  const items = [{ tab:"flow", label:t("flow.title") }, { tab:"config", label:t("config.title") }, { tab:"tree", label:t("nav.tree") }].concat(ORDER.map((p, i) => ({ tab:"phase:" + p, label:(i+1) + ". " + LABELS[p], phase:p })));
   for (const item of items) {
     const button = document.createElement("button");
     button.textContent = item.label;
@@ -647,6 +653,7 @@ function renderHitl() {
 
 function renderView() {
   if (tab === "flow") return renderFlow();
+  if (tab === "config") return renderConfig();
   if (tab === "tree") return renderTree();
   return renderPhase(tab.slice(6));
 }
@@ -729,11 +736,7 @@ function renderPhase(phase) {
 
   // Phase-specific panels: configuration for analysis/build, measured results for test/deploy.
   const report = reports[phase];
-  if (phase === "analysis") card.parentElement.appendChild(configCard());
-  if (phase === "build") {
-    card.parentElement.appendChild(configCard());
-    if (report) card.parentElement.appendChild(scaffoldCard(report.scaffold));
-  }
+  if (phase === "build" && report) card.parentElement.appendChild(scaffoldCard(report.scaffold));
   if (phase === "test" && report) card.parentElement.appendChild(qualityCard(report.quality ? { ...report.quality, history: report.history } : null));
   if (phase === "deploy" && report) card.parentElement.appendChild(factsCard(report.facts));
   if (["build", "test", "deploy"].includes(phase) && !report) {
@@ -996,54 +999,6 @@ async function loadReport(phase) {
   return reports[phase];
 }
 
-function configCard(onSaved) {
-  const box = document.createElement("div"); box.className = "card";
-  const title = document.createElement("h3"); title.textContent = t("config.specsTitle");
-  const help = document.createElement("div"); help.className = "hint"; help.style.marginBottom = "6px";
-  help.textContent = t("config.specsHelp");
-  const specs = document.createElement("textarea"); specs.id = "config-specs"; specs.rows = 4;
-  specs.className = "editor-mini";
-  specs.value = (state.specSources || []).join("\\n");
-  specs.placeholder = "https://wiki.corp/spec/api.md\\ndocs/standards.md";
-  box.append(title, help, specs);
-
-  const scaffoldTitle = document.createElement("h3"); scaffoldTitle.textContent = t("config.scaffoldTitle");
-  scaffoldTitle.style.marginTop = "14px";
-  const command = document.createElement("input"); command.id = "config-scaffold"; command.className = "editor-mini";
-  command.value = state.scaffoldCommand || "";
-  command.placeholder = t("config.scaffoldCommand");
-  const template = document.createElement("input"); template.id = "config-template"; template.className = "editor-mini";
-  template.value = state.scaffoldTemplate || "";
-  template.placeholder = t("config.scaffoldTemplate");
-  const labels = document.createElement("div"); labels.className = "hint";
-  labels.textContent = t("config.scaffoldCommand") + " / " + t("config.scaffoldTemplate");
-  box.append(scaffoldTitle, labels, command, template);
-
-  const row = document.createElement("div"); row.className = "row"; row.style.marginTop = "10px";
-  const save = document.createElement("button"); save.textContent = t("home.save");
-  const statusNote = document.createElement("span"); statusNote.className = "hint";
-  save.onclick = async () => {
-    save.disabled = true;
-    try {
-      await api("/api/config", {
-        method: "POST", headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          specSources: el("config-specs").value.split("\\n").map(line => line.trim()).filter(Boolean),
-          scaffoldCommand: el("config-scaffold").value,
-          scaffoldTemplate: el("config-template").value,
-        }),
-      });
-      statusNote.textContent = t("config.saved");
-      await refreshState();
-      onSaved?.();
-    } catch (err) { alert(err.message); }
-    save.disabled = false;
-  };
-  row.append(save, statusNote);
-  box.appendChild(row);
-  return box;
-}
-
 function qualityCard(report) {
   const box = document.createElement("div"); box.className = "card";
   const title = document.createElement("h3"); title.textContent = t("quality.title");
@@ -1171,6 +1126,119 @@ function scaffoldCard(scaffold) {
   }
   box.appendChild(chips);
   return box;
+}
+
+/* ---------- 配置页：每个步骤的文档与命令集中一处 ---------- */
+
+/** Which fields each phase actually honours; the form only shows what has an effect. */
+const PHASE_FIELDS = {
+  requirements: { sources: true, prompt: true, command: false,
+    sourcesLabel: "config.reqSources", sourcesHelp: "config.reqSourcesHelp", promptLabel: "config.reqPrompt" },
+  analysis: { sources: true, prompt: true, command: false,
+    sourcesLabel: "config.specsTitle", sourcesHelp: "config.specsHelp", promptLabel: "config.extraPrompt" },
+  build: { sources: true, prompt: true, command: true,
+    sourcesLabel: "config.buildSources", sourcesHelp: "config.buildSourcesHelp",
+    promptLabel: "config.buildPrompt", commandLabel: "config.scaffoldCommand" },
+  test: { sources: false, prompt: true, command: true,
+    promptLabel: "config.extraPrompt", commandLabel: "config.testCommand" },
+  deploy: { sources: false, prompt: true, command: false, promptLabel: "config.extraPrompt" },
+  release: { sources: false, prompt: true, command: false, promptLabel: "config.extraPrompt" },
+};
+
+function renderConfig() {
+  const view = el("view");
+  view.textContent = "";
+
+  const global = document.createElement("div"); global.className = "card";
+  const globalTitle = document.createElement("h3"); globalTitle.textContent = t("config.global");
+  const notesLabel = document.createElement("div"); notesLabel.className = "hint"; notesLabel.textContent = t("config.notesHelp");
+  const notes = document.createElement("textarea"); notes.id = "config-notes"; notes.rows = 3; notes.className = "editor-mini";
+  notes.value = state.notes || "";
+  const globalRow = document.createElement("div"); globalRow.className = "row"; globalRow.style.marginTop = "8px";
+  const saveGlobal = document.createElement("button"); saveGlobal.textContent = t("home.save");
+  const globalNote = document.createElement("span"); globalNote.className = "hint";
+  saveGlobal.onclick = async () => {
+    saveGlobal.disabled = true;
+    try {
+      await api("/api/notes", { method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ notes: el("config-notes").value }) });
+      globalNote.textContent = t("config.saved");
+      await refreshState();
+    } catch (err) { alert(err.message); }
+    saveGlobal.disabled = false;
+  };
+  globalRow.append(saveGlobal, globalNote);
+  global.append(globalTitle, notesLabel, notes, globalRow);
+  view.appendChild(global);
+
+  ORDER.forEach((phase, index) => {
+    const fields = PHASE_FIELDS[phase];
+    const config = (state.config || {})[phase] || { sources: [], prompt: "", command: "" };
+    const card = document.createElement("div"); card.className = "card";
+    const head = document.createElement("div"); head.className = "row";
+    const title = document.createElement("h3"); title.textContent = (index + 1) + ". " + LABELS[phase];
+    const pill = document.createElement("span"); pill.className = "status";
+    pill.textContent = MARKS[status(phase)]; pill.dataset.status = status(phase);
+    head.append(title, pill);
+    const desc = document.createElement("div"); desc.className = "hint";
+    desc.textContent = phaseTitle(phase).split(" — ").slice(1).join(" — ") || phaseTitle(phase);
+    card.append(head, desc);
+
+    const adds = [];
+    if (fields.sources) {
+      const label = document.createElement("div"); label.className = "field-label"; label.textContent = t(fields.sourcesLabel);
+      const help = document.createElement("div"); help.className = "hint"; help.textContent = t(fields.sourcesHelp);
+      const sources = document.createElement("textarea");
+      sources.className = "editor-mini"; sources.rows = 3; sources.dataset.field = "sources";
+      sources.dataset.phase = phase;
+      sources.value = (config.sources || []).join("\\n");
+      card.append(label, help, sources);
+      adds.push("sources");
+    } else {
+      const note = document.createElement("div"); note.className = "hint"; note.textContent = t("config.noSources");
+      card.appendChild(note);
+    }
+    if (fields.prompt) {
+      const label = document.createElement("div"); label.className = "field-label"; label.textContent = t(fields.promptLabel);
+      const prompt = document.createElement("textarea");
+      prompt.className = "editor-mini"; prompt.rows = 2; prompt.dataset.field = "prompt"; prompt.dataset.phase = phase;
+      prompt.value = config.prompt || "";
+      card.append(label, prompt);
+      adds.push("prompt");
+    }
+    if (fields.command) {
+      const label = document.createElement("div"); label.className = "field-label"; label.textContent = t(fields.commandLabel);
+      const command = document.createElement("input");
+      command.className = "editor-mini"; command.dataset.field = "command"; command.dataset.phase = phase;
+      command.value = config.command || "";
+      card.append(label, command);
+      adds.push("command");
+    }
+
+    const row = document.createElement("div"); row.className = "row"; row.style.marginTop = "10px";
+    const save = document.createElement("button"); save.textContent = t("home.save");
+    const note = document.createElement("span"); note.className = "hint";
+    save.onclick = async () => {
+      save.disabled = true;
+      const body = { phase };
+      for (const field of adds) {
+        const node = card.querySelector('[data-field="' + field + '"]');
+        body[field] = field === "sources"
+          ? node.value.split("\\n").map(line => line.trim()).filter(Boolean)
+          : node.value;
+      }
+      try {
+        await api("/api/config", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+        note.textContent = t("config.saved");
+        reports[phase] = undefined;
+        await refreshState();
+      } catch (err) { alert(err.message); }
+      save.disabled = false;
+    };
+    row.append(save, note);
+    card.appendChild(row);
+    view.appendChild(card);
+  });
 }
 
 /* ---------- 产物树 ---------- */

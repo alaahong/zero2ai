@@ -120,6 +120,21 @@ const EN = {
 	"flow.hint": "Click a stage to open its detail; the diagram follows the live state.",
 	"flow.notStarted": "not started",
 
+	"config.title": "Config",
+	"config.global": "Workspace-wide",
+	"config.notesHelp": "补充说明: injected into every stage prompt as a requirement constraint.",
+	"config.extraPrompt": "Extra instruction for this stage (optional)",
+	"config.reqSources": "Material & attachments",
+	"config.reqSourcesHelp":
+		"Line 1 is the recording/transcript for ASR; every further line is an attached document appended to the material (URL or project path).",
+	"config.reqPrompt": "Discussion notes (optional)",
+	"config.buildSources": "Template directory",
+	"config.buildSourcesHelp":
+		"Line 1 is a directory copied into the project before the agent runs; existing files are never overwritten.",
+	"config.buildPrompt": "Implementation instruction (optional; the design is used when empty)",
+	"config.testCommand": "Test command (optional; auto-detected when empty)",
+	"config.noSources": "This stage reads no external documents — its input is produced by earlier stages.",
+	"config.noCommand": "This stage runs no command.",
 	"config.specsTitle": "Spec & skill sources",
 	"config.specsHelp":
 		"One per line: an http(s) URL or a path inside the project (a file, or a directory of .md/.yml files). Loaded into the analysis prompts; each run records what it loaded in specs-loaded.md.",
@@ -270,6 +285,20 @@ const ZH: Record<EsdlcMessageKey, string> = {
 	"flow.hint": "点击阶段节点可直接进入该阶段明细；图示随状态实时更新。",
 	"flow.notStarted": "未开始",
 
+	"config.title": "配置",
+	"config.global": "全局设置",
+	"config.notesHelp": "补充说明：会作为需求约束注入到每个阶段的提示词。",
+	"config.extraPrompt": "本阶段附加指令（可选）",
+	"config.reqSources": "材料与附件",
+	"config.reqSourcesHelp":
+		"第 1 行是用于 ASR 的录音/转写；其余每行是附加文档，会并入需求材料（支持 URL 或项目内路径）。",
+	"config.reqPrompt": "讨论要点（可选）",
+	"config.buildSources": "模板目录",
+	"config.buildSourcesHelp": "第 1 行是在 agent 运行前复制进项目的目录；已存在的文件不会被覆盖。",
+	"config.buildPrompt": "实现指令（可选；留空则使用设计文档）",
+	"config.testCommand": "测试命令（可选；留空自动探测）",
+	"config.noSources": "该阶段不读取外部文档——其输入由前序阶段产出。",
+	"config.noCommand": "该阶段不执行命令。",
 	"config.specsTitle": "规范 / 技能来源",
 	"config.specsHelp":
 		"每行一条：http(s) 地址，或项目内路径（文件，或含 .md/.yml 的目录）。会注入到分析与设计提示词；每次运行都会把实际加载内容记录在 specs-loaded.md。",

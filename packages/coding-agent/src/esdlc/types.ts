@@ -60,6 +60,25 @@ export interface EsdlcCallRecord {
 	readonly responsePath?: string;
 }
 
+/**
+ * What one phase depends on, externalized so it can be set once in the workspace instead of
+ * passed as flags on every run.
+ */
+export interface EsdlcPhaseConfig {
+	/**
+	 * Documents the phase reads: an `http(s)` URL or a path inside the project.
+	 *
+	 * - requirements: `sources[0]` is the recording/transcript; the rest are appended as material.
+	 * - analysis: specification/skill sources that bind the BRD/FSD.
+	 * - build: `sources[0]` is a template directory copied in as the skeleton.
+	 */
+	readonly sources: readonly string[];
+	/** Instruction override for the phase's agent/model call. */
+	readonly prompt: string;
+	/** Command the phase executes, when it runs one (build: scaffold; test: suite). */
+	readonly command: string;
+}
+
 export interface EsdlcState {
 	readonly version: 1;
 	readonly projectRoot: string;
@@ -70,15 +89,8 @@ export interface EsdlcState {
 	readonly notes: string;
 	/** Interface language chosen in the workspace (`""` = follow the client/environment). */
 	readonly locale: string;
-	/**
-	 * Specification/skill sources folded into the analysis & design prompts. Each entry is an
-	 * `http(s)` URL or a path inside the project; the phase records what it actually loaded.
-	 */
-	readonly specSources: readonly string[];
-	/** Build pre-step: a command that creates the project skeleton before the agent runs. */
-	readonly scaffoldCommand: string;
-	/** Build pre-step: a directory copied into the project as the starting skeleton. */
-	readonly scaffoldTemplate: string;
+	/** Per-phase externalized configuration: the documents and commands each step depends on. */
+	readonly config: Readonly<Record<EsdlcPhaseId, EsdlcPhaseConfig>>;
 }
 
 /** Short flow labels — the ids alone lose "& DESIGN", so labels are explicit. */
@@ -169,4 +181,9 @@ export interface EsdlcScaffoldResult {
 	readonly durationMs: number;
 	readonly created: readonly string[];
 	readonly note?: string;
+}
+
+/** An empty per-phase configuration, used for new workspaces and missing entries. */
+export function emptyPhaseConfig(): EsdlcPhaseConfig {
+	return { sources: [], prompt: "", command: "" };
 }

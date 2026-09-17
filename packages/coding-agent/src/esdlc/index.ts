@@ -4,6 +4,7 @@
  */
 import {
 	ESDLC_PHASES,
+	emptyPhaseConfig,
 	ESDLC_PHASE_LABELS,
 	ESDLC_PHASE_TITLES,
 	type EsdlcPhaseId,
@@ -41,7 +42,7 @@ export type EsdlcPhaseRequest = Omit<
 	readonly scaffoldCommand?: string;
 	readonly scaffoldTemplate?: string;
 };
-export { ESDLC_PHASES, ESDLC_PHASE_LABELS, ESDLC_PHASE_TITLES, readEsdlcState };
+export { ESDLC_PHASES, ESDLC_PHASE_LABELS, ESDLC_PHASE_TITLES, emptyPhaseConfig, readEsdlcState };
 export { ESDLC_LOCALES, esdlcCatalogs, esdlcMessages, isEsdlcLocale, resolveEsdlcLocale, tEsdlc };
 export type { EsdlcLocale, EsdlcMessageKey } from "./i18n";
 export type { EsdlcPhaseId, EsdlcPhaseRun, EsdlcQuestion, EsdlcState };
@@ -79,15 +80,28 @@ export async function runEsdlcPhase(
 	await recordPhaseRun(projectRoot, phase, running);
 	const state = await readEsdlcState(projectRoot);
 	const { requestInput, specSources, scaffoldCommand, scaffoldTemplate, ...phaseOptions } = options;
+	// The workspace externalizes what each step depends on; an explicit argument for this run wins.
+	const config = state.config[phase] ?? { sources: [], prompt: "", command: "" };
 	try {
 		const outcome = await RUNNERS[phase]({
 			...phaseOptions,
 			cwd: projectRoot,
 			notes: state.notes,
-			// Configuration lives in the workspace; an explicit argument for this run wins.
-			specSources: specSources ?? state.specSources,
-			scaffoldCommand: scaffoldCommand ?? state.scaffoldCommand,
-			scaffoldTemplate: scaffoldTemplate ?? state.scaffoldTemplate,
+			...(phaseOptions.prompt ? {} : config.prompt ? { prompt: config.prompt } : {}),
+			...(phaseOptions.input
+				? {}
+				: phase === "requirements" && config.sources[0]
+					? { input: config.sources[0] }
+					: {}),
+			...(phaseOptions.command ? {} : config.command ? { command: config.command } : {}),
+			...(specSources ? { specSources } : phase === "analysis" ? { specSources: config.sources } : {}),
+			...(scaffoldCommand ? { scaffoldCommand } : phase === "build" ? { scaffoldCommand: config.command } : {}),
+			...(scaffoldTemplate
+				? { scaffoldTemplate }
+				: phase === "build" && config.sources[0]
+					? { scaffoldTemplate: config.sources[0] }
+					: {}),
+			...(phase === "requirements" && config.sources.length > 1 ? { attachments: config.sources.slice(1) } : {}),
 			// The runner owns the persisted question; the caller owns the transport (web page or
 			// interactive terminal). Without a transport there is no human to wait for, so the
 			// phase proceeds rather than parking forever on a question nobody can answer.
