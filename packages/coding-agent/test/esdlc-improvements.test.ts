@@ -8,6 +8,7 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { runEsdlcPhase, runScaffoldPreStep } from "../src/esdlc";
+import { buildCodeGraph } from "../src/esdlc/code-graph";
 import { collectDeployFacts } from "../src/esdlc/deploy-facts";
 import { writePhaseConfig } from "../src/esdlc/state";
 import { parseCoveragePercent, parseTestCounts, renderQualityArtifact, scoreQuality } from "../src/esdlc/quality";
@@ -107,10 +108,7 @@ describe("build scaffold", () => {
 		write("templates/api/README.md", "# Template readme");
 		write("templates/api/src/index.ts", "export const index = 1;");
 		write("src/index.ts", "export const existing = true;");
-		const result = await runScaffoldPreStep({
-			cwd: projectRoot,
-			scaffoldTemplate: "templates/api",
-		});
+		const result = await runScaffoldPreStep({ cwd: projectRoot, phase: "build", scaffoldTemplate: "templates/api" });
 		// The template's src/index.ts is skipped: the repository already has one.
 		expect([...result.created].sort()).toEqual(["README.md"]);
 		expect(fs.readFileSync(path.join(projectRoot, "README.md"), "utf-8")).toContain("Template readme");
@@ -126,7 +124,7 @@ describe("build scaffold", () => {
 	it("runs a scaffold command and records its output", async () => {
 		write("seed.ts", 'await Bun.write("generated/app.ts", "export const app = 1;\\n");\nconsole.log("seeded");\n');
 		write("package.json", JSON.stringify({ name: "fixture", scripts: { seed: "bun run seed.ts" } }, null, 2));
-		const result = await runScaffoldPreStep({ cwd: projectRoot, scaffoldCommand: "bun run seed" });
+		const result = await runScaffoldPreStep({ cwd: projectRoot, phase: "build", scaffoldCommand: "bun run seed" });
 		expect(result.record?.exitCode).toBe(0);
 		expect(fs.existsSync(path.join(projectRoot, "generated", "app.ts"))).toBe(true);
 		const log = fs.readFileSync(path.join(projectRoot, ".zero2ai", "esdlc", "build", "scaffold.log"), "utf-8");
@@ -138,16 +136,16 @@ describe("build scaffold", () => {
 			"package.json",
 			JSON.stringify({ name: "fixture", scripts: { boom: 'bun -e "process.exit(3)"' } }, null, 2),
 		);
-		await expect(runScaffoldPreStep({ cwd: projectRoot, scaffoldCommand: "bun run boom" })).rejects.toThrow(
-			/scaffold command failed/,
-		);
+		await expect(
+			runScaffoldPreStep({ cwd: projectRoot, phase: "build", scaffoldCommand: "bun run boom" }),
+		).rejects.toThrow(/scaffold command failed/);
 		expect(fs.readFileSync(path.join(projectRoot, ".zero2ai", "esdlc", "build", "scaffold.log"), "utf-8")).toContain(
 			"exit code: 3",
 		);
 	});
 
 	it("does nothing when no scaffold is configured", async () => {
-		const result = await runScaffoldPreStep({ cwd: projectRoot });
+		const result = await runScaffoldPreStep({ cwd: projectRoot, phase: "build" });
 		expect(result.record).toBeNull();
 		expect(result.notes).toEqual([]);
 	});
@@ -218,6 +216,98 @@ describe("externalized phase configuration", () => {
 			fs.readFileSync(path.join(projectRoot, ".zero2ai", "esdlc", "test", "quality.json"), "utf-8"),
 		) as { signals: Array<{ name: string; command: string; passed?: number }> };
 		expect(report.signals.find(signal => signal.name === "test")?.passed).toBe(2);
+	});
+});
+
+describe("live run detail", () => {
+	it("streams a command's output into the run log while the phase runs", async () => {
+		// A command that prints twice with a pause between: the log must exist before it finishes.
+		write(
+			"slow.ts",
+			[
+				'console.log("first line");',
+				"await Bun.sleep(1200);",
+				'console.log("second line");',
+				"await Bun.sleep(1500);",
+				'console.log("done");',
+				"",
+			].join("\n"),
+		);
+		await writePhaseConfig(projectRoot, "test", { command: "bun run slow.ts" });
+		const running = runEsdlcPhase(projectRoot, "test", { model: "does-not-exist/model" });
+		// Wait until the phase starts, then read the log *mid-run*.
+		let midRun = "";
+		for (let attempt = 0; attempt < 120; attempt++) {
+			await Bun.sleep(50);
+			try {
+				midRun = fs.readFileSync(path.join(projectRoot, ".zero2ai", "esdlc", "test", "run.log"), "utf-8");
+			} catch {
+				midRun = "";
+			}
+			if (midRun.includes("first line")) break;
+		}
+		expect(midRun).toContain("first line");
+		expect(midRun).not.toContain("done");
+		await running;
+		const finalLog = fs.readFileSync(path.join(projectRoot, ".zero2ai", "esdlc", "test", "run.log"), "utf-8");
+		expect(finalLog).toContain("second line");
+		expect(finalLog).toContain("done");
+	});
+
+	it("resets the log per run so an old tail cannot be mistaken for the current one", async () => {
+		await writePhaseConfig(projectRoot, "test", { command: "bun run one.ts" });
+		write("one.ts", 'console.log("run-one-marker");\n');
+		await runEsdlcPhase(projectRoot, "test", { model: "does-not-exist/model" });
+		await writePhaseConfig(projectRoot, "test", { command: "bun run two.ts" });
+		write("two.ts", 'console.log("run-two-marker");\n');
+		await runEsdlcPhase(projectRoot, "test", { model: "does-not-exist/model" });
+		const log = fs.readFileSync(path.join(projectRoot, ".zero2ai", "esdlc", "test", "run.log"), "utf-8");
+		expect(log).toContain("run-two-marker");
+		expect(log).not.toContain("run-one-marker");
+	});
+});
+
+describe("code graph and impact", () => {
+	it("follows relative imports and reports who a change reaches", async () => {
+		write("src/util.ts", "export const util = 1;\n");
+		write("src/service.ts", 'import { util } from "./util";\nexport const service = util + 1;\n');
+		write("src/api.ts", 'import { service } from "./service";\nexport const api = service + 1;\n');
+		write("src/unrelated.ts", "export const lonely = true;\n");
+		write("src/index.ts", 'import { api } from "./api";\nexport const main = api;\n');
+		const graph = await buildCodeGraph({ cwd: projectRoot, changedFiles: ["src/util.ts"] });
+		expect(graph.changed).toEqual(["src/util.ts"]);
+		// util is imported by service (depth 1), which is imported by api (2) and index (3).
+		expect(graph.impacted).toMatchObject({ "src/service.ts": 1, "src/api.ts": 2, "src/index.ts": 3 });
+		expect(graph.impacted["src/unrelated.ts"]).toBeUndefined();
+		// The dependency direction is reported too.
+		expect(graph.dependencies).toEqual({});
+		const reverse = await buildCodeGraph({ cwd: projectRoot, changedFiles: ["src/index.ts"] });
+		expect(reverse.dependencies).toMatchObject({ "src/api.ts": 1, "src/service.ts": 2, "src/util.ts": 3 });
+	});
+
+	it("resolves extensionless and index specifiers, and separates external packages", async () => {
+		write("lib/dir/index.ts", "export const inside = 1;\n");
+		write(
+			"lib/consumer.ts",
+			'import { inside } from "./dir";\nimport { z } from "zod";\nexport const value = inside;\n',
+		);
+		const graph = await buildCodeGraph({ cwd: projectRoot, changedFiles: ["lib/dir/index.ts"] });
+		expect(graph.impacted).toEqual({ "lib/consumer.ts": 1 });
+		expect(graph.external).toContain("zod");
+		expect(graph.nodes.find(node => node.path === "lib/dir/index.ts")?.importedBy).toEqual(["lib/consumer.ts"]);
+	});
+
+	it("writes the graph and the impact report next to the build", async () => {
+		write("src/a.ts", "export const a = 1;\n");
+		write("src/b.ts", 'import { a } from "./a";\nexport const b = a;\n');
+		write("package.json", JSON.stringify({ name: "fixture", scripts: {} }, null, 2));
+		// Build fails at the agent (unknown model) but the graph is derived from the diff before that.
+		await runEsdlcPhase(projectRoot, "build", { model: "does-not-exist/model" });
+		const graph = JSON.parse(
+			fs.readFileSync(path.join(projectRoot, ".zero2ai", "esdlc", "build", "code-graph.json"), "utf-8"),
+		) as { nodes: unknown[]; impacted: Record<string, number> };
+		expect(Array.isArray(graph.nodes)).toBe(true);
+		expect(fs.existsSync(path.join(projectRoot, ".zero2ai", "esdlc", "build", "IMPACT.md"))).toBe(true);
 	});
 });
 

@@ -13,10 +13,13 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import { ESDLC_PHASES, ESDLC_PHASE_LABELS, readEsdlcState, renderEsdlcBannerArt, runEsdlcPhase } from "./index";
 import { esdlcCatalogs, isEsdlcLocale } from "./i18n";
+import { currentImpact } from "./code-graph";
+import type { EsdlcCodeGraph } from "./code-graph";
 import type { EsdlcDeployFacts, EsdlcQualityReport, EsdlcScaffoldResult } from "./types";
 import {
 	readPhaseEvents,
 	readPhaseJson,
+	readRunLogTail,
 	readProjectTree,
 	readQualityHistory,
 	writePhaseConfig,
@@ -204,6 +207,44 @@ async function handleArtifact(projectRoot: string, url: URL): Promise<Response> 
 	}
 }
 
+/** Cached on-demand impact graph: cheap to build, but not once per poll. */
+let graphCache: { readonly at: number; readonly key: string; readonly graph: EsdlcCodeGraph } | null = null;
+
+async function handleGraph(projectRoot: string): Promise<Response> {
+	const state = await readEsdlcState(projectRoot);
+	// Key on the workspace's own update stamp: any phase run or edit invalidates the cache.
+	const key = state.updatedAt + ":" + state.phases.build.finishedAt;
+	if (graphCache && graphCache.key === key && Date.now() - graphCache.at < 15_000) {
+		return json(graphCache.graph);
+	}
+	const graph = await currentImpact(projectRoot);
+	graphCache = { at: Date.now(), key, graph };
+	return json(graph);
+}
+
+/**
+ * Live run log for a phase, so a long command is watchable while it runs.
+ *
+ * The page polls this; the file is written streaming by the phase itself, so the answer is always
+ * the truth on disk rather than a buffered copy in the server.
+ */
+async function handleLog(projectRoot: string, url: URL): Promise<Response> {
+	const phase = url.searchParams.get("phase") ?? "";
+	if (!isEsdlcPhaseId(phase)) return json({ error: `phase must be one of: ${ESDLC_PHASES.join(", ")}` }, 400);
+	const tail = await readRunLogTail(projectRoot, phase as EsdlcPhaseId);
+	const state = await readEsdlcState(projectRoot);
+	const run = state.phases[phase as EsdlcPhaseId];
+	return json({
+		...tail,
+		status: run.status,
+		startedAt: run.startedAt || null,
+		finishedAt: run.finishedAt,
+		elapsedMs: run.startedAt
+			? (run.finishedAt ? Date.parse(run.finishedAt) : Date.now()) - Date.parse(run.startedAt)
+			: 0,
+	});
+}
+
 /**
  * Structured phase data for the workspace UI: quality signals, deployment facts and the build
  * scaffold record. The JSON files are the source of truth; this endpoint only parses them.
@@ -220,7 +261,10 @@ async function handleReport(projectRoot: string, url: URL): Promise<Response> {
 		return json({ facts: await readPhaseJson<EsdlcDeployFacts>(projectRoot, "deploy", "deploy-facts.json") });
 	}
 	if (phase === "build") {
-		return json({ scaffold: await readPhaseJson<EsdlcScaffoldResult>(projectRoot, "build", "scaffold.json") });
+		return json({
+			scaffold: await readPhaseJson<EsdlcScaffoldResult>(projectRoot, "build", "scaffold.json"),
+			graph: await readPhaseJson<EsdlcCodeGraph>(projectRoot, "build", "code-graph.json"),
+		});
 	}
 	return json({});
 }
@@ -251,6 +295,8 @@ export function startEsdlcWeb(options: EsdlcWebOptions): EsdlcWebHandle {
 			if (url.pathname === "/api/tree") return json(await readProjectTree(projectRoot));
 			if (url.pathname === "/api/events") return await handleEvents(projectRoot, url);
 			if (url.pathname === "/api/report") return await handleReport(projectRoot, url);
+			if (url.pathname === "/api/log") return await handleLog(projectRoot, url);
+			if (url.pathname === "/api/graph") return await handleGraph(projectRoot);
 			if (url.pathname === "/api/config" && request.method === "POST") {
 				const body = await parseBody(request);
 				if (body instanceof Response) return body;
@@ -448,7 +494,17 @@ const PAGE = `<!DOCTYPE html>
   .quality-history-fill[data-band="high"] { background:var(--ok); }
   .quality-history-fill[data-band="mid"] { background:var(--warn); }
   .quality-history-fill[data-band="low"] { background:var(--err); }
-  .scaffold-lines { display:flex; flex-direction:column; gap:3px; font:12px ui-monospace,Consolas,monospace; }
+  pre.live-log { max-height:36vh; background:#0e1013; border:1px solid var(--line); border-radius:6px; padding:10px; }
+  .graph-svg { width:100%; height:auto; }
+  .graph-edge { stroke:#2f333a; stroke-width:1; } display:flex; flex-direction:column; gap:3px; font:12px ui-monospace,Consolas,monospace; }
+  .graph-dot { stroke:#0b0c0e; stroke-width:1.5; }
+  .graph-dot-changed { fill:var(--accent); }
+  .graph-dot-impacted { fill:#ef4444; }
+  .graph-dot-dependency { fill:#38bdf8; }
+  .graph-label { fill:#c9cdd4; font:10.5px ui-monospace,Consolas,monospace; }
+  .graph-list { display:flex; flex-direction:column; gap:4px; align-items:flex-start; max-height:280px; overflow:auto; }
+  .graph-list .chip[data-kind="impact"] { border-color:#7f1d1d; }
+  .badge.impact { color:var(--err); border-color:#41211f; }
   .facts-list { display:flex; flex-wrap:wrap; gap:6px; font:12px ui-monospace,Consolas,monospace; color:var(--fg); }
   input.editor-mini, textarea.editor-mini { width:100%; margin-top:4px; background:#0e1013; color:var(--fg);
       border:1px solid var(--line); border-radius:6px; padding:7px 9px; font:12px ui-monospace,Consolas,monospace; }
@@ -607,7 +663,7 @@ async function refreshState() {
 function renderTabs() {
   const nav = el("stages");
   nav.textContent = "";
-  const items = [{ tab:"flow", label:t("flow.title") }, { tab:"config", label:t("config.title") }, { tab:"tree", label:t("nav.tree") }].concat(ORDER.map((p, i) => ({ tab:"phase:" + p, label:(i+1) + ". " + LABELS[p], phase:p })));
+  const items = [{ tab:"flow", label:t("flow.title") }, { tab:"graph", label:t("graph.tab") }, { tab:"config", label:t("config.title") }, { tab:"tree", label:t("nav.tree") }].concat(ORDER.map((p, i) => ({ tab:"phase:" + p, label:(i+1) + ". " + LABELS[p], phase:p })));
   for (const item of items) {
     const button = document.createElement("button");
     button.textContent = item.label;
@@ -653,6 +709,7 @@ function renderHitl() {
 
 function renderView() {
   if (tab === "flow") return renderFlow();
+  if (tab === "graph") return renderGraph();
   if (tab === "config") return renderConfig();
   if (tab === "tree") return renderTree();
   return renderPhase(tab.slice(6));
@@ -736,6 +793,7 @@ function renderPhase(phase) {
 
   // Phase-specific panels: configuration for analysis/build, measured results for test/deploy.
   const report = reports[phase];
+  card.parentElement.appendChild(liveLogCard(phase));
   if (phase === "build" && report) card.parentElement.appendChild(scaffoldCard(report.scaffold));
   if (phase === "test" && report) card.parentElement.appendChild(qualityCard(report.quality ? { ...report.quality, history: report.history } : null));
   if (phase === "deploy" && report) card.parentElement.appendChild(factsCard(report.facts));
@@ -1241,6 +1299,202 @@ function renderConfig() {
   });
 }
 
+/* ---------- 实时运行细节 ---------- */
+
+/** Poll the phase's run log while it runs; show the tail with an elapsed clock. */
+function liveLogCard(phase) {
+  const run = state.phases[phase];
+  const box = document.createElement("div"); box.className = "card";
+  const head = document.createElement("div"); head.className = "row";
+  const title = document.createElement("h3"); title.textContent = t("live.title");
+  const badge = document.createElement("span"); badge.className = "badge";
+  badge.textContent = statusText(run.status);
+  head.append(title, badge);
+  const meta = document.createElement("div"); meta.className = "hint";
+  meta.textContent = t("live.hint");
+  const pre = document.createElement("pre"); pre.className = "viewer live-log"; pre.id = "live-log";
+  pre.textContent = t("live.loading");
+  const actions = document.createElement("div"); actions.className = "row"; actions.style.marginTop = "8px";
+  const follow = document.createElement("label"); follow.className = "hint";
+  const followBox = document.createElement("input"); followBox.type = "checkbox"; followBox.checked = true;
+  follow.append(followBox, makeSpan(" " + t("live.follow")));
+  const refresh = document.createElement("button"); refresh.className = "ghost"; refresh.textContent = t("home.refresh");
+  refresh.onclick = () => void refreshLog(phase, pre, meta, badge, followBox);
+  actions.append(follow, refresh);
+  box.append(head, meta, pre, actions);
+
+  liveTail.set(phase, { pre: pre, meta: meta, badge: badge, follow: followBox });
+  void refreshLog(phase, pre, meta, badge, followBox);
+  return box;
+}
+
+/** Phase → its live log nodes, so the poll can update the visible one without a re-render. */
+const liveTail = new Map();
+
+async function refreshLog(phase, pre, meta, badge, followBox) {
+  try {
+    const payload = await api("/api/log?phase=" + phase);
+    badge.textContent = statusText(payload.status);
+    meta.textContent = t("live.elapsed", { duration: fmtDuration(payload.elapsedMs) }) +
+      (payload.truncated ? " · " + t("live.truncated") : "") +
+      (payload.status === "running" || payload.status === "awaiting-input" ? " · " + t("live.streaming") : "");
+    pre.textContent = payload.text || t("live.empty");
+    if (followBox && followBox.checked) pre.scrollTop = pre.scrollHeight;
+  } catch (err) {
+    meta.textContent = String(err.message || err);
+  }
+}
+
+/* ---------- 代码图与变更影响 ---------- */
+
+function renderGraph() {
+  const view = el("view");
+  view.textContent = "";
+  const report = reports.build;
+  if (!report) {
+    const card = document.createElement("div"); card.className = "card";
+    card.appendChild(Object.assign(document.createElement("div"), { className: "empty", textContent: t("graph.empty") }));
+    view.appendChild(card);
+    if (reports.build === undefined) void loadReport("build").then(() => { if (tab === "graph") renderGraph(); });
+    return;
+  }
+  const graph = report.graph;
+  if (!graph) {
+    const card = document.createElement("div"); card.className = "card";
+    card.appendChild(Object.assign(document.createElement("div"), { className: "empty", textContent: t("graph.none") }));
+    view.appendChild(card);
+    return;
+  }
+
+  const summary = document.createElement("div"); summary.className = "card";
+  const head = document.createElement("h3"); head.textContent = t("graph.title");
+  const strip = document.createElement("div"); strip.className = "row"; strip.style.gap = "16px";
+  strip.append(
+    makeBadge(t("graph.changedCount", { count: graph.changed.length }), "chg"),
+    makeBadge(t("graph.impactedCount", { count: Object.keys(graph.impacted).length }), "impact"),
+    makeBadge(t("graph.dependencyCount", { count: Object.keys(graph.dependencies).length })),
+    makeSpan(t("graph.scanned", { count: graph.filesScanned }) + (graph.truncated ? " · " + t("graph.capped") : "")),
+  );
+  const hint = document.createElement("div"); hint.className = "hint"; hint.textContent = t("graph.hint");
+  summary.append(head, strip, hint);
+  view.appendChild(summary);
+
+  const layout = document.createElement("div"); layout.className = "card";
+  layout.appendChild(renderGraphSvg(graph));
+  view.appendChild(layout);
+
+  const lists = document.createElement("div"); lists.className = "split";
+  lists.append(
+    fileListCard(t("graph.impactList"), Object.entries(graph.impacted), "impact"),
+    fileListCard(t("graph.dependencyList"), Object.entries(graph.dependencies), "dep"),
+  );
+  view.appendChild(lists);
+  if (graph.external?.length) {
+    const external = document.createElement("div"); external.className = "card";
+    const title = document.createElement("h3"); title.textContent = t("graph.external");
+    const chips = document.createElement("div"); chips.className = "chips";
+    for (const name of graph.external.slice(0, 60)) chips.appendChild(makeSpan(name));
+    external.append(title, chips);
+    view.appendChild(external);
+  }
+}
+
+function fileListCard(title, entries, kind) {
+  const card = document.createElement("div"); card.className = "card";
+  const heading = document.createElement("h3"); heading.textContent = title;
+  card.appendChild(heading);
+  if (!entries.length) {
+    card.appendChild(Object.assign(document.createElement("div"), { className: "empty", textContent: t("graph.noneInDirection") }));
+    return card;
+  }
+  const list = document.createElement("div"); list.className = "graph-list";
+  for (const [file, depth] of entries.slice(0, 80)) {
+    const row = document.createElement("button"); row.className = "chip"; row.dataset.kind = kind;
+    row.textContent = file + " · " + t("graph.depth", { depth: depth });
+    row.onclick = () => openPreview(file);
+    list.appendChild(row);
+  }
+  card.appendChild(list);
+  return card;
+}
+
+/** Radial impact layout: changed files in the middle, dependents by depth around them. */
+function renderGraphSvg(graph) {
+  const width = 1000, height = 460, cx = width / 2, cy = height / 2;
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 " + width + " " + height);
+  svg.setAttribute("class", "graph-svg");
+  const changed = graph.changed.slice(0, 10);
+  const impacted = Object.entries(graph.impacted).slice(0, 40);
+  const positions = new Map();
+
+  changed.forEach((file, index) => {
+    const angle = (index / Math.max(1, changed.length)) * Math.PI * 2 - Math.PI / 2;
+    const radius = changed.length === 1 ? 0 : 62;
+    positions.set(file, { x: cx + Math.cos(angle) * radius, y: cy + Math.sin(angle) * radius, kind: "changed" });
+  });
+  // Dependencies get their own ring, so both directions of the change are visible at once.
+  const dependencyFiles = Object.entries(graph.dependencies ?? {}).slice(0, 24);
+  dependencyFiles.forEach(([file, depth], index) => {
+    if (positions.has(file)) return;
+    const angle = (index / Math.max(1, dependencyFiles.length)) * Math.PI * 2 + Math.PI / 2 + depth * 0.2;
+    const radius = 118 + (depth - 1) * 60;
+    positions.set(file, { x: cx + Math.cos(angle) * radius, y: cy + Math.sin(angle) * radius, kind: "dependency" });
+  });
+  const byDepth = new Map();
+  for (const [file, depth] of impacted) {
+    const bucket = byDepth.get(depth) ?? [];
+    bucket.push(file);
+    byDepth.set(depth, bucket);
+  }
+  for (const [depth, files] of [...byDepth.entries()].sort((a, b) => a[0] - b[0])) {
+    const radius = 130 + (depth - 1) * 92;
+    files.forEach((file, index) => {
+      const angle = (index / Math.max(1, files.length)) * Math.PI * 2 - Math.PI / 2 + depth * 0.35;
+      positions.set(file, { x: cx + Math.cos(angle) * radius, y: cy + Math.sin(angle) * radius, kind: "impacted" });
+    });
+  }
+
+  // Edges first so nodes sit on top.
+  const drawn = new Set();
+  for (const [file, position] of positions) {
+    const node = graph.nodes.find(entry => entry.path === file);
+    if (!node) continue;
+    for (const target of node.imports) {
+      const to = positions.get(target);
+      if (!to) continue;
+      const key = file + "→" + target;
+      if (drawn.has(key)) continue;
+      drawn.add(key);
+      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line.setAttribute("x1", position.x); line.setAttribute("y1", position.y);
+      line.setAttribute("x2", to.x); line.setAttribute("y2", to.y);
+      line.setAttribute("class", "graph-edge");
+      svg.appendChild(line);
+    }
+  }
+
+  for (const [file, position] of positions) {
+    const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    group.setAttribute("class", "graph-node");
+    group.style.cursor = "pointer";
+    group.addEventListener("click", () => openPreview(file));
+    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    circle.setAttribute("cx", position.x); circle.setAttribute("cy", position.y);
+    circle.setAttribute("r", position.kind === "changed" ? "9" : "5.5");
+    circle.setAttribute("class", "graph-dot graph-dot-" + position.kind);
+    const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    label.setAttribute("x", position.x + 11); label.setAttribute("y", position.y + 4);
+    label.setAttribute("class", "graph-label");
+    label.textContent = file.split("/").pop();
+    const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+    title.textContent = file + (position.kind === "changed" ? " — " + t("graph.changedTag") : "");
+    group.append(circle, label, title);
+    svg.appendChild(group);
+  }
+  return svg;
+}
+
 /* ---------- 产物树 ---------- */
 
 function makeSpan(text) { const span = document.createElement("span"); span.textContent = text; return span; }
@@ -1575,7 +1829,13 @@ setInterval(async () => {
   const before = ORDER.map(status).join(",");
   await refreshState();
   if (ORDER.map(status).join(",") !== before) { await loadTree(); renderView(); }
-}, 2500);
+  // The visible log keeps streaming between state changes: poll it on its own cadence.
+  const phase = tab.startsWith("phase:") ? tab.slice(6) : null;
+  const tail = phase ? liveTail.get(phase) : null;
+  if (tail && tail.pre.isConnected) {
+    await refreshLog(phase, tail.pre, tail.meta, tail.badge, tail.follow);
+  }
+}, 1500);
 </script>
 </body>
 </html>

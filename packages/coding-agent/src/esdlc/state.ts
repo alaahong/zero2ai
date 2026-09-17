@@ -196,6 +196,52 @@ export async function appendPhaseEvent(projectRoot: string, record: EsdlcCallRec
 	}
 }
 
+/**
+ * The live log of a phase run: every command's output as it arrives.
+ *
+ * Written streaming rather than at the end, so the workspace can show what a long build or test
+ * run is doing right now instead of only its aftermath.
+ */
+export function runLogPath(projectRoot: string, phase: EsdlcPhaseId): string {
+	return path.join(phaseDir(projectRoot, phase), "run.log");
+}
+
+/** Start a fresh run log for a phase (overwrites the previous run's). */
+export async function resetRunLog(projectRoot: string, phase: EsdlcPhaseId, header: string): Promise<void> {
+	const file = runLogPath(projectRoot, phase);
+	await fs.mkdir(path.dirname(file), { recursive: true });
+	await Bun.write(file, `${header}\n`);
+}
+
+/** Append streamed output to the run log. */
+export async function appendRunLog(projectRoot: string, phase: EsdlcPhaseId, text: string): Promise<void> {
+	try {
+		const file = runLogPath(projectRoot, phase);
+		const handle = Bun.file(file);
+		const existing = (await handle.exists()) ? await handle.text() : "";
+		await Bun.write(file, `${existing}${text}`);
+	} catch {
+		// A log write must never fail a phase.
+	}
+}
+
+/** The tail of a run log, bounded so a chatty command cannot flood the page. */
+export async function readRunLogTail(
+	projectRoot: string,
+	phase: EsdlcPhaseId,
+	maxChars = 60_000,
+): Promise<{ text: string; bytes: number; truncated: boolean }> {
+	try {
+		const file = runLogPath(projectRoot, phase);
+		const text = await Bun.file(file).text();
+		const truncated = text.length > maxChars;
+		return { text: truncated ? text.slice(-maxChars) : text, bytes: text.length, truncated };
+	} catch (error) {
+		if (isEnoent(error)) return { text: "", bytes: 0, truncated: false };
+		return { text: "", bytes: 0, truncated: false };
+	}
+}
+
 /** One model call's transcripts, so the execution trail shows the actual work. */
 export async function writeCallTranscript(
 	projectRoot: string,

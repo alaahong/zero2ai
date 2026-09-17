@@ -12,10 +12,11 @@ import * as vcs from "@zero2ai/natives/vcs";
 import { asRecord, isEnoent, prompt } from "@zero2ai/utils";
 import { type EsdlcCallSummary, generateText } from "./llm";
 import { transcribeRecording } from "./audio";
+import { currentImpact, renderImpactArtifact } from "./code-graph";
 import { collectDeployFacts, renderDeployFactsArtifact, renderDeployFactsForPrompt } from "./deploy-facts";
 import { parseCoveragePercent, parseTestCounts, renderQualityArtifact, scoreQuality } from "./quality";
 import { loadSpecSources, renderSpecsArtifact, renderSpecsForPrompt } from "./specs";
-import { appendQualityHistory, phaseDir } from "./state";
+import { appendQualityHistory, appendRunLog, phaseDir } from "./state";
 import type { EsdlcArtifact, EsdlcPhaseId, EsdlcQualityReport, EsdlcQualitySignal, EsdlcScaffoldResult } from "./types";
 
 import systemAnalyst from "./prompts/system-analyst.md" with { type: "text" };
@@ -37,6 +38,8 @@ const CLARIFICATION_THRESHOLD_CHARS = 400;
 
 export interface EsdlcRunOptions {
 	readonly cwd: string;
+	/** Phase being run; the runner sets it so commands can log against the right workspace phase. */
+	readonly phase: EsdlcPhaseId;
 	/** Recording or transcript handed to the requirements phase. */
 	readonly input?: string;
 	/** Free-form instruction (requirements notes, build instruction). */
@@ -99,25 +102,127 @@ interface CommandResult {
 	readonly durationMs: number;
 }
 
-async function runCommand(cwd: string, argv: readonly string[], signal?: AbortSignal): Promise<CommandResult> {
+async function runCommand(
+	cwd: string,
+	argv: readonly string[],
+	options: {
+		readonly signal?: AbortSignal;
+		/** Receives output as it arrives, for the live run log and progress lines. */
+		readonly onChunk?: (chunk: string) => void;
+	} = {},
+): Promise<CommandResult> {
 	const started = Date.now();
-	const child = Bun.spawn([...argv], { cwd, stdout: "pipe", stderr: "pipe", ...(signal ? { signal } : {}) });
-	const [stdout, stderr, exitCode] = await Promise.all([
-		new Response(child.stdout as ReadableStream).text(),
-		new Response(child.stderr as ReadableStream).text(),
-		child.exited,
+	const child = Bun.spawn([...argv], {
+		cwd,
+		stdout: "pipe",
+		stderr: "pipe",
+		...(options.signal ? { signal: options.signal } : {}),
+	});
+	let captured = "";
+	const pump = async (stream: ReadableStream<Uint8Array> | null): Promise<void> => {
+		if (!stream) return;
+		const reader = stream.getReader();
+		const decoder = new TextDecoder();
+		while (true) {
+			const { done, value } = await reader.read();
+			if (done) break;
+			const text = decoder.decode(value, { stream: true });
+			captured += text;
+			options.onChunk?.(text);
+		}
+	};
+	await Promise.all([
+		pump(child.stdout as ReadableStream<Uint8Array>),
+		pump(child.stderr as ReadableStream<Uint8Array>),
 	]);
-	const combined = [stdout, stderr]
-		.filter(part => part.trim())
-		.join("\n")
-		.trim();
+	const exitCode = await child.exited;
+	const trimmed = captured.trim();
 	return {
 		output:
-			combined.length > MAX_CAPTURED_OUTPUT_CHARS
-				? `${combined.slice(0, MAX_CAPTURED_OUTPUT_CHARS)}\n… (truncated)`
-				: combined,
+			trimmed.length > MAX_CAPTURED_OUTPUT_CHARS
+				? `${trimmed.slice(0, MAX_CAPTURED_OUTPUT_CHARS)}\n… (truncated)`
+				: trimmed,
 		exitCode,
 		durationMs: Date.now() - started,
+	};
+}
+
+/**
+ * Run a command for a phase: its output streams into the run log as it arrives and the newest
+ * line becomes a progress update, so a long build or test run is watchable while it happens.
+ */
+async function runPhaseCommand(options: EsdlcRunOptions, argv: readonly string[]): Promise<CommandResult> {
+	const label = argv.join(" ");
+	options.onProgress?.(`$ ${label}`);
+	const stream = createStreamingSink(options);
+	const result = await runCommand(options.cwd, argv, {
+		...(options.signal ? { signal: options.signal } : {}),
+		onChunk: stream.push,
+	});
+	await stream.flush();
+	return result;
+}
+
+/**
+ * Batch output into the run log and the progress channel: file writes are debounced (~250 ms) and
+ * progress lines throttled (~700 ms), so a command that prints per-byte cannot thrash either.
+ */
+function createStreamingSink(options: EsdlcRunOptions): { push: (chunk: string) => void; flush: () => Promise<void> } {
+	const pending: string[] = [];
+	let lastProgressAt = 0;
+	let progressTimer: ReturnType<typeof setTimeout> | null = null;
+	let writeTimer: ReturnType<typeof setTimeout> | null = null;
+
+	const flushLog = async (): Promise<void> => {
+		if (!pending.length || !options.phase) return;
+		const text = pending.join("");
+		pending.length = 0;
+		await appendRunLog(options.cwd, options.phase, text);
+	};
+	const scheduleLog = (): void => {
+		if (writeTimer) return;
+		writeTimer = setTimeout(() => {
+			writeTimer = null;
+			void flushLog();
+		}, 250);
+	};
+	const emitProgress = (): void => {
+		const now = Date.now();
+		if (now - lastProgressAt < 700) {
+			if (progressTimer) return;
+			progressTimer = setTimeout(() => {
+				progressTimer = null;
+				emitProgress();
+			}, 700);
+			return;
+		}
+		lastProgressAt = now;
+		const line = pending
+			.join("")
+			.split("\n")
+			.map(entry => entry.trim())
+			.filter(Boolean)
+			.pop();
+		if (line) options.onProgress?.(line.length > 140 ? `${line.slice(0, 140)}…` : line);
+	};
+
+	return {
+		push: chunk => {
+			pending.push(chunk);
+			scheduleLog();
+			emitProgress();
+		},
+		flush: async () => {
+			if (writeTimer) {
+				clearTimeout(writeTimer);
+				writeTimer = null;
+			}
+			if (progressTimer) {
+				clearTimeout(progressTimer);
+				progressTimer = null;
+			}
+			await flushLog();
+		},
 	};
 }
 
@@ -323,7 +428,7 @@ export async function runScaffoldPreStep(options: EsdlcRunOptions): Promise<{
 	if (command) {
 		options.onProgress?.(`scaffold: ${command}`);
 		const argv = command.split(/\s+/).filter(Boolean);
-		const run = await runCommand(options.cwd, argv, options.signal);
+		const run = await runPhaseCommand(options, argv);
 		exitCode = run.exitCode;
 		durationMs += run.durationMs;
 		notes.push(`command \`${command}\` exited ${run.exitCode} in ${run.durationMs} ms`);
@@ -362,7 +467,7 @@ export async function runBuildPhase(options: EsdlcRunOptions): Promise<EsdlcPhas
 	const argv = [process.execPath, entry, "-p", instruction];
 	// Honour the caller's model choice (web picker / --model) for the agent run too.
 	if (options.model) argv.push("--model", options.model);
-	const run = await runCommand(options.cwd, argv, options.signal);
+	const run = await runPhaseCommand(options, argv);
 	const artifacts = [
 		await writeArtifact(options.cwd, "build", "agent-output.md", `# Build run\n\n${run.output || "(no output)"}`),
 	];
@@ -370,6 +475,14 @@ export async function runBuildPhase(options: EsdlcRunOptions): Promise<EsdlcPhas
 	if (files.length > 0)
 		artifacts.push(await writeArtifact(options.cwd, "build", "changed-files.txt", files.join("\n")));
 	if (patch.trim()) artifacts.push(await writeArtifact(options.cwd, "build", "changes.patch", patch));
+	// What the change touches: the import graph answers the reviewer's "what else breaks?".
+	options.onProgress?.("analysing impact …");
+	const graph = await currentImpact(options.cwd, files);
+	artifacts.push(
+		await writeArtifact(options.cwd, "build", "code-graph.json", `${JSON.stringify(graph, null, 2)}\n`),
+		await writeArtifact(options.cwd, "build", "IMPACT.md", renderImpactArtifact(graph)),
+	);
+	const impactCount = Object.keys(graph.impacted).length;
 	await writeArtifact(
 		options.cwd,
 		"build",
@@ -392,7 +505,9 @@ export async function runBuildPhase(options: EsdlcRunOptions): Promise<EsdlcPhas
 			}))
 		: [];
 	return {
-		summary: `exit 0, ${files.length} file(s) changed${scaffoldNotes.length ? " (scaffolded first)" : ""}`,
+		summary:
+			`exit 0, ${files.length} file(s) changed, ${impactCount} file(s) impacted` +
+			(scaffoldNotes.length ? " (scaffolded first)" : ""),
 		artifacts: [
 			...artifacts,
 			...scaffoldFiles,
@@ -418,7 +533,7 @@ export async function runTestPhase(options: EsdlcRunOptions): Promise<EsdlcPhase
 	): Promise<{ exitCode: number; output: string; durationMs: number }> => {
 		const argv = command.split(/\s+/).filter(Boolean);
 		options.onProgress?.(`quality: ${name} (${command})`);
-		const run = await runCommand(options.cwd, argv, options.signal);
+		const run = await runPhaseCommand(options, argv);
 		outputs.push(`$ ${command}\n${run.output || "(no output)"}`);
 		return { exitCode: run.exitCode, output: run.output, durationMs: run.durationMs };
 	};

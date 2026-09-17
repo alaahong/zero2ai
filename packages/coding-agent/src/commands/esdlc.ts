@@ -7,7 +7,7 @@ import { runEsdlcCommand } from "../cli/esdlc-cli";
 import { esdlcHelp as commandHelp } from "../cli/command-help";
 import { initTheme } from "../modes/theme/theme";
 
-const ACTIONS = ["status", "run"] as const;
+const ACTIONS = ["status", "run", "graph"] as const;
 
 export default class Esdlc extends Command {
 	static description = commandHelp.description;
@@ -44,6 +44,7 @@ export default class Esdlc extends Command {
 		"# Capture a discussion recording (ASR) or an existing transcript\n  zero2ai esdlc run requirements --input ./meeting.m4a",
 		'# Capture notes without audio\n  zero2ai esdlc run requirements --prompt "row-level reconciliation scope"',
 		"# Generate BRD + FSD from the captured requirements\n  zero2ai esdlc run analysis",
+		"# Show what the current uncommitted change reaches\n  zero2ai esdlc graph",
 		'# Run the project test suite and summarise it\n  zero2ai esdlc run test --command "bun run test"',
 	];
 

@@ -1,6 +1,7 @@
 /**
  * `zero2ai esdlc` — engineering lifecycle workspace (status + phase runs).
  */
+import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import { getProjectDir, readLines } from "@zero2ai/utils";
 import {
@@ -15,6 +16,8 @@ import {
 	runEsdlcPhase,
 } from "../esdlc";
 import { isEsdlcPhaseId } from "../esdlc/types";
+import { currentImpact, renderImpactArtifact } from "../esdlc/code-graph";
+import { phaseDir } from "../esdlc/state";
 import { openEsdlcScreen } from "../esdlc/screen";
 import { DEFAULT_ESDLC_WEB_PORT, startEsdlcWeb } from "../esdlc/web";
 
@@ -100,6 +103,26 @@ export async function runEsdlcCommand(args: EsdlcCommandArgs): Promise<number> {
 			}).done;
 		}
 		process.stdout.write(`${renderEsdlcStatus(state, locale)}\n`);
+		return 0;
+	}
+
+	if (action === "graph") {
+		const graph = await currentImpact(projectRoot);
+		const changedLabel = `${graph.changed.length} changed`;
+		const impacted = Object.entries(graph.impacted);
+		process.stdout.write(
+			`${changedLabel}, ${impacted.length} impacted, ${graph.filesScanned} source file(s) scanned\n`,
+		);
+		for (const file of graph.changed) process.stdout.write(`  ~ ${file}\n`);
+		for (const [file, depth] of impacted.slice(0, 40)) process.stdout.write(`  ← ${file} (depth ${depth})\n`);
+		for (const [file, depth] of Object.entries(graph.dependencies).slice(0, 20)) {
+			process.stdout.write(`  → ${file} (depth ${depth})\n`);
+		}
+		const dir = phaseDir(projectRoot, "build");
+		await fs.mkdir(dir, { recursive: true });
+		await Bun.write(path.join(dir, "code-graph.json"), `${JSON.stringify(graph, null, 2)}\n`);
+		await Bun.write(path.join(dir, "IMPACT.md"), `${renderImpactArtifact(graph)}\n`);
+		process.stdout.write(`  written: .zero2ai/esdlc/build/code-graph.json, IMPACT.md\n`);
 		return 0;
 	}
 

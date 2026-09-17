@@ -12,7 +12,7 @@ import {
 	type EsdlcQuestion,
 	type EsdlcState,
 } from "./types";
-import { appendPhaseEvent, readEsdlcState, recordPhaseRun, writeCallTranscript } from "./state";
+import { appendPhaseEvent, readEsdlcState, recordPhaseRun, resetRunLog, writeCallTranscript } from "./state";
 import * as phases from "./phases";
 import type { EsdlcPhaseOutcome, EsdlcRunOptions } from "./phases";
 import {
@@ -34,7 +34,7 @@ export { runScaffoldPreStep } from "./phases";
  */
 export type EsdlcPhaseRequest = Omit<
 	EsdlcRunOptions,
-	"cwd" | "notes" | "requestInput" | "onEvent" | "specSources" | "scaffoldCommand" | "scaffoldTemplate"
+	"cwd" | "phase" | "notes" | "requestInput" | "onEvent" | "specSources" | "scaffoldCommand" | "scaffoldTemplate"
 > & {
 	readonly requestInput?: (question: EsdlcQuestion) => Promise<string>;
 	/** Overrides for the workspace configuration; a caller that omits them uses the stored values. */
@@ -78,6 +78,8 @@ export async function runEsdlcPhase(
 		question: null,
 	};
 	await recordPhaseRun(projectRoot, phase, running);
+	// Fresh run log per attempt: the page tails it while the phase runs.
+	await resetRunLog(projectRoot, phase, `# ${phase} · ${startedAt}\n`);
 	const state = await readEsdlcState(projectRoot);
 	const { requestInput, specSources, scaffoldCommand, scaffoldTemplate, ...phaseOptions } = options;
 	// The workspace externalizes what each step depends on; an explicit argument for this run wins.
@@ -86,6 +88,7 @@ export async function runEsdlcPhase(
 		const outcome = await RUNNERS[phase]({
 			...phaseOptions,
 			cwd: projectRoot,
+			phase,
 			notes: state.notes,
 			...(phaseOptions.prompt ? {} : config.prompt ? { prompt: config.prompt } : {}),
 			...(phaseOptions.input

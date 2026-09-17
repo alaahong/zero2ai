@@ -2,12 +2,12 @@
   "version": 1,
   "projectRoot": "",
   "createdAt": "2026-09-17T01:04:00.268Z",
-  "updatedAt": "2026-09-17T06:25:28.653Z",
+  "updatedAt": "2026-09-17T06:43:31.531Z",
   "phases": {
     "requirements": {
       "status": "completed",
-      "startedAt": "2026-09-17T02:34:16.912Z",
-      "finishedAt": "2026-09-17T02:34:16.917Z",
+      "startedAt": "2026-09-17T06:41:00.620Z",
+      "finishedAt": "2026-09-17T06:41:00.628Z",
       "summary": "captured notes.md",
       "error": null,
       "artifacts": [
@@ -20,8 +20,8 @@
     },
     "analysis": {
       "status": "completed",
-      "startedAt": "2026-09-17T02:58:41.815Z",
-      "finishedAt": "2026-09-17T03:01:06.728Z",
+      "startedAt": "2026-09-17T06:41:11.423Z",
+      "finishedAt": "2026-09-17T06:43:31.531Z",
       "summary": "BRD + FSD generated with opencode-go/deepseek-v4.1-flash",
       "error": null,
       "artifacts": [
@@ -121,5 +121,37 @@
   "locale": "en",
   "specSources": [],
   "scaffoldCommand": "",
-  "scaffoldTemplate": ""
+  "scaffoldTemplate": "",
+  "config": {
+    "requirements": {
+      "sources": [],
+      "prompt": "",
+      "command": ""
+    },
+    "analysis": {
+      "sources": [],
+      "prompt": "",
+      "command": ""
+    },
+    "build": {
+      "sources": [],
+      "prompt": "",
+      "command": ""
+    },
+    "test": {
+      "sources": [],
+      "prompt": "",
+      "command": ""
+    },
+    "deploy": {
+      "sources": [],
+      "prompt": "",
+      "command": ""
+    },
+    "release": {
+      "sources": [],
+      "prompt": "",
+      "command": ""
+    }
+  }
 }
