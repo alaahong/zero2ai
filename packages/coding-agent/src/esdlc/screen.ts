@@ -17,7 +17,7 @@ import {
 	tEsdlc,
 	type EsdlcLocale,
 } from "./index";
-import type { EsdlcPhaseId, EsdlcState } from "./types";
+import type { EsdlcPhaseId, EsdlcQuestion, EsdlcState } from "./types";
 
 const PROGRESS_HISTORY = 6;
 const UP = "\u001b[A";
@@ -44,7 +44,8 @@ class EsdlcScreen implements Component {
 	#running: EsdlcPhaseId | null = null;
 	#progress: string[] = [];
 	#notice: string | null = null;
-	#typing: { phase: EsdlcPhaseId; buffer: string } | null = null;
+	#typing: { phase: EsdlcPhaseId; buffer: string; question?: string } | null = null;
+	#answer: ((text: string) => void) | null = null;
 	readonly #options: EsdlcScreenOptions;
 	readonly #locale: EsdlcLocale;
 	readonly #refresh: () => void;
@@ -84,8 +85,14 @@ class EsdlcScreen implements Component {
 		});
 		lines.push("");
 		if (this.#typing) {
-			lines.push(`  ${messages["home.notes"]} · ${this.#typing.phase}: ${this.#typing.buffer}_`.slice(0, width));
-			lines.push(`  ${messages["screen.enterToRun"]}`);
+			if (this.#typing.question) {
+				lines.push(`  ${messages["hitl.title"].replace("{phase}", this.#typing.phase)}`.slice(0, width));
+				lines.push(`  ${this.#typing.question}`.slice(0, width));
+			} else {
+				lines.push(`  ${messages["home.notes"]} · ${this.#typing.phase}: ${this.#typing.buffer}_`.slice(0, width));
+			}
+			lines.push(`  > ${this.#typing.buffer}_`.slice(0, width));
+			lines.push(`  ${messages["screen.answerKeys"]}`.slice(0, width));
 		} else if (this.#running) {
 			lines.push(`  ${messages["cli.runningPhase"].replace("{phase}", this.#running ?? "")}`);
 			for (const entry of this.#progress.slice(-PROGRESS_HISTORY)) lines.push(`    - ${entry}`.slice(0, width));
@@ -128,9 +135,20 @@ class EsdlcScreen implements Component {
 		const typing = this.#typing;
 		if (!typing) return;
 		if (data === "\u001b" || data === "\u0003") {
+			const resolve = this.#answer;
+			this.#answer = null;
 			this.#typing = null;
+			resolve?.("");
 		} else if (data === "\r" || data === "\n") {
 			this.#typing = null;
+			if (typing.question) {
+				// An answer resumes the parked phase instead of starting a new run.
+				const resolve = this.#answer;
+				this.#answer = null;
+				resolve?.(typing.buffer);
+				this.#refresh();
+				return;
+			}
 			void this.#run(typing.phase, typing.buffer);
 			return;
 		} else if (data === "\u007f") {
@@ -151,6 +169,16 @@ class EsdlcScreen implements Component {
 			...((prompt ?? this.#options.prompt) ? { prompt: prompt ?? this.#options.prompt } : {}),
 			...(this.#options.model ? { model: this.#options.model } : {}),
 			...(this.#options.command ? { command: this.#options.command } : {}),
+			// A phase that needs a human asks *here*: the screen is the terminal surface, so the
+			// question must not be skipped the way a non-interactive run skips it.
+			requestInput: async (question: EsdlcQuestion) => {
+				this.#progress = [];
+				const { promise, resolve } = Promise.withResolvers<string>();
+				this.#answer = resolve;
+				this.#typing = { phase, buffer: "", question: question.text };
+				this.#refresh();
+				return await promise;
+			},
 			onProgress: message => {
 				this.#progress.push(message);
 				this.#refresh();

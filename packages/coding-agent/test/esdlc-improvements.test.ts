@@ -219,6 +219,33 @@ describe("externalized phase configuration", () => {
 	});
 });
 
+describe("answering a phase's question without a live transport", () => {
+	it("uses a supplied clarification, so a script can answer what a terminal would", async () => {
+		fs.mkdirSync(path.join(projectRoot, ".zero2ai", "esdlc", "requirements"), { recursive: true });
+		fs.writeFileSync(path.join(projectRoot, ".zero2ai", "esdlc", "requirements", "notes.md"), "对账");
+		const state = await runEsdlcPhase(projectRoot, "analysis", {
+			model: "does-not-exist/model",
+			clarification: "范围：仅对私业务；规则：18:00 截止",
+		});
+		// The answer is what the phase recorded, and the parked question is cleared afterwards.
+		const clarifications = fs.readFileSync(
+			path.join(projectRoot, ".zero2ai", "esdlc", "analysis", "clarifications.md"),
+			"utf-8",
+		);
+		expect(clarifications).toContain("仅对私业务");
+		expect(state.phases.analysis.question).toBeNull();
+	});
+
+	it("treats an empty clarification as the operator skipping the question", async () => {
+		fs.mkdirSync(path.join(projectRoot, ".zero2ai", "esdlc", "requirements"), { recursive: true });
+		fs.writeFileSync(path.join(projectRoot, ".zero2ai", "esdlc", "requirements", "notes.md"), "对账");
+		const state = await runEsdlcPhase(projectRoot, "analysis", { model: "does-not-exist/model", clarification: "" });
+		expect(state.phases.analysis.question).toBeNull();
+		// Nothing was added, so no clarification artifact is written.
+		expect(fs.existsSync(path.join(projectRoot, ".zero2ai", "esdlc", "analysis", "clarifications.md"))).toBe(false);
+	});
+});
+
 describe("live run detail", () => {
 	it("streams a command's output into the run log while the phase runs", async () => {
 		// A command that prints twice with a pause between: the log must exist before it finishes.

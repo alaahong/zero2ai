@@ -37,6 +37,11 @@ export type EsdlcPhaseRequest = Omit<
 	"cwd" | "phase" | "notes" | "requestInput" | "onEvent" | "specSources" | "scaffoldCommand" | "scaffoldTemplate"
 > & {
 	readonly requestInput?: (question: EsdlcQuestion) => Promise<string>;
+	/**
+	 * Pre-supplied answer to a phase's question: the caller answers without a live transport,
+	 * which is how a script or pipeline supplies the clarification it already knows.
+	 */
+	readonly clarification?: string;
 	/** Overrides for the workspace configuration; a caller that omits them uses the stored values. */
 	readonly specSources?: readonly string[];
 	readonly scaffoldCommand?: string;
@@ -81,7 +86,7 @@ export async function runEsdlcPhase(
 	// Fresh run log per attempt: the page tails it while the phase runs.
 	await resetRunLog(projectRoot, phase, `# ${phase} · ${startedAt}\n`);
 	const state = await readEsdlcState(projectRoot);
-	const { requestInput, specSources, scaffoldCommand, scaffoldTemplate, ...phaseOptions } = options;
+	const { requestInput, clarification, specSources, scaffoldCommand, scaffoldTemplate, ...phaseOptions } = options;
 	// The workspace externalizes what each step depends on; an explicit argument for this run wins.
 	const config = state.config[phase] ?? { sources: [], prompt: "", command: "" };
 	try {
@@ -108,7 +113,7 @@ export async function runEsdlcPhase(
 			// The runner owns the persisted question; the caller owns the transport (web page or
 			// interactive terminal). Without a transport there is no human to wait for, so the
 			// phase proceeds rather than parking forever on a question nobody can answer.
-			...(requestInput
+			...(requestInput || clarification !== undefined
 				? {
 						requestInput: async (text: string) => {
 							const question: EsdlcQuestion = {
@@ -117,7 +122,8 @@ export async function runEsdlcPhase(
 								askedAt: new Date().toISOString(),
 							};
 							await recordPhaseRun(projectRoot, phase, { ...running, status: "awaiting-input", question });
-							const answer = await requestInput(question);
+							// A supplied answer short-circuits any transport: deterministic for scripts.
+							const answer = clarification !== undefined ? clarification : await requestInput!(question);
 							await recordPhaseRun(projectRoot, phase, { ...running, question: null });
 							return answer;
 						},

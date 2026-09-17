@@ -32,6 +32,7 @@ export default class Esdlc extends Command {
 		}),
 		scaffold: Flags.string({ description: "Build pre-step: command that creates the project skeleton" }),
 		template: Flags.string({ description: "Build pre-step: template directory copied into the project" }),
+		clarify: Flags.string({ description: "Answer a stage's question up front (non-interactive runs)" }),
 	};
 
 	static examples = [
@@ -45,6 +46,7 @@ export default class Esdlc extends Command {
 		'# Capture notes without audio\n  zero2ai esdlc run requirements --prompt "row-level reconciliation scope"',
 		"# Generate BRD + FSD from the captured requirements\n  zero2ai esdlc run analysis",
 		"# Show what the current uncommitted change reaches\n  zero2ai esdlc graph",
+		'# Answer a thin-requirements question without an interactive terminal\n  zero2ai esdlc run analysis --clarify "scope: private banking only"',
 		'# Run the project test suite and summarise it\n  zero2ai esdlc run test --command "bun run test"',
 	];
 
@@ -66,6 +68,7 @@ export default class Esdlc extends Command {
 			...(flags.spec?.length ? { spec: flags.spec } : {}),
 			...(flags.scaffold ? { scaffold: flags.scaffold } : {}),
 			...(flags.template ? { template: flags.template } : {}),
+			...(flags.clarify !== undefined ? { clarify: flags.clarify } : {}),
 		});
 		process.exitCode = code;
 	}
