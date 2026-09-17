@@ -5,7 +5,7 @@
  * other one-shot generators, so `--model`, provider credentials and the usage
  * policy stay consistent with the rest of the CLI.
  */
-import { completeSimple } from "@zero2ai/ai";
+import { type AssistantMessage, completeSimple } from "@zero2ai/ai";
 import { type ResolvedCommitModel, resolvePrimaryModel } from "../commit/model-selection";
 import { ModelRegistry } from "../config/model-registry";
 import { Settings } from "../config/settings";
@@ -16,6 +16,24 @@ export interface EsdlcCompletion {
 	readonly model: string;
 }
 
+/** What one model call cost, for the UI's execution trail. */
+export interface EsdlcCallSummary {
+	readonly model: string;
+	readonly promptChars: number;
+	readonly responseChars: number;
+	readonly durationMs: number;
+	readonly inputTokens?: number;
+	readonly outputTokens?: number;
+	readonly stopReason?: string;
+	readonly error?: string;
+	/** The material the call ran on and produced, so the trail can show the real work. */
+	readonly systemPrompt: string;
+	readonly userPrompt: string;
+	readonly text: string;
+	/** Native reasoning, when the provider returns it. */
+	readonly thinking?: string;
+}
+
 export interface EsdlcCompletionOptions {
 	readonly cwd: string;
 	readonly systemPrompt: string;
@@ -23,6 +41,8 @@ export interface EsdlcCompletionOptions {
 	readonly model?: string;
 	readonly maxTokens?: number;
 	readonly signal?: AbortSignal;
+	/** Invoked once per call, success or failure, with timing, usage and content. */
+	readonly onCall?: (summary: EsdlcCallSummary) => void | Promise<void>;
 }
 
 /** Generate one document body. Throws with an actionable message when no model is usable. */
@@ -46,29 +66,62 @@ export async function generateText(options: EsdlcCompletionOptions): Promise<Esd
 					`Configure a provider (see \`zero2ai models\`), or pass --model <provider/model>.`,
 			);
 		}
-		const apiKey = await registry.getApiKey(fallback);
 		target = { model: fallback, apiKey: registry.resolver(fallback) };
 	}
-	const message = await completeSimple(
-		target.model,
-		{
-			systemPrompt: options.systemPrompt.trim() ? [options.systemPrompt] : undefined,
-			messages: [{ role: "user", content: options.userPrompt, timestamp: Date.now() }],
-		},
-		{
-			apiKey: target.apiKey,
-			maxTokens: options.maxTokens ?? 8192,
-			...(options.signal ? { signal: options.signal } : {}),
-		},
-	);
-	if (message.stopReason === "error") {
-		throw new Error(`model call failed: ${message.errorMessage ?? "provider error"}`);
+	const startedAt = Date.now();
+	const promptChars = options.systemPrompt.length + options.userPrompt.length;
+	let message: AssistantMessage;
+	try {
+		message = await completeSimple(
+			target.model,
+			{
+				systemPrompt: options.systemPrompt.trim() ? [options.systemPrompt] : undefined,
+				messages: [{ role: "user", content: options.userPrompt, timestamp: Date.now() }],
+			},
+			{
+				apiKey: target.apiKey,
+				maxTokens: options.maxTokens ?? 8192,
+				...(options.signal ? { signal: options.signal } : {}),
+			},
+		);
+	} catch (error) {
+		await options.onCall?.({
+			model: `${target.model.provider}/${target.model.id}`,
+			promptChars,
+			responseChars: 0,
+			durationMs: Date.now() - startedAt,
+			error: (error as Error).message,
+			systemPrompt: options.systemPrompt,
+			userPrompt: options.userPrompt,
+			text: "",
+		});
+		throw error;
 	}
 	const text = message.content
 		.filter(block => block.type === "text")
 		.map(block => block.text)
 		.join("\n")
 		.trim();
+	const thinking = message.content
+		.filter(block => block.type === "thinking")
+		.map(block => block.thinking)
+		.join("\n\n")
+		.trim();
+	await options.onCall?.({
+		...(thinking ? { thinking } : {}),
+		systemPrompt: options.systemPrompt,
+		userPrompt: options.userPrompt,
+		text,
+		model: `${target.model.provider}/${target.model.id}`,
+		promptChars,
+		responseChars: text.length,
+		durationMs: Date.now() - startedAt,
+		...(message.usage ? { inputTokens: message.usage.input, outputTokens: message.usage.output } : {}),
+		stopReason: message.stopReason,
+	});
+	if (message.stopReason === "error") {
+		throw new Error(`model call failed: ${message.errorMessage ?? "provider error"}`);
+	}
 	if (!text) throw new Error("model returned an empty response");
 	return { text, model: `${target.model.provider}/${target.model.id}` };
 }

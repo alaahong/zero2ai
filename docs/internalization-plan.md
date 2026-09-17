@@ -463,20 +463,26 @@ zero2ai --config /etc/corp/zero2ai/baseline.yml \
 | deploy | 依据仓库事实生成部署文档 | `DEPLOY.md` |
 | release | 生成项目级发布文档 | `RELEASE-NOTES.md` |
 
-**已实现（本轮）**：阶段引擎与状态机（`.zero2ai/esdlc/state.json`，失败阶段不破坏其他阶段记录）、六阶段实现、`zero2ai esdlc [status|run <phase>]` 命令、提示词全部落在 `src/esdlc/prompts/*.md`（Handlebars 模板，仓库规则）、ASR 复用内置 STT 管线（PCM WAV 直接解码，其他容器经 ffmpeg 转 16k 单声道）、7 项契约测试通过。
+**已实现（本轮）**：阶段引擎与状态机（`.zero2ai/esdlc/state.json`，失败阶段不破坏其他阶段记录）、六阶段实现、`zero2ai esdlc [status|run <phase>]` 命令（`--dir` 可指向任意项目目录，工作区属于项目而非 cwd）、提示词全部落在 `src/esdlc/prompts/*.md`（Handlebars 模板，仓库规则）、ASR 复用内置 STT 管线（PCM WAV 直接解码，其他容器经 ffmpeg 转 16k 单声道）、**人工补充说明（全局 notes）**、**人工介入（HITL）澄清**、**产物树 / 执行细节 / 预览三视图**、17 项契约测试通过。
 
 **复用而非新造**：模型解析走 `resolvePrimaryModel`，一次性生成走 `completeSimple`，改动快照走 `@zero2ai/natives/vcs`（`diffText`/`changedFiles`），音频走既有 `sttClient`。
 
 **界面（已实现并实测）**：两种形态共用同一套阶段引擎与同一份工作区（`<project>/.zero2ai/esdlc/`）。
 
-- **Web 工作台（推荐）**：`zero2ai esdlc --web [--port 3848]` → 浏览器打开 `http://127.0.0.1:3848`。页面含 ZERO2AI 字标、流程行（REQUIREMENTS → ANALYSIS & DESIGN → BUILD → TEST → DEPLOY → RELEASE）、六阶段卡片（状态徽标 + 说明 + 摘要/报错 + 产物按钮），右侧为产物预览面板；requirements 卡片内可直接写讨论要点后点“运行”。
-  - **安全设计**：仅绑定回环、校验 `Host`（拒绝非回环，防 DNS rebinding）、无 CORS 头、产物读取按路径前缀限制在工作区内、请求体与产物大小上限；页面为**单文件内联**（无构建、无 CDN、无第三方资源），可在断网主机运行且可直接阅读评审。
-  - **HTTP 契约**：`GET /`（页面）、`GET /api/state`、`GET /api/models`（已绑定模型清单 + 隐式默认）、`POST /api/run`（`{phase,input?,prompt?,model?,command?}`；阶段失败仍返回 200 + 该阶段状态，便于界面渲染原因）、`GET /api/artifact?path=`。
+- **Web 工作台（推荐）**：`zero2ai esdlc --web [--port 3848] [--dir <项目目录>]` → 浏览器打开 `http://127.0.0.1:3848`。顶部为字标 + 流程行（REQUIREMENTS → ANALYSIS & DESIGN → BUILD → TEST → DEPLOY → RELEASE）+ 工具条（模型选择器、**补充说明**、项目目录 / 配置根 / 已绑定模型数），其下是**标签页导航：产物树 + 六个阶段各一页**；阶段页内是该阶段的状态徽标、摘要/报错、运行控制（requirements 页含讨论要点输入框）、产物清单与该阶段的执行细节；产物树页为「左项目文件树 / 右预览」。首屏自动聚焦“最近有活动”的阶段。
+  - **补充说明（全局 notes）**：工具条中随时写入业务约束（如“仅对私业务”“金额两位小数”“禁止公网模型”），保存进工作区 `state.json` 并**注入到每个阶段的提示词**，视为需求约束；analysis 阶段另将其固化为 `clarifications.md` 产物，文档中引用为证据。
+  - **人工介入（HITL）**：`requirements` 材料过薄时，`analysis` 不再直接臆测，而是把阶段置为 `awaiting-input` 并在页面弹出问题（如请补充业务目标/范围/角色/关键规则），提交后阶段继续；留空提交即跳过。阶段状态、问题全文与提问时间都落在 `state.json`，可审计。**应答通道由调用方提供**：Web 页面走 `/api/answer`，终端仅在**交互 TTY**（`process.stdin.isTTY`）下提示输入；管道/CI/SDK 等无人在场的调用**不提供通道，阶段直接继续而不是永久挂起**（早期实现把通道写死在引擎里，导致 `analysis` 在 CI 中无限等待——已由两条回归测试锁死）。
+  - **界面多语言（zh / en）**：所有用户可见文案集中在 `src/esdlc/i18n.ts` 的词条表（页面、CLI 状态、TUI 屏、阶段说明），语言解析优先级为 **`--lang` > 工作区已存选择 > 环境变量**（`ZERO2AI_LANG`/`LC_ALL`/`LC_MESSAGES`/`LANG`，按前缀匹配 `zh_CN.UTF-8` 这类值）；页面首次打开跟随浏览器语言，切换后写入工作区 `state.json`（默认 `zh`/`en` 按钮在工具条，切换即时生效、无需刷新，重载后保持）。阶段名（`REQUIREMENTS`/`BUILD`…）与引擎产出的文档正文不翻译——前者是跨语言引用的固定流程术语，后者由阶段提示词定义。命令帮助与 flag 描述保持英文（CLI 惯例）。词条表有契约测试保证两种语言键集一致、占位符集合一致（漏译或改名会渲染出 `{count}` 原样文本）。
+  - **预览与就地编辑**：预览面板对 Markdown（`.md`/`.markdown`/`.mdx`）提供 **渲染 / 源码** 两种视图——渲染器是页面内自带的约 120 行实现（标题、列表与嵌套、表格、引用、围栏代码、任务清单、行内样式），**先转义再转换**，模型写进文档的 `<img onerror=…>` 只会显示为文本、`javascript:` 链接被中和，不加载任何外部资源（断网可用）。任何文本文件都可点「编辑」就地修改并通过 `PUT /api/file` 保存（上限 1 MB，二进制与 `.git/**` 拒绝，越界 403），保存后重新拉取文件树、字节数同步。改动未保存时切换文件会先确认。
+  - **执行细节（含真实过程）**：每次模型调用追加写入 `<工作区>/<phase>/events.jsonl`（环节、模型、耗时、字符数、input/output tokens），并把**提示词、模型思考（provider 返回的 reasoning）、实际输出全文**分别落为 `<工作区>/<phase>/calls/NN-<kind>.{prompt,thinking,response}.md`，事件里只记路径；页面每次调用的行可展开，用「提示词 / 思考过程 / 输出」标签切换，失败调用留下错误与当时的输入。NN 为递增序号，重跑不会覆盖旧记录。
+  - **安全设计**：仅绑定回环、校验 `Host`（拒绝非回环，防 DNS rebinding）、无 CORS 头、**产物读取以项目根为界**（绝对路径与 `../` 越界一律 403；树覆盖整个项目，因为只遍历工作区会藏起 build 写入的源码）、请求体与产物大小上限；页面为**单文件内联**（无构建、无 CDN、无第三方资源），可在断网主机运行且可直接阅读评审。
+  - **HTTP 契约**：`GET /`（页面）、`GET /api/state`（含各阶段状态/摘要/产物/待答问题、补充说明）、`GET /api/models`（已绑定模型清单 + 隐式默认 + 活动配置根）、`GET /api/tree`（**项目文件树**：嵌套节点 + 字节数 + `artifact`/`changed` 标记 + 截断标注）、`GET /api/events?phase=`（该阶段模型调用记录，含提示词/思考/输出转录路径）、`GET /api/artifact?path=`（项目内任意文本文件）、`POST /api/run`（`{phase,input?,prompt?,model?,command?}`；**即刻确认**（`{started:true}`）后在后台执行，进度由界面轮询 `/api/state` 获得，长耗时生成不会卡住请求）、**`PUT /api/file`**（`{path,text}`：就地保存编辑，1 MB 上限（413）、二进制拒绝（400）、`.git/**` 与越界拒绝（403））、`POST /api/notes`（`{notes}`）、`POST /api/answer`（`{questionId,text}`；未知/已答问题返回 404）。畸形请求体一律 400，不会打断服务。
   - **凭据复用**：界面不收集任何密钥。模型清单来自与 CLI 同一条链（`discoverAuthStorage` → `Settings` → `ModelRegistry.getAvailable()`，即 auth-broker / 环境变量 / `agent.db` / `models.yml` 已绑定者）；顶部选择器可选“默认（commit → smol → 任一已绑定）”或任一已绑定模型，选择随 `POST /api/run` 的 `model` 下发，并**同时透传给 `build` 阶段的 agent 子进程**（`--model`）。当角色链无候选时，默认回退为第一个已绑定模型；但**显式指定的模型无法解析时一律报错**，绝不静默换模型（否则会误报文档的生成来源）。
-  - **实测证据**：契约测试 **7/7 通过**（含路径穿越拒绝、伪造 Host 拒绝、未知阶段拒绝、阶段运行落盘）；浏览器实测：页面渲染正确 → 点 `deploy` 显示可操作报错（本机未配置模型）→ 点 `test` 完成并显示 `exit 1 in 227 ms` 与 `report.md` 产物 → 点产物在右侧面板看到报告全文（含降级说明与原始输出）。
+  - **实测证据**：契约测试 **45/45 通过**（含路径穿越拒绝、伪造 Host 拒绝、未知阶段拒绝、显式未知模型报错不静默换模、异步运行、项目文件树的产物/改动标记与机器目录隐藏、跨工作区的项目文件预览与就地保存、编辑写入的 6 类拒绝（越界/`.git`/二进制/超限/类型错误）、页面脚本可解析、Markdown 渲染契约（结构 + 转义 + 危险链接中和）、**双语言词条一致性与语言解析优先级**、`POST /api/locale` 持久化与非法值 400、目录注入与运行时词条一致、转录落盘与序号递增、补充说明持久化、HITL 未知问题 404、畸形请求体 400 而非 500）；浏览器端到端实测（真实模型 `opencode-go/deepseek-v4.1-flash`）：`requirements --prompt 需要对账` → `analysis` 挂起为 `awaiting-input` 并在页面弹问 → 页面提交人工补充说明 → 阶段完成，产出 `BRD.md`(13.8 KB)、`FSD.md`(31.9 KB)、`clarifications.md`(183 B)，执行细节显示 `brd 39.6s 306→6745 tokens`、`fsd 71.1s 4183→14114 tokens`，BRD 正文 36 处引用补充说明（双人复核 / 18:00 / 对私业务）。界面实测（`D:/tmp/z2a-build`）：英文浏览器默认英文（`Artifacts`/`Model`/`Execution detail`），切「中文」即时变中文（`产物树`/`模型`/`执行细节`，含 `思考 10404 字`）并写入 `state.json`，重载保持；反向切回英文同样持久；CLI `--lang zh` 输出 `项目目录:` 与中文阶段说明。BRD.md 以 **渲染视图**呈现（1 个 h1、5 个 h2、**21 张表格**、3 组列表、引用与任务清单），切「源码」显示原始 Markdown，点「编辑」追加一行后保存 → 磁盘文件 15,681 B、树内字节同步、视图自动回到渲染态。
+  - **build 阶段确实产出代码（实测）**：`build` 以 `-p` 子进程驱动完整 agent（含 edit/write，不是只生成文档），阶段结束记录工作树差异。实测（`D:/tmp/z2a-build`，需求「给 greet 增加中英文问候与大小写选项，并补测试」）：`requirements → analysis → build` 全部 completed，build **exit 0、2 个源文件被改写**（`src/greet.ts` 由 3 行扩为约 100 行、含类型与 FR 映射；`test/greet.test.ts` 同步更新），产物含 `agent-output.md` / `changed-files.txt` / `changes.patch` / `BUILD-NOTES.md`。所以「每个阶段只产 md」是**界面盲区**（树只遍历 `.zero2ai/esdlc/`）而非阶段行为——已由项目文件树的「改动」标记修正。
 - **终端屏幕（轻量替代）**：TTY 下 `zero2ai esdlc`（不带 `--web`）打开全屏屏幕——同一状态、同一按键方式（↑↓/j/k 选择、Enter 触发、r 刷新、q 退出）；管道与 CI 自动回落到静态输出，保持可脚本化。
 
-**待做**：① 把 ESDLC 本轮改动纳入基线补丁序列（当前补丁至 12）；② `build` 阶段目前以 `-p` 子进程驱动 agent，后续可改为进程内 SDK 调用省一次冷启动；③ 阶段产物可加“在编辑器中打开”快捷键。
+**待做**：① 把 ESDLC 本轮改动纳入基线补丁序列（当前补丁至 12）；② `build` 阶段目前以 `-p` 子进程驱动 agent，后续可改为进程内 SDK 调用省一次冷启动；③ 阶段产物可加“在编辑器中打开”快捷键；④ 执行细节可加“按环节聚合的成本汇总”（逐条记录已含 tokens）。
 
 ---
 

@@ -4,6 +4,11 @@
 
 ### Added
 
+- Added the `esdlc` command: a six-phase requirements-to-release workspace (`requirements`, `analysis`, `build`, `test`, `deploy`, `release`) driven by the host's own bound models, with a terminal screen (`zero2ai esdlc`) and a loopback-only web workspace (`zero2ai esdlc --web`). `--dir` points the workspace at any project directory.
+- The ESDLC web workspace is now organized as stage tabs: each stage owns its status, artifacts, run control and execution trail. The artifact tree became a project file tree (nested, expandable), with ESDLC artifacts and the build phase's changed source files marked, so the code a build wrote is visible instead of hidden behind workspace-only entries.
+- Added zh/en localization to the ESDLC workspace: the web UI, CLI status output, terminal screen and stage descriptions all come from one catalog, with `--lang`, a stored workspace preference, and environment detection (`ZERO2AI_LANG`/`LC_ALL`/`LANG`) resolved in that order. The web UI switches instantly and remembers the choice.
+- ESDLC's preview pane renders Markdown (headings, tables, lists, quotes, code fences, task lists) with a built-in, self-contained renderer that escapes first and neutralises unsafe links, and any project text file can be edited in place and saved (`PUT /api/file`, 1 MB cap, binary and `.git` refused).
+- ESDLC now records every model call's prompt, provider reasoning and full output as transcripts under `<workspace>/<phase>/calls/`, so the execution trail expands to the actual work instead of a size tally. Workspace notes are injected into every phase prompt, and a human-in-the-loop prompt parks a phase as `awaiting-input` until answered in the page; callers without an answer transport (CI, SDK, pipelines) never park.
 - Added `tui.titleSpinner` (`braille` | `dots` | `line`, default `braille`) to pick the terminal-title working-state spinner glyphs alongside the existing `tui.titleState` on/off toggle.
 
 ## [18.2.1] - 2026-09-15

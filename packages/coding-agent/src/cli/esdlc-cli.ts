@@ -1,8 +1,19 @@
 /**
  * `zero2ai esdlc` — engineering lifecycle workspace (status + phase runs).
  */
-import { getProjectDir } from "@zero2ai/utils";
-import { ESDLC_PHASES, type EsdlcPhaseId, readEsdlcState, renderEsdlcStatus, runEsdlcPhase } from "../esdlc";
+import * as path from "node:path";
+import { getProjectDir, readLines } from "@zero2ai/utils";
+import {
+	ESDLC_PHASES,
+	type EsdlcLocale,
+	resolveEsdlcLocale,
+	tEsdlc,
+	type EsdlcPhaseId,
+	type EsdlcQuestion,
+	readEsdlcState,
+	renderEsdlcStatus,
+	runEsdlcPhase,
+} from "../esdlc";
 import { isEsdlcPhaseId } from "../esdlc/types";
 import { openEsdlcScreen } from "../esdlc/screen";
 import { DEFAULT_ESDLC_WEB_PORT, startEsdlcWeb } from "../esdlc/web";
@@ -17,11 +28,36 @@ export interface EsdlcCommandArgs {
 	readonly json?: boolean;
 	readonly web?: boolean;
 	readonly port?: number;
+	/** Project directory; defaults to the current working directory. */
+	readonly dir?: string;
+	/** Interface language override (`zh` | `en`). */
+	readonly lang?: string;
+}
+
+/**
+ * Ask the operator on an interactive terminal.
+ *
+ * Non-TTY callers pass no transport at all, which makes the phase proceed instead of parking
+ * on a prompt no one can answer.
+ */
+async function askOnTty(question: EsdlcQuestion, locale: EsdlcLocale): Promise<string> {
+	process.stdout.write(`\n${tEsdlc(locale, "cli.askHuman")}：${question.text}\n> `);
+	for await (const line of readLines(Bun.stdin.stream())) {
+		return new TextDecoder().decode(line).trim();
+	}
+	return "";
 }
 
 export async function runEsdlcCommand(args: EsdlcCommandArgs): Promise<number> {
-	const projectRoot = getProjectDir();
+	// Any directory works: the workspace belongs to the project, not the cwd.
+	const projectRoot = args.dir ? path.resolve(args.dir) : getProjectDir();
 	const action = args.action ?? "status";
+	// Language: explicit flag → workspace choice → environment.
+	const locale = resolveEsdlcLocale({
+		explicit: args.lang,
+		stored: (await readEsdlcState(projectRoot)).locale,
+		env: Bun.env,
+	});
 
 	if (action === "status") {
 		const state = await readEsdlcState(projectRoot);
@@ -33,7 +69,9 @@ export async function runEsdlcCommand(args: EsdlcCommandArgs): Promise<number> {
 		// prefer a web page over a terminal screen.
 		if (args.web) {
 			const server = startEsdlcWeb({ projectRoot, port: args.port ?? DEFAULT_ESDLC_WEB_PORT });
-			process.stdout.write(`ESDLC workspace: ${server.url}\n(loopback only — Ctrl+C to stop)\n`);
+			process.stdout.write(
+				`ESDLC workspace: ${server.url}\nproject: ${projectRoot}\n(loopback only — Ctrl+C to stop)\n`,
+			);
 			const { promise, resolve } = Promise.withResolvers<number>();
 			const shutdown = (): void => {
 				server.stop();
@@ -48,29 +86,34 @@ export async function runEsdlcCommand(args: EsdlcCommandArgs): Promise<number> {
 		if (process.stdout.isTTY) {
 			return await openEsdlcScreen({
 				projectRoot,
+				locale,
 				...(args.input ? { input: args.input } : {}),
 				...(args.prompt ? { prompt: args.prompt } : {}),
 				...(args.model ? { model: args.model } : {}),
 				...(args.command ? { command: args.command } : {}),
 			}).done;
 		}
-		process.stdout.write(`${renderEsdlcStatus(state)}\n`);
+		process.stdout.write(`${renderEsdlcStatus(state, locale)}\n`);
 		return 0;
 	}
 
 	if (action !== "run") {
-		process.stderr.write(`unknown action "${action}"; expected one of: status, run\n`);
+		process.stderr.write(`${tEsdlc(locale, "cli.unknownAction", { action })}\n`);
 		return 2;
 	}
 
 	const phase = (args.phase ?? "").trim();
 	if (!isEsdlcPhaseId(phase)) {
-		process.stderr.write(`phase is required and must be one of: ${ESDLC_PHASES.join(", ")}\n`);
+		process.stderr.write(`${tEsdlc(locale, "cli.phaseRequired", { phases: ESDLC_PHASES.join(", ") })}\n`);
 		return 2;
 	}
 
-	process.stdout.write(`running phase: ${phase}\n`);
+	process.stdout.write(`${tEsdlc(locale, "cli.runningPhase", { phase })}\n`);
 	const state = await runEsdlcPhase(projectRoot, phase as EsdlcPhaseId, {
+		// Human-in-the-loop needs a human: only an interactive terminal can answer.
+		...(process.stdin.isTTY === true
+			? { requestInput: (question: EsdlcQuestion) => askOnTty(question, locale) }
+			: {}),
 		...(args.input ? { input: args.input } : {}),
 		...(args.prompt ? { prompt: args.prompt } : {}),
 		...(args.model ? { model: args.model } : {}),
@@ -78,9 +121,10 @@ export async function runEsdlcCommand(args: EsdlcCommandArgs): Promise<number> {
 		onProgress: message => process.stdout.write(`  - ${message}\n`),
 	});
 	const run = state.phases[phase as EsdlcPhaseId];
-	process.stdout.write(`\nphase ${phase}: ${run.status}\n`);
+	process.stdout.write(`\n${tEsdlc(locale, "cli.phaseResult", { phase, status: run.status })}\n`);
 	if (run.summary) process.stdout.write(`  ${run.summary}\n`);
 	if (run.error) process.stderr.write(`  ${run.error}\n`);
-	for (const artifact of run.artifacts) process.stdout.write(`  artifact: ${artifact.path}\n`);
+	for (const artifact of run.artifacts)
+		process.stdout.write(`  ${tEsdlc(locale, "cli.artifact")}: ${artifact.path}\n`);
 	return run.status === "completed" ? 0 : 1;
 }

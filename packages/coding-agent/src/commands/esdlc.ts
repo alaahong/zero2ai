@@ -3,7 +3,7 @@
  */
 
 import { Args, Command, Flags } from "@zero2ai/utils/cli";
-import { type EsdlcCommandArgs, runEsdlcCommand } from "../cli/esdlc-cli";
+import { runEsdlcCommand } from "../cli/esdlc-cli";
 import { esdlcHelp as commandHelp } from "../cli/command-help";
 import { initTheme } from "../modes/theme/theme";
 
@@ -24,15 +24,19 @@ export default class Esdlc extends Command {
 		json: Flags.boolean({ description: "Output JSON (status)" }),
 		web: Flags.boolean({ description: "Serve the workspace as a local web UI" }),
 		port: Flags.integer({ description: "Web UI port (default 3848)" }),
+		dir: Flags.string({ description: "Project directory (default: current directory)" }),
+		lang: Flags.string({ description: "Interface language (zh|en)", options: ["zh", "en"] }),
 	};
 
 	static examples = [
 		"# Open the workspace in a browser (loopback only)\n  zero2ai esdlc --web",
+		"# Point the workspace at another project\n  zero2ai esdlc --dir D:/work/corp-service --web",
 		"# Show the workspace status\n  zero2ai esdlc",
+		"# Serve the workspace in Chinese or English\n  zero2ai esdlc --web --lang zh",
 		"# Capture a discussion recording (ASR) or an existing transcript\n  zero2ai esdlc run requirements --input ./meeting.m4a",
-		"# Capture notes without audio\n  zero2ai esdlc run requirements --prompt \"row-level reconciliation scope\"",
+		'# Capture notes without audio\n  zero2ai esdlc run requirements --prompt "row-level reconciliation scope"',
 		"# Generate BRD + FSD from the captured requirements\n  zero2ai esdlc run analysis",
-		"# Run the project test suite and summarise it\n  zero2ai esdlc run test --command \"bun run test\"",
+		'# Run the project test suite and summarise it\n  zero2ai esdlc run test --command "bun run test"',
 	];
 
 	async run(): Promise<void> {
@@ -48,6 +52,8 @@ export default class Esdlc extends Command {
 			...(flags.json ? { json: true } : {}),
 			...(flags.web ? { web: true } : {}),
 			...(flags.port ? { port: flags.port } : {}),
+			...(flags.dir ? { dir: flags.dir } : {}),
+			...(flags.lang ? { lang: flags.lang } : {}),
 		});
 		process.exitCode = code;
 	}

@@ -9,10 +9,13 @@
 import { ProcessTerminal, TUI, type Component } from "@zero2ai/tui";
 import {
 	ESDLC_PHASES,
-	ESDLC_PHASE_TITLES,
+	esdlcMessages,
 	readEsdlcState,
 	renderEsdlcBannerLines,
+	resolveEsdlcLocale,
 	runEsdlcPhase,
+	tEsdlc,
+	type EsdlcLocale,
 } from "./index";
 import type { EsdlcPhaseId, EsdlcState } from "./types";
 
@@ -26,6 +29,8 @@ export interface EsdlcScreenOptions {
 	readonly prompt?: string;
 	readonly model?: string;
 	readonly command?: string;
+	/** Interface language; defaults to the workspace's choice, then the environment. */
+	readonly locale?: EsdlcLocale;
 }
 
 export interface EsdlcScreenHandle {
@@ -41,6 +46,7 @@ class EsdlcScreen implements Component {
 	#notice: string | null = null;
 	#typing: { phase: EsdlcPhaseId; buffer: string } | null = null;
 	readonly #options: EsdlcScreenOptions;
+	readonly #locale: EsdlcLocale;
 	readonly #refresh: () => void;
 	readonly #finish: (failed: number) => void;
 
@@ -49,15 +55,27 @@ class EsdlcScreen implements Component {
 		this.#state = state;
 		this.#refresh = refresh;
 		this.#finish = finish;
+		this.#locale = options.locale ?? resolveEsdlcLocale({ stored: state.locale, env: Bun.env });
 	}
 
 	render(width: number): readonly string[] {
-		const lines: string[] = [...renderEsdlcBannerLines(), `project: ${this.#options.projectRoot}`, ""];
+		const messages = esdlcMessages(this.#locale);
+		const lines: string[] = [
+			...renderEsdlcBannerLines(),
+			`${messages["cli.project"]}: ${this.#options.projectRoot}`,
+			"",
+		];
 		ESDLC_PHASES.forEach((phase, index) => {
 			const run = this.#state.phases[phase];
 			const cursor = index === this.#selected ? ">" : " ";
-			const mark = run.status === "completed" ? "+" : run.status === "failed" ? "x" : run.status === "running" ? "~" : ".";
-			lines.push(`${cursor} ${mark} ${index + 1}. ${phase.padEnd(13)} ${ESDLC_PHASE_TITLES[phase]}`.slice(0, width));
+			const mark =
+				run.status === "completed" ? "+" : run.status === "failed" ? "x" : run.status === "running" ? "~" : ".";
+			lines.push(
+				`${cursor} ${mark} ${index + 1}. ${phase.padEnd(13)} ${tEsdlc(this.#locale, `phase.${phase}.title`)}`.slice(
+					0,
+					width,
+				),
+			);
 			if (run.summary) lines.push(`        ${run.summary}`.slice(0, width));
 			if (run.error) lines.push(`        ! ${run.error.split("\n")[0]}`.slice(0, width));
 			if (index === this.#selected) {
@@ -66,13 +84,13 @@ class EsdlcScreen implements Component {
 		});
 		lines.push("");
 		if (this.#typing) {
-			lines.push(`  notes for ${this.#typing.phase}: ${this.#typing.buffer}_`.slice(0, width));
-			lines.push("  Enter to run · Esc to cancel");
+			lines.push(`  ${messages["home.notes"]} · ${this.#typing.phase}: ${this.#typing.buffer}_`.slice(0, width));
+			lines.push(`  ${messages["screen.enterToRun"]}`);
 		} else if (this.#running) {
-			lines.push(`  running ${this.#running} …`);
+			lines.push(`  ${messages["cli.runningPhase"].replace("{phase}", this.#running ?? "")}`);
 			for (const entry of this.#progress.slice(-PROGRESS_HISTORY)) lines.push(`    - ${entry}`.slice(0, width));
 		} else {
-			lines.push(`  ${this.#notice ?? "up/down select · Enter run · r refresh · q quit"}`.slice(0, width));
+			lines.push(`  ${this.#notice ?? messages["screen.keys"]}`.slice(0, width));
 		}
 		return lines;
 	}
@@ -130,7 +148,7 @@ class EsdlcScreen implements Component {
 		this.#refresh();
 		this.#state = await runEsdlcPhase(this.#options.projectRoot, phase, {
 			...(this.#options.input ? { input: this.#options.input } : {}),
-			...(prompt ?? this.#options.prompt ? { prompt: prompt ?? this.#options.prompt } : {}),
+			...((prompt ?? this.#options.prompt) ? { prompt: prompt ?? this.#options.prompt } : {}),
 			...(this.#options.model ? { model: this.#options.model } : {}),
 			...(this.#options.command ? { command: this.#options.command } : {}),
 			onProgress: message => {

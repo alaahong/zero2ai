@@ -2,55 +2,112 @@
   "version": 1,
   "projectRoot": "D:\\code\\opensource\\zero2ai",
   "createdAt": "2026-09-17T01:04:00.268Z",
-  "updatedAt": "2026-09-17T01:04:11.041Z",
+  "updatedAt": "2026-09-17T03:01:06.728Z",
   "phases": {
     "requirements": {
-      "status": "failed",
-      "startedAt": "2026-09-17T01:04:00.268Z",
-      "finishedAt": "2026-09-17T01:04:00.272Z",
-      "summary": null,
-      "error": "requirements needs material: pass --input <recording|transcript> or --prompt \"<discussion notes>\"",
-      "artifacts": []
+      "status": "completed",
+      "startedAt": "2026-09-17T02:34:16.912Z",
+      "finishedAt": "2026-09-17T02:34:16.917Z",
+      "summary": "captured notes.md",
+      "error": null,
+      "artifacts": [
+        {
+          "label": "notes.md",
+          "path": ".zero2ai/esdlc/requirements/notes.md"
+        }
+      ],
+      "question": null
     },
     "analysis": {
-      "status": "failed",
-      "startedAt": "2026-09-17T01:04:11.037Z",
-      "finishedAt": "2026-09-17T01:04:11.041Z",
-      "summary": null,
-      "error": "no requirements captured yet: run `zero2ai esdlc run requirements --input <file>` first",
-      "artifacts": []
+      "status": "completed",
+      "startedAt": "2026-09-17T02:58:41.815Z",
+      "finishedAt": "2026-09-17T03:01:06.728Z",
+      "summary": "BRD + FSD generated with opencode-go/deepseek-v4.1-flash",
+      "error": null,
+      "artifacts": [
+        {
+          "label": "clarifications.md",
+          "path": ".zero2ai/esdlc/analysis/clarifications.md"
+        },
+        {
+          "label": "BRD.md",
+          "path": ".zero2ai/esdlc/analysis/BRD.md"
+        },
+        {
+          "label": "FSD.md",
+          "path": ".zero2ai/esdlc/analysis/FSD.md"
+        }
+      ],
+      "question": null
     },
     "build": {
-      "status": "pending",
-      "startedAt": "",
-      "finishedAt": null,
-      "summary": null,
+      "status": "completed",
+      "startedAt": "2026-09-17T01:37:26.875Z",
+      "finishedAt": "2026-09-17T01:41:22.108Z",
+      "summary": "exit 0, 1 file(s) changed",
       "error": null,
-      "artifacts": []
+      "artifacts": [
+        {
+          "label": "agent-output.md",
+          "path": ".zero2ai/esdlc/build/agent-output.md"
+        },
+        {
+          "label": "changed-files.txt",
+          "path": ".zero2ai/esdlc/build/changed-files.txt"
+        },
+        {
+          "label": "changes.patch",
+          "path": ".zero2ai/esdlc/build/changes.patch"
+        },
+        {
+          "label": "BUILD-NOTES.md",
+          "path": ".zero2ai/esdlc/build/BUILD-NOTES.md"
+        }
+      ],
+      "question": null
     },
     "test": {
-      "status": "pending",
-      "startedAt": "",
-      "finishedAt": null,
-      "summary": null,
+      "status": "completed",
+      "startedAt": "2026-09-17T01:42:41.585Z",
+      "finishedAt": "2026-09-17T02:07:00.729Z",
+      "summary": "exit 1 in 1373628 ms",
       "error": null,
-      "artifacts": []
+      "artifacts": [
+        {
+          "label": "report.md",
+          "path": ".zero2ai/esdlc/test/report.md"
+        }
+      ],
+      "question": null
     },
     "deploy": {
-      "status": "pending",
-      "startedAt": "",
-      "finishedAt": null,
-      "summary": null,
+      "status": "completed",
+      "startedAt": "2026-09-17T02:19:25.641Z",
+      "finishedAt": "2026-09-17T02:20:33.992Z",
+      "summary": "deployment document generated with opencode-go/deepseek-v4.1-flash",
       "error": null,
-      "artifacts": []
+      "artifacts": [
+        {
+          "label": "DEPLOY.md",
+          "path": ".zero2ai/esdlc/deploy/DEPLOY.md"
+        }
+      ],
+      "question": null
     },
     "release": {
-      "status": "pending",
-      "startedAt": "",
-      "finishedAt": null,
-      "summary": null,
+      "status": "completed",
+      "startedAt": "2026-09-17T02:23:23.343Z",
+      "finishedAt": "2026-09-17T02:25:26.300Z",
+      "summary": "release notes generated with opencode-go/deepseek-v4.1-flash",
       "error": null,
-      "artifacts": []
+      "artifacts": [
+        {
+          "label": "RELEASE-NOTES.md",
+          "path": ".zero2ai/esdlc/release/RELEASE-NOTES.md"
+        }
+      ],
+      "question": null
     }
-  }
+  },
+  "notes": ""
 }

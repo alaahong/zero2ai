@@ -8,15 +8,35 @@ import {
 	ESDLC_PHASE_TITLES,
 	type EsdlcPhaseId,
 	type EsdlcPhaseRun,
+	type EsdlcQuestion,
 	type EsdlcState,
 } from "./types";
-import { readEsdlcState, recordPhaseRun } from "./state";
+import { appendPhaseEvent, readEsdlcState, recordPhaseRun, writeCallTranscript } from "./state";
 import * as phases from "./phases";
 import type { EsdlcPhaseOutcome, EsdlcRunOptions } from "./phases";
+import {
+	ESDLC_LOCALES,
+	type EsdlcLocale,
+	esdlcCatalogs,
+	esdlcMessages,
+	isEsdlcLocale,
+	resolveEsdlcLocale,
+	tEsdlc,
+} from "./i18n";
 
 export type { EsdlcRunOptions, EsdlcPhaseOutcome };
+
+/**
+ * Options accepted by {@link runEsdlcPhase}: the phase options minus the ones the runner
+ * owns, plus an optional transport for answering a phase's question.
+ */
+export type EsdlcPhaseRequest = Omit<EsdlcRunOptions, "cwd" | "notes" | "requestInput" | "onEvent"> & {
+	readonly requestInput?: (question: EsdlcQuestion) => Promise<string>;
+};
 export { ESDLC_PHASES, ESDLC_PHASE_LABELS, ESDLC_PHASE_TITLES, readEsdlcState };
-export type { EsdlcPhaseId, EsdlcPhaseRun, EsdlcState };
+export { ESDLC_LOCALES, esdlcCatalogs, esdlcMessages, isEsdlcLocale, resolveEsdlcLocale, tEsdlc };
+export type { EsdlcLocale, EsdlcMessageKey } from "./i18n";
+export type { EsdlcPhaseId, EsdlcPhaseRun, EsdlcQuestion, EsdlcState };
 
 const RUNNERS: Readonly<Record<EsdlcPhaseId, (options: EsdlcRunOptions) => Promise<EsdlcPhaseOutcome>>> = {
 	requirements: phases.runRequirementsPhase,
@@ -36,13 +56,64 @@ const RUNNERS: Readonly<Record<EsdlcPhaseId, (options: EsdlcRunOptions) => Promi
 export async function runEsdlcPhase(
 	projectRoot: string,
 	phase: EsdlcPhaseId,
-	options: Omit<EsdlcRunOptions, "cwd"> = {},
+	options: EsdlcPhaseRequest = {},
 ): Promise<EsdlcState> {
 	const startedAt = new Date().toISOString();
-	const running: EsdlcPhaseRun = { status: "running", startedAt, finishedAt: null, summary: null, error: null, artifacts: [] };
+	const running: EsdlcPhaseRun = {
+		status: "running",
+		startedAt,
+		finishedAt: null,
+		summary: null,
+		error: null,
+		artifacts: [],
+		question: null,
+	};
 	await recordPhaseRun(projectRoot, phase, running);
+	const state = await readEsdlcState(projectRoot);
+	const { requestInput, ...phaseOptions } = options;
 	try {
-		const outcome = await RUNNERS[phase]({ ...options, cwd: projectRoot });
+		const outcome = await RUNNERS[phase]({
+			...phaseOptions,
+			cwd: projectRoot,
+			notes: state.notes,
+			// The runner owns the persisted question; the caller owns the transport (web page or
+			// interactive terminal). Without a transport there is no human to wait for, so the
+			// phase proceeds rather than parking forever on a question nobody can answer.
+			...(requestInput
+				? {
+						requestInput: async (text: string) => {
+							const question: EsdlcQuestion = {
+								id: crypto.randomUUID(),
+								text,
+								askedAt: new Date().toISOString(),
+							};
+							await recordPhaseRun(projectRoot, phase, { ...running, status: "awaiting-input", question });
+							const answer = await requestInput(question);
+							await recordPhaseRun(projectRoot, phase, { ...running, question: null });
+							return answer;
+						},
+					}
+				: {}),
+			onEvent: async ({ kind, systemPrompt, userPrompt, text, thinking, ...metrics }) => {
+				// Persist the material and the answer as transcripts next to the phase, then record
+				// their paths: the trail shows what the model actually read and reasoned, not a tally.
+				const transcripts = await writeCallTranscript(projectRoot, phase, kind, {
+					systemPrompt,
+					userPrompt,
+					text,
+					...(thinking ? { thinking } : {}),
+					...(metrics.error ? { error: metrics.error } : {}),
+				});
+				await appendPhaseEvent(projectRoot, {
+					at: new Date().toISOString(),
+					phase,
+					kind,
+					...metrics,
+					...transcripts,
+					...(thinking ? { thinkingChars: thinking.length } : {}),
+				});
+			},
+		});
 		return await recordPhaseRun(projectRoot, phase, {
 			status: "completed",
 			startedAt,
@@ -50,6 +121,7 @@ export async function runEsdlcPhase(
 			summary: outcome.summary,
 			error: null,
 			artifacts: outcome.artifacts,
+			question: null,
 		});
 	} catch (error) {
 		return await recordPhaseRun(projectRoot, phase, {
@@ -88,20 +160,23 @@ export function renderEsdlcBanner(): string {
 const STATUS_MARK: Readonly<Record<EsdlcPhaseRun["status"], string>> = {
 	pending: ".",
 	running: "~",
+	"awaiting-input": "?",
 	completed: "+",
 	failed: "x",
 };
 
 /** Plain-text status table; the interactive screen re-uses it verbatim. */
-export function renderEsdlcStatus(state: EsdlcState): string {
-	const lines: string[] = [renderEsdlcBanner(), `project: ${state.projectRoot}`, ""];
+export function renderEsdlcStatus(state: EsdlcState, locale?: EsdlcLocale): string {
+	const lang = locale ?? resolveEsdlcLocale({ stored: state.locale, env: Bun.env });
+	const messages = esdlcMessages(lang);
+	const lines: string[] = [renderEsdlcBanner(), `${tEsdlc(lang, "cli.project")}: ${state.projectRoot}`, ""];
 	for (const [index, phase] of ESDLC_PHASES.entries()) {
 		const run = state.phases[phase];
-		lines.push(`${STATUS_MARK[run.status]} ${index + 1}. ${phase.padEnd(13)} ${ESDLC_PHASE_TITLES[phase]}`);
+		lines.push(`${STATUS_MARK[run.status]} ${index + 1}. ${phase.padEnd(13)} ${messages[`phase.${phase}.title`]}`);
 		if (run.summary) lines.push(`      |_ ${run.summary}`);
 		if (run.error) lines.push(`      |_ ${run.error.split("\n")[0]}`);
 		for (const artifact of run.artifacts) lines.push(`      |_ ${artifact.path}`);
 	}
-	lines.push("", 'run a phase:  zero2ai esdlc run <phase> [--input <file>] [--prompt "<text>"] [--model <id>]');
+	lines.push("", `  ${tEsdlc(lang, "cli.hint")}`);
 	return lines.join("\n");
 }

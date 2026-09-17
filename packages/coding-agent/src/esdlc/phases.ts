@@ -10,10 +10,11 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import * as vcs from "@zero2ai/natives/vcs";
 import { asRecord, isEnoent, prompt } from "@zero2ai/utils";
-import { generateText } from "./llm";
+import { type EsdlcCallSummary, generateText } from "./llm";
 import { transcribeRecording } from "./audio";
 import { phaseDir } from "./state";
 import type { EsdlcArtifact, EsdlcPhaseId } from "./types";
+
 import systemAnalyst from "./prompts/system-analyst.md" with { type: "text" };
 import systemEngineer from "./prompts/system-engineer.md" with { type: "text" };
 import brdUser from "./prompts/brd.user.md" with { type: "text" };
@@ -24,6 +25,12 @@ import releaseUser from "./prompts/release.user.md" with { type: "text" };
 
 const MAX_CAPTURED_OUTPUT_CHARS = 40_000;
 const ARTIFACT_INPUTS = ["transcript.md", "notes.md"] as const;
+
+/** What one phase hands the runner after a model call: metrics plus the content itself. */
+export type EsdlcPhaseEvent = EsdlcCallSummary & { readonly kind: string };
+
+/** Below this many characters the requirements material cannot support a BRD. */
+const CLARIFICATION_THRESHOLD_CHARS = 400;
 
 export interface EsdlcRunOptions {
 	readonly cwd: string;
@@ -36,6 +43,12 @@ export interface EsdlcRunOptions {
 	readonly command?: string;
 	readonly signal?: AbortSignal;
 	readonly onProgress?: (message: string) => void;
+	/** Workspace 补充说明, injected into every model prompt. */
+	readonly notes?: string;
+	/** Ask the human a question and wait for the answer. */
+	readonly requestInput?: (question: string) => Promise<string>;
+	/** Execution trail: one record per model call, awaited so transcripts land in order. */
+	readonly onEvent?: (record: EsdlcPhaseEvent) => void | Promise<void>;
 }
 
 export interface EsdlcPhaseOutcome {
@@ -83,9 +96,15 @@ async function runCommand(cwd: string, argv: readonly string[], signal?: AbortSi
 		new Response(child.stderr as ReadableStream).text(),
 		child.exited,
 	]);
-	const combined = [stdout, stderr].filter(part => part.trim()).join("\n").trim();
+	const combined = [stdout, stderr]
+		.filter(part => part.trim())
+		.join("\n")
+		.trim();
 	return {
-		output: combined.length > MAX_CAPTURED_OUTPUT_CHARS ? `${combined.slice(0, MAX_CAPTURED_OUTPUT_CHARS)}\n… (truncated)` : combined,
+		output:
+			combined.length > MAX_CAPTURED_OUTPUT_CHARS
+				? `${combined.slice(0, MAX_CAPTURED_OUTPUT_CHARS)}\n… (truncated)`
+				: combined,
 		exitCode,
 		durationMs: Date.now() - started,
 	};
@@ -130,12 +149,42 @@ async function collectRepoFacts(cwd: string): Promise<string> {
 	return parts.join("\n\n") || "(no repository facts found)";
 }
 
+/**
+ * Every document phase goes through here: the workspace notes are appended to
+ * the prompt (they are operator context, not part of the source material) and
+ * each call is recorded for the execution trail.
+ */
+async function callModel(
+	options: EsdlcRunOptions,
+	kind: string,
+	request: { systemPrompt: string; userPrompt: string; maxTokens?: number },
+): Promise<{ text: string; model: string }> {
+	const notes = options.notes?.trim();
+	const userPrompt = notes
+		? `${request.userPrompt}\n\n---\n工作区补充说明（来自使用者，视为需求约束）：\n${notes}`
+		: request.userPrompt;
+	const result = await generateText({
+		cwd: options.cwd,
+		systemPrompt: request.systemPrompt,
+		userPrompt,
+		...(options.model ? { model: options.model } : {}),
+		...(request.maxTokens ? { maxTokens: request.maxTokens } : {}),
+		...(options.signal ? { signal: options.signal } : {}),
+		onCall: async summary => {
+			await options.onEvent?.({ kind, ...summary });
+		},
+	});
+	return result;
+}
+
 /** 1) Requirements — capture a discussion and turn it into text. */
 export async function runRequirementsPhase(options: EsdlcRunOptions): Promise<EsdlcPhaseOutcome> {
 	const input = options.input?.trim();
 	const notes = options.prompt?.trim();
 	if (!input && !notes) {
-		throw new Error('requirements needs material: pass --input <recording|transcript> or --prompt "<discussion notes>"');
+		throw new Error(
+			'requirements needs material: pass --input <recording|transcript> or --prompt "<discussion notes>"',
+		);
 	}
 	const artifacts: EsdlcArtifact[] = [];
 	if (input) {
@@ -144,7 +193,14 @@ export async function runRequirementsPhase(options: EsdlcRunOptions): Promise<Es
 			...(options.onProgress ? { onProgress: options.onProgress } : {}),
 		});
 		if (!text) throw new Error(`no text extracted from ${source}`);
-		artifacts.push(await writeArtifact(options.cwd, "requirements", "transcript.md", `# Requirements input — ${source}\n\n${text}`));
+		artifacts.push(
+			await writeArtifact(
+				options.cwd,
+				"requirements",
+				"transcript.md",
+				`# Requirements input — ${source}\n\n${text}`,
+			),
+		);
 	}
 	if (notes) {
 		artifacts.push(await writeArtifact(options.cwd, "requirements", "notes.md", `# Requirements notes\n\n${notes}`));
@@ -154,25 +210,35 @@ export async function runRequirementsPhase(options: EsdlcRunOptions): Promise<Es
 
 /** 2) Analysis & design — BRD and FSD from the captured requirements. */
 export async function runAnalysisPhase(options: EsdlcRunOptions): Promise<EsdlcPhaseOutcome> {
-	const material = await readArtifacts(options.cwd, "requirements", ARTIFACT_INPUTS);
-	if (!material) throw new Error('no requirements captured yet: run `zero2ai esdlc run requirements --input <file>` first');
-	const brd = await generateText({
-		cwd: options.cwd,
+	let material = await readArtifacts(options.cwd, "requirements", ARTIFACT_INPUTS);
+	if (!material)
+		throw new Error("no requirements captured yet: run `zero2ai esdlc run requirements --input <file>` first");
+	const artifacts: EsdlcArtifact[] = [];
+	// Human-in-the-loop: a one-line requirement cannot support a BRD, so ask for
+	// the missing context instead of letting the model invent it.
+	if (options.requestInput && material.length < CLARIFICATION_THRESHOLD_CHARS) {
+		const answer = await options.requestInput(
+			"需求材料较少，生成的 BRD/FSD 会有较多假设。请补充：业务目标、范围边界、干系人角色、关键规则或约束（可直接留空继续）。",
+		);
+		if (answer.trim()) {
+			material = `${material}\n\n## 人工补充说明\n${answer.trim()}`;
+			artifacts.push(
+				await writeArtifact(options.cwd, "analysis", "clarifications.md", `# 人工补充说明\n\n${answer.trim()}`),
+			);
+		}
+	}
+	const brd = await callModel(options, "brd", {
 		systemPrompt: systemAnalyst,
 		userPrompt: prompt.render(brdUser, { requirements: material }),
-		...(options.model ? { model: options.model } : {}),
-		...(options.signal ? { signal: options.signal } : {}),
 	});
 	const brdArtifact = await writeArtifact(options.cwd, "analysis", "BRD.md", brd.text);
-	const fsd = await generateText({
-		cwd: options.cwd,
+	const fsd = await callModel(options, "fsd", {
 		systemPrompt: systemAnalyst,
 		userPrompt: prompt.render(fsdUser, { requirements: material, brd: brd.text }),
-		...(options.model ? { model: options.model } : {}),
-		...(options.signal ? { signal: options.signal } : {}),
 	});
 	const fsdArtifact = await writeArtifact(options.cwd, "analysis", "FSD.md", fsd.text);
-	return { summary: `BRD + FSD generated with ${brd.model}`, artifacts: [brdArtifact, fsdArtifact] };
+	artifacts.push(brdArtifact, fsdArtifact);
+	return { summary: `BRD + FSD generated with ${brd.model}`, artifacts };
 }
 
 /** 3) Build — drive the agent on the design and capture what changed. */
@@ -192,7 +258,8 @@ export async function runBuildPhase(options: EsdlcRunOptions): Promise<EsdlcPhas
 		await writeArtifact(options.cwd, "build", "agent-output.md", `# Build run\n\n${run.output || "(no output)"}`),
 	];
 	const { patch, files } = await worktreeDiff(options.cwd);
-	if (files.length > 0) artifacts.push(await writeArtifact(options.cwd, "build", "changed-files.txt", files.join("\n")));
+	if (files.length > 0)
+		artifacts.push(await writeArtifact(options.cwd, "build", "changed-files.txt", files.join("\n")));
 	if (patch.trim()) artifacts.push(await writeArtifact(options.cwd, "build", "changes.patch", patch));
 	await writeArtifact(
 		options.cwd,
@@ -207,7 +274,12 @@ export async function runBuildPhase(options: EsdlcRunOptions): Promise<EsdlcPhas
 		summary: `exit 0, ${files.length} file(s) changed`,
 		artifacts: [
 			...artifacts,
-			{ label: "BUILD-NOTES.md", path: path.relative(options.cwd, path.join(phaseDir(options.cwd, "build"), "BUILD-NOTES.md")).replaceAll("\\", "/") },
+			{
+				label: "BUILD-NOTES.md",
+				path: path
+					.relative(options.cwd, path.join(phaseDir(options.cwd, "build"), "BUILD-NOTES.md"))
+					.replaceAll("\\", "/"),
+			},
 		],
 	};
 }
@@ -217,11 +289,11 @@ export async function runTestPhase(options: EsdlcRunOptions): Promise<EsdlcPhase
 	const command = options.command?.trim() || (await detectTestCommand(options.cwd));
 	const argv = command.split(/\s+/).filter(Boolean);
 	const run = await runCommand(options.cwd, argv, options.signal);
-	let summary = `**Verdict:** ${run.exitCode === 0 ? "the configured suite passed" : "the configured suite failed"} ` +
+	let summary =
+		`**Verdict:** ${run.exitCode === 0 ? "the configured suite passed" : "the configured suite failed"} ` +
 		`(exit ${run.exitCode}, ${run.durationMs} ms)\n\n> Automated narrative summary unavailable:\n> {{error}}`;
 	try {
-		const analysis = await generateText({
-			cwd: options.cwd,
+		const analysis = await callModel(options, "test-summary", {
 			systemPrompt: systemEngineer,
 			userPrompt: prompt.render(testUser, {
 				command,
@@ -229,8 +301,6 @@ export async function runTestPhase(options: EsdlcRunOptions): Promise<EsdlcPhase
 				durationMs: String(run.durationMs),
 				output: run.output || "(no output)",
 			}),
-			...(options.model ? { model: options.model } : {}),
-			...(options.signal ? { signal: options.signal } : {}),
 		});
 		summary = analysis.text;
 	} catch (error) {
@@ -259,12 +329,9 @@ async function detectTestCommand(cwd: string): Promise<string> {
 /** 5) Deploy — deployment documentation from repository facts. */
 export async function runDeployPhase(options: EsdlcRunOptions): Promise<EsdlcPhaseOutcome> {
 	const facts = await collectRepoFacts(options.cwd);
-	const { text, model } = await generateText({
-		cwd: options.cwd,
+	const { text, model } = await callModel(options, "deploy-doc", {
 		systemPrompt: systemEngineer,
 		userPrompt: prompt.render(deployUser, { facts }),
-		...(options.model ? { model: options.model } : {}),
-		...(options.signal ? { signal: options.signal } : {}),
 	});
 	const artifact = await writeArtifact(options.cwd, "deploy", "DEPLOY.md", text);
 	return { summary: `deployment document generated with ${model}`, artifacts: [artifact] };
@@ -278,12 +345,9 @@ export async function runReleasePhase(options: EsdlcRunOptions): Promise<EsdlcPh
 		files.length ? `Uncommitted changes (${files.length}):\n${files.join("\n")}` : "No uncommitted changes.",
 		`Working-tree diff stat: ${patch ? `${patch.split("\n").length} lines` : "(empty)"}`,
 	].join("\n\n");
-	const { text, model } = await generateText({
-		cwd: options.cwd,
+	const { text, model } = await callModel(options, "release-notes", {
 		systemPrompt: systemEngineer,
 		userPrompt: prompt.render(releaseUser, { facts, history }),
-		...(options.model ? { model: options.model } : {}),
-		...(options.signal ? { signal: options.signal } : {}),
 	});
 	const artifact = await writeArtifact(options.cwd, "release", "RELEASE-NOTES.md", text);
 	return { summary: `release notes generated with ${model}`, artifacts: [artifact] };
