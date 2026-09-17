@@ -80,7 +80,9 @@ describe("createAgentSession credential_disabled subscription", () => {
 	const tempDirs: string[] = [];
 
 	const makeDirs = (label: string): SessionDirs => {
-		const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), `zero2ai-credential-disabled-${label}-${Snowflake.next()}-`));
+		const tempDir = fs.mkdtempSync(
+			path.join(os.tmpdir(), `zero2ai-credential-disabled-${label}-${Snowflake.next()}-`),
+		);
 		tempDirs.push(tempDir);
 		const cwd = path.join(tempDir, "project");
 		const agentDir = path.join(tempDir, "agent");

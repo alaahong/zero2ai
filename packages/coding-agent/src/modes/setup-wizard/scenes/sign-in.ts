@@ -1,14 +1,7 @@
 import type { AuthStorage } from "@zero2ai/ai";
 import { PASTE_CODE_LOGIN_PROVIDERS } from "@zero2ai/ai";
 import type { OAuthProvider } from "@zero2ai/ai/oauth/types";
-import {
-	type Component,
-	type Focusable,
-	Input,
-	matchesKey,
-	type SgrMouseEvent,
-	wrapTextWithAnsi,
-} from "@zero2ai/tui";
+import { type Component, type Focusable, Input, matchesKey, type SgrMouseEvent, wrapTextWithAnsi } from "@zero2ai/tui";
 import { getAgentDbPath } from "@zero2ai/utils";
 import { captureBrowserSession } from "../../../utils/browser-session";
 import { copyToClipboard } from "../../../utils/clipboard";

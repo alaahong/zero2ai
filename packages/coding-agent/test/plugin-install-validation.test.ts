@@ -274,7 +274,11 @@ describe("PluginManager.install load validation", () => {
 	test("restores the previous package tree when reinstall validation fails", async () => {
 		await Bun.write(
 			pluginsPkgJson,
-			JSON.stringify({ name: "zero2ai-plugins", private: true, dependencies: { "broken-plugin": "1.0.0" } }, null, 2),
+			JSON.stringify(
+				{ name: "zero2ai-plugins", private: true, dependencies: { "broken-plugin": "1.0.0" } },
+				null,
+				2,
+			),
 		);
 		await Bun.write(
 			path.join(tmpRoot, "zero2ai-plugins.lock.json"),

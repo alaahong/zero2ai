@@ -4,10 +4,7 @@ import {
 	IndexedSessionStorage,
 	type SessionStorageBackend,
 } from "@zero2ai/coding-agent/session/indexed-session-storage";
-import {
-	SessionManager,
-	SessionPersistenceIndeterminateError,
-} from "@zero2ai/coding-agent/session/session-manager";
+import { SessionManager, SessionPersistenceIndeterminateError } from "@zero2ai/coding-agent/session/session-manager";
 import {
 	FileSessionStorage,
 	MemorySessionStorage,

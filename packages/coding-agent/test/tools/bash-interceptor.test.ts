@@ -1,10 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import type { AgentToolContext } from "@zero2ai/agent-core";
 import { validateToolArguments } from "@zero2ai/ai/utils/validation";
-import {
-	type BashInterceptorRule,
-	DEFAULT_BASH_INTERCEPTOR_RULES,
-} from "@zero2ai/coding-agent/config/settings-schema";
+import { type BashInterceptorRule, DEFAULT_BASH_INTERCEPTOR_RULES } from "@zero2ai/coding-agent/config/settings-schema";
 import type { ToolSession } from "@zero2ai/coding-agent/tools";
 import { BashTool, type BashToolInput } from "@zero2ai/coding-agent/tools/bash";
 import { checkBashInterception } from "@zero2ai/coding-agent/tools/bash-interceptor";

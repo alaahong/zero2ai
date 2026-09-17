@@ -8,16 +8,7 @@ import type { AgentTool } from "@zero2ai/agent-core";
 import type { ToolExample, TSchema } from "@zero2ai/ai";
 import { renderToolInventory } from "@zero2ai/ai/dialect";
 import type { DelegationBias } from "@zero2ai/catalog/compat/delegation";
-import {
-	$env,
-	getAgentDir,
-	getGpuCachePath,
-	getProjectDir,
-	hasFsCode,
-	isEnoent,
-	logger,
-	prompt,
-} from "@zero2ai/utils";
+import { $env, getAgentDir, getGpuCachePath, getProjectDir, hasFsCode, isEnoent, logger, prompt } from "@zero2ai/utils";
 import { contextFileCapability } from "./capability/context-file";
 import { systemPromptCapability } from "./capability/system-prompt";
 import { findConfigFile } from "./config";

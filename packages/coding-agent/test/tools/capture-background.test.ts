@@ -13,11 +13,7 @@ import { BashTool } from "@zero2ai/coding-agent/tools/bash";
 import { EvalTool } from "@zero2ai/coding-agent/tools/eval";
 import { HubTool, hubToolRenderer } from "@zero2ai/coding-agent/tools/hub";
 import type { CoordinationDetails, JobSnapshot } from "@zero2ai/coding-agent/tools/hub/types";
-import {
-	formatOutputNotice,
-	type OutputMeta,
-	wrapToolWithMetaNotice,
-} from "@zero2ai/coding-agent/tools/output-meta";
+import { formatOutputNotice, type OutputMeta, wrapToolWithMetaNotice } from "@zero2ai/coding-agent/tools/output-meta";
 import { ReadTool } from "@zero2ai/coding-agent/tools/read";
 import { ToolAbortError } from "@zero2ai/coding-agent/tools/tool-errors";
 import { TempDir } from "@zero2ai/utils";

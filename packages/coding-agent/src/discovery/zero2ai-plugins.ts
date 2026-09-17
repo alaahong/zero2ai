@@ -320,7 +320,9 @@ async function loadMCPServers(ctx: LoadContext): Promise<LoadResult<MCPServer>> 
 			if (!serverCfg || typeof serverCfg !== "object" || Array.isArray(serverCfg)) continue;
 			const cfg = serverCfg as RawMcpServer;
 			if (typeof cfg.command !== "string" && typeof cfg.url !== "string") {
-				warnings.push(`[zero2ai-plugins] Skipping MCP server "${serverName}" in ${mcpPath}: missing command or url`);
+				warnings.push(
+					`[zero2ai-plugins] Skipping MCP server "${serverName}" in ${mcpPath}: missing command or url`,
+				);
 				continue;
 			}
 			// Root relative command/cwd at the plugin's config directory, not the

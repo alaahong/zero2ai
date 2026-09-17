@@ -85,7 +85,10 @@ export async function listBoundModels(cwd: string): Promise<BoundModels> {
 	const authStorage = await discoverAuthStorage();
 	const settings = await Settings.init({ cwd });
 	const registry = new ModelRegistry(authStorage);
-	const available = registry.getAvailable().map(summarize).sort((a, b) => a.label.localeCompare(b.label));
+	const available = registry
+		.getAvailable()
+		.map(summarize)
+		.sort((a, b) => a.label.localeCompare(b.label));
 	let resolved: BoundModelSummary | null = null;
 	try {
 		resolved = summarize((await resolvePrimaryModel(undefined, settings, registry)).model);

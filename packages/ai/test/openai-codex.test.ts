@@ -1,8 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import {
-	createOpenAICodexAuthorizationUrl,
-	formatOpenAICodexTokenEndpointError,
-} from "@zero2ai/ai/oauth/openai-codex";
+import { createOpenAICodexAuthorizationUrl, formatOpenAICodexTokenEndpointError } from "@zero2ai/ai/oauth/openai-codex";
 import { type RequestBody, transformRequestBody } from "@zero2ai/ai/providers/openai-codex/request-transformer";
 import { CodexApiError, parseCodexError } from "@zero2ai/ai/providers/openai-codex/response-handler";
 import { convertOpenAICodexResponsesTools } from "@zero2ai/ai/providers/openai-codex-responses";

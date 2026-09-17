@@ -52,7 +52,8 @@ const NON_WIRE_KEYS = new Set<keyof SimpleStreamOptions>([
 	"providerSessionState",
 ]);
 const ZERO2AI_NATIVE_STREAM_IDLE_TIMEOUT_ERROR = "zero2ai-native stream stalled while waiting for the next event";
-const ZERO2AI_NATIVE_STREAM_FIRST_EVENT_TIMEOUT_ERROR = "zero2ai-native stream timed out while waiting for the first event";
+const ZERO2AI_NATIVE_STREAM_FIRST_EVENT_TIMEOUT_ERROR =
+	"zero2ai-native stream timed out while waiting for the first event";
 
 function isPiNativeProgressEvent(event: unknown): boolean {
 	if (typeof event !== "object" || event === null || !("type" in event)) return true;
@@ -222,7 +223,9 @@ export function streamPiNative<TApi extends Api>(
 				onIdle: () =>
 					abortTracker.abortLocally(new AIError.StreamTimeoutError(ZERO2AI_NATIVE_STREAM_IDLE_TIMEOUT_ERROR)),
 				onFirstItemTimeout: () =>
-					abortTracker.abortLocally(new AIError.StreamTimeoutError(ZERO2AI_NATIVE_STREAM_FIRST_EVENT_TIMEOUT_ERROR)),
+					abortTracker.abortLocally(
+						new AIError.StreamTimeoutError(ZERO2AI_NATIVE_STREAM_FIRST_EVENT_TIMEOUT_ERROR),
+					),
 				isProgressItem: isPiNativeProgressEvent,
 			});
 			let sawTerminal = false;

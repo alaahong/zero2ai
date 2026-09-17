@@ -3,11 +3,7 @@ import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
 import type { Skill } from "@zero2ai/coding-agent/extensibility/skills";
-import {
-	applyResolvedSystemPromptInputs,
-	readPipedInput,
-	submitInteractiveInput,
-} from "@zero2ai/coding-agent/main";
+import { applyResolvedSystemPromptInputs, readPipedInput, submitInteractiveInput } from "@zero2ai/coding-agent/main";
 import type { SubmittedUserInput } from "@zero2ai/coding-agent/modes/types";
 import type { CreateAgentSessionOptions } from "@zero2ai/coding-agent/sdk";
 import { SKILL_PROMPT_MESSAGE_TYPE } from "@zero2ai/coding-agent/session/messages";

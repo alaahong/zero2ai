@@ -250,7 +250,9 @@ export function installGlobalProxyFetch(): void {
 	// indistinguishable from a working proxy that the peer rejected.
 	const env = {
 		ZERO2AI_PROXY: proxyUrl ? proxyLogTarget(proxyUrl) : undefined,
-		ZERO2AI_PROXY_ANTHROPIC: Bun.env.ZERO2AI_PROXY_ANTHROPIC ? proxyLogTarget(Bun.env.ZERO2AI_PROXY_ANTHROPIC) : undefined,
+		ZERO2AI_PROXY_ANTHROPIC: Bun.env.ZERO2AI_PROXY_ANTHROPIC
+			? proxyLogTarget(Bun.env.ZERO2AI_PROXY_ANTHROPIC)
+			: undefined,
 		HTTPS_PROXY: Bun.env.HTTPS_PROXY || Bun.env.https_proxy ? "set" : undefined,
 		ALL_PROXY: Bun.env.ALL_PROXY || Bun.env.all_proxy ? "set" : undefined,
 		NO_PROXY: Bun.env.NO_PROXY || Bun.env.no_proxy,

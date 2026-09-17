@@ -137,7 +137,12 @@ describe("zero2ai models image support column", () => {
 	it("keeps declared text-only zero2ai-native models at no", () => {
 		expect(
 			imagesCell(
-				makeModel({ id: "text-only-model", api: "openai-completions", input: ["text"], transport: "zero2ai-native" }),
+				makeModel({
+					id: "text-only-model",
+					api: "openai-completions",
+					input: ["text"],
+					transport: "zero2ai-native",
+				}),
 			),
 		).toBe("no");
 	});

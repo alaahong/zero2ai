@@ -1614,7 +1614,8 @@ async function runBenchmark(cfg: Config): Promise<BenchmarkRun> {
 		process.stdout.write(bold("zero2ai env:\n"));
 		for (const key in harborEnv) {
 			if (key === "ZERO2AI_BENCH_FORWARD_ENV") continue;
-			if (key.startsWith("ZERO2AI_BENCH_") || key === "PYTHONPATH") process.stdout.write(`  ${key}=${harborEnv[key]}\n`);
+			if (key.startsWith("ZERO2AI_BENCH_") || key === "PYTHONPATH")
+				process.stdout.write(`  ${key}=${harborEnv[key]}\n`);
 		}
 		if (harborEnv.ZERO2AI_BENCH_FORWARD_ENV) {
 			const parsedForwardEnv: unknown = JSON.parse(harborEnv.ZERO2AI_BENCH_FORWARD_ENV);

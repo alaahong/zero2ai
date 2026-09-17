@@ -29,10 +29,7 @@ import { ExtensionRunner } from "@zero2ai/coding-agent/extensibility/extensions/
 import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
 import { AgentSession, type AgentSessionEvent } from "@zero2ai/coding-agent/session/agent-session";
 import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
-import {
-	type ServingModel,
-	validateRetryFallbackChains,
-} from "@zero2ai/coding-agent/session/retry-fallback-chains";
+import { type ServingModel, validateRetryFallbackChains } from "@zero2ai/coding-agent/session/retry-fallback-chains";
 import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
 import { convertToLlm } from "@zero2ai/coding-agent/session/messages";
 import { EventBus } from "@zero2ai/coding-agent/utils/event-bus";

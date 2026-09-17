@@ -4,14 +4,7 @@ import * as nodePath from "node:path";
 import { type ApiKey, getOpenRouterHeaders, withAuth } from "@zero2ai/ai";
 import { ProviderHttpError } from "@zero2ai/ai/error";
 import { hostMatchesUrl } from "@zero2ai/catalog/hosts";
-import {
-	$env,
-	$flag,
-	extractHttpStatusFromError,
-	fetchWithRetry,
-	getFastembedCacheDir,
-	logger,
-} from "@zero2ai/utils";
+import { $env, $flag, extractHttpStatusFromError, fetchWithRetry, getFastembedCacheDir, logger } from "@zero2ai/utils";
 import { LRUCache } from "@zero2ai/utils/lru";
 import type { EmbeddingModel } from "fastembed";
 import { ensureFastembedModelSidecars } from "./fastembed-model-cache";

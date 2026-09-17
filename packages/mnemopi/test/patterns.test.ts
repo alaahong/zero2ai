@@ -1,10 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import {
-	CompressionStats,
-	DetectedPattern,
-	MemoryCompressor,
-	PatternDetector,
-} from "@zero2ai/mnemopi/core/patterns";
+import { CompressionStats, DetectedPattern, MemoryCompressor, PatternDetector } from "@zero2ai/mnemopi/core/patterns";
 
 describe("memory compression", () => {
 	it("reports savings and zero-size stats", () => {

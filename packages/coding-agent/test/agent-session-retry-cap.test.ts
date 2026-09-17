@@ -3234,7 +3234,10 @@ describe("AgentSession retry delay cap", () => {
 	it.each([
 		["verbose socket close", "The socket connection was closed unexpectedly"],
 		["bare socket close", "Socket is closed"],
-		["zero2ai-native premature close", "zero2ai-native stream read error: stream closed before a terminal response event"],
+		[
+			"zero2ai-native premature close",
+			"zero2ai-native stream read error: stream closed before a terminal response event",
+		],
 		["gateway 500", "auth-gateway 500: <none>"],
 		["gateway 524", "auth-gateway 524: <none>"],
 	])("retries a transient %s after partial text and thinking", async (_label, errorMessage) => {

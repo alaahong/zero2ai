@@ -8,15 +8,7 @@
  * broken turn is the score, because state is carried in the model's own last
  * reply and cannot be recovered once it drifts.
  */
-import type {
-	Api,
-	ApiKeyResolver,
-	AssistantMessage,
-	Context,
-	Message,
-	Model,
-	ProviderSessionState,
-} from "@zero2ai/ai";
+import type { Api, ApiKeyResolver, AssistantMessage, Context, Message, Model, ProviderSessionState } from "@zero2ai/ai";
 import { logger } from "@zero2ai/utils";
 import type { BenchRuntime, BenchTarget, StreamSimpleFn } from "../cli/bench-runtime";
 import { formatModelSelectorValue, formatModelString } from "../config/model-resolver";

@@ -21,7 +21,11 @@ describe("parseArgs — Windows extension paths", () => {
 
 describe("parseArgs — trusted extension allowlist", () => {
 	it("accepts repeatable native absolute paths", () => {
-		const parsed = parseArgs(["--trusted-extension", "/opt/zero2ai/policy.ts", "--trusted-extension=/opt/zero2ai/audit.ts"]);
+		const parsed = parseArgs([
+			"--trusted-extension",
+			"/opt/zero2ai/policy.ts",
+			"--trusted-extension=/opt/zero2ai/audit.ts",
+		]);
 
 		expect(parsed.trustedExtensions).toEqual(["/opt/zero2ai/policy.ts", "/opt/zero2ai/audit.ts"]);
 	});

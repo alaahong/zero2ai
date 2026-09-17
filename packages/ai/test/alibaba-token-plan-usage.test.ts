@@ -1,10 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import type { FetchImpl } from "@zero2ai/ai/types";
 import type { UsageFetchParams } from "@zero2ai/ai/usage";
-import {
-	alibabaTokenPlanRankingStrategy,
-	alibabaTokenPlanUsageProvider,
-} from "@zero2ai/ai/usage/alibaba-token-plan";
+import { alibabaTokenPlanRankingStrategy, alibabaTokenPlanUsageProvider } from "@zero2ai/ai/usage/alibaba-token-plan";
 import {
 	ALIBABA_TOKEN_PLAN_CN_BASE_URL,
 	serializeAlibabaTokenPlanCredential,

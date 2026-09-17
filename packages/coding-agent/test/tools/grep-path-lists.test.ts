@@ -9,10 +9,7 @@ import { getEditStore } from "@zero2ai/coding-agent/edit/store";
 import type { RenderResultOptions } from "@zero2ai/coding-agent/extensibility/custom-tools/types";
 import { AgentTranscriptViewer } from "@zero2ai/coding-agent/modes/components/agent-transcript-viewer";
 import { TreeSelectorComponent } from "@zero2ai/coding-agent/modes/components/tree-selector";
-import type {
-	ObservableSession,
-	SessionObserverRegistry,
-} from "@zero2ai/coding-agent/modes/session-observer-registry";
+import type { ObservableSession, SessionObserverRegistry } from "@zero2ai/coding-agent/modes/session-observer-registry";
 import type { Theme } from "@zero2ai/coding-agent/modes/theme/theme";
 import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
 import { AgentRegistry } from "@zero2ai/coding-agent/registry/agent-registry";

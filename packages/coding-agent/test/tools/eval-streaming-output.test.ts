@@ -11,11 +11,7 @@ import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
 import type { ToolSession } from "@zero2ai/coding-agent/tools";
 import { EvalTool } from "@zero2ai/coding-agent/tools/eval";
 import { evalToolRenderer } from "@zero2ai/coding-agent/tools/eval-render";
-import {
-	formatOutputNotice,
-	stripOutputNotice,
-	wrapToolWithMetaNotice,
-} from "@zero2ai/coding-agent/tools/output-meta";
+import { formatOutputNotice, stripOutputNotice, wrapToolWithMetaNotice } from "@zero2ai/coding-agent/tools/output-meta";
 import { removeWithRetries, sanitizeText } from "@zero2ai/utils";
 
 function makeSession(settings = Settings.isolated()): ToolSession {

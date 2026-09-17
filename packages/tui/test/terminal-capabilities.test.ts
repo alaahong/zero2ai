@@ -96,8 +96,12 @@ describe("synchronizedOutputUserOverride", () => {
 	});
 
 	it("resolves opt-out ahead of force-on when both are set", () => {
-		expect(synchronizedOutputUserOverride({ ZERO2AI_NO_SYNC_OUTPUT: "1", ZERO2AI_FORCE_SYNC_OUTPUT: "1" })).toBe(false);
-		expect(synchronizedOutputUserOverride({ ZERO2AI_TUI_SYNC_OUTPUT: "0", ZERO2AI_FORCE_SYNC_OUTPUT: "1" })).toBe(false);
+		expect(synchronizedOutputUserOverride({ ZERO2AI_NO_SYNC_OUTPUT: "1", ZERO2AI_FORCE_SYNC_OUTPUT: "1" })).toBe(
+			false,
+		);
+		expect(synchronizedOutputUserOverride({ ZERO2AI_TUI_SYNC_OUTPUT: "0", ZERO2AI_FORCE_SYNC_OUTPUT: "1" })).toBe(
+			false,
+		);
 	});
 });
 
@@ -168,7 +172,9 @@ describe("shouldEnableSynchronizedOutputByDefault", () => {
 		expect(shouldEnableSynchronizedOutputByDefault({ HERDR_ENV: "1", ZERO2AI_NO_SYNC_OUTPUT: "1" }, "ghostty")).toBe(
 			false,
 		);
-		expect(shouldEnableSynchronizedOutputByDefault({ HERDR_ENV: "1", ZERO2AI_TUI_SYNC_OUTPUT: "0" }, "kitty")).toBe(false);
+		expect(shouldEnableSynchronizedOutputByDefault({ HERDR_ENV: "1", ZERO2AI_TUI_SYNC_OUTPUT: "0" }, "kitty")).toBe(
+			false,
+		);
 	});
 
 	it("keeps known-unsupported and unknown profiles off", () => {

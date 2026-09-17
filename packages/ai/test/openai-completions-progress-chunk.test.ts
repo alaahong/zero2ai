@@ -1,8 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import {
-	isOpenAICompletionsProgressChunk,
-	streamOpenAICompletions,
-} from "@zero2ai/ai/providers/openai-completions";
+import { isOpenAICompletionsProgressChunk, streamOpenAICompletions } from "@zero2ai/ai/providers/openai-completions";
 import type { Context, FetchImpl, Model, ModelSpec } from "@zero2ai/ai/types";
 import { buildModel } from "@zero2ai/catalog/build";
 import { getBundledModel } from "@zero2ai/catalog/models";

@@ -1,13 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import {
-	type BoundModule,
-	type Module,
-	type Scope,
-	type Submodule,
-	scope,
-	type Type,
-	type,
-} from "@zero2ai/schema/ark";
+import { type BoundModule, type Module, type Scope, type Submodule, scope, type Type, type } from "@zero2ai/schema/ark";
 import type { Eq } from "./type-assert";
 
 describe("submodule", () => {

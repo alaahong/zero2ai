@@ -7,13 +7,7 @@
  */
 import * as path from "node:path";
 import type { VcsGitRepo, VcsNumstatEntry } from "@zero2ai/natives";
-import {
-	DiffSide,
-	DiffStream,
-	type DiffStreamProgress,
-	type DiffStreamResult,
-	rasterizeSvg,
-} from "@zero2ai/natives";
+import { DiffSide, DiffStream, type DiffStreamProgress, type DiffStreamResult, rasterizeSvg } from "@zero2ai/natives";
 import * as vcs from "@zero2ai/natives/vcs";
 import { BINARY_SNIFF_BYTES, isEnoent, isProbablyBinaryHeader } from "@zero2ai/utils";
 import type { NumstatEntry } from "../../commit/types";

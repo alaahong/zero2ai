@@ -3,14 +3,7 @@ import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
 import { stripVTControlCharacters } from "node:util";
-import {
-	type ComposerStyle,
-	CURSOR_MARKER,
-	Editor,
-	type EditorTheme,
-	registerComposerStyle,
-	TUI,
-} from "@zero2ai/tui";
+import { type ComposerStyle, CURSOR_MARKER, Editor, type EditorTheme, registerComposerStyle, TUI } from "@zero2ai/tui";
 import { CombinedAutocompleteProvider } from "@zero2ai/tui/autocomplete";
 import { KeybindingsManager, setKeybindings, TUI_KEYBINDINGS } from "@zero2ai/tui/keybindings";
 import { setKittyProtocolActive } from "@zero2ai/tui/keys";

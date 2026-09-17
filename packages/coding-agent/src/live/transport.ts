@@ -1,11 +1,6 @@
 import { type AuthStorage, isAuthRetryableError, type OAuthAccess, withOAuthAccess } from "@zero2ai/ai";
 import { getProxyForUrl, wrapFetchForProxy } from "@zero2ai/ai/utils/proxy";
-import {
-	CODEX_BASE_URL,
-	CODEX_CLIENT_VERSION,
-	getCodexAccountId,
-	OPENAI_HEADERS,
-} from "@zero2ai/catalog/wire/codex";
+import { CODEX_BASE_URL, CODEX_CLIENT_VERSION, getCodexAccountId, OPENAI_HEADERS } from "@zero2ai/catalog/wire/codex";
 import { LiveWebRtcPeer } from "@zero2ai/natives";
 import { generateCodexAttestation } from "./attestation";
 import {

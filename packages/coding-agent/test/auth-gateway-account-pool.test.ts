@@ -8,7 +8,11 @@ import { runAuthGatewayCommand } from "@zero2ai/coding-agent/cli/auth-gateway-cl
 import { removeWithRetries } from "@zero2ai/utils";
 
 const BROKER_TOKEN = "gateway-account-pool-token";
-const ENV_KEYS = ["ZERO2AI_AUTH_BROKER_URL", "ZERO2AI_AUTH_BROKER_TOKEN", "ZERO2AI_AUTH_BROKER_ACCOUNT_POOL_FILE"] as const;
+const ENV_KEYS = [
+	"ZERO2AI_AUTH_BROKER_URL",
+	"ZERO2AI_AUTH_BROKER_TOKEN",
+	"ZERO2AI_AUTH_BROKER_ACCOUNT_POOL_FILE",
+] as const;
 
 describe("auth-gateway account pool", () => {
 	let tempDir = "";

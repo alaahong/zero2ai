@@ -13,10 +13,7 @@ import type { ExtensionRunner } from "@zero2ai/coding-agent/extensibility/extens
 import { RegisteredToolAdapter } from "@zero2ai/coding-agent/extensibility/extensions/wrapper";
 import { extensionToolSourceInfo } from "@zero2ai/coding-agent/extensibility/extensions/loader";
 import { BUILTIN_TOOLS, type ToolSession } from "@zero2ai/coding-agent/tools";
-import {
-	defaultLoadModeForToolName,
-	ESSENTIAL_BUILTIN_TOOL_NAMES,
-} from "@zero2ai/coding-agent/tools/essential-tools";
+import { defaultLoadModeForToolName, ESSENTIAL_BUILTIN_TOOL_NAMES } from "@zero2ai/coding-agent/tools/essential-tools";
 import { isMountableUnderXdev } from "@zero2ai/coding-agent/tools/xdev";
 
 function makeSession(): ToolSession {

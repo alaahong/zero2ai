@@ -75,9 +75,7 @@ export const finalBeta = Reflect.get(globalThis, "__betaLoads") ?? 0;
 		// fall-through. The generator now globs each wildcard's source pattern
 		// and registers every concrete `.ts` match against the virtual namespace.
 		const overrides = __buildLegacyPiPackageRootOverrides(true, bundledModuleKeys);
-		expect(overrides["@zero2ai/ai/oauth/anthropic"]).toBe(
-			"zero2ai-legacy-pi-bundled:@zero2ai/ai/oauth/anthropic",
-		);
+		expect(overrides["@zero2ai/ai/oauth/anthropic"]).toBe("zero2ai-legacy-pi-bundled:@zero2ai/ai/oauth/anthropic");
 		// Sanity: the wildcard expansion also reaches deeper subroots so plugins
 		// pinned to e.g. `@zero2ai/ai/providers/openai` keep resolving.
 		expect(bundledModuleKeys.has("@zero2ai/ai/oauth/anthropic")).toBe(true);
@@ -172,12 +170,7 @@ export const observed = [
 			// shims (they re-attach `Type`, `defineTool`, `decodeKittyPrintable`, etc.
 			// dropped from the canonical package surfaces); typebox is served via
 			// TYPEBOX_SHIM_PATH.
-			if (
-				key === "@zero2ai/ai" ||
-				key === "@zero2ai/coding-agent" ||
-				key === "@zero2ai/tui" ||
-				key === "typebox"
-			)
+			if (key === "@zero2ai/ai" || key === "@zero2ai/coding-agent" || key === "@zero2ai/tui" || key === "typebox")
 				continue;
 			if (overrides[key] !== `zero2ai-legacy-pi-bundled:${key}`) {
 				missing.push(key);

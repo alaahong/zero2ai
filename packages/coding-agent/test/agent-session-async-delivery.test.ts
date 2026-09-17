@@ -20,10 +20,7 @@ import { buildAsyncResultBlock } from "@zero2ai/coding-agent/modes/utils/transcr
 import { initTheme } from "@zero2ai/coding-agent/modes/theme/theme";
 import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
 import { ArtifactManager } from "@zero2ai/coding-agent/session/artifacts";
-import {
-	buildAsyncResultBatchMessage,
-	type AsyncResultEntry,
-} from "@zero2ai/coding-agent/session/async-job-delivery";
+import { buildAsyncResultBatchMessage, type AsyncResultEntry } from "@zero2ai/coding-agent/session/async-job-delivery";
 import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
 import { convertToLlm, type CustomMessage } from "@zero2ai/coding-agent/session/messages";
 import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";

@@ -397,7 +397,9 @@ describe("GitLab Duo Workflow provider protocol", () => {
 
 		// The ZERO2AI system prompt lives in the flow config system slot, not the goal.
 		const flowPrompt = payload.flowConfig?.prompts[0];
-		expect(flowPrompt?.prompt_template.system).toContain("ZERO2AI system instructions: preserve the local tool bridge.");
+		expect(flowPrompt?.prompt_template.system).toContain(
+			"ZERO2AI system instructions: preserve the local tool bridge.",
+		);
 		expect(flowPrompt?.prompt_template.system).not.toContain(patToken);
 		expect(flowPrompt?.prompt_template.system).toContain("[gitlab_token_redacted]");
 		// This goal IS a multi-turn ChatML transcript, so the system slot appends the

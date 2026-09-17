@@ -1,16 +1,9 @@
 import { describe, expect, it, spyOn } from "bun:test";
 import * as path from "node:path";
 import { BlobStore } from "@zero2ai/coding-agent/session/blob-store";
-import type {
-	CompactionEntry,
-	FileEntry,
-	SessionMessageEntry,
-} from "@zero2ai/coding-agent/session/session-entries";
+import type { CompactionEntry, FileEntry, SessionMessageEntry } from "@zero2ai/coding-agent/session/session-entries";
 import { formatSessionHistoryMarkdown } from "@zero2ai/coding-agent/session/session-history-format";
-import {
-	loadSessionMessagesReadOnly,
-	resolveBlobRefsInEntries,
-} from "@zero2ai/coding-agent/session/session-loader";
+import { loadSessionMessagesReadOnly, resolveBlobRefsInEntries } from "@zero2ai/coding-agent/session/session-loader";
 import { TempDir } from "@zero2ai/utils";
 import * as snapcompact from "@zero2ai/snapcompact";
 

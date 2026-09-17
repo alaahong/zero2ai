@@ -3,11 +3,7 @@ import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
 import type { SessionInfo } from "@zero2ai/coding-agent/session/session-listing";
-import {
-	loadPinnedSessionIds,
-	sortPinnedFirst,
-	toggleSessionPin,
-} from "@zero2ai/coding-agent/session/session-pins";
+import { loadPinnedSessionIds, sortPinnedFirst, toggleSessionPin } from "@zero2ai/coding-agent/session/session-pins";
 
 describe("session-pins", () => {
 	let tempDir: string;

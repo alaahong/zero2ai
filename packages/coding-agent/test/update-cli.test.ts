@@ -640,7 +640,9 @@ describe("update-cli package manager commands", () => {
 
 describe("update-cli npm rename contract", () => {
 	it("parses a well-formed zero2ai.rename pointer and rejects malformed ones", () => {
-		expect(resolveReleaseRename({ zero2ai: { rename: { package: "@new/zero2ai", natives: "@new/natives" } } })).toEqual({
+		expect(
+			resolveReleaseRename({ zero2ai: { rename: { package: "@new/zero2ai", natives: "@new/natives" } } }),
+		).toEqual({
 			pkg: "@new/zero2ai",
 			natives: "@new/natives",
 		});
@@ -679,10 +681,7 @@ describe("update-cli npm rename contract", () => {
 			"@zero2ai/natives",
 			"@oh-my-pi/pi-natives-darwin-arm64",
 		]);
-		expect(buildRenameCleanupPackages(packages, "linux-arm")).toEqual([
-			"@zero2ai/coding-agent",
-			"@zero2ai/natives",
-		]);
+		expect(buildRenameCleanupPackages(packages, "linux-arm")).toEqual(["@zero2ai/coding-agent", "@zero2ai/natives"]);
 	});
 
 	it("keeps the natives packages on an agent-only rename so cleanup cannot strip the addon the new install pinned", () => {
@@ -894,9 +893,13 @@ describe("update-cli bun cache pruning", () => {
 		expect(await Bun.file(path.join(dir, "react", "19.2.6@@@1")).exists()).toBe(true);
 		expect(await Bun.file(path.join(dir, "react@19.2.6@@@1", "package.json")).exists()).toBe(true);
 		expect(await Bun.file(path.join(dir, "@oh-my-pi", "zero2ai-utils", "15.7.6@@@1")).exists()).toBe(false);
-		expect(await Bun.file(path.join(dir, "@oh-my-pi", "zero2ai-utils@15.7.6@@@1", "package.json")).exists()).toBe(false);
+		expect(await Bun.file(path.join(dir, "@oh-my-pi", "zero2ai-utils@15.7.6@@@1", "package.json")).exists()).toBe(
+			false,
+		);
 		expect(await Bun.file(path.join(dir, "@oh-my-pi", "zero2ai-utils", "15.8.0@@@1")).exists()).toBe(true);
-		expect(await Bun.file(path.join(dir, "@oh-my-pi", "zero2ai-utils@15.8.0@@@1", "package.json")).exists()).toBe(true);
+		expect(await Bun.file(path.join(dir, "@oh-my-pi", "zero2ai-utils@15.8.0@@@1", "package.json")).exists()).toBe(
+			true,
+		);
 		expect(await Bun.file(path.join(dir, "chalk", "4.1.2@@@1")).exists()).toBe(true);
 		expect(await Bun.file(path.join(dir, "chalk@4.1.2@@@1", "package.json")).exists()).toBe(true);
 	});

@@ -663,7 +663,9 @@ describe("createAgentSession session storage isolation", () => {
 	it("stores placeholder keys under the configured agentDir", async () => {
 		await withClearedSecretEnv(async () => {
 			await withTempConfigRoot(async () => {
-				const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), `zero2ai-sdk-secrets-agent-key-${Snowflake.next()}-`));
+				const tempDir = fs.mkdtempSync(
+					path.join(os.tmpdir(), `zero2ai-sdk-secrets-agent-key-${Snowflake.next()}-`),
+				);
 				tempDirs.push(tempDir);
 				const cwd = path.join(tempDir, "project");
 				const agentDir = path.join(tempDir, "agent");

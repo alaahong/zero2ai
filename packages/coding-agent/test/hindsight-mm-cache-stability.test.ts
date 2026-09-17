@@ -5,11 +5,7 @@
  */
 
 import { describe, expect, it, vi } from "bun:test";
-import type {
-	HindsightApi,
-	MentalModelListResponse,
-	MentalModelSummary,
-} from "@zero2ai/coding-agent/hindsight/client";
+import type { HindsightApi, MentalModelListResponse, MentalModelSummary } from "@zero2ai/coding-agent/hindsight/client";
 import type { HindsightConfig } from "@zero2ai/coding-agent/hindsight/config";
 import { Settings } from "@zero2ai/coding-agent/config/settings";
 import { renderMentalModelsBlock } from "@zero2ai/coding-agent/hindsight/mental-models";

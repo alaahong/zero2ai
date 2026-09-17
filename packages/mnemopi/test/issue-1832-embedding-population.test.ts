@@ -20,10 +20,7 @@ import "./setup";
 import { cmdRemember } from "@zero2ai/mnemopi/cli";
 import { BeamMemory } from "@zero2ai/mnemopi/core/beam";
 import { Mnemopi } from "@zero2ai/mnemopi/core/memory";
-import {
-	type ResolvedMnemopiRuntimeOptions,
-	withMnemopiRuntimeOptions,
-} from "@zero2ai/mnemopi/core/runtime-options";
+import { type ResolvedMnemopiRuntimeOptions, withMnemopiRuntimeOptions } from "@zero2ai/mnemopi/core/runtime-options";
 
 interface EmbeddingRow {
 	readonly memory_id: string;

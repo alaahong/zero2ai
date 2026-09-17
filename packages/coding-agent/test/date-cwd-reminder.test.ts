@@ -114,7 +114,11 @@ describe("date-cwd-reminder", () => {
 			const context: Context = { systemPrompt: ["system"], messages: [firstUser] };
 
 			const first = injector.transform(context, "2026-08-14", "/work/zero2ai");
-			const replay = injector.transform({ ...context, messages: [...context.messages] }, "2026-08-14", "/work/zero2ai");
+			const replay = injector.transform(
+				{ ...context, messages: [...context.messages] },
+				"2026-08-14",
+				"/work/zero2ai",
+			);
 
 			expect(replay.messages[0]).toBe(first.messages[0]);
 		});

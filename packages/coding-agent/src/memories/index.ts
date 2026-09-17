@@ -5,15 +5,7 @@ import * as path from "node:path";
 import type { AgentMessage } from "@zero2ai/agent-core";
 import { type ApiKey, completeSimple, Effort, type Model, retryTransientCompletion } from "@zero2ai/ai";
 import { clampThinkingLevelForModel } from "@zero2ai/catalog/model-thinking";
-import {
-	getAgentDbPath,
-	getMemoriesDir,
-	isEnoent,
-	logger,
-	parseJsonlLenient,
-	peekFile,
-	prompt,
-} from "@zero2ai/utils";
+import { getAgentDbPath, getMemoriesDir, isEnoent, logger, parseJsonlLenient, peekFile, prompt } from "@zero2ai/utils";
 
 import type { ModelRegistry } from "../config/model-registry";
 import { getModelMatchPreferences, resolveModelRoleValue } from "../config/model-resolver";

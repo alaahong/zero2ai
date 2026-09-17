@@ -2,11 +2,7 @@ import { describe, expect, it } from "bun:test";
 import type { AgentMessage } from "@zero2ai/agent-core";
 import type { ImageContent, TextContent } from "@zero2ai/ai";
 import { BlobStore, isBlobRef, lazyImageDataSync } from "@zero2ai/coding-agent/session/blob-store";
-import type {
-	CompactionEntry,
-	FileEntry,
-	SessionMessageEntry,
-} from "@zero2ai/coding-agent/session/session-entries";
+import type { CompactionEntry, FileEntry, SessionMessageEntry } from "@zero2ai/coding-agent/session/session-entries";
 import { resolveBlobRefsInEntries } from "@zero2ai/coding-agent/session/session-loader";
 import { prepareEntryForPersistence } from "@zero2ai/coding-agent/session/session-persistence";
 import { TempDir } from "@zero2ai/utils";

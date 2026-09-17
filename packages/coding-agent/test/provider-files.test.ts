@@ -7,10 +7,7 @@ import {
 	type ProviderFileClient,
 	type ProviderFileHandle,
 } from "@zero2ai/coding-agent/blob-broker/provider-file-types";
-import {
-	type ProviderFileClientFactory,
-	ProviderFileManager,
-} from "@zero2ai/coding-agent/blob-broker/provider-files";
+import { type ProviderFileClientFactory, ProviderFileManager } from "@zero2ai/coding-agent/blob-broker/provider-files";
 import { createAnthropicFileClient } from "@zero2ai/coding-agent/blob-broker/provider-files-anthropic";
 import { createGeminiProviderFileClient } from "@zero2ai/coding-agent/blob-broker/provider-files-gemini";
 import { createOpenAIFileClient } from "@zero2ai/coding-agent/blob-broker/provider-files-openai";

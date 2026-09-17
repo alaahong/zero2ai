@@ -1,10 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { Effort } from "@zero2ai/catalog/effort";
 import MODELS_JSON from "@zero2ai/catalog/models.json" with { type: "json" };
-import {
-	MODELS_DEV_PROVIDER_DESCRIPTORS,
-	mapModelsDevToModels,
-} from "@zero2ai/catalog/provider-models/openai-compat";
+import { MODELS_DEV_PROVIDER_DESCRIPTORS, mapModelsDevToModels } from "@zero2ai/catalog/provider-models/openai-compat";
 import type { ModelSpec } from "@zero2ai/catalog/types";
 import { applyGeneratedModelPolicies } from "../scripts/generated-policies";
 

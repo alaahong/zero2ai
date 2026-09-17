@@ -7,14 +7,8 @@ import { buildModel } from "@zero2ai/catalog/build";
 import { writeModelCache } from "@zero2ai/catalog/model-cache";
 import { resolveProviderModels } from "@zero2ai/catalog/model-manager";
 import { getBundledModels } from "@zero2ai/catalog/models";
-import {
-	googleModelManagerOptions,
-	googleVertexModelManagerOptions,
-} from "@zero2ai/catalog/provider-models/google";
-import {
-	MODELS_DEV_PROVIDER_DESCRIPTORS,
-	mapModelsDevToModels,
-} from "@zero2ai/catalog/provider-models/openai-compat";
+import { googleModelManagerOptions, googleVertexModelManagerOptions } from "@zero2ai/catalog/provider-models/google";
+import { MODELS_DEV_PROVIDER_DESCRIPTORS, mapModelsDevToModels } from "@zero2ai/catalog/provider-models/openai-compat";
 import type { Api, ModelSpec } from "@zero2ai/catalog/types";
 
 const googleVertexModelsDevPayload = {

@@ -42,10 +42,7 @@
 import { describe, expect, it } from "bun:test";
 import { renderDemotedThinking } from "@zero2ai/ai/dialect";
 import { convertMessages } from "@zero2ai/ai/providers/openai-completions";
-import {
-	applyChatCompletionsReasoningParams,
-	type OpenAICompletionsParams,
-} from "@zero2ai/ai/providers/openai-shared";
+import { applyChatCompletionsReasoningParams, type OpenAICompletionsParams } from "@zero2ai/ai/providers/openai-shared";
 import type { AssistantMessage, Message, Model, ModelSpec, ThinkingContent, UserMessage } from "@zero2ai/ai/types";
 import { buildModel } from "@zero2ai/catalog/build";
 

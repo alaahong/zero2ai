@@ -32,9 +32,7 @@ describe("legacy-pi bundled virtual module synthesizer (issue #3423)", () => {
 
 	it("emits one ES named export per enumerable namespace key", () => {
 		const src = __synthesizeLegacyPiBundledSourceWithModules("@zero2ai/coding-agent", modules);
-		expect(src).toContain(
-			`const __omp_bundled = globalThis[${JSON.stringify(globalKey)}]["@zero2ai/coding-agent"];`,
-		);
+		expect(src).toContain(`const __omp_bundled = globalThis[${JSON.stringify(globalKey)}]["@zero2ai/coding-agent"];`);
 		expect(src).toContain('export const VERSION = __omp_bundled["VERSION"];');
 		expect(src).toContain('export const defineTool = __omp_bundled["defineTool"];');
 		expect(src).toContain('export const Type = __omp_bundled["Type"];');

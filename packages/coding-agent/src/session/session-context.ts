@@ -1,10 +1,6 @@
 import type { AgentMessage } from "@zero2ai/agent-core";
 import { getAnthropicCompactionPayload } from "@zero2ai/agent-core/compaction";
-import {
-	coerceServiceTierByFamily,
-	type OpenAIResponsesHistoryPayload,
-	type ServiceTierByFamily,
-} from "@zero2ai/ai";
+import { coerceServiceTierByFamily, type OpenAIResponsesHistoryPayload, type ServiceTierByFamily } from "@zero2ai/ai";
 import * as snapcompact from "@zero2ai/snapcompact";
 import { isRecord } from "@zero2ai/utils";
 import {

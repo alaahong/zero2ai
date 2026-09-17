@@ -8,11 +8,7 @@ import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
 import { Settings } from "@zero2ai/coding-agent/config/settings";
 import { AgentSession, type AgentSessionEvent } from "@zero2ai/coding-agent/session/agent-session";
 import { CONTEXT_NOTES_ENTRY_TYPE, getContextNotes } from "@zero2ai/coding-agent/session/context-notes";
-import {
-	createCustomMessage,
-	convertToLlm,
-	SKILL_PROMPT_MESSAGE_TYPE,
-} from "@zero2ai/coding-agent/session/messages";
+import { createCustomMessage, convertToLlm, SKILL_PROMPT_MESSAGE_TYPE } from "@zero2ai/coding-agent/session/messages";
 import type { CompactionEntry } from "@zero2ai/coding-agent/session/session-entries";
 import { ExtensionRuntime, loadExtensionFromFactory } from "@zero2ai/coding-agent/extensibility/extensions/loader";
 import { ExtensionRunner } from "@zero2ai/coding-agent/extensibility/extensions/runner";

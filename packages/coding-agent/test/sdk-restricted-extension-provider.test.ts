@@ -9,11 +9,7 @@ import { runCommitAgentSession } from "@zero2ai/coding-agent/commit/agentic/agen
 import * as commitTools from "@zero2ai/coding-agent/commit/agentic/tools";
 import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
 import { Settings } from "@zero2ai/coding-agent/config/settings";
-import {
-	type CreateAgentSessionOptions,
-	createAgentSession,
-	type ExtensionFactory,
-} from "@zero2ai/coding-agent/sdk";
+import { type CreateAgentSessionOptions, createAgentSession, type ExtensionFactory } from "@zero2ai/coding-agent/sdk";
 import type { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
 import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
 import { removeSyncWithRetries, Snowflake } from "@zero2ai/utils";

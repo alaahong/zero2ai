@@ -4,13 +4,7 @@
  */
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import {
-	type Agent,
-	AgentBusyError,
-	type AgentMessage,
-	EventLoopKeepalive,
-	ThinkingLevel,
-} from "@zero2ai/agent-core";
+import { type Agent, AgentBusyError, type AgentMessage, EventLoopKeepalive, ThinkingLevel } from "@zero2ai/agent-core";
 import type { CompactionOutcome } from "@zero2ai/agent-core/compaction";
 import type { AssistantMessage, ImageContent, Message, Model, Usage, UsageReport } from "@zero2ai/ai";
 import { modelsAreEqual } from "@zero2ai/catalog/models";

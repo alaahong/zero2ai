@@ -14,11 +14,7 @@ import type { CreateAgentSessionResult } from "@zero2ai/coding-agent/sdk";
 import * as sdkModule from "@zero2ai/coding-agent/sdk";
 import type { AgentMessage } from "@zero2ai/agent-core";
 import type { AgentSession, AgentSessionEvent } from "@zero2ai/coding-agent/session/agent-session";
-import {
-	attachIrcWakeTurnMonitor,
-	runSubagentFollowUpTurn,
-	runSubprocess,
-} from "@zero2ai/coding-agent/task/executor";
+import { attachIrcWakeTurnMonitor, runSubagentFollowUpTurn, runSubprocess } from "@zero2ai/coding-agent/task/executor";
 import type { AgentDefinition } from "@zero2ai/coding-agent/task/types";
 import { EventBus } from "@zero2ai/coding-agent/utils/event-bus";
 

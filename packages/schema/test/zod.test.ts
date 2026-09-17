@@ -150,7 +150,13 @@ describe("zod-like parsing", () => {
 	});
 
 	it("supports string and number refinements plus nullable and optional values", () => {
-		expect(z.string().regex(/^zero2ai$/).url().safeParse("zero2ai").success).toBe(false);
+		expect(
+			z
+				.string()
+				.regex(/^zero2ai$/)
+				.url()
+				.safeParse("zero2ai").success,
+		).toBe(false);
 		expect(z.string().url().parse("https://omp.sh")).toBe("https://omp.sh");
 		expect(z.number().int().nonnegative().parse(0)).toBe(0);
 		expect(z.number().int().safeParse(1.5).success).toBe(false);
@@ -181,8 +187,20 @@ describe("zod-like trim and superRefine", () => {
 		expect(z.string().min(2).trim().parse("  ab  ")).toBe("ab");
 		expect(z.string().trim().min(3).parse("  abc  ")).toBe("abc");
 		expect(z.string().trim().min(3).safeParse("  ab  ").success).toBe(false);
-		expect(z.string().trim().regex(/^zero2ai$/).parse("  zero2ai  ")).toBe("zero2ai");
-		expect(z.string().trim().regex(/^zero2ai$/).safeParse("  nope  ").success).toBe(false);
+		expect(
+			z
+				.string()
+				.trim()
+				.regex(/^zero2ai$/)
+				.parse("  zero2ai  "),
+		).toBe("zero2ai");
+		expect(
+			z
+				.string()
+				.trim()
+				.regex(/^zero2ai$/)
+				.safeParse("  nope  ").success,
+		).toBe(false);
 		expect(z.string().trim().url().parse("  https://omp.sh  ")).toBe("https://omp.sh");
 		expect(z.string().trim().url().safeParse("  not-a-url  ").success).toBe(false);
 		expect(z.object({ name: z.string().default(" zero2ai ").trim() }).parse({})).toEqual({ name: "zero2ai" });

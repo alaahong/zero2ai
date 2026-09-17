@@ -10,11 +10,7 @@ import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
 import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";
 import { SKILL_PROMPT_MESSAGE_TYPE } from "@zero2ai/coding-agent/session/messages";
 import { SessionManager } from "@zero2ai/coding-agent/session/session-manager";
-import {
-	AUTO_THINKING,
-	clampAutoThinkingEffort,
-	resolveProvisionalAutoLevel,
-} from "@zero2ai/coding-agent/thinking";
+import { AUTO_THINKING, clampAutoThinkingEffort, resolveProvisionalAutoLevel } from "@zero2ai/coding-agent/thinking";
 import { TempDir } from "@zero2ai/utils";
 import { createAssistantMessage } from "./helpers/agent-session-setup";
 

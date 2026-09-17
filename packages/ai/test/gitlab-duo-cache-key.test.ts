@@ -1,10 +1,6 @@
 import { afterEach, describe, expect, it, mock, spyOn } from "bun:test";
 import type { Context } from "@zero2ai/ai";
-import {
-	clearGitLabDuoDirectAccessCache,
-	getGitLabDuoModels,
-	streamGitLabDuo,
-} from "@zero2ai/ai/providers/gitlab-duo";
+import { clearGitLabDuoDirectAccessCache, getGitLabDuoModels, streamGitLabDuo } from "@zero2ai/ai/providers/gitlab-duo";
 import * as registerBuiltins from "@zero2ai/ai/providers/register-builtins";
 import { apiRouteFor } from "@zero2ai/catalog/compat/behavior";
 import { getBundledModel } from "@zero2ai/catalog/models";

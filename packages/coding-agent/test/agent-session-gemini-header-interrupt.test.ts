@@ -1,15 +1,7 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
 import * as path from "node:path";
 import { Agent } from "@zero2ai/agent-core";
-import type {
-	Api,
-	AssistantMessage,
-	Context,
-	Message,
-	Model,
-	SimpleStreamOptions,
-	ThinkingContent,
-} from "@zero2ai/ai";
+import type { Api, AssistantMessage, Context, Message, Model, SimpleStreamOptions, ThinkingContent } from "@zero2ai/ai";
 import { createMockModel } from "@zero2ai/ai/providers/mock";
 import { AssistantMessageEventStream } from "@zero2ai/ai/utils/event-stream";
 import { GEMINI_HEADER_RUNAWAY_THRESHOLD } from "@zero2ai/ai/utils/thinking-loop";

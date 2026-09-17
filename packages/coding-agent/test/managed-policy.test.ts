@@ -9,7 +9,11 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { __resetManagedPolicyCacheForTests, getManagedPolicy, managedExtensionPaths } from "../src/config/managed-policy";
+import {
+	__resetManagedPolicyCacheForTests,
+	getManagedPolicy,
+	managedExtensionPaths,
+} from "../src/config/managed-policy";
 import { resolveApproval } from "../src/tools/approval";
 
 const BASH = { name: "bash", approval: "exec" } as const;

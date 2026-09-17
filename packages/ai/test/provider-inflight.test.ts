@@ -4,11 +4,7 @@ import * as os from "node:os";
 import * as path from "node:path";
 import { clearCustomApis } from "@zero2ai/ai/api-registry";
 import { createMockModel, registerMockApi } from "@zero2ai/ai/providers/mock";
-import {
-	__providerInFlightForTesting,
-	configureProviderMaxInFlightRequests,
-	streamSimple,
-} from "@zero2ai/ai/stream";
+import { __providerInFlightForTesting, configureProviderMaxInFlightRequests, streamSimple } from "@zero2ai/ai/stream";
 import type { Context } from "@zero2ai/ai/types";
 
 function context(): Context {

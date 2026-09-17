@@ -16,10 +16,7 @@ import {
 	renderSubagentHudLines,
 	SubagentHudComponent,
 } from "@zero2ai/coding-agent/modes/interactive-mode";
-import {
-	type ObservableSession,
-	SessionObserverRegistry,
-} from "@zero2ai/coding-agent/modes/session-observer-registry";
+import { type ObservableSession, SessionObserverRegistry } from "@zero2ai/coding-agent/modes/session-observer-registry";
 import { initTheme, theme } from "@zero2ai/coding-agent/modes/theme/theme";
 import { AgentSession } from "@zero2ai/coding-agent/session/agent-session";
 import { AuthStorage } from "@zero2ai/coding-agent/session/auth-storage";

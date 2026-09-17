@@ -10,10 +10,7 @@ import { scheduler } from "node:timers/promises";
 import { type } from "@zero2ai/schema";
 import { Agent, type AgentMessage, type AgentTool } from "@zero2ai/agent-core";
 import type { AssistantMessage, AssistantMessageEvent, ToolCall } from "@zero2ai/ai";
-import {
-	accumulateToolCallArgumentsDelta,
-	finalizeToolCallArgumentsDone,
-} from "@zero2ai/ai/providers/openai-shared";
+import { accumulateToolCallArgumentsDelta, finalizeToolCallArgumentsDone } from "@zero2ai/ai/providers/openai-shared";
 import { createMockModel } from "@zero2ai/ai/providers/mock";
 import { kStreamingPartialJson } from "@zero2ai/ai/utils/block-symbols";
 import { AssistantMessageEventStream } from "@zero2ai/ai/utils/event-stream";

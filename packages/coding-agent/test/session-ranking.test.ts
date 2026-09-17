@@ -3,10 +3,7 @@ import { describe, expect, it } from "bun:test";
 import * as path from "node:path";
 import { gzipSync } from "node:zlib";
 import { runGcCommand } from "@zero2ai/coding-agent/cli/gc-cli";
-import {
-	mergeSessionRanking,
-	rankSessionSearchMatches,
-} from "@zero2ai/coding-agent/modes/components/session-selector";
+import { mergeSessionRanking, rankSessionSearchMatches } from "@zero2ai/coding-agent/modes/components/session-selector";
 import { listSessions, type SessionInfo } from "@zero2ai/coding-agent/session/session-listing";
 import { MemorySessionStorage } from "@zero2ai/coding-agent/session/session-storage";
 import { getHistoryDbPath, getSessionsDir, TempDir } from "@zero2ai/utils";

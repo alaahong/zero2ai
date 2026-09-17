@@ -3152,7 +3152,9 @@ async function createAgentSessionScoped(options: CreateAgentSessionOptions): Pro
 		const inlineToolDescriptors = shouldInlineToolDescriptors(settings.get("inlineToolDescriptors"), model?.id);
 		const eagerTasks = settings.get("task.eager") !== "default";
 		const eagerTasksAlways = settings.get("task.eager") === "always";
-		const intentField = $flag("ZERO2AI_INTENT_TRACING", settings.get("tools.intentTracing")) ? INTENT_FIELD : undefined;
+		const intentField = $flag("ZERO2AI_INTENT_TRACING", settings.get("tools.intentTracing"))
+			? INTENT_FIELD
+			: undefined;
 		const includeWorkspaceTree = settings.get("includeWorkspaceTree") ?? false;
 		// Latest memory backend instructions rendered for advisor system prompts.
 		// Populated by the initial rebuildSystemPrompt below (before the session is

@@ -1,10 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { getEnvApiKey } from "@zero2ai/ai/stream";
 import { DEFAULT_MODEL_PER_PROVIDER, PROVIDER_DESCRIPTORS } from "@zero2ai/catalog/provider-models/descriptors";
-import {
-	aimlApiModelManagerOptions,
-	isLikelyAimlApiChatModelId,
-} from "@zero2ai/catalog/provider-models/openai-compat";
+import { aimlApiModelManagerOptions, isLikelyAimlApiChatModelId } from "@zero2ai/catalog/provider-models/openai-compat";
 
 describe("AIML API built-in provider (issue #2105)", () => {
 	test("registers built-in runtime descriptor with AIMLAPI_API_KEY discovery", () => {

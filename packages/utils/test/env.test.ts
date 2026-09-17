@@ -335,8 +335,12 @@ describe("stripGitRepoLocationEnv", () => {
 
 describe("isBunTestRuntime", () => {
 	it("does not treat shared application env names as a test runner signal", async () => {
-		expect(await runRuntimeProbe({ NODE_ENV: "test", BUN_ENV: undefined, ZERO2AI_TEST_RUNTIME: undefined })).toBe(false);
-		expect(await runRuntimeProbe({ NODE_ENV: undefined, BUN_ENV: "test", ZERO2AI_TEST_RUNTIME: undefined })).toBe(false);
+		expect(await runRuntimeProbe({ NODE_ENV: "test", BUN_ENV: undefined, ZERO2AI_TEST_RUNTIME: undefined })).toBe(
+			false,
+		);
+		expect(await runRuntimeProbe({ NODE_ENV: undefined, BUN_ENV: "test", ZERO2AI_TEST_RUNTIME: undefined })).toBe(
+			false,
+		);
 	});
 
 	it("honors the private test runner signal", async () => {

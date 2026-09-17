@@ -105,7 +105,8 @@ function nextWidthInput(kind: keyof typeof widthInputVariants): string {
 // ============================================================================
 
 summary(() => {
-	bench("visibleWidth: short ascii (zero2ai-tui)", () => do_not_optimize(tuiVisibleWidth(nextWidthInput("shortAscii"))));
+	bench("visibleWidth: short ascii (zero2ai-tui)", () =>
+		do_not_optimize(tuiVisibleWidth(nextWidthInput("shortAscii"))));
 	bench("visibleWidth: short ascii (native N-API)", () =>
 		do_not_optimize(visibleWidth(nextWidthInput("shortAscii"), 3)));
 	bench("visibleWidth: short ascii (Bun.stringWidth)", () =>
@@ -125,7 +126,8 @@ summary(() => {
 });
 
 summary(() => {
-	bench("visibleWidth: ansi styled (zero2ai-tui)", () => do_not_optimize(tuiVisibleWidth(nextWidthInput("ansiStyled"))));
+	bench("visibleWidth: ansi styled (zero2ai-tui)", () =>
+		do_not_optimize(tuiVisibleWidth(nextWidthInput("ansiStyled"))));
 	bench("visibleWidth: ansi styled (native N-API)", () =>
 		do_not_optimize(visibleWidth(nextWidthInput("ansiStyled"), 3)));
 	bench("visibleWidth: ansi styled (Bun.stringWidth)", () =>

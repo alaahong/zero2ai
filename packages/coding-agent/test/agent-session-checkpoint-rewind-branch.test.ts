@@ -3,12 +3,7 @@ import * as path from "node:path";
 import { type } from "@zero2ai/schema";
 import { Agent, type AgentMessage, type AgentTool } from "@zero2ai/agent-core";
 import type { AssistantMessage, Message, ThinkingContent } from "@zero2ai/ai";
-import {
-	createMockModel,
-	type MockContent,
-	type MockModel,
-	type MockResponseSource,
-} from "@zero2ai/ai/providers/mock";
+import { createMockModel, type MockContent, type MockModel, type MockResponseSource } from "@zero2ai/ai/providers/mock";
 import { ModelRegistry } from "@zero2ai/coding-agent/config/model-registry";
 import { Settings } from "@zero2ai/coding-agent/config/settings";
 import { ExtensionRuntime, loadExtensionFromFactory } from "@zero2ai/coding-agent/extensibility/extensions/loader";

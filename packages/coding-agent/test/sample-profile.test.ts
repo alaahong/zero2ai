@@ -7,11 +7,7 @@ import { Settings } from "@zero2ai/coding-agent/config/settings";
 import type { ToolSession } from "@zero2ai/coding-agent/tools";
 import type { ReadToolDetails } from "@zero2ai/coding-agent/tools/read";
 import { ReadTool } from "@zero2ai/coding-agent/tools/read";
-import {
-	demangleSymbol,
-	parseSampleProfile,
-	renderSampleProfile,
-} from "@zero2ai/coding-agent/utils/sample-profile";
+import { demangleSymbol, parseSampleProfile, renderSampleProfile } from "@zero2ai/coding-agent/utils/sample-profile";
 import { removeWithRetries } from "@zero2ai/utils";
 
 const BOX_MEASURE = "_RNvNtCsfMEenOU8j5j_11slab_kernel6layout11box_measure";

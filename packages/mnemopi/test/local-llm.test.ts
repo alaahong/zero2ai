@@ -1,11 +1,7 @@
 import { afterEach, describe, expect, it } from "bun:test";
 import type { FetchImpl } from "@zero2ai/ai";
 import { createMockModel, registerMockApi } from "@zero2ai/ai/providers/mock";
-import {
-	CallableLlmBackend,
-	resetHostLlmBackendForTests,
-	setHostLlmBackend,
-} from "@zero2ai/mnemopi/core/llm-backends";
+import { CallableLlmBackend, resetHostLlmBackendForTests, setHostLlmBackend } from "@zero2ai/mnemopi/core/llm-backends";
 import {
 	buildHostPrompt,
 	callLocalLlm,

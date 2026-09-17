@@ -4,10 +4,7 @@ import { buildModel } from "@zero2ai/catalog/build";
 import { getBundledModel } from "@zero2ai/catalog/models";
 import { seedModels } from "@zero2ai/catalog/compat/providers";
 import { providerEntry } from "@zero2ai/catalog/compat/providers";
-import {
-	metaModelManagerOptions,
-	museCodeModelManagerOptions,
-} from "@zero2ai/catalog/provider-models/openai-compat";
+import { metaModelManagerOptions, museCodeModelManagerOptions } from "@zero2ai/catalog/provider-models/openai-compat";
 import type { FetchImpl, ThinkingConfig } from "@zero2ai/catalog/types";
 
 const MUSE_SPARK_THINKING: ThinkingConfig = {

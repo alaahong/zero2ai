@@ -2,15 +2,7 @@ import { describe, expect, it } from "bun:test";
 import { type } from "@zero2ai/schema";
 import { streamOpenAICompletions } from "@zero2ai/ai/providers/openai-completions";
 import { streamOpenAIResponses } from "@zero2ai/ai/providers/openai-responses";
-import type {
-	Context,
-	FetchImpl,
-	Model,
-	ModelSpec,
-	OpenAICompat,
-	ProviderSessionState,
-	Tool,
-} from "@zero2ai/ai/types";
+import type { Context, FetchImpl, Model, ModelSpec, OpenAICompat, ProviderSessionState, Tool } from "@zero2ai/ai/types";
 import { buildModel } from "@zero2ai/catalog/build";
 import { getBundledModel } from "@zero2ai/catalog/models";
 

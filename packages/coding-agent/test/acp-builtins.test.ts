@@ -3,12 +3,7 @@ import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
 import { Tokenizer } from "@zero2ai/agent-core";
-import type {
-	ResetCreditAccountStatus,
-	ResetCreditRedeemOutcome,
-	ResetCreditTarget,
-	UsageReport,
-} from "@zero2ai/ai";
+import type { ResetCreditAccountStatus, ResetCreditRedeemOutcome, ResetCreditTarget, UsageReport } from "@zero2ai/ai";
 import { Settings } from "@zero2ai/coding-agent/config/settings";
 import { PluginManager } from "@zero2ai/coding-agent/extensibility/plugins";
 import { MarketplaceManager } from "@zero2ai/coding-agent/extensibility/plugins/marketplace";

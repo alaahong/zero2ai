@@ -165,7 +165,8 @@ export function wrapShellLineForClientTerminal(
  * or "false". Controls whether the prompt advertises the in-process builtins.
  */
 function shellBuiltinsDisabled(settings: Settings): boolean {
-	const raw = settings.getShellConfig().env?.ZERO2AI_DISABLE_UUTILS_BUILTINS ?? Bun.env.ZERO2AI_DISABLE_UUTILS_BUILTINS;
+	const raw =
+		settings.getShellConfig().env?.ZERO2AI_DISABLE_UUTILS_BUILTINS ?? Bun.env.ZERO2AI_DISABLE_UUTILS_BUILTINS;
 	return !!raw && raw !== "0" && raw.toLowerCase() !== "false";
 }
 

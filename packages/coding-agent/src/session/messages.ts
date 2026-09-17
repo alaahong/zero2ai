@@ -5,10 +5,7 @@
  * and provides a transformer to convert them to LLM-compatible messages.
  */
 import type { AgentMessage } from "@zero2ai/agent-core";
-import {
-	invalidateMessageCache,
-	registerMessageCacheInvalidator,
-} from "@zero2ai/agent-core/compaction/message-cache";
+import { invalidateMessageCache, registerMessageCacheInvalidator } from "@zero2ai/agent-core/compaction/message-cache";
 import {
 	type BranchSummaryMessage,
 	type CompactionSummaryMessage,

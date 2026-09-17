@@ -8,12 +8,7 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import {
-	disableProvider,
-	disableUserSource,
-	enableProvider,
-	enableUserSource,
-} from "@zero2ai/coding-agent/capability";
+import { disableProvider, disableUserSource, enableProvider, enableUserSource } from "@zero2ai/coding-agent/capability";
 import { clearCache as clearFsCache } from "@zero2ai/coding-agent/capability/fs";
 import { resolveAgentModelPatterns } from "@zero2ai/coding-agent/config/model-resolver";
 import { clearClaudePluginRootsCache } from "@zero2ai/coding-agent/discovery/helpers";

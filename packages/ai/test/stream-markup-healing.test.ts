@@ -1,10 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import {
-	type Dialect,
-	getDialectDefinition,
-	type InbandScanEvent,
-	ThinkingInbandScanner,
-} from "@zero2ai/ai/dialect";
+import { type Dialect, getDialectDefinition, type InbandScanEvent, ThinkingInbandScanner } from "@zero2ai/ai/dialect";
 import { streamGoogleGeminiCli } from "@zero2ai/ai/providers/google-gemini-cli";
 import { streamOpenAICompletions } from "@zero2ai/ai/providers/openai-completions";
 import { stream } from "@zero2ai/ai/stream";

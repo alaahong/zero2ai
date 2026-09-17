@@ -699,7 +699,8 @@ export const SETTINGS_SCHEMA = {
 				{
 					value: "project",
 					label: "Per-project",
-					description: "Save project role models in .zero2ai/config.yml; missing project roles use global defaults",
+					description:
+						"Save project role models in .zero2ai/config.yml; missing project roles use global defaults",
 				},
 			],
 		},
@@ -4615,7 +4616,8 @@ export const SETTINGS_SCHEMA = {
 			tab: "tools",
 			group: "GitHub",
 			label: "GitHub View Cache",
-			description: "Cache rendered issue/PR view output in ~/.zero2ai/cache/github-cache.db so repeated reads are free",
+			description:
+				"Cache rendered issue/PR view output in ~/.zero2ai/cache/github-cache.db so repeated reads are free",
 		},
 	},
 

@@ -111,13 +111,12 @@ describe("createTools", () => {
 
 	it("still exposes eval when python kernel is unavailable (dispatches to js)", async () => {
 		const session = createTestSession();
-		vi.spyOn(
-			await import("@zero2ai/coding-agent/eval/py/kernel"),
-			"checkPythonKernelAvailability",
-		).mockResolvedValue({
-			ok: false,
-			reason: "missing python",
-		});
+		vi.spyOn(await import("@zero2ai/coding-agent/eval/py/kernel"), "checkPythonKernelAvailability").mockResolvedValue(
+			{
+				ok: false,
+				reason: "missing python",
+			},
+		);
 		const tools = await createTools(session, ["eval"]);
 		const names = tools.map(t => t.name);
 

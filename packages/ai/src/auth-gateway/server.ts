@@ -759,7 +759,11 @@ async function handlePiNative(
 		} catch (error) {
 			if (controller.signal.aborted) return aborted();
 			const classified = classifyGatewayError(error);
-			logger.warn("auth-gateway non-streaming aborted", { format: "zero2ai-native", error: classified.message, peer });
+			logger.warn("auth-gateway non-streaming aborted", {
+				format: "zero2ai-native",
+				error: classified.message,
+				peer,
+			});
 			return piNative.formatError(classified.status, classified.type, classified.message);
 		}
 	}

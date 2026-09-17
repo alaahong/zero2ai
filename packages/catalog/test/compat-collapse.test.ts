@@ -15,10 +15,7 @@ import {
 	type VariantCollapseTable,
 } from "@zero2ai/catalog/compat/collapse";
 import { stripThinkingVariantSuffix } from "@zero2ai/catalog/compat/taxonomy";
-import {
-	ANTIGRAVITY_PRIMARY_ENDPOINT,
-	fetchAntigravityDiscoveryModels,
-} from "@zero2ai/catalog/discovery/antigravity";
+import { ANTIGRAVITY_PRIMARY_ENDPOINT, fetchAntigravityDiscoveryModels } from "@zero2ai/catalog/discovery/antigravity";
 import { Effort } from "@zero2ai/catalog/effort";
 import { resolveProviderModels } from "@zero2ai/catalog/model-manager";
 import {

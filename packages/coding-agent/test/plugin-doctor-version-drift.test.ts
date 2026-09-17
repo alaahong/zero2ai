@@ -43,7 +43,11 @@ describe("PluginManager.doctor version drift", () => {
 		);
 		await Bun.write(
 			path.join(pluginsDir, "package.json"),
-			JSON.stringify({ name: "zero2ai-plugins", private: true, dependencies: { [name]: `^${lockVersion}` } }, null, 2),
+			JSON.stringify(
+				{ name: "zero2ai-plugins", private: true, dependencies: { [name]: `^${lockVersion}` } },
+				null,
+				2,
+			),
 		);
 		const state: PluginRuntimeState = { version: lockVersion, enabledFeatures: null, enabled: true };
 		await Bun.write(

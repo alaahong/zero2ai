@@ -1,8 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import {
-	formatConnectEndStreamError,
-	summarizeConnectErrorDetails,
-} from "@zero2ai/ai/providers/connect-error-detail";
+import { formatConnectEndStreamError, summarizeConnectErrorDetails } from "@zero2ai/ai/providers/connect-error-detail";
 
 describe("formatConnectEndStreamError", () => {
 	it("keeps the legacy prefix for a plain code/message error", () => {

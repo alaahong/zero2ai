@@ -25,7 +25,10 @@ function normalizeIdleTimeoutMs(value: string | undefined, fallback: number): nu
  * Caller options still take precedence; env overrides still trump the fallback.
  */
 export function getStreamIdleTimeoutMs(fallbackMs: number = DEFAULT_STREAM_IDLE_TIMEOUT_MS): number | undefined {
-	return normalizeIdleTimeoutMs($env.ZERO2AI_STREAM_IDLE_TIMEOUT_MS ?? $env.ZERO2AI_OPENAI_STREAM_IDLE_TIMEOUT_MS, fallbackMs);
+	return normalizeIdleTimeoutMs(
+		$env.ZERO2AI_STREAM_IDLE_TIMEOUT_MS ?? $env.ZERO2AI_OPENAI_STREAM_IDLE_TIMEOUT_MS,
+		fallbackMs,
+	);
 }
 
 /**
@@ -38,7 +41,10 @@ export function getStreamIdleTimeoutMs(fallbackMs: number = DEFAULT_STREAM_IDLE_
  * Set `ZERO2AI_OPENAI_STREAM_IDLE_TIMEOUT_MS=0` to disable the watchdog.
  */
 export function getOpenAIStreamIdleTimeoutMs(fallbackMs: number = DEFAULT_STREAM_IDLE_TIMEOUT_MS): number | undefined {
-	return normalizeIdleTimeoutMs($env.ZERO2AI_OPENAI_STREAM_IDLE_TIMEOUT_MS ?? $env.ZERO2AI_STREAM_IDLE_TIMEOUT_MS, fallbackMs);
+	return normalizeIdleTimeoutMs(
+		$env.ZERO2AI_OPENAI_STREAM_IDLE_TIMEOUT_MS ?? $env.ZERO2AI_STREAM_IDLE_TIMEOUT_MS,
+		fallbackMs,
+	);
 }
 
 /**

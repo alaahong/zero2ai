@@ -1,14 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { renderDemotedThinking } from "@zero2ai/ai/dialect";
 import { convertAnthropicMessages, streamAnthropic } from "@zero2ai/ai/providers/anthropic";
-import type {
-	AssistantMessage,
-	Message,
-	Model,
-	ModelSpec,
-	ToolResultMessage,
-	UserMessage,
-} from "@zero2ai/ai/types";
+import type { AssistantMessage, Message, Model, ModelSpec, ToolResultMessage, UserMessage } from "@zero2ai/ai/types";
 import { buildModel } from "@zero2ai/catalog/build";
 
 /**

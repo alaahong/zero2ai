@@ -200,7 +200,8 @@ export function resolveApproval(
 	// subagent defaults: both the mode ceiling and the per-tool directive are
 	// applied here, on the single path every caller funnels through.
 	const effectiveMode: ApprovalMode =
-		managed?.approvalMode && TIER_RANK[APPROVAL_MODE_MAX_TIER[managed.approvalMode]] < TIER_RANK[APPROVAL_MODE_MAX_TIER[mode]]
+		managed?.approvalMode &&
+		TIER_RANK[APPROVAL_MODE_MAX_TIER[managed.approvalMode]] < TIER_RANK[APPROVAL_MODE_MAX_TIER[mode]]
 			? managed.approvalMode
 			: mode;
 	const managedPolicy = lookupManagedApproval(managed, policyKey, tool.name);

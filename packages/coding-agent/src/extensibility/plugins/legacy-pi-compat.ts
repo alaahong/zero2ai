@@ -837,7 +837,14 @@ const CANONICAL_PI_SCOPE = "@oh-my-pi";
 const ZERO2AI_SCOPE_ALIASES = ["oh-my-pi", "mariozechner", "earendil-works"] as const;
 
 // Internal pi-* package basenames bundled inside the zero2ai binary.
-const ZERO2AI_PACKAGE_NAMES = ["pi-agent-core", "pi-ai", "pi-coding-agent", "pi-natives", "pi-tui", "pi-utils"] as const;
+const ZERO2AI_PACKAGE_NAMES = [
+	"pi-agent-core",
+	"pi-ai",
+	"pi-coding-agent",
+	"pi-natives",
+	"pi-tui",
+	"pi-utils",
+] as const;
 
 const ZERO2AI_SCOPE_ALTERNATION = ZERO2AI_SCOPE_ALIASES.join("|");
 const ZERO2AI_PACKAGE_ALTERNATION = ZERO2AI_PACKAGE_NAMES.join("|");
@@ -869,7 +876,9 @@ function remapLegacyPiSubpath(rest: string): string {
 	return rest;
 }
 
-const LEGACY_PI_SPECIFIER_FILTER = new RegExp(`^@(?:${ZERO2AI_SCOPE_ALTERNATION})/(?:${ZERO2AI_PACKAGE_ALTERNATION})(?:/.*)?$`);
+const LEGACY_PI_SPECIFIER_FILTER = new RegExp(
+	`^@(?:${ZERO2AI_SCOPE_ALTERNATION})/(?:${ZERO2AI_PACKAGE_ALTERNATION})(?:/.*)?$`,
+);
 const resolvedSpecifierFallbacks = new Map<string, string>();
 const SOURCE_MODULE_EXTENSIONS = [".ts", ".tsx", ".mts", ".cts", ".js", ".jsx", ".mjs", ".cjs"] as const;
 const SUPPORTED_PACKAGE_IMPORT_CONDITIONS = new Set(["bun", "node", "import", "default"]);

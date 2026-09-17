@@ -2637,7 +2637,9 @@ function createRuntimeGeneric(
 		parameters,
 		instantiateIR(arguments_) {
 			if (arguments_.length !== parameters.length) {
-				throw new Zero2AiTypeError(`generic expects ${parameters.length} arguments (received ${arguments_.length})`);
+				throw new Zero2AiTypeError(
+					`generic expects ${parameters.length} arguments (received ${arguments_.length})`,
+				);
 			}
 			for (let index = 0; index < parameters.length; index++) {
 				const parameter = parameters[index];
@@ -3128,7 +3130,8 @@ function makeFn(resolve?: AliasResolver): FnParser {
 		const parameterExpression = fnExpression(params.ir);
 		const returnsExpression = fnExpression(returns.ir);
 		return (implementation: (...arguments_: readonly unknown[]) => unknown) => {
-			if (typeof implementation !== "function") throw new Zero2AiTypeError("type.fn requires a function implementation");
+			if (typeof implementation !== "function")
+				throw new Zero2AiTypeError("type.fn requires a function implementation");
 			const raw = (...arguments_: readonly unknown[]): unknown => {
 				const validatedArguments = params.assert(arguments_);
 				const result = Reflect.apply(implementation, undefined, validatedArguments);

@@ -113,7 +113,10 @@ describe("detectKittyUnicodePlaceholdersSupport", () => {
 		expect(detectKittyUnicodePlaceholdersSupport("base", forcedTmux)).toBe(true);
 		expect(detectKittyUnicodePlaceholdersSupport("wezterm", forcedTmux)).toBe(true);
 		expect(
-			detectKittyUnicodePlaceholdersSupport("ghostty", env({ HERDR_ENV: "1", ZERO2AI_FORCE_IMAGE_PROTOCOL: "kitty" })),
+			detectKittyUnicodePlaceholdersSupport(
+				"ghostty",
+				env({ HERDR_ENV: "1", ZERO2AI_FORCE_IMAGE_PROTOCOL: "kitty" }),
+			),
 		).toBe(true);
 		// Automatic multiplexer fallback remains conservative when the outer terminal is unknown.
 		expect(detectKittyUnicodePlaceholdersSupport("base", env({ TMUX: "/tmp/tmux-1000/default,1,0" }))).toBe(false);
@@ -124,15 +127,21 @@ describe("detectKittyUnicodePlaceholdersSupport", () => {
 	it("ignores leaked Kitty-capable terminal identities inside Herdr unless placeholders are explicitly forced", () => {
 		const leaked = env({ HERDR_ENV: "1", GHOSTTY_RESOURCES_DIR: "/usr/share/ghostty" });
 		expect(detectKittyUnicodePlaceholdersSupport("ghostty", leaked)).toBe(false);
-		expect(detectKittyUnicodePlaceholdersSupport("ghostty", { ...leaked, ZERO2AI_KITTY_PLACEHOLDERS: "1" })).toBe(true);
+		expect(detectKittyUnicodePlaceholdersSupport("ghostty", { ...leaked, ZERO2AI_KITTY_PLACEHOLDERS: "1" })).toBe(
+			true,
+		);
 		const paneOnly = env({ HERDR_PANE_ID: "p1", GHOSTTY_RESOURCES_DIR: "/usr/share/ghostty" });
 		expect(detectKittyUnicodePlaceholdersSupport("ghostty", paneOnly)).toBe(false);
-		expect(detectKittyUnicodePlaceholdersSupport("ghostty", { ...paneOnly, ZERO2AI_KITTY_PLACEHOLDERS: "1" })).toBe(true);
+		expect(detectKittyUnicodePlaceholdersSupport("ghostty", { ...paneOnly, ZERO2AI_KITTY_PLACEHOLDERS: "1" })).toBe(
+			true,
+		);
 	});
 
 	it("honors ZERO2AI_NO_KITTY_PLACEHOLDERS=1 as a hard off override on supporting terminals", () => {
 		expect(detectKittyUnicodePlaceholdersSupport("kitty", env({ ZERO2AI_NO_KITTY_PLACEHOLDERS: "1" }))).toBe(false);
-		expect(detectKittyUnicodePlaceholdersSupport("ghostty", env({ ZERO2AI_NO_KITTY_PLACEHOLDERS: "true" }))).toBe(false);
+		expect(detectKittyUnicodePlaceholdersSupport("ghostty", env({ ZERO2AI_NO_KITTY_PLACEHOLDERS: "true" }))).toBe(
+			false,
+		);
 	});
 
 	it("honors ZERO2AI_KITTY_PLACEHOLDERS=1 as opt-in on otherwise-unsupported terminals", () => {

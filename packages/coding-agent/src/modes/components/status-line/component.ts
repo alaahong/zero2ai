@@ -1,10 +1,7 @@
 import * as path from "node:path";
 import type { AgentMessage } from "@zero2ai/agent-core";
 import type { AssistantMessage, UsageLimit, UsageReport } from "@zero2ai/ai";
-import {
-	getAntigravityCounterKeyForModel,
-	scopeAntigravityLimitsForModel,
-} from "@zero2ai/ai/usage/google-antigravity";
+import { getAntigravityCounterKeyForModel, scopeAntigravityLimitsForModel } from "@zero2ai/ai/usage/google-antigravity";
 import { getNextTimeBasedPricingTransition } from "@zero2ai/catalog/models";
 import type { Model, ModelCost } from "@zero2ai/catalog/types";
 import type { VcsRepo } from "@zero2ai/natives";

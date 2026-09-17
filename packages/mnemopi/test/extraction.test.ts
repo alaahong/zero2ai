@@ -8,11 +8,7 @@ import {
 	parseFacts,
 } from "@zero2ai/mnemopi/core/extraction";
 import { getExtractionStats, resetExtractionStats } from "@zero2ai/mnemopi/core/extraction/diagnostics";
-import {
-	CallableLlmBackend,
-	resetHostLlmBackendForTests,
-	setHostLlmBackend,
-} from "@zero2ai/mnemopi/core/llm-backends";
+import { CallableLlmBackend, resetHostLlmBackendForTests, setHostLlmBackend } from "@zero2ai/mnemopi/core/llm-backends";
 import {
 	type MnemopiLlmCompletionTask,
 	type ResolvedMnemopiRuntimeOptions,

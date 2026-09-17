@@ -1,11 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "bun:test";
-import {
-	Agent,
-	type AgentMessage,
-	type AgentTool,
-	AppendOnlyContextManager,
-	type StreamFn,
-} from "@zero2ai/agent-core";
+import { Agent, type AgentMessage, type AgentTool, AppendOnlyContextManager, type StreamFn } from "@zero2ai/agent-core";
 import {
 	type Api,
 	type Context,

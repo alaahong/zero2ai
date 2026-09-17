@@ -1,11 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { encodeResponse, encodeStream, parseRequest } from "@zero2ai/ai/providers/openai-chat-server";
-import type {
-	AssistantMessage,
-	AssistantMessageEvent,
-	AssistantMessageEventStream,
-	ToolCall,
-} from "@zero2ai/ai/types";
+import type { AssistantMessage, AssistantMessageEvent, AssistantMessageEventStream, ToolCall } from "@zero2ai/ai/types";
 
 function makeEventStream(events: AssistantMessageEvent[], final: AssistantMessage): AssistantMessageEventStream {
 	async function* iter() {

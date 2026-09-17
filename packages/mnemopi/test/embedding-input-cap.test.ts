@@ -1,10 +1,6 @@
 import { afterEach, describe, expect, it } from "bun:test";
 
-import {
-	embed,
-	resetEmbeddingProviderForTests,
-	setEmbeddingProviderForTests,
-} from "@zero2ai/mnemopi/core/embeddings";
+import { embed, resetEmbeddingProviderForTests, setEmbeddingProviderForTests } from "@zero2ai/mnemopi/core/embeddings";
 import { withMnemopiRuntimeOptions } from "@zero2ai/mnemopi/core/runtime-options";
 
 /**

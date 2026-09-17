@@ -1177,10 +1177,15 @@ function parseArrayExpression(def: readonly unknown[], resolve?: AliasResolver):
 						  },
 				): Zero2AiErrors => {
 					const detail = typeof input === "string" ? { expected: input } : input;
-					const next = Zero2AiErrors.single([...(detail.path ?? detail.relativePath ?? [])], detail.expected, value, {
-						preserveActual: true,
-						...(Object.hasOwn(detail, "actual") ? { actual: String(detail.actual) } : {}),
-					});
+					const next = Zero2AiErrors.single(
+						[...(detail.path ?? detail.relativePath ?? [])],
+						detail.expected,
+						value,
+						{
+							preserveActual: true,
+							...(Object.hasOwn(detail, "actual") ? { actual: String(detail.actual) } : {}),
+						},
+					);
 					if (errors) errors.append(next);
 					else errors = next;
 					return next;

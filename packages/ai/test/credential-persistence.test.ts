@@ -9,10 +9,7 @@
  * in `credential-store-persistence.test.ts`, which needs the native addon.
  */
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import {
-	assertCredentialPersistenceAllowed,
-	credentialStoreMode,
-} from "../src/auth/credential-persistence";
+import { assertCredentialPersistenceAllowed, credentialStoreMode } from "../src/auth/credential-persistence";
 
 let previousMode: string | undefined;
 

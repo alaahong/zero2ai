@@ -17,7 +17,12 @@ import { sttClient } from "../stt/asr-client";
 const TARGET_SAMPLE_RATE = 16_000;
 const WAV_EXTENSIONS: Readonly<Record<string, true>> = { ".wav": true, ".wave": true };
 const TO_TEXT_EXTENSIONS: Readonly<Record<string, true>> = {
-	".md": true, ".markdown": true, ".txt": true, ".vtt": true, ".srt": true, ".json": true,
+	".md": true,
+	".markdown": true,
+	".txt": true,
+	".vtt": true,
+	".srt": true,
+	".json": true,
 };
 
 export interface TranscriptionResult {
@@ -42,7 +47,12 @@ export function decodeWav(bytes: Uint8Array): Float32Array {
 	let dataOffset = -1;
 	let dataLength = 0;
 	while (offset + 8 <= bytes.length) {
-		const id = String.fromCharCode(bytes[offset] ?? 0, bytes[offset + 1] ?? 0, bytes[offset + 2] ?? 0, bytes[offset + 3] ?? 0);
+		const id = String.fromCharCode(
+			bytes[offset] ?? 0,
+			bytes[offset + 1] ?? 0,
+			bytes[offset + 2] ?? 0,
+			bytes[offset + 3] ?? 0,
+		);
 		const size = view.getUint32(offset + 4, true);
 		const body = offset + 8;
 		if (id === "fmt ") {
@@ -57,7 +67,8 @@ export function decodeWav(bytes: Uint8Array): Float32Array {
 		offset = body + size + (size % 2);
 	}
 	if (dataOffset < 0) throw new Error("WAV file has no data chunk");
-	if (format !== 1 && format !== 3) throw new Error(`unsupported WAV encoding (format ${format}); use 16-bit PCM or float`);
+	if (format !== 1 && format !== 3)
+		throw new Error(`unsupported WAV encoding (format ${format}); use 16-bit PCM or float`);
 	const bytesPerSample = Math.max(1, bitsPerSample / 8);
 	const frames = Math.floor(dataLength / (bytesPerSample * channels));
 	const mono = new Float32Array(frames);
@@ -99,10 +110,28 @@ async function toSixteenKhzWav(sourcePath: string): Promise<{ wav: Uint8Array; c
 	}
 	const dir = await fs.mkdtemp(path.join(os.tmpdir(), "zero2ai-esdlc-audio-"));
 	const target = path.join(dir, "audio.wav");
-	const child = Bun.spawn([ffmpeg, "-hide_banner", "-loglevel", "error", "-y", "-i", sourcePath, "-ac", "1", "-ar", "16000", "-c:a", "pcm_s16le", target], {
-		stdout: "ignore",
-		stderr: "pipe",
-	});
+	const child = Bun.spawn(
+		[
+			ffmpeg,
+			"-hide_banner",
+			"-loglevel",
+			"error",
+			"-y",
+			"-i",
+			sourcePath,
+			"-ac",
+			"1",
+			"-ar",
+			"16000",
+			"-c:a",
+			"pcm_s16le",
+			target,
+		],
+		{
+			stdout: "ignore",
+			stderr: "pipe",
+		},
+	);
 	const [stderr, exitCode] = await Promise.all([new Response(child.stderr as ReadableStream).text(), child.exited]);
 	if (exitCode !== 0) {
 		await fs.rm(dir, { recursive: true, force: true });
@@ -135,7 +164,11 @@ export async function transcribeRecording(
 	try {
 		options.onProgress?.("Transcribing (bundled STT model)");
 		const samples = decodeWav(wav);
-		const text = await sttClient.transcribe(DEFAULT_STT_MODEL_KEY, samples, options.signal ? { signal: options.signal } : {});
+		const text = await sttClient.transcribe(
+			DEFAULT_STT_MODEL_KEY,
+			samples,
+			options.signal ? { signal: options.signal } : {},
+		);
 		return { text: text.trim(), source: path.basename(absolute) };
 	} catch (error) {
 		throw new Error(

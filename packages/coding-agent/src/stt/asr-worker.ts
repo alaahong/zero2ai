@@ -7,12 +7,7 @@ import type {
 	AutomaticSpeechRecognitionPipeline,
 	ProgressInfo,
 } from "@huggingface/transformers";
-import {
-	ensureRuntimeInstalled,
-	getTinyModelsCacheDir,
-	isCompiledBinary,
-	resolveRuntimeModule,
-} from "@zero2ai/utils";
+import { ensureRuntimeInstalled, getTinyModelsCacheDir, isCompiledBinary, resolveRuntimeModule } from "@zero2ai/utils";
 import packageJson from "../../package.json" with { type: "json" };
 import {
 	errorMessage,

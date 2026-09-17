@@ -67,9 +67,12 @@ const WARNED_NON_BASE64_IMAGE_SOURCES = new Set<string>();
 function warnNonBase64ImageSource(sourceType: string): void {
 	if (WARNED_NON_BASE64_IMAGE_SOURCES.has(sourceType)) return;
 	WARNED_NON_BASE64_IMAGE_SOURCES.add(sourceType);
-	logger.warn("anthropic-messages: image source surfaced as text placeholder (zero2ai-ai ImageContent lacks URL channel)", {
-		sourceType,
-	});
+	logger.warn(
+		"anthropic-messages: image source surfaced as text placeholder (zero2ai-ai ImageContent lacks URL channel)",
+		{
+			sourceType,
+		},
+	);
 }
 
 // Compact, log-safe stringification for unknown content blocks. Keeps the

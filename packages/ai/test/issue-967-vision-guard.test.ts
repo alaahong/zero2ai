@@ -3,10 +3,7 @@ import { convertAnthropicMessages } from "@zero2ai/ai/providers/anthropic";
 import { convertMessages as convertGoogleMessages } from "@zero2ai/ai/providers/google-shared";
 import { convertCodexResponsesMessages } from "@zero2ai/ai/providers/openai-codex-responses";
 import { convertMessages as convertOpenAICompletionsMessages } from "@zero2ai/ai/providers/openai-completions";
-import {
-	appendResponsesToolResultMessages,
-	convertResponsesInputContent,
-} from "@zero2ai/ai/providers/openai-shared";
+import { appendResponsesToolResultMessages, convertResponsesInputContent } from "@zero2ai/ai/providers/openai-shared";
 import { NON_VISION_IMAGE_PLACEHOLDER } from "@zero2ai/ai/providers/vision-guard";
 import type { Api, AssistantMessage, Context, Model, ModelSpec, ToolResultMessage, Usage } from "@zero2ai/ai/types";
 import { buildModel } from "@zero2ai/catalog/build";

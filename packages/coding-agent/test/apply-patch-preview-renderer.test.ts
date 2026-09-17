@@ -1,9 +1,5 @@
 import { beforeAll, describe, expect, test } from "bun:test";
-import {
-	type EditRenderContext,
-	editToolRenderer,
-	type PerFileDiffPreview,
-} from "@zero2ai/coding-agent/edit/renderer";
+import { type EditRenderContext, editToolRenderer, type PerFileDiffPreview } from "@zero2ai/coding-agent/edit/renderer";
 import * as themeModule from "@zero2ai/coding-agent/modes/theme/theme";
 
 let uiTheme: themeModule.Theme;

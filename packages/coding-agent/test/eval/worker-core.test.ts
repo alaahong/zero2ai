@@ -102,7 +102,9 @@ describe("WorkerCore", () => {
 
 		const gate = Promise.withResolvers<void>();
 		const entered = Promise.withResolvers<void>();
-		(globalThis as { __zero2ai_worker_core_gate?: { entered(): void; wait: Promise<void> } }).__zero2ai_worker_core_gate = {
+		(
+			globalThis as { __zero2ai_worker_core_gate?: { entered(): void; wait: Promise<void> } }
+		).__zero2ai_worker_core_gate = {
 			entered: () => entered.resolve(),
 			wait: gate.promise,
 		};
@@ -152,7 +154,9 @@ describe("WorkerCore", () => {
 
 		const gate = Promise.withResolvers<void>();
 		const entered = Promise.withResolvers<void>();
-		(globalThis as { __zero2ai_worker_core_gate?: { entered(): void; wait: Promise<void> } }).__zero2ai_worker_core_gate = {
+		(
+			globalThis as { __zero2ai_worker_core_gate?: { entered(): void; wait: Promise<void> } }
+		).__zero2ai_worker_core_gate = {
 			entered: () => entered.resolve(),
 			wait: gate.promise,
 		};
@@ -219,7 +223,9 @@ describe("WorkerCore", () => {
 
 		const gate = Promise.withResolvers<void>();
 		const entered = Promise.withResolvers<void>();
-		(globalThis as { __zero2ai_worker_core_gate?: { entered(): void; wait: Promise<void> } }).__zero2ai_worker_core_gate = {
+		(
+			globalThis as { __zero2ai_worker_core_gate?: { entered(): void; wait: Promise<void> } }
+		).__zero2ai_worker_core_gate = {
 			entered: () => entered.resolve(),
 			wait: gate.promise,
 		};
@@ -304,7 +310,9 @@ describe("WorkerCore", () => {
 
 		const gate = Promise.withResolvers<void>();
 		const entered = Promise.withResolvers<void>();
-		(globalThis as { __zero2ai_worker_core_gate?: { entered(): void; wait: Promise<void> } }).__zero2ai_worker_core_gate = {
+		(
+			globalThis as { __zero2ai_worker_core_gate?: { entered(): void; wait: Promise<void> } }
+		).__zero2ai_worker_core_gate = {
 			entered: () => entered.resolve(),
 			wait: gate.promise,
 		};
@@ -396,7 +404,9 @@ describe("WorkerCore", () => {
 
 		const gate = Promise.withResolvers<void>();
 		const entered = Promise.withResolvers<void>();
-		(globalThis as { __zero2ai_worker_cwd_gate?: { entered(): void; wait: Promise<void> } }).__zero2ai_worker_cwd_gate = {
+		(
+			globalThis as { __zero2ai_worker_cwd_gate?: { entered(): void; wait: Promise<void> } }
+		).__zero2ai_worker_cwd_gate = {
 			entered: () => entered.resolve(),
 			wait: gate.promise,
 		};

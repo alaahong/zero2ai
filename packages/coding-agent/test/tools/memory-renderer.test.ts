@@ -1,10 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { getThemeByName } from "@zero2ai/coding-agent/modes/theme/theme";
-import {
-	recallToolRenderer,
-	reflectToolRenderer,
-	retainToolRenderer,
-} from "@zero2ai/coding-agent/tools/memory-render";
+import { recallToolRenderer, reflectToolRenderer, retainToolRenderer } from "@zero2ai/coding-agent/tools/memory-render";
 import { sanitizeText } from "@zero2ai/utils";
 
 const themePromise = getThemeByName("dark");

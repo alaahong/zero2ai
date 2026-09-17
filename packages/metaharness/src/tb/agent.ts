@@ -121,6 +121,7 @@ web_search:
 	const writeConfig = await vm.exec(
 		`mkdir -p "$HOME/.zero2ai/agent"\ncat > "$HOME/.zero2ai/agent/models.yml" <<'ZERO2AI_MODELS_EOF'\n${modelsYaml}ZERO2AI_MODELS_EOF\ncat > "$HOME/.zero2ai/agent/config.yml" <<'ZERO2AI_CONFIG_EOF'\n${configYaml}ZERO2AI_CONFIG_EOF`,
 	);
-	if (writeConfig.exitCode !== 0) throw new Error(`Could not install zero2ai configuration: ${writeConfig.stderr.trim()}`);
+	if (writeConfig.exitCode !== 0)
+		throw new Error(`Could not install zero2ai configuration: ${writeConfig.stderr.trim()}`);
 	return entrypoint;
 }
