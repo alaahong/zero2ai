@@ -34,10 +34,20 @@ export async function generateText(options: EsdlcCompletionOptions): Promise<Esd
 	try {
 		target = await resolvePrimaryModel(options.model, settings, registry);
 	} catch (error) {
-		throw new Error(
-			`ESDLC needs a language model for this phase, but none is usable: ${(error as Error).message}\n` +
-				`Configure a provider (see \`zero2ai models\`), or pass --model <provider/model>.`,
-		);
+		// The role chain ("commit → smol → any") can come up empty on hosts whose
+		// bound providers are not role-mapped (a single gateway, a local runtime).
+		// Any provider the host can actually reach beats refusing to work.
+		// An explicitly requested model must fail loudly when it cannot resolve —
+		// silently running a different one would misreport what produced a document.
+		const fallback = options.model ? undefined : registry.getAvailable()[0];
+		if (!fallback) {
+			throw new Error(
+				`ESDLC needs a language model for this phase, but none is usable: ${(error as Error).message}\n` +
+					`Configure a provider (see \`zero2ai models\`), or pass --model <provider/model>.`,
+			);
+		}
+		const apiKey = await registry.getApiKey(fallback);
+		target = { model: fallback, apiKey: registry.resolver(fallback) };
 	}
 	const message = await completeSimple(
 		target.model,

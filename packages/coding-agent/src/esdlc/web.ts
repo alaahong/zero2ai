@@ -20,6 +20,7 @@ import {
 	runEsdlcPhase,
 } from "./index";
 import { esdlcDir } from "./state";
+import { listBoundModels } from "./models";
 import { isEsdlcPhaseId, type EsdlcPhaseId } from "./types";
 
 export const ESDLC_WEB_HOST = "127.0.0.1";
@@ -130,6 +131,7 @@ export function startEsdlcWeb(options: EsdlcWebOptions): EsdlcWebHandle {
 				return new Response(PAGE, { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } });
 			}
 			if (url.pathname === "/api/state") return json(await readEsdlcState(options.projectRoot));
+			if (url.pathname === "/api/models") return json(await listBoundModels(options.projectRoot));
 			if (url.pathname === "/api/run" && request.method === "POST") return await handleRun(options.projectRoot, request);
 			if (url.pathname === "/api/artifact") return await handleArtifact(options.projectRoot, url);
 			return json({ error: "not found" }, 404);
@@ -157,6 +159,8 @@ const PAGE = `<!DOCTYPE html>
   pre.banner { margin:0; color:var(--fg); font:12px/1.2 ui-monospace,Consolas,monospace; white-space:pre; }
   .flow { color:var(--accent); font:12px ui-monospace,Consolas,monospace; letter-spacing:.5px; margin:8px 0 0; }
   .root { color:var(--dim); font-size:12px; margin:4px 0 0; }
+  .toolbar { display:flex; align-items:center; gap:8px; margin-top:10px; font-size:12px; color:var(--dim); }
+  .toolbar select { background:#0b0b0b; color:var(--fg); border:1px solid var(--line); border-radius:6px; padding:4px 8px; font:12px ui-monospace,monospace; min-width:260px; }
   main { display:grid; grid-template-columns:minmax(420px,1fr) minmax(360px,1.1fr); gap:20px; padding:20px 24px 40px; }
   .phases { display:flex; flex-direction:column; gap:10px; }
   .phase { background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--line); border-radius:8px; padding:12px 14px; }
@@ -188,6 +192,11 @@ const PAGE = `<!DOCTYPE html>
   <pre class="banner">${renderEsdlcBannerArt().join("\n")}</pre>
   <p class="flow">${FLOW_TEXT}</p>
   <p class="root" id="root"></p>
+  <div class="toolbar">
+    <label for="model">模型（已绑定的 provider）</label>
+    <select id="model"></select>
+    <span class="hint" id="model-hint"></span>
+  </div>
 </header>
 <main>
   <section class="phases" id="phases"></section>
@@ -201,6 +210,34 @@ const ORDER = ${PHASE_ORDER};
 const TITLES = ${PHASE_TITLES};
 
 let state = null;
+let models = null;
+
+async function loadModels() {
+  try {
+    models = await (await fetch("/api/models")).json();
+  } catch {
+    models = { default: null, defaultLabel: "默认", available: [] };
+  }
+  const select = document.getElementById("model");
+  const saved = localStorage.getItem("esdlc.model") ?? "";
+  select.textContent = "";
+  const auto = document.createElement("option");
+  auto.value = "";
+  auto.textContent = models.default ? models.defaultLabel + " — " + models.default.label : models.defaultLabel;
+  select.appendChild(auto);
+  for (const model of models.available) {
+    const option = document.createElement("option");
+    option.value = model.label;
+    option.textContent = model.label;
+    select.appendChild(option);
+  }
+  if (saved) select.value = saved;
+  document.getElementById("model-hint").textContent =
+    models.available.length === 0
+      ? "未检测到可用凭据：先在命令行配置 provider（zero2ai models）"
+      : models.available.length + " 个已绑定模型";
+  select.onchange = () => localStorage.setItem("esdlc.model", select.value);
+}
 
 async function refresh() {
   const res = await fetch("/api/state");
@@ -260,6 +297,8 @@ function render() {
       button.textContent = "运行中…";
       const body = { phase };
       if (notes && notes.value.trim()) body.prompt = notes.value.trim();
+      const chosen = document.getElementById("model").value;
+      if (chosen) body.model = chosen;
       try {
         const res = await fetch("/api/run", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
         const payload = await res.json();
@@ -296,6 +335,7 @@ async function openArtifact(artifact) {
 }
 
 refresh();
+loadModels();
 setInterval(refresh, 2500);
 </script>
 </body>

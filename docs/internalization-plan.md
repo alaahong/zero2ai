@@ -468,7 +468,8 @@ zero2ai --config /etc/corp/zero2ai/baseline.yml \
 
 - **Web 工作台（推荐）**：`zero2ai esdlc --web [--port 3848]` → 浏览器打开 `http://127.0.0.1:3848`。页面含 ZERO2AI 字标、流程行（REQUIREMENTS → ANALYSIS & DESIGN → BUILD → TEST → DEPLOY → RELEASE）、六阶段卡片（状态徽标 + 说明 + 摘要/报错 + 产物按钮），右侧为产物预览面板；requirements 卡片内可直接写讨论要点后点“运行”。
   - **安全设计**：仅绑定回环、校验 `Host`（拒绝非回环，防 DNS rebinding）、无 CORS 头、产物读取按路径前缀限制在工作区内、请求体与产物大小上限；页面为**单文件内联**（无构建、无 CDN、无第三方资源），可在断网主机运行且可直接阅读评审。
-  - **HTTP 契约**：`GET /`（页面）、`GET /api/state`、`POST /api/run`（`{phase,input?,prompt?,model?,command?}`；阶段失败仍返回 200 + 该阶段状态，便于界面渲染原因）、`GET /api/artifact?path=`。
+  - **HTTP 契约**：`GET /`（页面）、`GET /api/state`、`GET /api/models`（已绑定模型清单 + 隐式默认）、`POST /api/run`（`{phase,input?,prompt?,model?,command?}`；阶段失败仍返回 200 + 该阶段状态，便于界面渲染原因）、`GET /api/artifact?path=`。
+  - **凭据复用**：界面不收集任何密钥。模型清单来自与 CLI 同一条链（`discoverAuthStorage` → `Settings` → `ModelRegistry.getAvailable()`，即 auth-broker / 环境变量 / `agent.db` / `models.yml` 已绑定者）；顶部选择器可选“默认（commit → smol → 任一已绑定）”或任一已绑定模型，选择随 `POST /api/run` 的 `model` 下发，并**同时透传给 `build` 阶段的 agent 子进程**（`--model`）。当角色链无候选时，默认回退为第一个已绑定模型；但**显式指定的模型无法解析时一律报错**，绝不静默换模型（否则会误报文档的生成来源）。
   - **实测证据**：契约测试 **7/7 通过**（含路径穿越拒绝、伪造 Host 拒绝、未知阶段拒绝、阶段运行落盘）；浏览器实测：页面渲染正确 → 点 `deploy` 显示可操作报错（本机未配置模型）→ 点 `test` 完成并显示 `exit 1 in 227 ms` 与 `report.md` 产物 → 点产物在右侧面板看到报告全文（含降级说明与原始输出）。
 - **终端屏幕（轻量替代）**：TTY 下 `zero2ai esdlc`（不带 `--web`）打开全屏屏幕——同一状态、同一按键方式（↑↓/j/k 选择、Enter 触发、r 刷新、q 退出）；管道与 CI 自动回落到静态输出，保持可脚本化。
 

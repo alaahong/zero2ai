@@ -184,7 +184,10 @@ export async function runBuildPhase(options: EsdlcRunOptions): Promise<EsdlcPhas
 			? "Implement the functional specification in this repository. Work in small, verifiable steps and run the project's checks."
 			: "Implement the requested change in this repository, then run the project's checks.");
 	const entry = Bun.main;
-	const run = await runCommand(options.cwd, [process.execPath, entry, "-p", instruction], options.signal);
+	const argv = [process.execPath, entry, "-p", instruction];
+	// Honour the caller's model choice (web picker / --model) for the agent run too.
+	if (options.model) argv.push("--model", options.model);
+	const run = await runCommand(options.cwd, argv, options.signal);
 	const artifacts = [
 		await writeArtifact(options.cwd, "build", "agent-output.md", `# Build run\n\n${run.output || "(no output)"}`),
 	];

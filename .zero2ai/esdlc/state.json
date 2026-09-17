@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "projectRoot": "D:\\code\\opensource\\zero2ai",
+  "createdAt": "2026-09-17T01:04:00.268Z",
+  "updatedAt": "2026-09-17T01:04:11.041Z",
+  "phases": {
+    "requirements": {
+      "status": "failed",
+      "startedAt": "2026-09-17T01:04:00.268Z",
+      "finishedAt": "2026-09-17T01:04:00.272Z",
+      "summary": null,
+      "error": "requirements needs material: pass --input <recording|transcript> or --prompt \"<discussion notes>\"",
+      "artifacts": []
+    },
+    "analysis": {
+      "status": "failed",
+      "startedAt": "2026-09-17T01:04:11.037Z",
+      "finishedAt": "2026-09-17T01:04:11.041Z",
+      "summary": null,
+      "error": "no requirements captured yet: run `zero2ai esdlc run requirements --input <file>` first",
+      "artifacts": []
+    },
+    "build": {
+      "status": "pending",
+      "startedAt": "",
+      "finishedAt": null,
+      "summary": null,
+      "error": null,
+      "artifacts": []
+    },
+    "test": {
+      "status": "pending",
+      "startedAt": "",
+      "finishedAt": null,
+      "summary": null,
+      "error": null,
+      "artifacts": []
+    },
+    "deploy": {
+      "status": "pending",
+      "startedAt": "",
+      "finishedAt": null,
+      "summary": null,
+      "error": null,
+      "artifacts": []
+    },
+    "release": {
+      "status": "pending",
+      "startedAt": "",
+      "finishedAt": null,
+      "summary": null,
+      "error": null,
+      "artifacts": []
+    }
+  }
+}

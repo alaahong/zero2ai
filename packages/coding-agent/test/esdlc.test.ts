@@ -74,10 +74,10 @@ describe("requirements phase", () => {
 describe("phase isolation", () => {
 	it("keeps completed phases when a later phase fails", async () => {
 		await runEsdlcPhase(projectRoot, "requirements", { prompt: "scope" });
-		// Analysis has no model configured in this environment, and no requirements
-		// artefact in the second sandbox: either way it must fail without harming
-		// the requirements record.
-		await runEsdlcPhase(projectRoot, "analysis");
+		// Deterministic failure: an explicitly requested model that cannot resolve.
+		// (Relying on "no model configured" would depend on the host's credentials
+		// and on whether a bound provider answers.)
+		await runEsdlcPhase(projectRoot, "analysis", { model: "does-not-exist/model" });
 		const state = await readEsdlcState(projectRoot);
 		expect(state.phases.requirements.status).toBe("completed");
 		expect(state.phases.analysis.status).toBe("failed");
