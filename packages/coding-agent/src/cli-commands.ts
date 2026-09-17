@@ -117,7 +117,13 @@ export const commands: CommandEntry[] = [
 	{
 		name: "esdlc",
 		load: () => import("./commands/esdlc").then(m => m.default),
+		aliases: ["sdlc"],
 		help: commandHelp.esdlcHelp,
+	},
+	{
+		name: "sdlc-web",
+		load: () => import("./commands/sdlc-web").then(m => m.default),
+		help: commandHelp.sdlcWebHelp,
 	},
 	{
 		name: "gallery",

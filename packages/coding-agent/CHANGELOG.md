@@ -16,6 +16,7 @@
 - ESDLC's preview pane renders Markdown (headings, tables, lists, quotes, code fences, task lists) with a built-in, self-contained renderer that escapes first and neutralises unsafe links, and any project text file can be edited in place and saved (`PUT /api/file`, 1 MB cap, binary and `.git` refused).
 - ESDLC now records every model call's prompt, provider reasoning and full output as transcripts under `<workspace>/<phase>/calls/`, so the execution trail expands to the actual work instead of a size tally. Workspace notes are injected into every phase prompt, and a human-in-the-loop prompt parks a phase as `awaiting-input` until answered in the page; callers without an answer transport (CI, SDK, pipelines) never park.
 - Added `tui.titleSpinner` (`braille` | `dots` | `line`, default `braille`) to pick the terminal-title working-state spinner glyphs alongside the existing `tui.titleState` on/off toggle.
+- Added `sdlc` and `sdlc-web` shortcuts for the engineering lifecycle workspace: `zero2ai sdlc` opens the terminal workspace (static status when piped), and `zero2ai sdlc-web` opens the same per-project workspace in the browser without passing `--web`.
 
 ### Changed
 

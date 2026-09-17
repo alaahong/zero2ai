@@ -219,6 +219,8 @@ Run `zero2ai <command> --help` for each command's own flags and examples.
 | `compress` | Rewrite a text file into the dense prompt register, reporting what it drops. | |
 | `config` | Manage configuration settings. | [config usage](./config-usage.md), [settings](./settings.md) |
 | `dry-balance` | Dry-run OAuth account balancing across random session ids. | |
+| `esdlc`, `sdlc` | Engineering lifecycle workspace: requirements (ASR) → BRD/FSD → build → test → deploy → release; fullscreen terminal screen on a TTY, static status when piped. | |
+| `sdlc-web` | The same workspace, opened in the browser without passing `--web`. | |
 | `gc` | Run storage garbage collection. | |
 | `grep` | Test the grep tool from the CLI. (The [`grep` tool](./tools/grep.md) is a separate agent tool.) | |
 | `gallery` | Preview tool renderers across streaming, in-progress, success, and failure states. | |

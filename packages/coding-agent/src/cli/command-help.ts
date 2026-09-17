@@ -54,6 +54,10 @@ export const esdlcHelp = {
 	description: "Engineering lifecycle workspace: requirements (ASR) -> BRD/FSD -> build -> test -> deploy -> release",
 } satisfies CommandMetadata;
 
+export const sdlcWebHelp = {
+	description: "Engineering lifecycle workspace in the browser (shortcut for `esdlc --web`)",
+} satisfies CommandMetadata;
+
 export const galleryHelp = {
 	description: "Preview tool, composer, and status-line renderers in a deterministic visual gallery",
 } satisfies CommandMetadata;

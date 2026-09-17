@@ -11,6 +11,13 @@ const ACTIONS = ["status", "run", "graph"] as const;
 
 export default class Esdlc extends Command {
 	static description = commandHelp.description;
+
+	/**
+	 * Set by the `sdlc-web` shortcut (see `./sdlc-web`) so that entrypoint opens
+	 * the browser workspace without the operator passing `--web`.
+	 */
+	webByDefault = false;
+
 	static args = {
 		action: Args.string({ description: "ESDLC action", required: false, options: [...ACTIONS] }),
 		phase: Args.string({ description: "Phase to run (requirements|analysis|build|test|deploy|release)" }),
@@ -36,6 +43,8 @@ export default class Esdlc extends Command {
 	};
 
 	static examples = [
+		"# Shortcut: open the terminal workspace (same as `zero2ai esdlc`)\n  zero2ai sdlc",
+		"# Shortcut: open the browser workspace (same as `zero2ai esdlc --web`)\n  zero2ai sdlc-web",
 		"# Open the workspace in a browser (loopback only)\n  zero2ai esdlc --web",
 		"# Point the workspace at another project\n  zero2ai esdlc --dir D:/work/corp-service --web",
 		"# Show the workspace status\n  zero2ai esdlc",
@@ -61,8 +70,8 @@ export default class Esdlc extends Command {
 			...(flags.model ? { model: flags.model } : {}),
 			...(flags.command ? { command: flags.command } : {}),
 			...(flags.json ? { json: true } : {}),
-			...(flags.web ? { web: true } : {}),
-			...(flags.port ? { port: flags.port } : {}),
+			...(flags.web || this.webByDefault ? { web: true } : {}),
+			...(flags.port !== undefined ? { port: flags.port } : {}),
 			...(flags.dir ? { dir: flags.dir } : {}),
 			...(flags.lang ? { lang: flags.lang } : {}),
 			...(flags.spec?.length ? { spec: flags.spec } : {}),
