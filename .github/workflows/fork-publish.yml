@@ -96,10 +96,12 @@ jobs:
               native_version="$(bun -e 'process.stdout.write(require("./packages/natives/package.json").version)')"
               tarball="$(npm view "@oh-my-pi/pi-natives-linux-x64@${native_version}" dist.tarball)"
               echo "Fetching $tarball"
-              curl -fsSL --retry 3 "$tarball" | tar -xz -C "$RUNNER_TEMP"
-              mkdir -p packages/natives/native
-              cp "$RUNNER_TEMP/package/pi_natives.linux-x64-baseline.node" packages/natives/native/
-              cp "$RUNNER_TEMP/package/pi_natives.linux-x64-modern.node" packages/natives/native/
+              # Workspace-relative, not $RUNNER_TEMP: a Windows Git Bash runner cannot
+              # hand tar a `D:\...` path (see fork-release.yml).
+              rm -rf .native-addon && mkdir -p .native-addon packages/natives/native
+              curl -fsSL --retry 3 "$tarball" | tar -xz -C .native-addon
+              cp .native-addon/package/pi_natives.linux-x64-baseline.node packages/natives/native/
+              cp .native-addon/package/pi_natives.linux-x64-modern.node packages/natives/native/
          # A corrupt download must fail here, not as a confusing dlopen error
          # halfway through packing. `bun -e 'require("./x.node")'` swallows
          # dlopen failures, so the check runs from a script file.

@@ -81,9 +81,11 @@ jobs:
               native_version="$(bun -e 'process.stdout.write(require("./packages/natives/package.json").version)')"
               tarball="$(npm view "@oh-my-pi/pi-natives-${{ matrix.leaf }}@${native_version}" dist.tarball)"
               echo "Fetching $tarball"
-              curl -fsSL --retry 3 "$tarball" | tar -xz -C "$RUNNER_TEMP"
-              mkdir -p packages/natives/native
-              cp "$RUNNER_TEMP"/package/pi_natives.${{ matrix.leaf }}*.node packages/natives/native/
+              # Extracted into the workspace, not $RUNNER_TEMP: Git Bash for Windows
+              # hands tar a `D:\...` path it cannot parse (drive-letter mangling).
+              rm -rf .native-addon && mkdir -p .native-addon packages/natives/native
+              curl -fsSL --retry 3 "$tarball" | tar -xz -C .native-addon
+              cp .native-addon/package/pi_natives.${{ matrix.leaf }}*.node packages/natives/native/
               ls -l packages/natives/native
          # Compiles with the addon embedded (`gen:native` → `bun --compile`), so the
          # resulting binary needs no leaf package at runtime.
