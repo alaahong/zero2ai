@@ -27,6 +27,7 @@ const TEXT_DECODER = new TextDecoder();
 // Debug-only local MITM certificate. Claude is launched with
 // NODE_TLS_REJECT_UNAUTHORIZED=0, so the certificate has no trust value; it only
 // lets Node's TLS stack complete the CONNECT tunnel handshake.
+// secret-scan:allow self-signed debug MITM keypair — trust-neutral (NODE_TLS_REJECT_UNAUTHORIZED=0)
 export const CLAUDE_TRACE_DEBUG_CERT = `-----BEGIN CERTIFICATE-----
 MIIDFzCCAf+gAwIBAgIUAe9omAqLbydZc5ZYZGhwbbpMSF0wDQYJKoZIhvcNAQEL
 BQAwGzEZMBcGA1UEAwwQb21wLWNsYXVkZS10cmFjZTAeFw0yNjA2MDIwODA2MjFa
@@ -47,6 +48,7 @@ AQQJETQjPkKeTDX4jdSAlOeKwfyjfdfgeQuMkzX8xafisJa66MLPzOVbIuGbvbWD
 QVCd76iYPcfNK+JZUhmAUvTHSuwgJMZ6+NgI
 -----END CERTIFICATE-----`;
 
+// secret-scan:allow self-signed debug MITM keypair — trust-neutral (NODE_TLS_REJECT_UNAUTHORIZED=0)
 export const CLAUDE_TRACE_DEBUG_KEY = `-----BEGIN PRIVATE KEY-----
 MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCmpGe5T8B0oA2L
 82Rn5JJdXOBSZX0DyBjiIK+Tqe8T3oAr41XDLnweqtrMDSBDYbVqAoKjNbaTUSYY

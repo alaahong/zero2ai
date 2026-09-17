@@ -17,6 +17,20 @@ target/
 
 # Environment
 .env
+.env.*
+!.env.example
+
+# Credential material: a stray key must never be one `git add -A` away from a push.
+*.pem
+*.key
+*.p12
+*.jks
+*.pfx
+credentials.json
+
+# ESDLC run artifacts: real prompts, model output and call transcripts of the work done in
+# this repository. Only the workspace state is tracked; the per-phase directories are local.
+.zero2ai/esdlc/*/
 
 # Editors
 .vscode/

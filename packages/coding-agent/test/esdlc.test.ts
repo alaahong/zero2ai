@@ -216,6 +216,20 @@ describe("interface language", () => {
 	});
 });
 
+describe("workspace state hygiene", () => {
+	it("never writes the host path into the state file, but still reports it at runtime", async () => {
+		await runEsdlcPhase(projectRoot, "requirements", { prompt: "scope" });
+		const onDisk = (await Bun.file(path.join(projectRoot, ".zero2ai", "esdlc", "state.json")).json()) as {
+			projectRoot: string;
+		};
+		// The file is committed; an absolute host path would publish the operator's machine layout.
+		expect(onDisk.projectRoot).toBe("");
+		expect(JSON.stringify(onDisk)).not.toContain(projectRoot);
+		// Readers derive it from where the file lives, so the runtime view keeps the real root.
+		expect((await readEsdlcState(projectRoot)).projectRoot).toBe(projectRoot);
+	});
+});
+
 describe("human-in-the-loop transport", () => {
 	it("parks on the question it persists and resumes once the transport answers", async () => {
 		await runEsdlcPhase(projectRoot, "requirements", { prompt: "对账" });

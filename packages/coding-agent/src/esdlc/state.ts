@@ -68,7 +68,9 @@ export async function readEsdlcState(projectRoot: string): Promise<EsdlcState> {
 export async function writeEsdlcState(state: EsdlcState): Promise<void> {
 	const file = statePath(state.projectRoot);
 	await fs.mkdir(path.dirname(file), { recursive: true });
-	await Bun.write(file, `${JSON.stringify(state, null, 2)}\n`);
+	// `projectRoot` is derived from where this file lives, so writing it would only record the
+	// operator's machine layout in a file that gets committed. Readers restore it on load.
+	await Bun.write(file, `${JSON.stringify({ ...state, projectRoot: "" }, null, 2)}\n`);
 }
 
 /** Record a phase transition, preserving everything the other phases recorded. */
@@ -101,8 +103,7 @@ export async function writeWorkspaceLocale(projectRoot: string, locale: string):
 async function updateWorkspace(projectRoot: string, patch: { notes?: string; locale?: string }): Promise<EsdlcState> {
 	const state = await readEsdlcState(projectRoot);
 	const next: EsdlcState = { ...state, ...patch, updatedAt: new Date().toISOString() };
-	await fs.mkdir(path.dirname(statePath(projectRoot)), { recursive: true });
-	await Bun.write(statePath(projectRoot), `${JSON.stringify(next, null, 2)}\n`);
+	await writeEsdlcState(next);
 	return next;
 }
 
